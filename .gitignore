@@ -1,0 +1,4 @@
+build/
+
+# Ignore this because different computers have vcvarsall.bat in different drives.
+code/shell_setup.bat

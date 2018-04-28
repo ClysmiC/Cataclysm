@@ -1,0 +1,9 @@
+newmtl default
+Ns 96.078431
+Ka 0.200000 0.200000 0.200000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+map_Bump normal.png
+map_Ka white.png
+map_Kd white.png
+map_Ks white.png
