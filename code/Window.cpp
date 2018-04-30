@@ -27,11 +27,11 @@ void Window::glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, i
 	}
 }
 
-void Window::glfwWindowResizeCallback(GLFWwindow* window, int width, int height)
+void Window::glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 {
-	glfwGetFramebufferSize	(window, &width, &height);
+	glfwGetFramebufferSize(window, &w, &h);
 	
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, w, h);
 
 	// TODO: recalculate the perspective matrix!
 }

@@ -16,7 +16,7 @@ struct Mesh
     bool unload();
     void draw(const Mat4 &transform);
 
-	bool isLoaded;
+	bool isLoaded = false;
 	std::string id;
     std::vector<Submesh> submeshes;
 };

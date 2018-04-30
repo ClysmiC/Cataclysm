@@ -20,7 +20,7 @@ struct Material
     std::unordered_map<std::string, Texture*> textureUniforms;
     std::unordered_map<std::string, Mat4> mat4Uniforms;
 
-	bool isLoaded;
+	bool isLoaded = false;
 	std::string id;
     std::string filename;
     std::string name;

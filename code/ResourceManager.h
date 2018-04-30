@@ -14,12 +14,12 @@ struct ResourceManager
     RESOURCE_HANDLE nextHandle;
 	
     static ResourceManager& instance();
+	void init();
 
     std::string toFullPath(const std::string &relativeResourcePath);
 
     RESOURCE_HANDLE getHandle(std::string id);
 
-    void initDefaults();
 
     Texture* initTexture(std::string relFilename, bool gammaCorrect, bool loadNow);
     Mesh* initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
@@ -45,6 +45,8 @@ struct ResourceManager
     std::unordered_map<RESOURCE_HANDLE, Shader> shaders;
 
 private:
+    void initDefaults();
+
     template<class T>
     T* initResource(T resource, std::unordered_map<RESOURCE_HANDLE, T> &table, bool loadNow);
 

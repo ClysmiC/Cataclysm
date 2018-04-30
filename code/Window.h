@@ -11,6 +11,12 @@ struct Window
 	GLFWwindow* glfwWindow;
 	int init(uint32 width, uint32 height);
 
+	// TODO: make these functions that request dimensions from
+	// glfwGetFramebufferSize(window, &w, &h);
+	
+	// uint32 height;
+	// uint32 width;
+
 private:
 	// Callbacks the window registers with GLFW
 	static void glfwWindowResizeCallback(GLFWwindow* window, int width, int height);

@@ -10,7 +10,7 @@ struct Shader
 
     bool bind();
 
-	bool isLoaded;
+	bool isLoaded = false;
 	std::string id;
     std::string vertFilename;
     std::string fragFilename;

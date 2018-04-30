@@ -5,16 +5,15 @@
 
 ResourceManager & ResourceManager::instance()
 {
-    static ResourceManager *instance = nullptr;
+    static ResourceManager *instance = new ResourceManager();
 
-	if (instance == nullptr)
-	{
-		instance = static_cast<ResourceManager*>(malloc(sizeof(ResourceManager)));
-		instance->initDefaults();
-		instance->resourceDirectory = "x:/code/resources/";
-	}
-	
     return *instance;
+}
+
+void ResourceManager::init()
+{
+    resourceDirectory = "x:/code/resources/";
+    initDefaults();
 }
 
 std::string ResourceManager::toFullPath(const std::string &relativeResourcePath)
