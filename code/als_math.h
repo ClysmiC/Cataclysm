@@ -451,32 +451,6 @@ inline bool isCollinear(Vec3 pointA, Vec3 pointB, Vec3 pointC)
 	return FLOAT_EQ(abDxDz, acDxDz, EPSILON) && FLOAT_EQ(abDyDz, acDyDz, EPSILON);
 }
 
-Mat3 operator * (Mat3 left, Mat3 right)
-{
-	Mat3 result;
-
-	const int matDimension = 3;
-
-	for(int down = 0; down < matDimension; down++)
-	{
-		for(int across = 0; across < matDimension; across++)
-		{
-			real32 sum = 0;
-			
-			for(int i = 0; i < matDimension; i++)
-			{
-				sum += (left[down][i] * right[i][across]);
-			}
-			
-			result[down][across] = sum;
-		}
-	}
-	
-	return result;
-}
-
-Quaternion lookRotation(Vec3 forward, Vec3 up);
-
 // http://answers.unity3d.com/questions/372371/multiply-quaternion-by-vector3-how-is-done.html
 inline Mat3 rotationMatrix3(Quaternion q)
 {
@@ -580,73 +554,21 @@ inline Quaternion rotateVector(Vec3 initial, Vec3 target)
 
 
 
+Quaternion lookRotation(Vec3 forward, Vec3 up);
+
+Mat3 operator * (Mat3 left, Mat3 right);
+
+Mat4 operator * (Mat4 left, Mat4 right);
+
+Vec3 operator * (Mat3 m, Vec3 v);
+
+Vec4 operator * (Mat4 m, Vec4 v);
+
+Quaternion operator * (Quaternion a, Quaternion b);
+
+Vec3 operator * (Quaternion quaternion, Vec3 vector);
 
 
-Mat4 operator * (Mat4 left, Mat4 right)
-{
-	Mat4 result;
-
-	const int matDimension = 4;
-
-	for(int down = 0; down < matDimension; down++)
-	{
-		for(int across = 0; across < matDimension; across++)
-		{
-			real32 sum = 0;
-			
-			for(int i = 0; i < matDimension; i++)
-			{
-				sum += (left[down][i] * right[i][across]);
-			}
-			
-			result[down][across] = sum;
-		}
-	}
-	
-	return result;
-}
-
-Vec3 operator * (Mat3 m, Vec3 v)
-{
-	Vec3 result;
-
-	result.x = m[0][0] * v.x   +   m[0][1] * v.y   +   m[0][2] * v.z;
-	result.y = m[1][0] * v.x   +   m[1][1] * v.y   +   m[1][2] * v.z;
-	result.z = m[2][0] * v.x   +   m[2][1] * v.y   +   m[2][2] * v.z;
-
-	return result;
-}
-
-Vec4 operator * (Mat4 m, Vec4 v)
-{
-	Vec4 result;
-
-	result.x = m[0][0] * v.x   +   m[0][1] * v.y   +   m[0][2] * v.z   +   m[0][3] * v.w;
-	result.y = m[1][0] * v.x   +   m[1][1] * v.y   +   m[1][2] * v.z   +   m[1][3] * v.w;
-	result.z = m[2][0] * v.x   +   m[2][1] * v.y   +   m[2][2] * v.z   +   m[2][3] * v.w;
-	result.w = m[3][0] * v.x   +   m[3][1] * v.y   +   m[3][2] * v.z   +   m[3][3] * v.w;
-
-	return result;
-}
-
-Quaternion operator * (Quaternion a, Quaternion b)
-{
-	Quaternion result;
-
-	result.x = (a.w * b.x)   +   (a.x * b.w)   +   (a.y * b.z)   -   (a.z * b.y);
-	result.y = (a.w * b.y)   +   (a.y * b.w)   +   (a.z * b.x)   -   (a.x * b.z);
-	result.z = (a.w * b.z)   +   (a.z * b.w)   +   (a.x * b.y)   -   (a.y * b.x);
-	result.w = (a.w * b.w)   -   (a.x * b.x)   -   (a.y * b.y)   -   (a.z * b.z);
-
-	return result;
-}
-
-Vec3 operator * (Quaternion quaternion, Vec3 vector)
-{
-	Vec3 result = rotationMatrix3(quaternion) * vector;
-
-	return result;
-}
 
 inline Vec3 upVector(Quaternion quaternion)
 {

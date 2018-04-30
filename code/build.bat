@@ -8,6 +8,10 @@ for %%f in (x:\code\*.cpp) do (
 	SET AllCppFiles=!AllCppFiles! %%f
 )
 
+for %%f in (x:\code\stb\*.cpp) do (
+	SET AllCppFiles=!AllCppFiles! %%f
+)
+
 REM - Remove first two characters
 REM   First character was a dummy '.' because idk if we can have an empty variable in batch scripting
 REM   Second character is a leading space when appending the '.' to the first filename
