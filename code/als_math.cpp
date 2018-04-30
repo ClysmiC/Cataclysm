@@ -67,6 +67,24 @@ real32* Mat4::dataPointer()
 	return result;
 }
 
+void Mat4::scaleInPlace(Vec3 scale)
+{
+	Mat4 sm = scalingMatrix(scale);
+	*this = sm * *this;
+}
+
+void Mat4::rotateInPlace(Quaternion rotation)
+{
+	Mat4 rm = rotationMatrix4(rotation);
+	*this = rm * *this;
+}
+
+void Mat4::translateInPlace(Vec3 translation)
+{
+	Mat4 tm = translationMatrix(translation);
+	*this = tm * *this;
+}
+
 void Mat3::transposeInPlace()
 {
 	real32 temp;

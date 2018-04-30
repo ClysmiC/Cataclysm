@@ -18,11 +18,9 @@ public:
     inline Mat4 transform()
     {
 		Mat4 result;
-		// TODO:
-        // QMatrix4x4 result;
-        // result.translate(position);
-        // result.rotate(orientation);
-        // result.scale(scale);
+        result.translateInPlace(position);
+        result.rotateInPlace(orientation);
+        result.scaleInPlace(scale);
 
         return result;
     }
