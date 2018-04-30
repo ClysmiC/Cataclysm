@@ -4,7 +4,7 @@
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
 
-#include "als_type.h"
+#include "Types.h"
 
 struct Window
 {

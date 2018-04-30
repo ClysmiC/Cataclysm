@@ -1,7 +1,7 @@
-#include "als_game.h"
+#include "Game.h"
 
-#include "als_type.h"
-#include "als_window.h"
+#include "Types.h"
+#include "Window.h"
 
 bool keys[1024];
 bool lastKeys[1024];

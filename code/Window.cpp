@@ -1,5 +1,5 @@
-#include "als_game.h"
-#include "als_window.h"
+#include "Game.h"
+#include "Window.h"
 
 #include <string>
 #include <fstream>

@@ -17,7 +17,8 @@ SET AllCppFiles=%AllCppFiles:~2%
 IF NOT EXIST ..\build mkdir ..\build
 pushd ..\build
 
-SET CompilerFlags= /Zi /I x:\code /EHsc /WX /W4 /wd4100 /FC
+REM reenable warning 4244
+SET CompilerFlags= /Zi /I x:\code /EHsc /WX /W4 /wd4100 /wd4201 /wd4244 /wd4267 /wd4305 /FC
 SET LinkerFlags= x:\lib\glfw3dll.lib x:\lib\glew32.lib opengl32.lib /INCREMENTAL:NO /NOLOGO
 
 call ..\code\shell_setup.bat
