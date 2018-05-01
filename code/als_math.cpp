@@ -16,28 +16,34 @@ Vec4::Vec4(Vec2 xy, Vec2 zw) { this->x = xy.x; this->y = xy.y; this->z = zw.x; t
 Vec4::Vec4(Vec3 xyz, real32 w) { this->x = xyz.x; this->y = xyz.y; this->z = xyz.z; this->w = w; }
 Vec4::Vec4(real32 x, real32 y, real32 z, real32 w) { this->x = x; this->y = y; this->z = z; this->w = w; }
 
-void Vec2::normalizeInPlace()
+Vec2& Vec2::normalizeInPlace()
 {
 	real32 len = length(*this);
 	x /= len;
 	y /= len;
+
+	return *this;
 }
 
-void Vec3::normalizeInPlace()
+Vec3& Vec3::normalizeInPlace()
 {
 	real32 len = length(*this);
 	x /= len;
 	y /= len;
 	z /= len;
+
+	return *this;
 }
 
-void Vec4::normalizeInPlace()
+Vec4& Vec4::normalizeInPlace()
 {
 	real32 len = length(*this);
 	x /= len;
 	y /= len;
 	z /= len;
 	w /= len;
+
+	return *this;
 }
 
 real32* Mat3::operator [] (int32 i)
@@ -67,25 +73,28 @@ real32* Mat4::dataPointer()
 	return result;
 }
 
-void Mat4::scaleInPlace(Vec3 scale)
+Mat4& Mat4::scaleInPlace(Vec3 scale)
 {
 	Mat4 sm = scalingMatrix(scale);
 	*this = sm * *this;
+	return *this;
 }
 
-void Mat4::rotateInPlace(Quaternion rotation)
+Mat4& Mat4::rotateInPlace(Quaternion rotation)
 {
 	Mat4 rm = rotationMatrix4(rotation);
 	*this = rm * *this;
+	return *this;
 }
 
-void Mat4::translateInPlace(Vec3 translation)
+Mat4& Mat4::translateInPlace(Vec3 translation)
 {
 	Mat4 tm = translationMatrix(translation);
 	*this = tm * *this;
+	return *this;
 }
 
-void Mat3::transposeInPlace()
+Mat3& Mat3::transposeInPlace()
 {
 	real32 temp;
 
@@ -100,9 +109,11 @@ void Mat3::transposeInPlace()
 	temp = (*this)[1][2];
 	(*this)[1][2] = (*this)[2][1];
 	(*this)[2][1] = temp;
+
+	return *this;
 }
 
-void Mat4::transposeInPlace()
+Mat4& Mat4::transposeInPlace()
 {
 	real32 temp;
 
@@ -129,9 +140,11 @@ void Mat4::transposeInPlace()
 	temp = (*this)[2][3];
 	(*this)[2][3] = (*this)[3][2];
 	(*this)[3][2] = temp;
+
+	return *this;
 }
 
-void Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far)
+Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far)
 {
 	assert(fov > 0);
 	assert(aspectRatio > 0);
@@ -142,6 +155,11 @@ void Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real3
 	real32 halfFov = fov / 2;
 	real32 right = near * tanf(TO_RAD(halfFov));
 	real32 top = right / (aspectRatio);
+
+	// TEMP: interpret fov as vertical fov (the way Qt does)
+	// real32 halfVFov = fov / 2;
+	// real32 top = near * tan(TO_RAD(halfVFov));
+	// real32 right = top * aspectRatio;
 
 	(*this)[0][0] = near / right;
 	(*this)[0][1] = 0;
@@ -162,6 +180,8 @@ void Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real3
 	(*this)[3][1] = 0;
 	(*this)[3][2] = -1;
 	(*this)[3][3] = 0;
+	
+	return *this;
 }
 
 

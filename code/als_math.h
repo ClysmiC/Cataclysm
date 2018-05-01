@@ -22,7 +22,7 @@ union Vec2
     };
     real32 element[2];
 
-	void normalizeInPlace();
+	Vec2& normalizeInPlace();
 };
 
 union Vec3
@@ -42,7 +42,7 @@ union Vec3
     };
     real32 element[3];
 
-	void normalizeInPlace();
+	Vec3& normalizeInPlace();
 };
 
 union Vec4
@@ -64,7 +64,7 @@ union Vec4
     };
     real32 element[4];
 
-	void normalizeInPlace();
+	Vec4& normalizeInPlace();
 };
 
 typedef Vec4 Quaternion;
@@ -82,7 +82,7 @@ struct Mat3
 	real32* operator [] (int32 i);
 	real32* dataPointer();
 
-	void transposeInPlace();
+	Mat3& transposeInPlace();
 };
 
 struct Mat4
@@ -99,13 +99,13 @@ struct Mat4
 	real32* operator [] (int32 i);
 	real32* dataPointer();
 
-	void scaleInPlace(Vec3 scale);
-	void rotateInPlace(Quaternion rotation);
-	void translateInPlace(Vec3 translation);
+	Mat4& scaleInPlace(Vec3 scale);
+	Mat4& rotateInPlace(Quaternion rotation);
+	Mat4& translateInPlace(Vec3 translation);
 	
-	void transposeInPlace();
+	Mat4& transposeInPlace();
 
-	void perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
+	Mat4& perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
 };
 
 Vec2 operator + (Vec2 vectorA, Vec2 vectorB);

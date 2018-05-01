@@ -26,6 +26,8 @@ void Submesh::draw(const Mat4 &transform)
 
     Mat4 projection;
     projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+	
+    real32 *entries = projection.dataPointer();
     // projection.ortho(-4, 4, -3, 3, .1, 100);
 
     auto v = glGetError();
