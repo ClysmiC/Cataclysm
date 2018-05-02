@@ -16,6 +16,11 @@ Vec4::Vec4(Vec2 xy, Vec2 zw) { this->x = xy.x; this->y = xy.y; this->z = zw.x; t
 Vec4::Vec4(Vec3 xyz, real32 w) { this->x = xyz.x; this->y = xyz.y; this->z = xyz.z; this->w = w; }
 Vec4::Vec4(real32 x, real32 y, real32 z, real32 w) { this->x = x; this->y = y; this->z = z; this->w = w; }
 
+Quaternion::Quaternion()                           { x = 0; y = 0; z = 0; w = 1;}
+Quaternion::Quaternion(Vec3 vector, real32 scalar) { x = vector.x; y = vector.y; z = vector.z; w = scalar; }
+Quaternion::Quaternion(Vec4 xyzw)                  { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
+Quaternion::Quaternion(real32 x_, real32 y_, real32 z_, real32 w_) { x = x_; y = y_; z = z_; w = w_; }
+
 Vec2& Vec2::normalizeInPlace()
 {
 	real32 len = length(*this);
@@ -45,6 +50,19 @@ Vec4& Vec4::normalizeInPlace()
 
 	return *this;
 }
+
+Quaternion& Quaternion::normalizeInPlace()
+{
+	real32 len = length(*this);
+	x /= len;
+	y /= len;
+	z /= len;
+	w /= len;
+
+	return *this;
+}
+
+
 
 real32* Mat3::operator [] (int32 i)
 {
@@ -534,6 +552,133 @@ Vec4& operator /= (Vec4& vector, real32 scalar)
 	vector = vector / scalar;
 	return vector;
 }
+
+// Quaternion
+Quaternion operator + (Quaternion quatA, Quaternion quatB)
+{
+	Quaternion result;
+
+	result.x = quatA.x + quatB.x;
+	result.y = quatA.y + quatB.y;
+	result.z = quatA.z + quatB.z;
+	result.w = quatA.w + quatB.w;
+	
+	return result;
+}
+Quaternion operator + (Quaternion quat, real32 constant)
+{
+	Quaternion result;
+
+	result.x = quat.x + constant;
+	result.y = quat.y + constant;
+	result.z = quat.z + constant;
+	result.w = quat.w + constant;
+	
+	return result;
+}
+Quaternion& operator += (Quaternion& quatA, Quaternion quatB)
+{
+	quatA.x += quatB.x;
+	quatA.y += quatB.y;
+	quatA.z += quatB.z;
+	quatA.w += quatB.w;
+
+
+	return quatA;
+}
+Quaternion& operator += (Quaternion& quat, real32 constant)
+{
+	quat = quat + constant;
+	return quat;
+}
+
+Quaternion operator - (Quaternion quatA, Quaternion quatB)
+{
+	Quaternion result;
+
+	result.x = quatA.x - quatB.x;
+	result.y = quatA.y - quatB.y;
+	result.z = quatA.z - quatB.z;
+	result.w = quatA.w - quatB.w;
+	
+	return result;
+}
+Quaternion operator - (Quaternion quat, real32 constant)
+{
+	Quaternion result;
+
+	result.x = quat.x - constant;
+	result.y = quat.y - constant;
+	result.z = quat.z - constant;
+	result.w = quat.w - constant;
+	
+	return result;
+}
+Quaternion& operator -= (Quaternion& quatA, Quaternion quatB)
+{
+	quatA.x -= quatB.x;
+	quatA.y -= quatB.y;
+	quatA.z -= quatB.z;
+	quatA.w -= quatB.w;
+
+	return quatA;
+}
+Quaternion& operator -= (Quaternion& quat, real32 constant)
+{
+	quat = quat - constant;
+	return quat;
+}
+Quaternion operator - (Quaternion quat)
+{
+	Quaternion result;
+	result.x = -quat.x;
+	result.y = -quat.y;
+	result.z = -quat.z;
+	result.w = -quat.w;
+
+	return result;
+}
+
+
+Quaternion operator * (real32 scalar, Quaternion quat)
+{
+	Quaternion result;
+
+	result.x = scalar * quat.x;
+	result.y = scalar * quat.y;
+	result.z = scalar * quat.z;
+	result.w = scalar * quat.w;
+
+	return result;
+}
+Quaternion operator * (Quaternion quat, real32 scalar)
+{
+	return scalar * quat;
+}
+Quaternion& operator *= (Quaternion& quat, real32 scalar)
+{
+	quat = quat * scalar;
+	return quat;
+}
+
+Quaternion operator / (Quaternion quat, real32 scalar)
+{
+	Quaternion result;
+
+	result.x = quat.x / scalar;
+	result.y = quat.y / scalar;
+	result.z = quat.z / scalar;
+	result.w = quat.w / scalar;
+
+	return result;
+}
+Quaternion& operator /= (Quaternion& quat, real32 scalar)
+{
+	quat = quat / scalar;
+	return quat;
+}
+
+
 
 Mat3 operator * (Mat3 left, Mat3 right)
 {

@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "MeshVertex.h"
 #include <vector>
+#include "Camera.h"
 
 // A mesh's data can be broken up into submeshes.
 // A submesh is the faces of a mesh that have the same material.
@@ -20,7 +21,7 @@ struct Submesh
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 
-    void draw(const Mat4 &transform);
+    void draw(const Mat4 &transform, Camera camera);
     void recalculateTangentsAndBitangents();
 
     Material* material;

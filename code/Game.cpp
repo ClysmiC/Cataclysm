@@ -13,6 +13,45 @@
 
 bool keys[1024];
 bool lastKeys[1024];
+real32 deltaTMs;
+
+
+void updateCamera(Camera& camera)
+{
+	real32 cameraTurnSpeed = 30; // Deg / Sec
+	real32 cameraSpeed = 1;
+	real32 deltaTS = deltaTMs / 1000.0f;
+	
+	if (keys[GLFW_KEY_W])
+	{
+		camera.position += camera.forward() * cameraSpeed * deltaTS;
+	}
+	else if (keys[GLFW_KEY_S])
+	{
+		camera.position += -camera.forward() * cameraSpeed * deltaTS;
+	}
+		
+	if (keys[GLFW_KEY_A])
+	{
+		camera.position += -camera.right() * cameraSpeed * deltaTS;
+	}
+	else if (keys[GLFW_KEY_D])
+	{
+		camera.position += camera.right() * cameraSpeed * deltaTS;
+	}
+
+	if (keys[GLFW_KEY_Q])
+	{
+		Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
+		camera.orientation = camera.orientation * turn;
+	}
+	else if (keys[GLFW_KEY_E])
+	{
+		Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
+		camera.orientation = camera.orientation * turn;
+	}	
+}
+
 
 int WinMain()
 {
@@ -36,6 +75,9 @@ int WinMain()
     // Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 
 	PointLight* light = new PointLight();
+	Camera camera;
+
+	real32 lastTimeMs = 0;
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
@@ -45,13 +87,18 @@ int WinMain()
 
 		auto v = glGetError();
 
-		float secondsElapsed = glfwGetTime();
+		real32 timeS = glfwGetTime();
+		real32 timeMs = timeS * 1000.0f;
+		deltaTMs = timeMs - lastTimeMs;
+		lastTimeMs = timeMs;
 
-		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(secondsElapsed / 5));
-		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(secondsElapsed));
+		updateCamera(camera);
+
+		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(timeS / 5));
+		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(timeS));
 
 		light->position = Vec3(0, 0, -2);
-		light->draw();
+		light->draw(camera);
 
 		glfwSwapBuffers(window.glfwWindow);
 

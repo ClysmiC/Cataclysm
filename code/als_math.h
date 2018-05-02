@@ -6,7 +6,7 @@
 
 #define FLOAT_EQ(x, y, epsilon) (fabs((x) - (y)) < epsilon)
 #define PI 3.14159265359f
-#define EPSILON 0.00001f
+#define EPSILON 0.0001f
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
@@ -67,7 +67,21 @@ union Vec4
 	Vec4& normalizeInPlace();
 };
 
-typedef Vec4 Quaternion;
+union Quaternion
+{
+	Quaternion();
+	Quaternion(Vec3 vector, real32 scalar);
+	Quaternion(Vec4 xyzw);
+	Quaternion(real32 x, real32 y, real32 z, real32 w);
+	
+    struct
+    {
+        real32 x, y, z, w;
+    };
+    real32 element[4];
+
+	Quaternion& normalizeInPlace();
+};
 
 struct Mat3
 {
@@ -166,6 +180,25 @@ Vec4 operator * (Vec4 vector, real32 scalar);
 Vec4& operator *= (Vec4& vector, real32 scalar);
 Vec4 operator / (Vec4 vector, real32 scalar);
 Vec4& operator /= (Vec4& vector, real32 scalar);
+
+// Quaternion
+Quaternion operator + (Quaternion quatA, Quaternion quatB);
+Quaternion operator + (Quaternion quat, real32 constant);
+Quaternion& operator += (Quaternion& quatA, Quaternion quatB);
+Quaternion& operator += (Quaternion& quat, real32 constant);
+
+Quaternion operator - (Quaternion quatA, Quaternion quatB);
+Quaternion operator - (Quaternion quat, real32 constant);
+Quaternion& operator -= (Quaternion& quatA, Quaternion quatB);
+Quaternion& operator -= (Quaternion& quat, real32 constant);
+Quaternion operator - (Quaternion quat);
+
+
+Quaternion operator * (real32 scalar, Quaternion quat);
+Quaternion operator * (Quaternion quat, real32 scalar);
+Quaternion& operator *= (Quaternion& quat, real32 scalar);
+Quaternion operator / (Quaternion quat, real32 scalar);
+Quaternion& operator /= (Quaternion& quat, real32 scalar);
 
 //
 // FUNCTIONS
@@ -277,6 +310,32 @@ inline bool equals(Vec4 vectorA, Vec4 vectorB)
 	real32 deltaY = fabs(vectorA.y - vectorB.y);
 	real32 deltaZ = fabs(vectorA.z - vectorB.z);
 	real32 deltaW = fabs(vectorA.w - vectorB.w);
+
+	return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON && deltaW < EPSILON;
+}
+
+// Quat
+inline real32 lengthSquared(Quaternion q)
+{
+	real32 result = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+	return result;
+}
+inline real32 length(Quaternion q)
+{
+	real32 result = sqrtf(lengthSquared(q));
+	return result;
+}
+inline Quaternion normalize(Quaternion q)
+{
+	Quaternion result = q / length(q);
+	return result;
+}
+inline bool equals(Quaternion quatA, Quaternion quatB)
+{
+	real32 deltaX = fabs(quatA.x - quatB.x);
+	real32 deltaY = fabs(quatA.y - quatB.y);
+	real32 deltaZ = fabs(quatA.z - quatB.z);
+	real32 deltaW = fabs(quatA.w - quatB.w);
 
 	return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON && deltaW < EPSILON;
 }
@@ -572,31 +631,6 @@ Quaternion operator * (Quaternion a, Quaternion b);
 
 Vec3 operator * (Quaternion quaternion, Vec3 vector);
 
-
-
-inline Vec3 upVector(Quaternion quaternion)
-{
-	Vec3 result = normalize(quaternion) * Vec3(0, 1, 0);
-	return result;
-}
-
-inline Vec3 forwardVector(Quaternion quaternion)
-{
-	Vec3 result = normalize(quaternion) * Vec3(0, 0, 1);
-	return result;
-}
-
-inline Vec3 rightVector(Quaternion quaternion)
-{
-	// TODO: FIX THIS SHIT
-	// leave this uncommented so I can step in with a debugger and
-	// check the value before I hack around it by doing cross product
-	Vec3 result = normalize(quaternion) * Vec3(1, 0, 0);
-
-	
-	result = normalize(cross(forwardVector(quaternion), upVector(quaternion)));
-	return result; // FIX THIS SHIT
-}
 
 inline Mat3 transposeOf(Mat3 m)
 {

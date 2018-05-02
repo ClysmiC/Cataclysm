@@ -238,10 +238,10 @@ bool Mesh::unload()
     return true;
 }
 
-void Mesh::draw(const Mat4 &transform)
+void Mesh::draw(const Mat4 &transform, Camera camera)
 {
     for (Submesh s : submeshes)
     {
-        s.draw(transform);
+        s.draw(transform, camera);
     }
 }

@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "MeshVertex.h"
 #include "Submesh.h"
+#include "Camera.h"
 
 #include "als_math.h"
 
@@ -14,7 +15,7 @@ struct Mesh
     bool useMaterialsReferencedInObjFile;
     bool load();
     bool unload();
-    void draw(const Mat4 &transform);
+    void draw(const Mat4 &transform, Camera camera);
 
 	bool isLoaded = false;
 	std::string id;

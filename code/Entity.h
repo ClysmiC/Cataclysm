@@ -1,7 +1,9 @@
 #pragma once
 
 #include "als_math.h"
-#include "Mesh.h"
+
+struct Mesh;
+class Camera;
 
 class Entity
 {
@@ -25,6 +27,6 @@ public:
         return result;
     }
 
-	void draw();
+	void draw(Camera camera);
 };
 

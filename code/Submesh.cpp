@@ -20,9 +20,9 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     setupGl();
 }
 
-void Submesh::draw(const Mat4 &transform)
+void Submesh::draw(const Mat4 &transform, Camera camera)
 {
-    Mat4 view;
+    Mat4 view = camera.worldToView();
 
     Mat4 projection;
     projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
