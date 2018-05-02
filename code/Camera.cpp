@@ -2,8 +2,8 @@
 
 Camera::Camera()
 {
-	position = Vec3(0, 0, 0);
-	orientation = Vec4(0, 0, 0, 1);
+	// position = Vec3(0, 0, 0);
+	// orientation = Vec4(0, 0, 0, 1);
 }
 
 Camera::~Camera() {}
@@ -32,6 +32,8 @@ Mat4 Camera::worldToView()
 	// Homogeneous
 	result[3][3] = 1;
 
+	Vec3 position(0, 0, 0); // TEMPORARY
+	
 	// Translate
 	Mat4 translation = translationMatrix(-position);
 	result = result * translation;

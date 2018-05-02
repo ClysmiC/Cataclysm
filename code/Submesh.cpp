@@ -22,26 +22,23 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
 
 void Submesh::draw(const Mat4 &transform, Camera camera)
 {
-    Mat4 view = camera.worldToView();
+    // Mat4 view = camera.worldToView();
 
-    Mat4 projection;
-    projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-	
-    real32 *entries = projection.dataPointer();
-    // projection.ortho(-4, 4, -3, 3, .1, 100);
+    // Mat4 projection;
+    // projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
-    auto v = glGetError();
+    // auto v = glGetError();
 
-    material->bind();
-    material->shader->setMat4("model", transform);
-    material->shader->setMat4("view", view);
-    material->shader->setMat4("projection", projection);
+    // material->bind();
+    // material->shader->setMat4("model", transform);
+    // material->shader->setMat4("view", view);
+    // material->shader->setMat4("projection", projection);
 
-    v = glGetError();
+    // v = glGetError();
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    // glBindVertexArray(VAO);
+    // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    // glBindVertexArray(0);
 }
 
 void Submesh::recalculateTangentsAndBitangents()
@@ -170,19 +167,21 @@ void Submesh::recalculateTangentsAndBitangents()
 
 void Submesh::setupGl()
 {
-    glGenVertexArrays(1, &VAO);
+	openGlHandles.indicesSize = indices.size();
+	
+    glGenVertexArrays(1, &openGlHandles.VAO);
 
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &openGlHandles.VBO);
 
-    glGenBuffers(1, &EBO);
+    glGenBuffers(1, &openGlHandles.EBO);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(openGlHandles.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, openGlHandles.VBO);
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(MeshVertex), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlHandles.EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32), indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);

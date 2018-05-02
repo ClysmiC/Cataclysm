@@ -9,8 +9,6 @@
 #include "Mesh.h"
 #include "GL/glew.h"
 
-#include "PointLight.h"
-
 bool keys[1024];
 bool lastKeys[1024];
 real32 deltaTMs;
@@ -22,34 +20,34 @@ void updateCamera(Camera& camera)
 	real32 cameraSpeed = 1;
 	real32 deltaTS = deltaTMs / 1000.0f;
 	
-	if (keys[GLFW_KEY_W])
-	{
-		camera.position += camera.forward() * cameraSpeed * deltaTS;
-	}
-	else if (keys[GLFW_KEY_S])
-	{
-		camera.position += -camera.forward() * cameraSpeed * deltaTS;
-	}
+	// if (keys[GLFW_KEY_W])
+	// {
+	// 	camera.position += camera.forward() * cameraSpeed * deltaTS;
+	// }
+	// else if (keys[GLFW_KEY_S])
+	// {
+	// 	camera.position += -camera.forward() * cameraSpeed * deltaTS;
+	// }
 		
-	if (keys[GLFW_KEY_A])
-	{
-		camera.position += -camera.right() * cameraSpeed * deltaTS;
-	}
-	else if (keys[GLFW_KEY_D])
-	{
-		camera.position += camera.right() * cameraSpeed * deltaTS;
-	}
+	// if (keys[GLFW_KEY_A])
+	// {
+	// 	camera.position += -camera.right() * cameraSpeed * deltaTS;
+	// }
+	// else if (keys[GLFW_KEY_D])
+	// {
+	// 	camera.position += camera.right() * cameraSpeed * deltaTS;
+	// }
 
-	if (keys[GLFW_KEY_Q])
-	{
-		Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
-		camera.orientation = camera.orientation * turn;
-	}
-	else if (keys[GLFW_KEY_E])
-	{
-		Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
-		camera.orientation = camera.orientation * turn;
-	}	
+	// if (keys[GLFW_KEY_Q])
+	// {
+	// 	Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
+	// 	camera.orientation = camera.orientation * turn;
+	// }
+	// else if (keys[GLFW_KEY_E])
+	// {
+	// 	Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
+	// 	camera.orientation = camera.orientation * turn;
+	// }	
 }
 
 
@@ -74,7 +72,6 @@ int WinMain()
     // Mesh *cyborg = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
     // Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 
-	PointLight* light = new PointLight();
 	Camera camera;
 
 	real32 lastTimeMs = 0;
@@ -97,8 +94,8 @@ int WinMain()
 		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(timeS / 5));
 		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(timeS));
 
-		light->position = Vec3(0, 0, -2);
-		light->draw(camera);
+		// light->position = Vec3(0, 0, -2);
+		// light->draw(camera);
 
 		glfwSwapBuffers(window.glfwWindow);
 
