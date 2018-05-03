@@ -5,6 +5,7 @@
 
 #include <thread>
 
+#include "Ecs.h"
 #include "ResourceManager.h"
 #include "Mesh.h"
 #include "GL/glew.h"
@@ -68,7 +69,7 @@ int WinMain()
 	glEnable(GL_CULL_FACE);
 
 	ResourceManager::instance().init();
-	// Mesh *nano = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
+	Mesh *nano = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
     // Mesh *cyborg = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
     // Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 
@@ -76,6 +77,24 @@ int WinMain()
 
 	real32 lastTimeMs = 0;
 	
+    Ecs ecs;
+    Entity test = ecs.nextEntityId();
+
+    // Set up render component
+    {
+        Mesh* m = nano;
+        
+        TransformComponent *tc = ecs.addTransformComponent(test);
+        tc->setPosition(0, -4, -10);
+        RenderComponentCollection rcc = ecs.addRenderComponents(test, m->submeshes.size());
+
+        for(uint32 i = 0; i < rcc.numComponents; i++)
+        {
+            RenderComponent *rc = rcc.renderComponents + i;
+            rc->init(m->submeshes[i]);
+        }
+    }
+
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
 		glfwPollEvents();
@@ -94,6 +113,7 @@ int WinMain()
 		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(timeS / 5));
 		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(timeS));
 
+        ecs.RenderAllRenderComponents(camera);
 		// light->position = Vec3(0, 0, -2);
 		// light->draw(camera);
 

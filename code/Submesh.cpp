@@ -167,21 +167,21 @@ void Submesh::recalculateTangentsAndBitangents()
 
 void Submesh::setupGl()
 {
-	openGlHandles.indicesSize = indices.size();
+	openGlInfo.indicesSize = indices.size();
 	
-    glGenVertexArrays(1, &openGlHandles.VAO);
+    glGenVertexArrays(1, &openGlInfo.VAO);
 
-    glGenBuffers(1, &openGlHandles.VBO);
+    glGenBuffers(1, &openGlInfo.VBO);
 
-    glGenBuffers(1, &openGlHandles.EBO);
+    glGenBuffers(1, &openGlInfo.EBO);
 
-    glBindVertexArray(openGlHandles.VAO);
+    glBindVertexArray(openGlInfo.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, openGlHandles.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, openGlInfo.VBO);
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(MeshVertex), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlHandles.EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlInfo.EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32), indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);

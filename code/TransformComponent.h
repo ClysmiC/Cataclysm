@@ -19,6 +19,7 @@ struct TransformComponent : public Component
 	Vec3 scale();
 	
 	void setPosition(Vec3 pos);
+	void setPosition(real32 x, real32 y, real32 z);
 	void setOrientation(Quaternion orientation);
 	void setScale(Vec3 scale);
 	

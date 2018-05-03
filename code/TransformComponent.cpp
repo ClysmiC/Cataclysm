@@ -25,6 +25,7 @@ Quaternion TransformComponent::orientation() { return orientation_; }
 Vec3 TransformComponent::scale() { return scale_; }
 
 void TransformComponent::setPosition(Vec3 position) { position_ = position; cacheValid = false; }
+void TransformComponent::setPosition(real32 x, real32 y, real32 z) { position_.x = x; position_.y = y; position_.z = z; cacheValid = false; }
 void TransformComponent::setOrientation(Quaternion orientation) { orientation_ = orientation; cacheValid = false; }
 void TransformComponent::setScale(Vec3 scale) { scale_ = scale; cacheValid = false; }
 

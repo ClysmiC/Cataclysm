@@ -34,7 +34,7 @@ struct Submesh
 
     Material* material;
 
-	SubmeshOpenGlInfo openGlHandles;
+	SubmeshOpenGlInfo openGlInfo;
 
 private:
     void setupGl();

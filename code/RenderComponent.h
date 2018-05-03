@@ -6,8 +6,9 @@
 
 struct RenderComponent : public Component
 {
-	SubmeshOpenGlInfo ncSubmeshOpenGlInfo;
-	TransformComponent ncTransform;
+    void init(const Submesh &submesh);
+
+	SubmeshOpenGlInfo submeshOpenGlInfo;
 
 	// TODO: can we copy a non-canonical set of the needed data here?
 	Material* material;
@@ -16,7 +17,15 @@ struct RenderComponent : public Component
 	// pretty much every rendered component per frame. Investigate if including
 	// a camera by value will be better due to cache performance or slower
 	// due to all the unnecessary copying
-	Camera* camera;
+    
+    // TODO: should this be part of the struct or passed in as a parameter
+	/* Camera* camera; */
 
-	void draw();
+	void draw(TransformComponent* xfm, Camera& camera);
+};
+
+struct RenderComponentCollection
+{
+    uint32 numComponents;
+    RenderComponent* renderComponents;
 };

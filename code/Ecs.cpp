@@ -1,6 +1,13 @@
 #include "Ecs.h"
 #include "assert.h"
 
+Ecs::Ecs()
+{
+    // TODO: solve this issue.
+    transformComponents.reserve(10000);
+    renderComponents.reserve(10000);
+}
+
 TransformComponent* Ecs::addTransformComponent(Entity e)
 {
 	return addComponent(e, transformComponents, transformComponentLookup);
@@ -11,17 +18,50 @@ TransformComponent* Ecs::getTransformComponent(Entity e)
 	return getComponent(e, transformComponents, transformComponentLookup);
 }
 
-RenderComponent* Ecs::addRenderComponent(Entity e)
+RenderComponentCollection Ecs::addRenderComponents(Entity e, uint32 numComponents)
 {
-	return addComponent(e, renderComponents, renderComponentLookup);
+    RenderComponent* firstRenderComponent = nullptr;
+
+    for (uint32 i = 0; i < numComponents; i++)
+    {
+        RenderComponent rc;
+        rc.entity = e;
+        renderComponents.push_back(rc);
+        
+        if (i == 0)
+        {
+            firstRenderComponent = &renderComponents.back();
+        }
+    }
+
+    RenderComponentCollection rcc;
+    rcc.numComponents = numComponents;
+    rcc.renderComponents = firstRenderComponent;
+
+    renderComponentLookup[e] = rcc;
+
+    return rcc;
 }
 
-RenderComponent* Ecs::getRenderComponent(Entity e)
+RenderComponentCollection Ecs::getRenderComponents(Entity e)
 {
-	return getComponent(e, renderComponents, renderComponentLookup);
+    RenderComponentCollection result;
+
+	auto it = renderComponentLookup.find(e);
+	if (it == renderComponentLookup.end())
+	{
+		result.numComponents = 0;
+        result.renderComponents = nullptr;
+	}
+    else
+    {
+        result = it->second;
+    }
+
+	return result;
 }
 
-void Ecs::RenderAllRenderComponents()
+void Ecs::RenderAllRenderComponents(Camera& camera)
 {
 	for (RenderComponent rc : renderComponents)
 	{
@@ -30,8 +70,7 @@ void Ecs::RenderAllRenderComponents()
 		assert(tc != nullptr); // Render component cannot exist without corresponding transform component
 		if (tc == nullptr) continue;
 
-		rc.ncTransform = *tc;
-		rc.draw();
+		rc.draw(tc, camera);
 	}
 }
 
@@ -41,11 +80,12 @@ uint32 Ecs::nextEntityId()
 }
 
 template<class T>
-T* Ecs::addComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> lookup)
+T* Ecs::addComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup)
 {
 	assert(lookup.find(e) == lookup.end()); // doesnt already exist
 
 	T componentToAdd;
+    componentToAdd.entity = e;
 	
 	components.push_back(componentToAdd);
 	T* result = &components.back();
@@ -55,7 +95,7 @@ T* Ecs::addComponent(Entity e, std::vector<T> &components, std::unordered_map<En
 }
 
 template<class T>
-T* Ecs::getComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> lookup)
+T* Ecs::getComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup)
 {
 	auto it = lookup.find(e);
 	if (it == lookup.end())
