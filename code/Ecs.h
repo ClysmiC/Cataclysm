@@ -13,7 +13,7 @@ template<class T>
 struct ComponentList
 {
 	T components[COMPONENT_ARRAY_SIZE];
-	uint32 nextIndex;
+	uint32 size;
 	std::unordered_map<Entity, T*> lookup;
 
 	T* addComponent(Entity e);
@@ -35,8 +35,10 @@ struct Ecs
 
 	PointLightComponent* addPointLightComponent(Entity e);
 	PointLightComponent* getPointLightComponent(Entity e);
-	
+
 	void renderAllRenderComponents(Camera &camera);
+	
+	PointLightComponent* closestPointLight(TransformComponent* xfm);
 	
 private:
 	Entity nextEntityId_ = 1;

@@ -70,8 +70,9 @@ int WinMain()
 
 	ResourceManager::instance().init();
 	Mesh *nano = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
+	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
+	
     // Mesh *cyborg = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
-    // Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 
 	Camera camera;
 
@@ -79,13 +80,14 @@ int WinMain()
 	
     Ecs ecs;
     Entity test = ecs.nextEntityId();
-
-    // Set up render component
+    // Set up test mesh
     {
         Mesh* m = nano;
         
         TransformComponent *tc = ecs.addTransformComponent(test);
-        tc->setPosition(0, -4, -10);
+        tc->setPosition(0, -2, -4);
+		tc->setScale(0.25);
+		
         RenderComponentCollection rcc = ecs.addRenderComponents(test, m->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
@@ -94,6 +96,41 @@ int WinMain()
             rc->init(m->submeshes[i]);
         }
     }
+	
+	Entity light = ecs.nextEntityId();
+	// Set up light
+	{
+		ResourceManager& rm = ResourceManager::instance();
+		
+        Mesh* m = bulb;
+        
+        TransformComponent *tc = ecs.addTransformComponent(light);
+        tc->setPosition(-2, 0, -7);
+        tc->setScale(.35);
+		
+        RenderComponentCollection rcc = ecs.addRenderComponents(light, m->submeshes.size());
+
+        for(uint32 i = 0; i < rcc.numComponents; i++)
+        {
+            RenderComponent *rc = rcc.renderComponents + i;
+            rc->init(m->submeshes[i]);
+        }
+
+		PointLightComponent *plc = ecs.addPointLightComponent(light);
+		plc->intensity = Vec3(5, 5, 5);
+
+		rm.initMaterial("", "bulbMaterial", true);
+		rm.initShader("shader/light.vert", "shader/light.frag", true);
+
+		m->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
+		m->submeshes[1].material->receiveLight = false;
+		m->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
+		m->submeshes[1].material->clearUniforms();
+		m->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
+	}
+
+	TransformComponent *lightXfm = ecs.getTransformComponent(light);
+    TransformComponent *testXfm = ecs.getTransformComponent(test);
 
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
@@ -109,13 +146,18 @@ int WinMain()
 		lastTimeMs = timeMs;
 
 		updateCamera(camera);
+		
+		Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
+        testXfm->setOrientation(lightRot);
+		
+		Mat4 xfm;
+		xfm.rotateInPlace(lightRot);
+		xfm.translateInPlace(Vec3(0, 0, -1));
 
-		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(timeS / 5));
-		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(timeS));
+		Vec4 rotatePosDelta = xfm * Vec4(0, 0, 0, 1);
+		lightXfm->setPosition(Vec3(0, 0, -4) + Vec3(rotatePosDelta.x, 0, rotatePosDelta.z));
 
         ecs.renderAllRenderComponents(camera);
-		// light->position = Vec3(0, 0, -2);
-		// light->draw(camera);
 
 		glfwSwapBuffers(window.glfwWindow);
 

@@ -10,6 +10,7 @@ struct Material
 {
     Shader *shader;
 
+
     std::unordered_map<std::string, int32> intUniforms;
     std::unordered_map<std::string, bool> boolUniforms;
     std::unordered_map<std::string, real32> floatUniforms;
@@ -21,6 +22,8 @@ struct Material
     std::unordered_map<std::string, Mat4> mat4Uniforms;
 
 	bool isLoaded = false;
+	bool receiveLight = true;
+	
 	std::string id;
     std::string filename;
     std::string name;

@@ -17,11 +17,15 @@ struct TransformComponent : public Component
 	Vec3 position();
 	Quaternion orientation();
 	Vec3 scale();
+
+	real32 distance(TransformComponent* other);
 	
 	void setPosition(Vec3 pos);
 	void setPosition(real32 x, real32 y, real32 z);
 	void setOrientation(Quaternion orientation);
 	void setScale(Vec3 scale);
+	void setScale(real32 uniformScale);
+	void setScale(real32 x, real32 y, real32 z);
 	
 	Mat4 matrix();
 

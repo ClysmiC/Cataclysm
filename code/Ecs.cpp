@@ -6,25 +6,27 @@ Ecs::Ecs()
 }
 
 template<class T>
-T* ComponentList<T>::addComponent(Entity e)
+T*
+ComponentList<T>::addComponent(Entity e)
 {
 	assert(lookup.find(e) == lookup.end()); // doesnt already exist
-	assert(nextIndex < COMPONENT_ARRAY_SIZE);
+	assert(size < COMPONENT_ARRAY_SIZE);
 
 	T componentToAdd;
     componentToAdd.entity = e;
 	
-	components[nextIndex] = componentToAdd;
-	T* result = &(components[nextIndex]);
+	components[size] = componentToAdd;
+	T* result = &(components[size]);
 
-	nextIndex++;
+	size++;
 
 	lookup[e] = result;
 	return result;	
 }
 
 template<class T>
-T* ComponentList<T>::getComponent(Entity e)
+T*
+ComponentList<T>::getComponent(Entity e)
 {
 	auto it = lookup.find(e);
 	if (it == lookup.end())
@@ -35,27 +37,32 @@ T* ComponentList<T>::getComponent(Entity e)
 	return it->second;
 }
 
-TransformComponent* Ecs::addTransformComponent(Entity e)
+TransformComponent*
+Ecs::addTransformComponent(Entity e)
 {
 	return transforms.addComponent(e);
 }
 
-TransformComponent* Ecs::getTransformComponent(Entity e)
+TransformComponent*
+Ecs::getTransformComponent(Entity e)
 {
 	return transforms.getComponent(e);
 }
 
-PointLightComponent* Ecs::addPointLightComponent(Entity e)
+PointLightComponent*
+Ecs::addPointLightComponent(Entity e)
+{
+	return pointLights.addComponent(e);
+}
+
+PointLightComponent*
+Ecs::getPointLightComponent(Entity e)
 {
 	return pointLights.getComponent(e);
 }
 
-PointLightComponent* Ecs::getPointLightComponent(Entity e)
-{
-	return pointLights.getComponent(e);
-}
-
-RenderComponentCollection Ecs::addRenderComponents(Entity e, uint32 numComponents)
+RenderComponentCollection
+Ecs::addRenderComponents(Entity e, uint32 numComponents)
 {
     RenderComponent* firstRenderComponent = nullptr;
 
@@ -81,7 +88,8 @@ RenderComponentCollection Ecs::addRenderComponents(Entity e, uint32 numComponent
     return rcc;
 }
 
-RenderComponentCollection Ecs::getRenderComponents(Entity e)
+RenderComponentCollection
+Ecs::getRenderComponents(Entity e)
 {
     RenderComponentCollection result;
 
@@ -99,21 +107,65 @@ RenderComponentCollection Ecs::getRenderComponents(Entity e)
 	return result;
 }
 
-void Ecs::renderAllRenderComponents(Camera& camera)
+void
+Ecs::renderAllRenderComponents(Camera& camera)
 {
 	for (uint32 i = 0; i < renderComponentNextIndex; i++)
 	{
 		RenderComponent &rc = renderComponents[i];
-		TransformComponent* tc = getTransformComponent(rc.entity);
+		TransformComponent* xfm = getTransformComponent(rc.entity);
 
-		assert(tc != nullptr); // Render component cannot exist without corresponding transform component
-		if (tc == nullptr) continue;
+		assert(xfm != nullptr); // Render component cannot exist without corresponding transform component
+		if (xfm == nullptr) continue;
 
-		rc.draw(tc, camera);
+		// TODO: pass closest lights to RenderComponent draw...
+		// ECS should be responsible for finding the light, but render component should be responsible
+		// for handling the lighting
+		if (rc.material->receiveLight)
+		{
+			PointLightComponent* pl = closestPointLight(xfm);
+
+			Shader* shader = rc.material->shader;
+			
+			shader->setVec3("pointLights[0].posWorld", xfm->position());
+			shader->setVec3("pointLights[0].intensity", pl->intensity);
+			shader->setFloat("pointLights[0].attenuationConstant", pl->attenuationConstant);
+			shader->setFloat("pointLights[0].attenuationLinear", pl->attenuationLinear);
+			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+		}
+
+		rc.draw(xfm, camera);
 	}
 }
 
-uint32 Ecs::nextEntityId()
+PointLightComponent*
+Ecs::closestPointLight(TransformComponent* xfm)
+{
+	PointLightComponent* closest = nullptr;
+	real32 closestDistance = FLT_MAX;
+
+	for (uint32 i = 0; i < pointLights.size; i++)
+	{
+		PointLightComponent* pl = &(pointLights.components[i]);
+		TransformComponent* plXfm = getTransformComponent(pl->entity);
+
+		assert(plXfm != nullptr);
+		if (plXfm == nullptr) continue;
+		
+		real32 distance = xfm->distance(plXfm);
+
+		if (distance < closestDistance)
+		{
+			closestDistance = distance;
+			closest = pl;
+		}
+	}
+
+	return closest;
+}
+
+uint32
+Ecs::nextEntityId()
 {
 	return nextEntityId_++;
 }
