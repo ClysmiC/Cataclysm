@@ -3,19 +3,16 @@
 
 Ecs::Ecs()
 {
-    // TODO: solve this issue.
-    transformComponents.reserve(10000);
-    renderComponents.reserve(10000);
 }
 
 TransformComponent* Ecs::addTransformComponent(Entity e)
 {
-	return addComponent(e, transformComponents, transformComponentLookup);
+	return addComponent(e, transformComponents, transformComponentNextIndex, transformComponentLookup);
 }
 
 TransformComponent* Ecs::getTransformComponent(Entity e)
 {
-	return getComponent(e, transformComponents, transformComponentLookup);
+	return getComponent(e, transformComponentLookup);
 }
 
 RenderComponentCollection Ecs::addRenderComponents(Entity e, uint32 numComponents)
@@ -26,12 +23,13 @@ RenderComponentCollection Ecs::addRenderComponents(Entity e, uint32 numComponent
     {
         RenderComponent rc;
         rc.entity = e;
-        renderComponents.push_back(rc);
-        
+        renderComponents[renderComponentNextIndex] = rc;
         if (i == 0)
         {
-            firstRenderComponent = &renderComponents.back();
+            firstRenderComponent = &(renderComponents[renderComponentNextIndex]);
         }
+		
+		renderComponentNextIndex++;
     }
 
     RenderComponentCollection rcc;
@@ -61,10 +59,11 @@ RenderComponentCollection Ecs::getRenderComponents(Entity e)
 	return result;
 }
 
-void Ecs::RenderAllRenderComponents(Camera& camera)
+void Ecs::renderAllRenderComponents(Camera& camera)
 {
-	for (RenderComponent rc : renderComponents)
+	for (uint32 i = 0; i < renderComponentNextIndex; i++)
 	{
+		RenderComponent &rc = renderComponents[i];
 		TransformComponent* tc = getTransformComponent(rc.entity);
 
 		assert(tc != nullptr); // Render component cannot exist without corresponding transform component
@@ -80,22 +79,25 @@ uint32 Ecs::nextEntityId()
 }
 
 template<class T>
-T* Ecs::addComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup)
+T* Ecs::addComponent(Entity e, T* components, uint32 &index, std::unordered_map<Entity, T*> &lookup)
 {
 	assert(lookup.find(e) == lookup.end()); // doesnt already exist
+	assert(index < COMPONENT_ARRAY_SIZE);
 
 	T componentToAdd;
     componentToAdd.entity = e;
 	
-	components.push_back(componentToAdd);
-	T* result = &components.back();
+	components[index] = componentToAdd;
+	T* result = &(components[index]);
+
+	index++;
 
 	lookup[e] = result;
 	return result;	
 }
 
 template<class T>
-T* Ecs::getComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup)
+T* Ecs::getComponent(Entity e, std::unordered_map<Entity, T*> &lookup)
 {
 	auto it = lookup.find(e);
 	if (it == lookup.end())

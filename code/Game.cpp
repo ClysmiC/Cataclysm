@@ -113,7 +113,7 @@ int WinMain()
 		Quaternion rotation = axisAngle(Vec3(0, 1, 0), -180 * sinf(timeS / 5));
 		Quaternion bulbRotation = axisAngle(Vec3(0, 1, 0), 30 * sinf(timeS));
 
-        ecs.RenderAllRenderComponents(camera);
+        ecs.renderAllRenderComponents(camera);
 		// light->position = Vec3(0, 0, -2);
 		// light->draw(camera);
 

@@ -6,6 +6,8 @@
 
 #include <unordered_map>
 
+#define COMPONENT_ARRAY_SIZE 512
+
 struct Ecs
 {
     Ecs();
@@ -19,20 +21,24 @@ struct Ecs
 	RenderComponentCollection addRenderComponents(Entity e, uint32 numComponents);
 	RenderComponentCollection getRenderComponents(Entity e);
 	
-	void RenderAllRenderComponents(Camera &camera);
+	void renderAllRenderComponents(Camera &camera);
 	
 private:
 	Entity nextEntityId_ = 1;
-	
-	std::vector<TransformComponent> transformComponents;
+
+
+	// TODO: make a dynamic array of pointers to contiguous "batches"
+	TransformComponent transformComponents[COMPONENT_ARRAY_SIZE];
 	std::unordered_map<Entity, TransformComponent*> transformComponentLookup;
-	
-	std::vector<RenderComponent> renderComponents;
+	uint32 transformComponentNextIndex = 0;
+
+	RenderComponent renderComponents[COMPONENT_ARRAY_SIZE];
 	std::unordered_map<Entity, RenderComponentCollection> renderComponentLookup;
+	uint32 renderComponentNextIndex = 0;
 
 	template<class T>
-	T* addComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup);
+	T* addComponent(Entity e, T* components, uint32 &index, std::unordered_map<Entity, T*> &lookup);
 
 	template<class T>
-	T* getComponent(Entity e, std::vector<T> &components, std::unordered_map<Entity, T*> &lookup);
+	T* getComponent(Entity e, std::unordered_map<Entity, T*> &lookup);
 };
