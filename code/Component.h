@@ -4,5 +4,5 @@
 
 struct Component
 {
-	Entity entity;
+	Entity entity = 0;
 };
