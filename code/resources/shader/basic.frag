@@ -102,6 +102,8 @@ void main()
 	mat3 tbnWorld = mat3(v2f.tWorld, v2f.bWorld, v2f.nWorld);
 	normal = tbnWorld * normal;
 
+	/* normal = v2f.nWorld; */
+
 	/* DEBUG VISUALIZE NORMALS */
 	/* color = vec4((normal.x), (normal.y), (normal.z), 1.0); */
 	/* return; */

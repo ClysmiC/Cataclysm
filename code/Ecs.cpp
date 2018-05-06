@@ -124,10 +124,11 @@ Ecs::renderAllRenderComponents(TransformComponent* cameraXfm)
 		if (rc.material->receiveLight)
 		{
 			PointLightComponent* pl = closestPointLight(xfm);
+			TransformComponent* plXfm = getTransformComponent(pl->entity);
 
 			Shader* shader = rc.material->shader;
 			
-			shader->setVec3("pointLights[0].posWorld", xfm->position());
+			shader->setVec3("pointLights[0].posWorld", plXfm->position());
 			shader->setVec3("pointLights[0].intensity", pl->intensity);
 			shader->setFloat("pointLights[0].attenuationConstant", pl->attenuationConstant);
 			shader->setFloat("pointLights[0].attenuationLinear", pl->attenuationLinear);

@@ -2,9 +2,9 @@
 
 Mat4 calculateWorldToViewMatrix(TransformComponent* cameraXfm)
 {
-	Vec3 up = cameraXfm->up();
-	Vec3 right = cameraXfm->right();
-	Vec3 direction = -cameraXfm->forward(); // NOTE: This is direction pointing TOWARDS the camera (i.e., -forward)
+	Vec3 up = cameraUp(cameraXfm);
+	Vec3 right = cameraRight(cameraXfm);
+	Vec3 direction = cameraBack(cameraXfm); // NOTE: This is direction pointing TOWARDS the camera (i.e., -forward)
 
 	Mat4 result;
 	

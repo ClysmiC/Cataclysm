@@ -26,20 +26,20 @@ void updateCamera(TransformComponent* cameraXfm)
 	
 	if (keys[GLFW_KEY_W])
 	{
-		position += cameraXfm->forward() * cameraSpeed * deltaTS;
+		position += cameraForward(cameraXfm) * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_S])
 	{
-		position += -cameraXfm->forward() * cameraSpeed * deltaTS;
+		position += cameraBack(cameraXfm) * cameraSpeed * deltaTS;
 	}
 		
 	if (keys[GLFW_KEY_A])
 	{
-		position += -cameraXfm->right() * cameraSpeed * deltaTS;
+		position += cameraLeft(cameraXfm) * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_D])
 	{
-		position += cameraXfm->right() * cameraSpeed * deltaTS;
+		position += cameraRight(cameraXfm) * cameraSpeed * deltaTS;
 	}
 
 	if (keys[GLFW_KEY_Q])
@@ -86,8 +86,6 @@ int WinMain()
 	// Set up camera
 	Entity camera = ecs.nextEntityId();
 	TransformComponent* cameraXfm = ecs.addTransformComponent(camera);
-	cameraXfm->setPosition(Vec3(0, 0, 0));
-	cameraXfm->setOrientation(axisAngle(Vec3(0, 1, 0), 180));
 	
     Entity test = ecs.nextEntityId();
     // Set up test mesh
@@ -113,7 +111,7 @@ int WinMain()
         Mesh* m = bulb;
         
         TransformComponent *tc = ecs.addTransformComponent(light);
-        tc->setPosition(-2, 0, -2);
+        tc->setPosition(0, 0, -2);
         tc->setScale(.35);
 		
         RenderComponentCollection rcc = ecs.addRenderComponents(light, bulb->submeshes.size());
@@ -146,6 +144,7 @@ int WinMain()
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		auto v = glGetError();
 
 		real32 timeS = glfwGetTime();
@@ -153,6 +152,7 @@ int WinMain()
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
 
+		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
 		updateCamera(cameraXfm);
 		
 		// Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
