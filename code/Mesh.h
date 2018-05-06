@@ -15,7 +15,7 @@ struct Mesh
     bool useMaterialsReferencedInObjFile;
     bool load();
     bool unload();
-    void draw(const Mat4 &transform, Camera camera);
+    // void draw(const Mat4 &transform, Camera camera);
 
 	bool isLoaded = false;
 	std::string id;

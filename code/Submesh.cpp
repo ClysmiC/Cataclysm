@@ -20,26 +20,26 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     setupGl();
 }
 
-void Submesh::draw(const Mat4 &transform, Camera camera)
-{
-    // Mat4 view = camera.worldToView();
+// void Submesh::draw(const Mat4 &transform, Camera camera)
+// {
+//     // Mat4 view = camera.worldToView();
 
-    // Mat4 projection;
-    // projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+//     // Mat4 projection;
+//     // projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
-    // auto v = glGetError();
+//     // auto v = glGetError();
 
-    // material->bind();
-    // material->shader->setMat4("model", transform);
-    // material->shader->setMat4("view", view);
-    // material->shader->setMat4("projection", projection);
+//     // material->bind();
+//     // material->shader->setMat4("model", transform);
+//     // material->shader->setMat4("view", view);
+//     // material->shader->setMat4("projection", projection);
 
-    // v = glGetError();
+//     // v = glGetError();
 
-    // glBindVertexArray(VAO);
-    // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    // glBindVertexArray(0);
-}
+//     // glBindVertexArray(VAO);
+//     // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+//     // glBindVertexArray(0);
+// }
 
 void Submesh::recalculateTangentsAndBitangents()
 {

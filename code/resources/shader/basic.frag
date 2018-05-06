@@ -54,6 +54,8 @@ out vec4 color;
 
 vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
 {
+	return vec3(0, 0, 0);
+	
 	vec3 toLightDir = -normalize(light.direction);
 	float nDotL = max(dot(fragNormal, toLightDir), 0);
 
@@ -100,15 +102,15 @@ void main()
 	mat3 tbnWorld = mat3(v2f.tWorld, v2f.bWorld, v2f.nWorld);
 	normal = tbnWorld * normal;
 
-	// DEBUG VISUALIZE NORMALS
-	// color = vec4(abs(normal.r), abs(normal.g), abs(normal.b), 1.0);
-	// return;
+	/* DEBUG VISUALIZE NORMALS */
+	/* color = vec4((normal.x), (normal.y), (normal.z), 1.0); */
+	/* return; */
 	
     vec3 result;
 
 	for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++)
 	{
-		result += directionalLight(directionalLights[i], normal, viewDir);
+		// result += directionalLight(directionalLights[i], normal, viewDir);
 	}
 	
 	for (int i = 0; i < POINT_LIGHT_COUNT; i++)

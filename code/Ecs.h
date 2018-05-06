@@ -36,7 +36,7 @@ struct Ecs
 	PointLightComponent* addPointLightComponent(Entity e);
 	PointLightComponent* getPointLightComponent(Entity e);
 
-	void renderAllRenderComponents(Camera &camera);
+	void renderAllRenderComponents(TransformComponent* cameraXfm);
 	
 	PointLightComponent* closestPointLight(TransformComponent* xfm);
 	

@@ -108,7 +108,7 @@ Ecs::getRenderComponents(Entity e)
 }
 
 void
-Ecs::renderAllRenderComponents(Camera& camera)
+Ecs::renderAllRenderComponents(TransformComponent* cameraXfm)
 {
 	for (uint32 i = 0; i < renderComponentNextIndex; i++)
 	{
@@ -134,7 +134,7 @@ Ecs::renderAllRenderComponents(Camera& camera)
 			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
 		}
 
-		rc.draw(xfm, camera);
+		rc.draw(xfm, cameraXfm);
 	}
 }
 

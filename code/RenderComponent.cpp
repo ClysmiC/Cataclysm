@@ -7,9 +7,9 @@ void RenderComponent::init(const Submesh &submesh)
     material = submesh.material;
 }
 
-void RenderComponent::draw(TransformComponent* xfm, Camera& camera)
+void RenderComponent::draw(TransformComponent* xfm, TransformComponent* cameraXfm)
 {
-	Mat4 view = camera.worldToView();
+	Mat4 view = calculateWorldToViewMatrix(cameraXfm);
 
 	// TODO: should this be part of the camera?
     Mat4 projection;

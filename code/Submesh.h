@@ -29,7 +29,7 @@ struct Submesh
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 
-    void draw(const Mat4 &transform, Camera camera);
+    // void draw(const Mat4 &transform, Transf);
     void recalculateTangentsAndBitangents();
 
     Material* material;

@@ -1,18 +1,10 @@
 #include "Camera.h"
 
-Camera::Camera()
+Mat4 calculateWorldToViewMatrix(TransformComponent* cameraXfm)
 {
-	// position = Vec3(0, 0, 0);
-	// orientation = Vec4(0, 0, 0, 1);
-}
-
-Camera::~Camera() {}
-
-Mat4 Camera::worldToView()
-{
-	Vec3 up = this->up();
-	Vec3 right = this->right();
-	Vec3 direction = -this->forward(); // NOTE: This is direction pointing TOWARDS the camera (i.e., -forward)
+	Vec3 up = cameraXfm->up();
+	Vec3 right = cameraXfm->right();
+	Vec3 direction = -cameraXfm->forward(); // NOTE: This is direction pointing TOWARDS the camera (i.e., -forward)
 
 	Mat4 result;
 	
@@ -31,11 +23,9 @@ Mat4 Camera::worldToView()
 
 	// Homogeneous
 	result[3][3] = 1;
-
-	Vec3 position(0, 0, 0); // TEMPORARY
 	
 	// Translate
-	Mat4 translation = translationMatrix(-position);
+	Mat4 translation = translationMatrix(-cameraXfm->position());
 	result = result * translation;
 
 	return result;

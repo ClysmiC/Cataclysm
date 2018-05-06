@@ -15,40 +15,46 @@ bool lastKeys[1024];
 real32 deltaTMs;
 
 
-void updateCamera(Camera& camera)
+void updateCamera(TransformComponent* cameraXfm)
 {
 	real32 cameraTurnSpeed = 30; // Deg / Sec
 	real32 cameraSpeed = 1;
 	real32 deltaTS = deltaTMs / 1000.0f;
-	
-	// if (keys[GLFW_KEY_W])
-	// {
-	// 	camera.position += camera.forward() * cameraSpeed * deltaTS;
-	// }
-	// else if (keys[GLFW_KEY_S])
-	// {
-	// 	camera.position += -camera.forward() * cameraSpeed * deltaTS;
-	// }
-		
-	// if (keys[GLFW_KEY_A])
-	// {
-	// 	camera.position += -camera.right() * cameraSpeed * deltaTS;
-	// }
-	// else if (keys[GLFW_KEY_D])
-	// {
-	// 	camera.position += camera.right() * cameraSpeed * deltaTS;
-	// }
 
-	// if (keys[GLFW_KEY_Q])
-	// {
-	// 	Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
-	// 	camera.orientation = camera.orientation * turn;
-	// }
-	// else if (keys[GLFW_KEY_E])
-	// {
-	// 	Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
-	// 	camera.orientation = camera.orientation * turn;
-	// }	
+	Vec3 position = cameraXfm->position();
+	Quaternion orientation = cameraXfm->orientation();
+	
+	if (keys[GLFW_KEY_W])
+	{
+		position += cameraXfm->forward() * cameraSpeed * deltaTS;
+	}
+	else if (keys[GLFW_KEY_S])
+	{
+		position += -cameraXfm->forward() * cameraSpeed * deltaTS;
+	}
+		
+	if (keys[GLFW_KEY_A])
+	{
+		position += -cameraXfm->right() * cameraSpeed * deltaTS;
+	}
+	else if (keys[GLFW_KEY_D])
+	{
+		position += cameraXfm->right() * cameraSpeed * deltaTS;
+	}
+
+	if (keys[GLFW_KEY_Q])
+	{
+		Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
+		orientation = orientation * turn;
+	}
+	else if (keys[GLFW_KEY_E])
+	{
+		Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
+		orientation = orientation * turn;
+	}
+
+	cameraXfm->setPosition(position);
+	cameraXfm->setOrientation(orientation);
 }
 
 
@@ -66,34 +72,36 @@ int WinMain()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
+	// glCullFace(GL_BACK);
 
 	ResourceManager::instance().init();
-	Mesh *nano = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
+	Mesh *mesh = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
 	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 	
-    // Mesh *cyborg = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
-
-	Camera camera;
-
 	real32 lastTimeMs = 0;
 	
     Ecs ecs;
+	
+	// Set up camera
+	Entity camera = ecs.nextEntityId();
+	TransformComponent* cameraXfm = ecs.addTransformComponent(camera);
+	cameraXfm->setPosition(Vec3(0, 0, 0));
+	cameraXfm->setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+	
     Entity test = ecs.nextEntityId();
     // Set up test mesh
     {
-        Mesh* m = nano;
-        
         TransformComponent *tc = ecs.addTransformComponent(test);
         tc->setPosition(0, -2, -4);
 		tc->setScale(0.25);
 		
-        RenderComponentCollection rcc = ecs.addRenderComponents(test, m->submeshes.size());
+        RenderComponentCollection rcc = ecs.addRenderComponents(test, mesh->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
             RenderComponent *rc = rcc.renderComponents + i;
-            rc->init(m->submeshes[i]);
+            rc->init(mesh->submeshes[i]);
         }
     }
 	
@@ -105,15 +113,15 @@ int WinMain()
         Mesh* m = bulb;
         
         TransformComponent *tc = ecs.addTransformComponent(light);
-        tc->setPosition(-2, 0, -7);
+        tc->setPosition(-2, 0, -2);
         tc->setScale(.35);
 		
-        RenderComponentCollection rcc = ecs.addRenderComponents(light, m->submeshes.size());
+        RenderComponentCollection rcc = ecs.addRenderComponents(light, bulb->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
             RenderComponent *rc = rcc.renderComponents + i;
-            rc->init(m->submeshes[i]);
+            rc->init(bulb->submeshes[i]);
         }
 
 		PointLightComponent *plc = ecs.addPointLightComponent(light);
@@ -122,11 +130,11 @@ int WinMain()
 		rm.initMaterial("", "bulbMaterial", true);
 		rm.initShader("shader/light.vert", "shader/light.frag", true);
 
-		m->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
-		m->submeshes[1].material->receiveLight = false;
-		m->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
-		m->submeshes[1].material->clearUniforms();
-		m->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
+		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
+		bulb->submeshes[1].material->receiveLight = false;
+		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
+		bulb->submeshes[1].material->clearUniforms();
+		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
 	TransformComponent *lightXfm = ecs.getTransformComponent(light);
@@ -145,19 +153,13 @@ int WinMain()
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
 
-		updateCamera(camera);
+		updateCamera(cameraXfm);
 		
-		Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
-        testXfm->setOrientation(lightRot);
-		
-		Mat4 xfm;
-		xfm.rotateInPlace(lightRot);
-		xfm.translateInPlace(Vec3(0, 0, -1));
+		// Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
+		Quaternion meshRot = axisAngle(Vec3(0, 1, 0), 30 * timeS); 
+        //testXfm->setOrientation(meshRot);
 
-		Vec4 rotatePosDelta = xfm * Vec4(0, 0, 0, 1);
-		lightXfm->setPosition(Vec3(0, 0, -4) + Vec3(rotatePosDelta.x, 0, rotatePosDelta.z));
-
-        ecs.renderAllRenderComponents(camera);
+        ecs.renderAllRenderComponents(cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 
