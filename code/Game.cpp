@@ -94,11 +94,11 @@ int WinMain()
         tc->setPosition(0, -2, -4);
 		tc->setScale(0.25);
 		
-        RenderComponentCollection rcc = ecs.addRenderComponents(test, mesh->submeshes.size());
+        ComponentGroup<RenderComponent> rcc = ecs.addRenderComponents(test, mesh->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
-            RenderComponent *rc = rcc.renderComponents + i;
+            RenderComponent *rc = rcc.components + i;
             rc->init(mesh->submeshes[i]);
         }
     }
@@ -114,12 +114,12 @@ int WinMain()
         tc->setPosition(0, 0, -2);
         tc->setScale(.35);
 		
-        RenderComponentCollection rcc = ecs.addRenderComponents(light, bulb->submeshes.size());
+        ComponentGroup<RenderComponent> rcc = ecs.addRenderComponents(light, m->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
-            RenderComponent *rc = rcc.renderComponents + i;
-            rc->init(bulb->submeshes[i]);
+            RenderComponent *rc = rcc.components + i;
+            rc->init(m->submeshes[i]);
         }
 
 		PointLightComponent *plc = ecs.addPointLightComponent(light);

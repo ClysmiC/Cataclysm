@@ -7,7 +7,7 @@ Ecs::Ecs()
 
 template<class T>
 T*
-ComponentList<T>::addComponent(Entity e)
+Ecs::ComponentList<T>::addComponent(Entity e)
 {
 	assert(lookup.find(e) == lookup.end()); // doesnt already exist
 	assert(size < COMPONENT_ARRAY_SIZE);
@@ -20,18 +20,69 @@ ComponentList<T>::addComponent(Entity e)
 
 	size++;
 
-	lookup[e] = result;
+	ComponentGroup<T> cg;
+	cg.components = result;
+	cg.numComponents = 1;
+	lookup[e] = cg;
+	
 	return result;	
 }
 
 template<class T>
 T*
-ComponentList<T>::getComponent(Entity e)
+Ecs::ComponentList<T>::getComponent(Entity e)
 {
 	auto it = lookup.find(e);
 	if (it == lookup.end())
 	{
 		return nullptr;
+	}
+
+	return it->second.components;
+}
+
+template<class T>
+ComponentGroup<T>
+Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
+{
+	assert(lookup.find(e) == lookup.end()); // doesnt already exist
+	
+	T* firstComponent = nullptr;
+
+    for (uint32 i = 0; i < numComponents; i++)
+    {
+		assert(size < COMPONENT_ARRAY_SIZE);
+		
+        T component;
+        component.entity = e;
+        components[size] = component;
+        if (i == 0)
+        {
+            firstComponent = &(components[size]);
+        }
+		
+		size++;
+    }
+
+    ComponentGroup<T> cg;
+    cg.components = firstComponent;
+    cg.numComponents = numComponents;
+    lookup[e] = cg;
+
+    return cg;
+}
+
+template<class T>
+ComponentGroup<T>
+Ecs::ComponentList<T>::getComponents(Entity e)
+{
+	auto it = lookup.find(e);
+	if (it == lookup.end())
+	{
+		ComponentGroup<T> result;
+		result.components = nullptr;
+		result.numComponents = 0;
+		return result;
 	}
 
 	return it->second;
@@ -61,58 +112,48 @@ Ecs::getPointLightComponent(Entity e)
 	return pointLights.getComponent(e);
 }
 
-RenderComponentCollection
-Ecs::addRenderComponents(Entity e, uint32 numComponents)
+ComponentGroup<PointLightComponent>
+Ecs::addPointLightComponents(Entity e, uint32 numComponents)
 {
-    RenderComponent* firstRenderComponent = nullptr;
-
-    for (uint32 i = 0; i < numComponents; i++)
-    {
-        RenderComponent rc;
-        rc.entity = e;
-        renderComponents[renderComponentNextIndex] = rc;
-        if (i == 0)
-        {
-            firstRenderComponent = &(renderComponents[renderComponentNextIndex]);
-        }
-		
-		renderComponentNextIndex++;
-    }
-
-    RenderComponentCollection rcc;
-    rcc.numComponents = numComponents;
-    rcc.renderComponents = firstRenderComponent;
-
-    renderComponentLookup[e] = rcc;
-
-    return rcc;
+	return pointLights.addComponents(e, numComponents);
 }
 
-RenderComponentCollection
+ComponentGroup<PointLightComponent>
+Ecs::getPointLightComponents(Entity e)
+{
+	return pointLights.getComponents(e);
+}
+
+RenderComponent*
+Ecs::addRenderComponent(Entity e)
+{
+	return renderComponents.addComponent(e);
+}
+
+RenderComponent*
+Ecs::getRenderComponent(Entity e)
+{
+	return renderComponents.getComponent(e);
+}
+
+ComponentGroup<RenderComponent>
+Ecs::addRenderComponents(Entity e, uint32 numComponents)
+{
+	return renderComponents.addComponents(e, numComponents);
+}
+
+ComponentGroup<RenderComponent>
 Ecs::getRenderComponents(Entity e)
 {
-    RenderComponentCollection result;
-
-	auto it = renderComponentLookup.find(e);
-	if (it == renderComponentLookup.end())
-	{
-		result.numComponents = 0;
-        result.renderComponents = nullptr;
-	}
-    else
-    {
-        result = it->second;
-    }
-
-	return result;
+	return renderComponents.getComponents(e);
 }
 
 void
 Ecs::renderAllRenderComponents(TransformComponent* cameraXfm)
 {
-	for (uint32 i = 0; i < renderComponentNextIndex; i++)
+	for (uint32 i = 0; i < renderComponents.size; i++)
 	{
-		RenderComponent &rc = renderComponents[i];
+		RenderComponent &rc = renderComponents.components[i];
 		TransformComponent* xfm = getTransformComponent(rc.entity);
 
 		assert(xfm != nullptr); // Render component cannot exist without corresponding transform component

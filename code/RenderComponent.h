@@ -15,9 +15,3 @@ struct RenderComponent : public Component
 
 	void draw(TransformComponent* xfm, TransformComponent* cameraXfm);
 };
-
-struct RenderComponentCollection
-{
-    uint32 numComponents;
-    RenderComponent* renderComponents;
-};

@@ -99,6 +99,9 @@ void main()
 
 	mat3 tbnWorld = mat3(v2f.tWorld, v2f.bWorld, v2f.nWorld);
 	normal = tbnWorld * normal;
+
+	/* DEBUG: disable normal mapping */
+	/* normal = v2f.nWorld; */
 	
     vec3 result;
 
