@@ -29,8 +29,11 @@ struct Material
     std::string name;
 
 	static const std::string COMPOSITE_ID_DELIMITER;
+
     static const std::string DEFAULT_MATERIAL_FILENAME;
     static const std::string DEFAULT_MATERIAL_NAME;
+	static const std::string DEBUG_MATERIAL_FILENAME;
+    static const std::string DEBUG_MATERIAL_NAME;
 
 	void init(std::string filename, std::string name);
 

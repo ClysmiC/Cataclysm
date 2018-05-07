@@ -7,6 +7,7 @@
 
 #include "Ecs.h"
 #include "ResourceManager.h"
+#include "DebugDraw.h"
 #include "Mesh.h"
 #include "GL/glew.h"
 
@@ -76,7 +77,8 @@ int WinMain()
 	// glCullFace(GL_BACK);
 
 	ResourceManager::instance().init();
-	Mesh *mesh = ResourceManager::instance().initMesh("nanosuit/nanosuit.obj", true, true);
+	
+	Mesh *mesh = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
 	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 	
 	real32 lastTimeMs = 0;
@@ -86,13 +88,15 @@ int WinMain()
 	// Set up camera
 	Entity camera = ecs.nextEntityId();
 	TransformComponent* cameraXfm = ecs.addTransformComponent(camera);
+
+	DebugDraw::instance().init(camera);
 	
     Entity test = ecs.nextEntityId();
     // Set up test mesh
     {
         TransformComponent *tc = ecs.addTransformComponent(test);
-        tc->setPosition(0, -2, -4);
-		tc->setScale(0.25);
+        tc->setPosition(0, -2, -5);
+		// tc->setScale(0.25);
 		
         ComponentGroup<RenderComponent> rcc = ecs.addRenderComponents(test, mesh->submeshes.size());
 
@@ -159,11 +163,12 @@ int WinMain()
 		Quaternion meshRot = axisAngle(Vec3(0, 1, 0), 30 * timeS); 
         //testXfm->setOrientation(meshRot);
 
-        ecs.renderAllRenderComponents(cameraXfm);
+        // ecs.renderAllRenderComponents(cameraXfm);
+		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(33));
 	}
 
 	glfwTerminate();

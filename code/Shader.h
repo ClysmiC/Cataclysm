@@ -35,7 +35,7 @@ struct Shader
     void setVec4(const std::string &name, Vec4 value) const;
     void setVec4(const std::string &name, real32 x, real32 y, real32 z, real32 w) const;
 
-    void setMat4(const std::string &name, Mat4 value) const;
+    void setMat4(const std::string &name, Mat4 &value) const;
 
     static std::string idFromFilenames(std::string vertFilename, std::string fragFilename);
 };

@@ -88,7 +88,7 @@ void Shader::setVec4(const std::string & name, real32 x, real32 y, real32 z, rea
     glUniform4f(glGetUniformLocation(openGlHandle, name.c_str()), x, y, z, w);
 }
 
-void Shader::setMat4(const std::string & name, Mat4 value) const
+void Shader::setMat4(const std::string & name, Mat4 &value) const
 {
 	// NOTE: Transpose matrix to make it column order
     glUniformMatrix4fv(glGetUniformLocation(openGlHandle, name.c_str()), 1, GL_TRUE, value.dataPointer());
