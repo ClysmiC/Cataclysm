@@ -42,13 +42,8 @@ void Shader::setBool(const std::string & name, bool value) const
 
 void Shader::setInt(const std::string & name, int value) const
 {
-	auto v = glGetError();
-	
     assert(isLoaded); if (!isLoaded) return;
-	this->bind();
     glUniform1i(glGetUniformLocation(openGlHandle, name.c_str()), value);
-
-	v = glGetError();
 }
 
 void Shader::setFloat(const std::string & name, real32 value) const

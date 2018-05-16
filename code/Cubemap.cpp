@@ -22,9 +22,9 @@ Cubemap::load()
 	glGenTextures(1, &openGlHandle);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, openGlHandle);
 
-	std::string filenames[] = { "right", "left", "top", "bottom", "back", "front" };
+	std::string filenames[] = { "right", "left", "top", "bottom", "front", "back" };
 
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
 	GLuint glTexTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 	
 	for (std::string filename : filenames)

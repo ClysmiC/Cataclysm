@@ -234,34 +234,17 @@ int WinMain()
 			Mat4 view = calculateWorldToViewMatrix(cameraXfm);
 			Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
 
-			v = glGetError();
+			cubemapShader->bind();
 			
 			glActiveTexture(GL_TEXTURE0);
-
-			v = glGetError();
-
-			uint32 zero = 0;
 			cubemapShader->setInt("cubemap", 0);
-
-			v = glGetError();
-			
 			cubemapShader->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
-			cubemapShader->bind();
-
-			v = glGetError();
 
 			glDepthMask(GL_FALSE);
 			glBindVertexArray(skyboxVao);
-
-			v = glGetError();
-			
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cm->openGlHandle);
-
-			v = glGetError();
 			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-
-			v = glGetError();
 			
 			glDepthMask(GL_TRUE);
 		}
