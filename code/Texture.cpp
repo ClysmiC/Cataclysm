@@ -7,13 +7,15 @@
 
 #include "GL/glew.h"
 
-void Texture::init(const std::string filename, bool gammaCorrect_)
+void
+Texture::init(const std::string filename, bool gammaCorrect_)
 {
 	this->id = filename;
 	this->gammaCorrect = gammaCorrect_;
 }
 
-bool Texture::load()
+bool
+Texture::load()
 {
     if (isLoaded) return true;
 
@@ -63,7 +65,8 @@ bool Texture::load()
     return true;
 }
 
-bool Texture::unload()
+bool
+Texture::unload()
 {
     assert(isLoaded);
 
@@ -75,7 +78,8 @@ bool Texture::unload()
     return true;
 }
 
-Texture* Texture::white()
+Texture*
+Texture::white()
 {
     std::string texFile = "default/white.png";
     ResourceManager::instance().initTexture(texFile, true, true);
@@ -84,7 +88,8 @@ Texture* Texture::white()
     return tex;
 }
 
-Texture * Texture::gray()
+Texture*
+Texture::gray()
 {
     std::string texFile = "default/gray.png";
     ResourceManager::instance().initTexture(texFile, true, true);
@@ -93,7 +98,8 @@ Texture * Texture::gray()
     return tex;
 }
 
-Texture* Texture::black()
+Texture*
+Texture::black()
 {
     std::string texFile = "default/black.png";
     ResourceManager::instance().initTexture(texFile, true, true);
@@ -102,7 +108,8 @@ Texture* Texture::black()
     return tex;
 }
 
-Texture* Texture::defaultNormal()
+Texture*
+Texture::defaultNormal()
 {
     std::string texFile = "default/normal.png";
     ResourceManager::instance().initTexture(texFile, false, true);

@@ -10,8 +10,8 @@ struct Texture
     bool load();
     bool unload();
 
-	bool isLoaded = false;
 	std::string id;
+	bool isLoaded = false;
     bool gammaCorrect;
 
     static Texture* white();
