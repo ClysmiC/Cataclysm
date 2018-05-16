@@ -21,6 +21,44 @@ Quaternion::Quaternion(Vec3 vector, real32 scalar) { x = vector.x; y = vector.y;
 Quaternion::Quaternion(Vec4 xyzw)                  { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
 Quaternion::Quaternion(real32 x_, real32 y_, real32 z_, real32 w_) { x = x_; y = y_; z = z_; w = w_; }
 
+// Mat3::Mat3(Mat4 mat4)
+// {
+// 	_e[0][0] = mat4[0][0];
+// 	_e[0][1] = mat4[0][1];
+// 	_e[0][2] = mat4[0][2];
+
+// 	_e[1][0] = mat4[1][0];
+// 	_e[1][1] = mat4[1][1];
+// 	_e[1][2] = mat4[1][2];
+
+// 	_e[2][0] = mat4[2][0];
+// 	_e[2][1] = mat4[2][1];
+// 	_e[2][2] = mat4[2][2];
+// }
+
+// Mat4::Mat4(Mat3 mat3)
+// {
+// 	_e[0][0] = mat3[0][0];
+// 	_e[0][1] = mat3[0][1];
+// 	_e[0][2] = mat3[0][2];
+// 	_e[0][3] = 0;
+
+// 	_e[1][0] = mat3[1][0];
+// 	_e[1][1] = mat3[1][1];
+// 	_e[1][2] = mat3[1][2];
+// 	_e[1][3] = 0;
+
+// 	_e[2][0] = mat3[2][0];
+// 	_e[2][1] = mat3[2][1];
+// 	_e[2][2] = mat3[2][2];
+// 	_e[2][3] = 0;
+
+// 	_e[3][0] = 0;
+// 	_e[3][1] = 0;
+// 	_e[3][2] = 0;
+// 	_e[3][3] = 1;
+// }
+
 Vec2& Vec2::normalizeInPlace()
 {
 	real32 len = length(*this);
@@ -158,6 +196,21 @@ Mat4& Mat4::transposeInPlace()
 	temp = (*this)[2][3];
 	(*this)[2][3] = (*this)[3][2];
 	(*this)[3][2] = temp;
+
+	return *this;
+}
+
+Mat4& Mat4::mat3ifyInPlace()
+{
+	(*this)[0][3] = 0;
+	(*this)[1][3] = 0;
+	(*this)[2][3] = 0;
+
+	(*this)[3][0] = 0;
+	(*this)[3][1] = 0;
+	(*this)[3][2] = 0;
+
+	(*this)[3][3] = 1;
 
 	return *this;
 }

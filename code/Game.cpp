@@ -139,17 +139,137 @@ int WinMain()
 		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
+	//
+	//
+	// Set up cubemap
+	uint32 skyboxVao;
+	uint32 skyboxVbo;
+	{
+		ResourceManager& rm = ResourceManager::instance();
+		rm.initShader("shader/cubemap.vert", "shader/cubemap.frag", true);
+		rm.initCubemap("cubemap/watersky", ".jpg", true);
+
+		real32 vertices[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			-1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f
+		};
+		
+		glGenBuffers(1, &skyboxVbo);
+		glGenVertexArrays(1, &skyboxVao);
+		glBindVertexArray(skyboxVao);
+		glBindBuffer(GL_ARRAY_BUFFER, skyboxVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+	}
+	//
+	//
+	//
+
+	auto v = glGetError();
+
 	TransformComponent *lightXfm = ecs.getTransformComponent(light);
     TransformComponent *testXfm = ecs.getTransformComponent(test);
 
+	Cubemap* cm = ResourceManager::instance().getCubemap("cubemap/watersky");
+	Shader* cubemapShader = ResourceManager::instance().getShader("shader/cubemap.vert", "shader/cubemap.frag");
+	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
+		v = glGetError();
+		
 		glfwPollEvents();
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		v = glGetError();
 
-		auto v = glGetError();
+		//
+		// Draw skybox
+		{
+			// TODO: should this be part of the camera?
+			Mat4 projection;
+			projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+
+			Mat4 view = calculateWorldToViewMatrix(cameraXfm);
+			Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
+
+			v = glGetError();
+			
+			glActiveTexture(GL_TEXTURE0);
+
+			v = glGetError();
+
+			uint32 zero = 0;
+			cubemapShader->setInt("cubemap", 0);
+
+			v = glGetError();
+			
+			cubemapShader->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
+			cubemapShader->bind();
+
+			v = glGetError();
+
+			glDepthMask(GL_FALSE);
+			glBindVertexArray(skyboxVao);
+
+			v = glGetError();
+			
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cm->openGlHandle);
+
+			v = glGetError();
+			
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			v = glGetError();
+			
+			glDepthMask(GL_TRUE);
+		}
+		//
+		//
+
+
+		v = glGetError();
 
 		real32 timeS = glfwGetTime();
 		real32 timeMs = timeS * 1000.0f;
@@ -163,7 +283,7 @@ int WinMain()
 		Quaternion meshRot = axisAngle(Vec3(0, 1, 0), 30 * timeS); 
         //testXfm->setOrientation(meshRot);
 
-        // ecs.renderAllRenderComponents(cameraXfm);
+        ecs.renderAllRenderComponents(cameraXfm);
 		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);

@@ -95,6 +95,20 @@ Mesh* ResourceManager::initMesh(std::string relFilename, bool useMaterialsRefren
     return initResource(m, meshes, loadNow);
 }
 
+Cubemap*
+ResourceManager::initCubemap(std::string directoryName, std::string extension, bool loadNow)
+{
+	Cubemap c;
+	c.init(directoryName, extension);
+	return initResource(c, cubemaps, loadNow);
+}
+
+Cubemap*
+ResourceManager::getCubemap(std::string id)
+{
+	return getResource(id, cubemaps);
+}
+
 template<class T>
 T* ResourceManager::initResource(T resourceArg, std::unordered_map<RESOURCE_HANDLE, T> &table, bool loadNow)
 {

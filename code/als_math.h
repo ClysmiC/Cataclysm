@@ -83,8 +83,11 @@ union Quaternion
 	Quaternion& normalizeInPlace();
 };
 
+struct Mat4;
 struct Mat3
 {
+	// Mat3(Mat4 mat4);
+	
 	real32 _e[3][3] = {
 		{ 1, 0, 0},
 		{ 0, 1, 0},
@@ -101,6 +104,8 @@ struct Mat3
 
 struct Mat4
 {
+	// Mat4(Mat3 mat3);
+	
 	real32 _e[4][4] = {
 		{ 1, 0, 0, 0},
 		{ 0, 1, 0, 0},
@@ -118,7 +123,7 @@ struct Mat4
 	Mat4& translateInPlace(Vec3 translation);
 	
 	Mat4& transposeInPlace();
-
+	Mat4& mat3ifyInPlace();
 	Mat4& perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
 };
 

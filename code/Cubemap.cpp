@@ -29,10 +29,12 @@ Cubemap::load()
 	
 	for (std::string filename : filenames)
 	{
-		std::string fullName = ResourceManager::instance().toFullPath(filename) + this->extension;
+		std::string fullName = ResourceManager::instance().toFullPath(this->id + "/" + filename) + this->extension;
 		
-		int w, h, channels;
-		unsigned char *data = stbi_load(filename.c_str(), &w, &h, &channels, 0);
+		int w = 0, h = 0, channels = 0;
+		unsigned char *data = stbi_load(fullName.c_str(), &w, &h, &channels, 0);
+
+		assert(w > 0);
 
 		glTexImage2D(glTexTarget, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 

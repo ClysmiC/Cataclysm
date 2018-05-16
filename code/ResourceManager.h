@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "Cubemap.h"
 
 #include <unordered_map>
 
@@ -22,16 +23,21 @@ struct ResourceManager
 
 
     Texture* initTexture(std::string relFilename, bool gammaCorrect, bool loadNow);
-    Mesh* initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
-    Material* initMaterial(std::string relFilename, std::string materialName, bool loadNow);
-    Shader* initShader(std::string vertFilename, std::string fragFilename, bool loadNow);
-
     Texture* getTexture(std::string relFilename);
+	
+    Mesh* initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
     Mesh* getMesh(std::string relFilename);
+	
+    Material* initMaterial(std::string relFilename, std::string materialName, bool loadNow);
     Material* getMaterial(std::string id);
     Material* getMaterial(std::string relFilename, std::string materialName);
+	
+    Shader* initShader(std::string vertFilename, std::string fragFilename, bool loadNow);
     Shader* getShader(std::string id);
     Shader* getShader(std::string vertFilename, std::string fragFilename);
+	
+	Cubemap* initCubemap(std::string directoryName, std::string extension, bool loadNow);
+	Cubemap* getCubemap(std::string id);
 
     std::string resourceDirectory;
 
@@ -43,6 +49,7 @@ struct ResourceManager
     std::unordered_map<RESOURCE_HANDLE, Mesh> meshes;
     std::unordered_map<RESOURCE_HANDLE, Material> materials;
     std::unordered_map<RESOURCE_HANDLE, Shader> shaders;
+	std::unordered_map<RESOURCE_HANDLE, Cubemap> cubemaps;
 
 private:
     void initDefaults();

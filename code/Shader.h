@@ -8,7 +8,7 @@ struct Shader
 {
 	void init(std::string vertFile, std::string fragFile);
 
-    bool bind();
+    bool bind() const;
 
 	bool isLoaded = false;
 	std::string id;
