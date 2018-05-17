@@ -5,7 +5,7 @@
 #include "Material.h"
 #include "MeshVertex.h"
 #include <vector>
-#include "Camera.h"
+#include "CameraComponent.h"
 
 struct SubmeshOpenGlInfo
 {

@@ -16,7 +16,7 @@ bool lastKeys[1024];
 real32 deltaTMs;
 
 
-void updateCamera(TransformComponent* cameraXfm)
+void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	real32 cameraTurnSpeed = 30; // Deg / Sec
 	real32 cameraSpeed = 1;
@@ -27,20 +27,20 @@ void updateCamera(TransformComponent* cameraXfm)
 	
 	if (keys[GLFW_KEY_W])
 	{
-		position += cameraForward(cameraXfm) * cameraSpeed * deltaTS;
+		position += camera->forward() * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_S])
 	{
-		position += cameraBack(cameraXfm) * cameraSpeed * deltaTS;
+		position += camera->back() * cameraSpeed * deltaTS;
 	}
 		
 	if (keys[GLFW_KEY_A])
 	{
-		position += cameraLeft(cameraXfm) * cameraSpeed * deltaTS;
+		position += camera->left() * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_D])
 	{
-		position += cameraRight(cameraXfm) * cameraSpeed * deltaTS;
+		position += camera->right() * cameraSpeed * deltaTS;
 	}
 
 	if (keys[GLFW_KEY_Q])
@@ -86,12 +86,15 @@ int WinMain()
     Ecs ecs;
 	
 	// Set up camera
-	Entity camera = ecs.nextEntityId();
+	Entity camera = ecs.makeEntity();
 	TransformComponent* cameraXfm = ecs.addTransformComponent(camera);
+	CameraComponent* cameraComponent = ecs.addCameraComponent(camera);
+	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+	cameraComponent->isOrthographic = false;
 
 	DebugDraw::instance().init(camera);
 	
-    Entity test = ecs.nextEntityId();
+    Entity test = ecs.makeEntity();
     // Set up test mesh
     {
         TransformComponent *tc = ecs.addTransformComponent(test);
@@ -107,7 +110,7 @@ int WinMain()
         }
     }
 	
-	Entity light = ecs.nextEntityId();
+	Entity light = ecs.makeEntity();
 	// Set up light
 	{
 		ResourceManager& rm = ResourceManager::instance();
@@ -231,7 +234,7 @@ int WinMain()
 			Mat4 projection;
 			projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
-			Mat4 view = calculateWorldToViewMatrix(cameraXfm);
+			Mat4 view = cameraComponent->worldToViewMatrix();
 			Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
 
 			cubemapShader->bind();
@@ -260,13 +263,13 @@ int WinMain()
 		lastTimeMs = timeMs;
 
 		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
-		updateCamera(cameraXfm);
+		updateCamera(cameraComponent, cameraXfm);
 		
 		// Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
 		Quaternion meshRot = axisAngle(Vec3(0, 1, 0), 30 * timeS); 
         //testXfm->setOrientation(meshRot);
 
-        ecs.renderAllRenderComponents(cameraXfm);
+        ecs.renderAllRenderComponents(cameraComponent);
 		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);

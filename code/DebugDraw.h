@@ -9,12 +9,10 @@ struct DebugDraw
 	static DebugDraw& instance();
 	void init(Entity camera);
 	
-	Entity camera;
+	CameraComponent* camera;
 	
 	Shader* shader;
 	Vec3 color;
-	/* real32 lineThickness = 0.5f; */
-	/* bool wireframe = false; */
 	
 	void drawSphere(Vec3 position, float radius);
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation);
@@ -25,8 +23,6 @@ private:
 	uint32 vbo;
 	uint32 ebo;
 	uint32 vao;
-
-	Mat4 projection; // TODO: consolidate this with camera
 
 	DebugDraw() = default;
 };

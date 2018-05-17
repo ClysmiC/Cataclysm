@@ -3,13 +3,15 @@
 #include "Entity.h"
 #include "ComponentGroup.h"
 #include "TransformComponent.h"
+#include "CameraComponent.h"
 #include "PointLightComponent.h"
 #include "RenderComponent.h"
 
 #include <unordered_map>
 
+// TODO better solution for this.
+// maybe each component type gets its own constant
 #define COMPONENT_ARRAY_SIZE 512
-
 
 struct Ecs
 {
@@ -21,7 +23,7 @@ private:
 	{
 		T components[COMPONENT_ARRAY_SIZE];
 		uint32 size = 0;
-		std::unordered_map<Entity, ComponentGroup<T>> lookup;
+		std::unordered_map<uint32, ComponentGroup<T>> lookup;
 
 		T* addComponent(Entity e);
 		T* getComponent(Entity e);
@@ -35,10 +37,13 @@ public:
     Ecs();
 
 	// Once you are given an Id, you can go ahead and start registering your components with it
-	Entity nextEntityId();
+	Entity makeEntity();
 
 	TransformComponent* addTransformComponent(Entity e);
 	TransformComponent* getTransformComponent(Entity e);
+
+	CameraComponent* addCameraComponent(Entity e);
+	CameraComponent* getCameraComponent(Entity e);
 
 	RenderComponent* addRenderComponent(Entity e);
 	RenderComponent* getRenderComponent(Entity e);
@@ -50,18 +55,19 @@ public:
 	ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents);
 	ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 
-	void renderAllRenderComponents(TransformComponent* cameraXfm);
+	void renderAllRenderComponents(CameraComponent* camera);
 	
 	PointLightComponent* closestPointLight(TransformComponent* xfm);
 
 	
 private:
 	
-	Entity nextEntityId_ = 1;
+	uint32 nextEntityId = 1;
 
-	// TODO: make a dynamic array of pointers to contiguous "batches"
+	// TODO: make a dynamic array of pointers to contiguous "batches/buckets"
 
 	ComponentList<TransformComponent> transforms;
+	ComponentList<CameraComponent> cameras;
 	ComponentList<PointLightComponent> pointLights;
 	ComponentList<RenderComponent> renderComponents;
 };

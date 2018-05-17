@@ -5,7 +5,7 @@
 template <class T>
 struct ComponentGroup
 {
-	Entity entity = 0;
+	Entity entity;
 
 	T* components;
 	uint32 numComponents;

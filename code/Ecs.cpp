@@ -14,6 +14,7 @@ Ecs::ComponentList<T>::addComponent(Entity e)
 
 	T componentToAdd;
     componentToAdd.entity = e;
+	componentToAdd.ecs = this;
 	
 	components[size] = componentToAdd;
 	T* result = &(components[size]);
@@ -23,7 +24,7 @@ Ecs::ComponentList<T>::addComponent(Entity e)
 	ComponentGroup<T> cg;
 	cg.components = result;
 	cg.numComponents = 1;
-	lookup[e] = cg;
+	lookup[e.id] = cg;
 	
 	return result;	
 }
@@ -32,7 +33,7 @@ template<class T>
 T*
 Ecs::ComponentList<T>::getComponent(Entity e)
 {
-	auto it = lookup.find(e);
+	auto it = lookup.find(e.id);
 	if (it == lookup.end())
 	{
 		return nullptr;
@@ -45,7 +46,7 @@ template<class T>
 ComponentGroup<T>
 Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
 {
-	assert(lookup.find(e) == lookup.end()); // doesnt already exist
+	assert(lookup.find(e.id) == lookup.end()); // doesnt already exist
 	
 	T* firstComponent = nullptr;
 
@@ -55,6 +56,8 @@ Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
 		
         T component;
         component.entity = e;
+		component.ecs = this;
+		
         components[size] = component;
         if (i == 0)
         {
@@ -65,9 +68,10 @@ Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
     }
 
     ComponentGroup<T> cg;
+	cg.entity = e;
     cg.components = firstComponent;
     cg.numComponents = numComponents;
-    lookup[e] = cg;
+    lookup[e.id] = cg;
 
     return cg;
 }
@@ -76,7 +80,7 @@ template<class T>
 ComponentGroup<T>
 Ecs::ComponentList<T>::getComponents(Entity e)
 {
-	auto it = lookup.find(e);
+	auto it = lookup.find(e.id);
 	if (it == lookup.end())
 	{
 		ComponentGroup<T> result;
@@ -149,7 +153,7 @@ Ecs::getRenderComponents(Entity e)
 }
 
 void
-Ecs::renderAllRenderComponents(TransformComponent* cameraXfm)
+Ecs::renderAllRenderComponents(CameraComponent* camera)
 {
 	for (uint32 i = 0; i < renderComponents.size; i++)
 	{
@@ -176,7 +180,7 @@ Ecs::renderAllRenderComponents(TransformComponent* cameraXfm)
 			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
 		}
 
-		rc.draw(xfm, cameraXfm);
+		rc.draw(xfm, camera);
 	}
 }
 
@@ -206,8 +210,13 @@ Ecs::closestPointLight(TransformComponent* xfm)
 	return closest;
 }
 
-uint32
-Ecs::nextEntityId()
+Entity
+Ecs::makeEntity()
 {
-	return nextEntityId_++;
+	Entity result;
+	result.id = nextEntityId;
+	result.ecs = this;
+	
+	nextEntityId++;
+	return result;
 }

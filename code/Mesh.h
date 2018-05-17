@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include "MeshVertex.h"
 #include "Submesh.h"
-#include "Camera.h"
+#include "CameraComponent.h"
 
 #include "als_math.h"
 
