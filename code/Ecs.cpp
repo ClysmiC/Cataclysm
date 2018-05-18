@@ -7,14 +7,14 @@ Ecs::Ecs()
 
 template<class T>
 T*
-Ecs::ComponentList<T>::addComponent(Entity e)
+Ecs::ComponentList<T>::addComponent(Entity e, Ecs* ecs)
 {
-	assert(lookup.find(e) == lookup.end()); // doesnt already exist
+	assert(lookup.find(e.id) == lookup.end()); // doesnt already exist
 	assert(size < COMPONENT_ARRAY_SIZE);
 
 	T componentToAdd;
     componentToAdd.entity = e;
-	componentToAdd.ecs = this;
+	componentToAdd.ecs = ecs;
 	
 	components[size] = componentToAdd;
 	T* result = &(components[size]);
@@ -44,7 +44,7 @@ Ecs::ComponentList<T>::getComponent(Entity e)
 
 template<class T>
 ComponentGroup<T>
-Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
+Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents, Ecs* ecs)
 {
 	assert(lookup.find(e.id) == lookup.end()); // doesnt already exist
 	
@@ -56,7 +56,7 @@ Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents)
 		
         T component;
         component.entity = e;
-		component.ecs = this;
+		component.ecs = ecs;
 		
         components[size] = component;
         if (i == 0)
@@ -95,7 +95,7 @@ Ecs::ComponentList<T>::getComponents(Entity e)
 TransformComponent*
 Ecs::addTransformComponent(Entity e)
 {
-	return transforms.addComponent(e);
+	return transforms.addComponent(e, this);
 }
 
 TransformComponent*
@@ -104,10 +104,22 @@ Ecs::getTransformComponent(Entity e)
 	return transforms.getComponent(e);
 }
 
+CameraComponent*
+Ecs::addCameraComponent(Entity e)
+{
+	return cameras.addComponent(e, this);
+}
+
+CameraComponent*
+Ecs::getCameraComponent(Entity e)
+{
+	return cameras.getComponent(e);
+}
+
 PointLightComponent*
 Ecs::addPointLightComponent(Entity e)
 {
-	return pointLights.addComponent(e);
+	return pointLights.addComponent(e, this);
 }
 
 PointLightComponent*
@@ -119,7 +131,7 @@ Ecs::getPointLightComponent(Entity e)
 ComponentGroup<PointLightComponent>
 Ecs::addPointLightComponents(Entity e, uint32 numComponents)
 {
-	return pointLights.addComponents(e, numComponents);
+	return pointLights.addComponents(e, numComponents, this);
 }
 
 ComponentGroup<PointLightComponent>
@@ -131,7 +143,7 @@ Ecs::getPointLightComponents(Entity e)
 RenderComponent*
 Ecs::addRenderComponent(Entity e)
 {
-	return renderComponents.addComponent(e);
+	return renderComponents.addComponent(e, this);
 }
 
 RenderComponent*
@@ -143,7 +155,7 @@ Ecs::getRenderComponent(Entity e)
 ComponentGroup<RenderComponent>
 Ecs::addRenderComponents(Entity e, uint32 numComponents)
 {
-	return renderComponents.addComponents(e, numComponents);
+	return renderComponents.addComponents(e, numComponents, this);
 }
 
 ComponentGroup<RenderComponent>

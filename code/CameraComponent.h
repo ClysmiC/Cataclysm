@@ -14,48 +14,15 @@ struct CameraComponent : public Component
 	// TODO: cache this if camera hasnt moved (then return pointer to cached value)
 	Mat4 worldToViewMatrix();
 
-	inline Vec3 right()
-	{
-		setTransformComponentIfNeeded();
-		return cachedXfm->orientation() * Vec3(1, 0, 0);
-	}
-	
-	inline Vec3 left()
-	{
-		return -right();
-	}
-
-	inline Vec3 up()
-	{
-		setTransformComponentIfNeeded();
-		return cachedXfm->orientation() * Vec3(0, 1, 0);
-	}
-
-	inline Vec3 down()
-	{
-		return -up();
-	}
-
-	inline Vec3 forward()
-	{
-		setTransformComponentIfNeeded();
-		return cachedXfm->orientation() * Vec3(0, 0, -1);
-	}
-
-	inline Vec3 back()
-	{
-		return -forward();
-	}
+	Vec3 right();
+	Vec3 left();
+	Vec3 up();
+	Vec3 down();
+	Vec3 forward();
+	Vec3 back();
 
 private:
-	inline void setTransformComponentIfNeeded()
-	{
-		assert(entity.id != 0);
-		if (cachedXfm == nullptr)
-		{
-			cachedXfm = ecs->getTransformComponent(this);
-		}
-	}
+	void setTransformComponentIfNeeded();
 };
 
 

@@ -1,4 +1,5 @@
 #include "CameraComponent.h"
+#include "Ecs.h"
 
 Mat4
 CameraComponent::worldToViewMatrix()
@@ -32,4 +33,53 @@ CameraComponent::worldToViewMatrix()
 	result = result * translation;
 
 	return result;
+}
+
+Vec3
+CameraComponent::right()
+{
+	setTransformComponentIfNeeded();
+	return cachedXfm->orientation() * Vec3(1, 0, 0);
+}
+	
+Vec3
+CameraComponent::left()
+{
+	return -right();
+}
+
+Vec3
+CameraComponent::up()
+{
+	setTransformComponentIfNeeded();
+	return cachedXfm->orientation() * Vec3(0, 1, 0);
+}
+
+Vec3
+CameraComponent::down()
+{
+	return -up();
+}
+
+Vec3
+CameraComponent::forward()
+{
+	setTransformComponentIfNeeded();
+	return cachedXfm->orientation() * Vec3(0, 0, -1);
+}
+
+Vec3
+CameraComponent::back()
+{
+	return -forward();
+}
+
+void
+CameraComponent::setTransformComponentIfNeeded()
+{
+	assert(entity.id != 0);
+	if (cachedXfm == nullptr)
+	{
+		cachedXfm = ecs->getTransformComponent(this->entity);
+	}
 }

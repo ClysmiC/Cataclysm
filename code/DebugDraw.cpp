@@ -3,6 +3,9 @@
 #include "GL/glew.h"
 #include "ResourceManager.h"
 
+#include "Entity.h"
+#include "Ecs.h"
+
 DebugDraw&
 DebugDraw::instance()
 {

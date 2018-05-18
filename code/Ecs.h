@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "Entity.h"
 #include "ComponentGroup.h"
 #include "TransformComponent.h"
@@ -8,6 +9,7 @@
 #include "RenderComponent.h"
 
 #include <unordered_map>
+
 
 // TODO better solution for this.
 // maybe each component type gets its own constant
@@ -25,9 +27,9 @@ private:
 		uint32 size = 0;
 		std::unordered_map<uint32, ComponentGroup<T>> lookup;
 
-		T* addComponent(Entity e);
+		T* addComponent(Entity e, Ecs* ecs);
 		T* getComponent(Entity e);
-		ComponentGroup<T> addComponents(Entity e, uint32 numComponents);
+		ComponentGroup<T> addComponents(Entity e, uint32 numComponents, Ecs* ecs);
 		ComponentGroup<T> getComponents(Entity e);
 	};
 
