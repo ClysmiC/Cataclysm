@@ -59,6 +59,22 @@ Quaternion::Quaternion(real32 x_, real32 y_, real32 z_, real32 w_) { x = x_; y =
 // 	_e[3][3] = 1;
 // }
 
+Plane::Plane(Vec3 point, Vec3 normal)
+	: point(point)
+	, normal(normalize(normal))
+{
+}
+
+
+Plane::Plane(Vec3 pointA, Vec3 pointB, Vec3 pointC)
+{
+	Vec3 ab = pointB - pointA;
+	Vec3 ac = pointC - pointA;
+	
+	point = pointA;
+	normal = normalize(cross(ab, ac));
+}
+
 Vec2& Vec2::normalizeInPlace()
 {
 	real32 len = length(*this);

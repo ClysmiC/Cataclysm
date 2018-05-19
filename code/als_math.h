@@ -127,6 +127,14 @@ struct Mat4
 	Mat4& perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
 };
 
+struct Plane
+{
+	Plane(Vec3 point, Vec3 normal);
+	Plane(Vec3 pointA, Vec3 pointB, Vec3 pointC); // NOTE: normal calculated using CCW winding
+	Vec3 point;
+	Vec3 normal;
+};
+
 Vec2 operator + (Vec2 vectorA, Vec2 vectorB);
 Vec2 operator + (Vec2 vector, real32 constant);
 Vec2& operator += (Vec2& vectorA, Vec2 vectorB);
@@ -403,16 +411,6 @@ inline real32 distance(Vec4 vectorA, Vec4 vectorB)
 // 	return equals(vectorA, vectorB);
 // }
 
-// inline Vec3 project(Vec3 vector, Plane plane)
-// {
-// 	ALS_ASSERT(isNormal(plane.normal));
-	
-// 	Vec3 vProjNormal = project(vector, plane.normal);
-// 	Vec3 result = vector - vProjNormal;
-
-// 	return result;
-// }
-
 inline bool isZeroVector(Vec2 v)
 {
 	bool result = (v.x == 0) && (v.y == 0);
@@ -455,6 +453,16 @@ inline bool isNormal(Vec4 v)
 	bool result;
 	result = FLOAT_EQ(lengthSquared(v), 1.0f, 0.01);
 	
+	return result;
+}
+
+inline Vec3 project(Vec3 vector, Plane plane)
+{
+	assert(isNormal(plane.normal));
+	
+	Vec3 vProjNormal = project(vector, plane.normal);
+	Vec3 result = vector - vProjNormal;
+
 	return result;
 }
 

@@ -13,49 +13,63 @@
 
 bool keys[1024];
 bool lastKeys[1024];
+
+float mouseX;
+float mouseY;
+float mouseXPrev;
+float mouseYPrev;
+
 real32 deltaTMs;
 
 
 void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 {
+	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
+	
 	real32 cameraTurnSpeed = 30; // Deg / Sec
 	real32 cameraSpeed = 1;
 	real32 deltaTS = deltaTMs / 1000.0f;
 
+	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
+	{
+		// Rotate
+		real32 deltaMouseX = mouseX - mouseXPrev;
+		real32 deltaMouseY = mouseY - mouseYPrev;
+
+		Quaternion deltaYawAndPitch;
+		deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
+		deltaYawAndPitch = deltaYawAndPitch * axisAngle(Vec3(1, 0, 0), cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+
+		cameraXfm->setOrientation(cameraXfm->orientation() * deltaYawAndPitch);
+	}
+
+	// Translate
 	Vec3 position = cameraXfm->position();
-	Quaternion orientation = cameraXfm->orientation();
+
+	Vec3 moveRight   = normalize( project(camera->right(), movementPlane) );
+	Vec3 moveLeft    = normalize( -moveRight );
+	Vec3 moveForward = normalize( project(camera->forward(), movementPlane) );
+	Vec3 moveBack    = normalize( -moveForward );
 	
 	if (keys[GLFW_KEY_W])
 	{
-		position += camera->forward() * cameraSpeed * deltaTS;
+		position += moveForward * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_S])
 	{
-		position += camera->back() * cameraSpeed * deltaTS;
+		position += moveBack * cameraSpeed * deltaTS;
 	}
 		
 	if (keys[GLFW_KEY_A])
 	{
-		position += camera->left() * cameraSpeed * deltaTS;
+		position += moveLeft * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_D])
 	{
-		position += camera->right() * cameraSpeed * deltaTS;
-	}
-
-	if (keys[GLFW_KEY_Q])
-	{
-		Quaternion turn = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * deltaTS);
-		orientation = orientation * turn;
-	}
-	else if (keys[GLFW_KEY_E])
-	{
-		Quaternion turn = axisAngle(Vec3(0, 1, 0), -cameraTurnSpeed * deltaTS);
-		orientation = orientation * turn;
+		position += moveRight * cameraSpeed * deltaTS;
 	}
 
 	cameraXfm->setPosition(position);
-	cameraXfm->setOrientation(orientation);
 }
 
 
@@ -274,6 +288,9 @@ int WinMain()
 
 		glfwSwapBuffers(window.glfwWindow);
 
+		mouseXPrev = mouseX;
+		mouseYPrev = mouseY;
+		
 		std::this_thread::sleep_for(std::chrono::milliseconds(33));
 	}
 

@@ -27,6 +27,12 @@ void Window::glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, i
 	}
 }
 
+void Window::glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	mouseX = (float)xPos;
+	mouseY = (float)yPos;
+}
+
 void Window::glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 {
 	glfwGetFramebufferSize(window, &w, &h);
@@ -45,6 +51,9 @@ int Window::init(uint32 width, uint32 height)
 		return -1;
 	}
 
+	mouseXPrev = FLT_MAX;
+	mouseYPrev = FLT_MAX;
+
 	glfwSetErrorCallback(&glfwErrorCallback);
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -59,6 +68,9 @@ int Window::init(uint32 width, uint32 height)
 	
 	glfwSetKeyCallback(glfwWindow, &glfwKeyPressedCallback);
 	glfwSetWindowSizeCallback(glfwWindow, &glfwWindowResizeCallback);
+
+	glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(glfwWindow, &glfwMouseMovedCallback);
 	
 	glewExperimental = GL_TRUE;
 	GLenum glewInitStatus = glewInit();
