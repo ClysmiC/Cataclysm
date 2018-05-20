@@ -26,10 +26,15 @@ void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
 	
-	real32 cameraTurnSpeed = 30; // Deg / Sec
-	real32 cameraSpeed = 1;
+	real32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
+	real32 cameraSpeed = 5;
 	real32 deltaTS = deltaTMs / 1000.0f;
 
+	Vec3 moveRight   = normalize( project(camera->right(), movementPlane) );
+	Vec3 moveLeft    = normalize( -moveRight );
+	Vec3 moveForward = normalize( project(camera->forward(), movementPlane) );
+	Vec3 moveBack    = normalize( -moveForward );
+	
 	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
 	{
 		// Rotate
@@ -38,18 +43,14 @@ void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 
 		Quaternion deltaYawAndPitch;
 		deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-		deltaYawAndPitch = deltaYawAndPitch * axisAngle(Vec3(1, 0, 0), cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+		deltaYawAndPitch = axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS) * deltaYawAndPitch; // pitch
 
-		cameraXfm->setOrientation(cameraXfm->orientation() * deltaYawAndPitch);
+		cameraXfm->setOrientation(deltaYawAndPitch * cameraXfm->orientation());
 	}
 
 	// Translate
 	Vec3 position = cameraXfm->position();
 
-	Vec3 moveRight   = normalize( project(camera->right(), movementPlane) );
-	Vec3 moveLeft    = normalize( -moveRight );
-	Vec3 moveForward = normalize( project(camera->forward(), movementPlane) );
-	Vec3 moveBack    = normalize( -moveForward );
 	
 	if (keys[GLFW_KEY_W])
 	{

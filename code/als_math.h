@@ -81,6 +81,7 @@ union Quaternion
     real32 element[4];
 
 	Quaternion& normalizeInPlace();
+	Quaternion& invertInPlace();
 };
 
 struct Mat4;
@@ -337,6 +338,10 @@ inline real32 length(Quaternion q)
 {
 	real32 result = sqrtf(lengthSquared(q));
 	return result;
+}
+inline Quaternion inverse(Quaternion q)
+{
+	return Quaternion(-q.x, -q.y, -q.z, q.w);
 }
 inline Quaternion normalize(Quaternion q)
 {
