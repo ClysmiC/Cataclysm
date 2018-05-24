@@ -7,6 +7,7 @@
 
 #include "Ecs.h"
 #include "ResourceManager.h"
+#include "Scene.h"
 #include "DebugDraw.h"
 #include "Mesh.h"
 #include "GL/glew.h"
@@ -97,26 +98,27 @@ int WinMain()
 	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 	
 	real32 lastTimeMs = 0;
-	
-    Ecs ecs;
+
+	Scene scene;
 	
 	// Set up camera
-	Entity camera = ecs.makeEntity();
-	TransformComponent* cameraXfm = ecs.addTransformComponent(camera);
-	CameraComponent* cameraComponent = ecs.addCameraComponent(camera);
+	Entity camera = scene.ecs->makeEntity();
+	
+	TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
+	CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
 	DebugDraw::instance().init(camera);
 	
-    Entity test = ecs.makeEntity();
+    Entity test = scene.ecs->makeEntity();
     // Set up test mesh
     {
-        TransformComponent *tc = ecs.addTransformComponent(test);
+        TransformComponent *tc = scene.ecs->addTransformComponent(test);
         tc->setPosition(0, -2, -5);
 		// tc->setScale(0.25);
 		
-        ComponentGroup<RenderComponent> rcc = ecs.addRenderComponents(test, mesh->submeshes.size());
+        ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(test, mesh->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
@@ -125,18 +127,18 @@ int WinMain()
         }
     }
 	
-	Entity light = ecs.makeEntity();
+	Entity light = scene.ecs->makeEntity();
 	// Set up light
 	{
 		ResourceManager& rm = ResourceManager::instance();
 		
         Mesh* m = bulb;
         
-        TransformComponent *tc = ecs.addTransformComponent(light);
+        TransformComponent *tc = scene.ecs->addTransformComponent(light);
         tc->setPosition(0, 0, -2);
         tc->setScale(.35);
 		
-        ComponentGroup<RenderComponent> rcc = ecs.addRenderComponents(light, m->submeshes.size());
+        ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(light, m->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
@@ -144,7 +146,7 @@ int WinMain()
             rc->init(m->submeshes[i]);
         }
 
-		PointLightComponent *plc = ecs.addPointLightComponent(light);
+		PointLightComponent *plc = scene.ecs->addPointLightComponent(light);
 		plc->intensity = Vec3(5, 5, 5);
 
 		rm.initMaterial("", "bulbMaterial", true);
@@ -157,120 +159,20 @@ int WinMain()
 		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
-	//
-	//
-	// Set up cubemap
-	uint32 skyboxVao;
-	uint32 skyboxVbo;
-	{
-		ResourceManager& rm = ResourceManager::instance();
-		rm.initShader("shader/cubemap.vert", "shader/cubemap.frag", true);
-		rm.initCubemap("cubemap/watersky", ".jpg", true);
-
-		real32 vertices[] = {
-			// positions          
-			-1.0f,  1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f,  1.0f,
-			1.0f,  1.0f,  1.0f,
-			1.0f,  1.0f,  1.0f,
-			1.0f,  1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			1.0f,  1.0f,  1.0f,
-			1.0f,  1.0f,  1.0f,
-			1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			-1.0f,  1.0f, -1.0f,
-			1.0f,  1.0f, -1.0f,
-			1.0f,  1.0f,  1.0f,
-			1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			1.0f, -1.0f,  1.0f
-		};
-		
-		glGenBuffers(1, &skyboxVbo);
-		glGenVertexArrays(1, &skyboxVao);
-		glBindVertexArray(skyboxVao);
-		glBindBuffer(GL_ARRAY_BUFFER, skyboxVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
-	}
-	//
-	//
-	//
+	ResourceManager& rm = ResourceManager::instance();
+	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
 
 	auto v = glGetError();
 
-	TransformComponent *lightXfm = ecs.getTransformComponent(light);
-    TransformComponent *testXfm = ecs.getTransformComponent(test);
+	TransformComponent *lightXfm = scene.ecs->getTransformComponent(light);
+    TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
 
-	Cubemap* cm = ResourceManager::instance().getCubemap("cubemap/watersky");
-	Shader* cubemapShader = ResourceManager::instance().getShader("shader/cubemap.vert", "shader/cubemap.frag");
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
-		v = glGetError();
-		
 		glfwPollEvents();
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		v = glGetError();
-
-		//
-		// Draw skybox
-		{
-			// TODO: should this be part of the camera?
-			Mat4 projection;
-			projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-
-			Mat4 view = cameraComponent->worldToViewMatrix();
-			Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
-
-			cubemapShader->bind();
-			
-			glActiveTexture(GL_TEXTURE0);
-			cubemapShader->setInt("cubemap", 0);
-			cubemapShader->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
-
-			glDepthMask(GL_FALSE);
-			glBindVertexArray(skyboxVao);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cm->openGlHandle);
-			
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-			
-			glDepthMask(GL_TRUE);
-		}
-		//
-		//
-
-
-		v = glGetError();
 
 		real32 timeS = glfwGetTime();
 		real32 timeMs = timeS * 1000.0f;
@@ -279,12 +181,7 @@ int WinMain()
 
 		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
 		updateCamera(cameraComponent, cameraXfm);
-		
-		// Quaternion lightRot = axisAngle(Vec3(0, 1, 0), 30 * timeS);
-		Quaternion meshRot = axisAngle(Vec3(0, 1, 0), 30 * timeS); 
-        //testXfm->setOrientation(meshRot);
 
-        ecs.renderAllRenderComponents(cameraComponent);
 		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);

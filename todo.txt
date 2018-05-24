@@ -1,3 +1,2 @@
--mouse moves camera
 -refactor cubemap immediate drawing out into the cubemap class
 -replace booleans with enums in resource manager and texture (gammaCorrect bool)

@@ -1,6 +1,8 @@
 #include "Ecs.h"
 #include "assert.h"
 
+uint32 Ecs::nextEntityId = 1;
+
 Ecs::Ecs()
 {
 }

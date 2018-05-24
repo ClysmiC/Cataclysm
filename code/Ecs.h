@@ -64,7 +64,7 @@ public:
 	
 private:
 	
-	uint32 nextEntityId = 1;
+	static uint32 nextEntityId;
 
 	// TODO: make a dynamic array of pointers to contiguous "batches/buckets"
 
