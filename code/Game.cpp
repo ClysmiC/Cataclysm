@@ -161,6 +161,7 @@ int WinMain()
 
 	ResourceManager& rm = ResourceManager::instance();
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
+	scene.addCubemap(cm);
 
 	auto v = glGetError();
 
@@ -182,6 +183,7 @@ int WinMain()
 		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
 		updateCamera(cameraComponent, cameraXfm);
 
+		scene.renderScene(cameraComponent);
 		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);

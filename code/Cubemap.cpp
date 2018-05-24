@@ -76,6 +76,8 @@ GlobalCubemapInfo::init()
 void
 Cubemap::init(const std::string& directory, const std::string& extension_)
 {
+	GlobalCubemapInfo::init();
+	
 	this->id = directory;
 	this->extension = extension_;
 }
