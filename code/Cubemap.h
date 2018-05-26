@@ -31,5 +31,5 @@ struct Cubemap
 
 	uint32 openGlHandle;
 
-	void render(CameraComponent* cameraComponent);
+	void render(CameraEntity camera);
 };

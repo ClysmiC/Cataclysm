@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "ComponentGroup.h"
 #include "TransformComponent.h"
+#include "PortalComponent.h"
 #include "CameraComponent.h"
 #include "PointLightComponent.h"
 #include "RenderComponent.h"
@@ -47,6 +48,9 @@ public:
 	CameraComponent* addCameraComponent(Entity e);
 	CameraComponent* getCameraComponent(Entity e);
 
+	PortalComponent* addPortalComponent(Entity e);
+	PortalComponent* getPortalComponent(Entity e);
+
 	RenderComponent* addRenderComponent(Entity e);
 	RenderComponent* getRenderComponent(Entity e);
 	ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents);
@@ -57,7 +61,8 @@ public:
 	ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents);
 	ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 
-	void renderAllRenderComponents(CameraComponent* camera);
+	void renderAllRenderComponents(CameraEntity camera);
+	void renderContentsOfAllPortals(CameraEntity camera);
 	
 	PointLightComponent* closestPointLight(TransformComponent* xfm);
 
@@ -72,4 +77,5 @@ private:
 	ComponentList<CameraComponent> cameras;
 	ComponentList<PointLightComponent> pointLights;
 	ComponentList<RenderComponent> renderComponents;
+	ComponentList<PortalComponent> portals;
 };

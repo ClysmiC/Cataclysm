@@ -14,9 +14,9 @@ Scene::addCubemap(Cubemap* cubemap_)
 }
 
 void
-Scene::renderScene(CameraComponent* cameraComponent)
+Scene::renderScene(CameraEntity camera)
 {
-	if (cubemap != nullptr) cubemap->render(cameraComponent);
+	if (cubemap != nullptr) cubemap->render(camera);
 
-	ecs->renderAllRenderComponents(cameraComponent);
+	ecs->renderAllRenderComponents(camera);
 }

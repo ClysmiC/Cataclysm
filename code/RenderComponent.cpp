@@ -7,7 +7,7 @@ void RenderComponent::init(const Submesh &submesh)
     material = submesh.material;
 }
 
-void RenderComponent::draw(TransformComponent* xfm, CameraComponent* camera)
+void RenderComponent::draw(TransformComponent *xfm, CameraComponent *camera)
 {
 	Mat4 view = camera->worldToViewMatrix();
 

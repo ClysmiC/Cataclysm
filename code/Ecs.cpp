@@ -118,6 +118,18 @@ Ecs::getCameraComponent(Entity e)
 	return cameras.getComponent(e);
 }
 
+PortalComponent*
+Ecs::addPortalComponent(Entity e)
+{
+	return portals.addComponent(e, this);
+}
+
+PortalComponent*
+Ecs::getPortalComponent(Entity e)
+{
+	return portals.getComponent(e);
+}
+
 PointLightComponent*
 Ecs::addPointLightComponent(Entity e)
 {
@@ -167,7 +179,15 @@ Ecs::getRenderComponents(Entity e)
 }
 
 void
-Ecs::renderAllRenderComponents(CameraComponent* camera)
+Ecs::renderContentsOfAllPortals(CameraEntity camera)
+{
+	// 1. Render the portal rectangles to the stencil buffer
+	// 2. Render the scenes that the portals are looking into
+	//    but only where the the stencil is set from 1
+}
+
+void
+Ecs::renderAllRenderComponents(CameraEntity camera)
 {
 	for (uint32 i = 0; i < renderComponents.size; i++)
 	{
@@ -194,7 +214,7 @@ Ecs::renderAllRenderComponents(CameraComponent* camera)
 			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
 		}
 
-		rc.draw(xfm, camera);
+		rc.draw(xfm, camera.cameraComponent);
 	}
 }
 

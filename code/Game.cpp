@@ -23,7 +23,7 @@ float mouseYPrev;
 real32 deltaTMs;
 
 
-void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
+void updateCamera(CameraEntity camera)
 {
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
 	
@@ -31,9 +31,9 @@ void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 	real32 cameraSpeed = 5;
 	real32 deltaTS = deltaTMs / 1000.0f;
 
-	Vec3 moveRight   = normalize( project(camera->right(), movementPlane) );
+	Vec3 moveRight   = normalize( project(camera.cameraComponent->right(), movementPlane) );
 	Vec3 moveLeft    = normalize( -moveRight );
-	Vec3 moveForward = normalize( project(camera->forward(), movementPlane) );
+	Vec3 moveForward = normalize( project(camera.cameraComponent->forward(), movementPlane) );
 	Vec3 moveBack    = normalize( -moveForward );
 	
 	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
@@ -46,11 +46,11 @@ void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 		deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
 		deltaYawAndPitch = axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS) * deltaYawAndPitch; // pitch
 
-		cameraXfm->setOrientation(deltaYawAndPitch * cameraXfm->orientation());
+		camera.transformComponent->setOrientation(deltaYawAndPitch * camera.transformComponent->orientation());
 	}
 
 	// Translate
-	Vec3 position = cameraXfm->position();
+	Vec3 position = camera.transformComponent->position();
 
 	
 	if (keys[GLFW_KEY_W])
@@ -71,7 +71,7 @@ void updateCamera(CameraComponent* camera, TransformComponent* cameraXfm)
 		position += moveRight * cameraSpeed * deltaTS;
 	}
 
-	cameraXfm->setPosition(position);
+	camera.transformComponent->setPosition(position);
 }
 
 
@@ -89,12 +89,15 @@ int WinMain()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_CULL_FACE);
-	// glCullFace(GL_BACK);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glStencilMask(0xFF);
 
 	ResourceManager::instance().init();
 	
-	Mesh *mesh = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
+	// Mesh *mesh = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
+	Mesh *hexMesh = ResourceManager::instance().initMesh("hex/hex.obj", true, true);
 	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
 	
 	real32 lastTimeMs = 0;
@@ -102,30 +105,35 @@ int WinMain()
 	Scene scene;
 	
 	// Set up camera
+	
 	Entity camera = scene.ecs->makeEntity();
+	{
+		TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
+		CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
+		cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+		cameraComponent->isOrthographic = false;
+	}
 	
-	TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
-	CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
-	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-	cameraComponent->isOrthographic = false;
+	CameraEntity cameraEntity(camera);
 
-	DebugDraw::instance().init(camera);
+
+	// DebugDraw::instance().init(camera);
 	
-    Entity test = scene.ecs->makeEntity();
-    // Set up test mesh
-    {
-        TransformComponent *tc = scene.ecs->addTransformComponent(test);
-        tc->setPosition(0, -2, -5);
-		// tc->setScale(0.25);
+    // Entity test = scene.ecs->makeEntity();
+    // // Set up test mesh
+    // {
+    //     TransformComponent *tc = scene.ecs->addTransformComponent(test);
+    //     tc->setPosition(0, -2, -5);
+	// 	// tc->setScale(0.25);
 		
-        ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(test, mesh->submeshes.size());
+    //     ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(test, mesh->submeshes.size());
 
-        for(uint32 i = 0; i < rcc.numComponents; i++)
-        {
-            RenderComponent *rc = rcc.components + i;
-            rc->init(mesh->submeshes[i]);
-        }
-    }
+    //     for(uint32 i = 0; i < rcc.numComponents; i++)
+    //     {
+    //         RenderComponent *rc = rcc.components + i;
+    //         rc->init(mesh->submeshes[i]);
+    //     }
+    // }
 	
 	Entity light = scene.ecs->makeEntity();
 	// Set up light
@@ -147,7 +155,7 @@ int WinMain()
         }
 
 		PointLightComponent *plc = scene.ecs->addPointLightComponent(light);
-		plc->intensity = Vec3(5, 5, 5);
+		plc->intensity = Vec3(1, 1, 1);
 
 		rm.initMaterial("", "bulbMaterial", true);
 		rm.initShader("shader/light.vert", "shader/light.frag", true);
@@ -163,17 +171,38 @@ int WinMain()
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
 	scene.addCubemap(cm);
 
+	Vec3 hexPositions[4];
+	hexPositions[0] = Vec3(-9, 8, -15);
+	hexPositions[1] = Vec3(3, 0, -20);
+	hexPositions[2] = Vec3(-18, -12, -40);
+	hexPositions[3] = Vec3(6, 5, -30);
+
+	for (uint32 i = 0; i < 4; i++)
+	{
+		Entity e = scene.ecs->makeEntity();
+		TransformComponent *tc = scene.ecs->addTransformComponent(e);
+		tc->setPosition(hexPositions[i]);
+		
+		ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(e, hexMesh->submeshes.size());
+
+		for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
+		{
+			RenderComponent *rc = rcc.components + j;
+			rc->init(hexMesh->submeshes[j]);
+		}
+	}
+
 	auto v = glGetError();
 
 	TransformComponent *lightXfm = scene.ecs->getTransformComponent(light);
-    TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
+    // TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
 
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
 		glfwPollEvents();
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		real32 timeS = glfwGetTime();
 		real32 timeMs = timeS * 1000.0f;
@@ -181,10 +210,10 @@ int WinMain()
 		lastTimeMs = timeMs;
 
 		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
-		updateCamera(cameraComponent, cameraXfm);
+		updateCamera(cameraEntity);
 
-		scene.renderScene(cameraComponent);
-		DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
+		scene.renderScene(cameraEntity);
+		// DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);
 

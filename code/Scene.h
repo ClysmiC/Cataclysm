@@ -12,6 +12,6 @@ struct Scene
 
 	Scene();
 
-	void renderScene(CameraComponent* cameraComponent);
+	void renderScene(CameraEntity camera);
 	void addCubemap(Cubemap* cubemap);
 };
