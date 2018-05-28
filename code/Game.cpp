@@ -35,6 +35,11 @@ void updateCamera(CameraEntity camera)
 	Vec3 moveLeft    = normalize( -moveRight );
 	Vec3 moveForward = normalize( project(camera.cameraComponent->forward(), movementPlane) );
 	Vec3 moveBack    = normalize( -moveForward );
+
+	assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
 	
 	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
 	{
@@ -44,9 +49,14 @@ void updateCamera(CameraEntity camera)
 
 		Quaternion deltaYawAndPitch;
 		deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-		deltaYawAndPitch = axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS) * deltaYawAndPitch; // pitch
+		deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS); // pitch
 
+
+		Quaternion oldOrientation = camera.transformComponent->orientation();
 		camera.transformComponent->setOrientation(deltaYawAndPitch * camera.transformComponent->orientation());
+
+		float camRightY = camera.cameraComponent->right().y;
+		assert(FLOAT_EQ(camRightY, 0, EPSILON));
 	}
 
 	// Translate
