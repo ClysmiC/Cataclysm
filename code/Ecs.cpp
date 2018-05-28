@@ -1,6 +1,7 @@
 #include "GL/glew.h"
 
 #include "Ecs.h"
+#include "Scene.h"
 #include "assert.h"
 
 uint32 Ecs::nextEntityId = 1;
@@ -187,28 +188,45 @@ Ecs::renderContentsOfAllPortals(CameraEntity camera)
 	// 2. Render the scenes that the portals are looking into
 	//    but only where the the stencil is set from 1
 
+
 	for (uint32 i = 0; i < portals.size; i++)
 	{
+		//
+		// Render to stencil
+		//
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		
 		PortalComponent &pc = portals.components[i];
 		TransformComponent* xfm = getTransformComponent(pc.entity);
 		Shader* portalShader = PortalComponent::shader();
 		uint32 portalVao = PortalComponent::quadVao();
 
-		//m, v, p, debugColor
-
 		Mat4 model = xfm->matrix();
 		Mat4 view = camera.cameraComponent->worldToViewMatrix();
 		Mat4 projection = camera.cameraComponent->projectionMatrix;
 
+		auto v = glGetError();
+		
 		portalShader->bind();
 		portalShader->setMat4("model", model);
 		portalShader->setMat4("view", view);
 		portalShader->setMat4("projection", projection);
 		portalShader->setVec3("debugColor", Vec3(0, 1, 0));
-		
+
 		glBindVertexArray(pc.quadVao());
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
+
+		//
+		// Render from portal camera
+		//
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+
+		pc.connectedScene->ecs->renderAllRenderComponents(pc.cameraIntoConnectedScene);
+		
+		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }
 

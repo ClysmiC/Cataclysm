@@ -89,10 +89,10 @@ int WinMain()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
+	// glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glStencilMask(0xFF);
+	// glStencilMask(0xFF);
 
 	ResourceManager::instance().init();
 	
@@ -215,7 +215,7 @@ int WinMain()
 		tc->setPosition(Vec3(0, 0, -5));
 		
 		PortalComponent* pc = scene.ecs->addPortalComponent(portal);
-		pc->dimensions = Vec2(1, 3);
+		pc->setDimensions(Vec2(1, 6));
 		pc->connectedScene = &scene;
 		pc->cameraIntoConnectedScene = portalCameraEntity;
 	}
@@ -224,7 +224,7 @@ int WinMain()
 	{
 		glfwPollEvents();
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_STENCIL_BUFFER_BIT);
 
 		real32 timeS = glfwGetTime();
 		real32 timeMs = timeS * 1000.0f;

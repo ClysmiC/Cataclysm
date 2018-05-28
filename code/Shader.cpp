@@ -108,6 +108,12 @@ bool Shader::load()
     vShaderStream << vStream.rdbuf();
     fShaderStream << fStream.rdbuf();
 
+    if (vStream.fail() || fStream.fail())
+    {
+        assert(false);
+        return false;
+    }
+
     vertexCode = vShaderStream.str();
     fragmentCode = fShaderStream.str();
 
@@ -131,7 +137,7 @@ bool Shader::load()
             glGetShaderInfoLog(vertex, 1024, NULL, infoLog);
             __debugbreak(); // check infoLog variable
 
-            false;
+            return false;
         }
     }
 
@@ -150,7 +156,7 @@ bool Shader::load()
             glGetShaderInfoLog(fragment, 1024, NULL, infoLog);
             __debugbreak(); // check infoLog variable
 
-            false;
+            return false;
         }
     }
 
@@ -171,7 +177,7 @@ bool Shader::load()
             glGetProgramInfoLog(openGlHandle, 1024, NULL, infoLog);
             __debugbreak(); // check infoLog variable
 
-            false;
+            return false;
         }
     }
 

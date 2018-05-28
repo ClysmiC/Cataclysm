@@ -16,11 +16,14 @@ struct PortalComponent : public Component
 	
 	PortalComponent();
 
-	Vec2 dimensions;
+	Vec2 getDimensions();
+	void setDimensions(Vec2 dim);
+
 	Scene *connectedScene;
 	CameraEntity cameraIntoConnectedScene;
 
 private:
+	Vec2 dimensions;
 	static void initQuadVboAndVao();
 	static uint32 quadVbo_;
 	static uint32 quadVao_;
