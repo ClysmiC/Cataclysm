@@ -18,5 +18,6 @@ Scene::renderScene(CameraEntity camera)
 {
 	if (cubemap != nullptr) cubemap->render(camera);
 
+	ecs->renderContentsOfAllPortals(camera);
 	ecs->renderAllRenderComponents(camera);
 }

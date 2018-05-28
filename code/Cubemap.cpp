@@ -5,11 +5,9 @@
 
 #include "GL/glew.h"
 
-bool GlobalCubemapInfo::isInited = false;
-Shader *GlobalCubemapInfo::shader = nullptr;
-uint32 GlobalCubemapInfo::vao = 0;
-uint32 GlobalCubemapInfo::vbo = 0;
-real32 GlobalCubemapInfo::vertices[] = {
+uint32 Cubemap::vao_ = 0;
+uint32 Cubemap::vbo_ = 0;
+real32 Cubemap::vertices[] = {
 	// positions          
 	-1.0f,  1.0f, -1.0f,
 	-1.0f, -1.0f, -1.0f,
@@ -54,30 +52,57 @@ real32 GlobalCubemapInfo::vertices[] = {
 	1.0f, -1.0f,  1.0f
 };
 
-void
-GlobalCubemapInfo::init()
+uint32
+Cubemap::vao()
 {
-	if (isInited) return;
-
-	isInited = true;
-
-	ResourceManager& rm = ResourceManager::instance();
-	shader = rm.initShader("shader/cubemap.vert", "shader/cubemap.frag", true);
+	if (vao_ == 0 || vbo_ == 0)
+	{
+		initVboAndVao();
+	}
 	
-	glGenBuffers(1, &vbo);
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	return vao_;
+}
+
+uint32
+Cubemap::vbo()
+{
+	if (vao_ == 0 || vbo_ == 0)
+	{
+		initVboAndVao();
+	}
+
+	return vbo_;
+}
+
+void
+Cubemap::initVboAndVao()
+{
+	glGenBuffers(1, &vbo_);
+	glGenVertexArrays(1, &vao_);
+	glBindVertexArray(vao_);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
 }
 
+Shader*
+Cubemap::shader()
+{
+	static Shader* theShader = nullptr;
+
+	if (theShader == nullptr)
+	{
+		ResourceManager& rm = ResourceManager::instance();
+		theShader = rm.initShader("shader/cubemap.vert", "shader/cubemap.frag", true);
+	}
+
+	return theShader;
+}
+
 void
 Cubemap::init(const std::string& directory, const std::string& extension_)
 {
-	GlobalCubemapInfo::init();
-	
 	this->id = directory;
 	this->extension = extension_;
 }
@@ -145,15 +170,15 @@ Cubemap::render(CameraEntity camera)
 	Mat4 view = camera.cameraComponent->worldToViewMatrix();
 	Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
 
-	Shader *shader = GlobalCubemapInfo::shader;
-	shader->bind();
+	Shader *s = shader();
+	s->bind();
 			
 	glActiveTexture(GL_TEXTURE0);
-	shader->setInt("cubemap", 0);
-	shader->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
+	s->setInt("cubemap", 0);
+	s->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
 
 	glDepthMask(GL_FALSE);
-	glBindVertexArray(GlobalCubemapInfo::vao);
+	glBindVertexArray(vao());
 	glBindTexture(GL_TEXTURE_CUBE_MAP, openGlHandle);
 			
 	glDrawArrays(GL_TRIANGLES, 0, 36);

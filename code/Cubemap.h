@@ -6,19 +6,13 @@
 
 #include "CameraComponent.h"
 
-struct GlobalCubemapInfo
-{
-	static bool isInited;
-	static void init();
-	
-	static Shader* shader;
-	static uint32 vao;
-	static uint32 vbo;
-	static real32 vertices[];
-};
-
 struct Cubemap
 {
+	static real32 vertices[];
+	static uint32 vao();
+	static uint32 vbo();
+	static Shader* shader();
+	
 	void init(const std::string& directory, const std::string& extension);
 
 	bool load();
@@ -32,4 +26,9 @@ struct Cubemap
 	uint32 openGlHandle;
 
 	void render(CameraEntity camera);
+
+private:
+	static void initVboAndVao();
+	static uint32 vbo_;
+	static uint32 vao_;
 };

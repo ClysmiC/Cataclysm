@@ -1,3 +1,5 @@
+#include "GL/glew.h"
+
 #include "Ecs.h"
 #include "assert.h"
 
@@ -184,6 +186,30 @@ Ecs::renderContentsOfAllPortals(CameraEntity camera)
 	// 1. Render the portal rectangles to the stencil buffer
 	// 2. Render the scenes that the portals are looking into
 	//    but only where the the stencil is set from 1
+
+	for (uint32 i = 0; i < portals.size; i++)
+	{
+		PortalComponent &pc = portals.components[i];
+		TransformComponent* xfm = getTransformComponent(pc.entity);
+		Shader* portalShader = PortalComponent::shader();
+		uint32 portalVao = PortalComponent::quadVao();
+
+		//m, v, p, debugColor
+
+		Mat4 model = xfm->matrix();
+		Mat4 view = camera.cameraComponent->worldToViewMatrix();
+		Mat4 projection = camera.cameraComponent->projectionMatrix;
+
+		portalShader->bind();
+		portalShader->setMat4("model", model);
+		portalShader->setMat4("view", view);
+		portalShader->setMat4("projection", projection);
+		portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+		
+		glBindVertexArray(pc.quadVao());
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+	}
 }
 
 void
@@ -206,6 +232,7 @@ Ecs::renderAllRenderComponents(CameraEntity camera)
 			TransformComponent* plXfm = getTransformComponent(pl->entity);
 
 			Shader* shader = rc.material->shader;
+			shader->bind();
 			
 			shader->setVec3("pointLights[0].posWorld", plXfm->position());
 			shader->setVec3("pointLights[0].intensity", pl->intensity);

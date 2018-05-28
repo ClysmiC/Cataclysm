@@ -197,6 +197,28 @@ int WinMain()
 	TransformComponent *lightXfm = scene.ecs->getTransformComponent(light);
     // TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
 
+	{
+		Entity portalCamera = scene.ecs->makeEntity();
+		TransformComponent* portalCameraXfm = scene.ecs->addTransformComponent(portalCamera);
+		CameraComponent* portalCameraComponent = scene.ecs->addCameraComponent(portalCamera);
+
+		CameraEntity portalCameraEntity(portalCamera);
+
+		portalCameraXfm->setPosition(Vec3(0, 0, -15));
+		portalCameraXfm->setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+		
+		portalCameraComponent->isOrthographic = false;
+		portalCameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+		
+		Entity portal = scene.ecs->makeEntity();
+		TransformComponent* tc = scene.ecs->addTransformComponent(portal);
+		tc->setPosition(Vec3(0, 0, -5));
+		
+		PortalComponent* pc = scene.ecs->addPortalComponent(portal);
+		pc->dimensions = Vec2(1, 3);
+		pc->connectedScene = &scene;
+		pc->cameraIntoConnectedScene = portalCameraEntity;
+	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
