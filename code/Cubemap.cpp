@@ -162,13 +162,10 @@ Cubemap::unload()
 }
 
 void
-Cubemap::render(CameraEntity camera)
+Cubemap::render(CameraComponent* camera, TransformComponent* cameraXfm)
 {
-	Mat4 projection;
-	projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-
-	Mat4 view = camera.cameraComponent->worldToViewMatrix();
-	Mat4 viewProjectionSansTranslation = projection * view.mat3ifyInPlace();
+	Mat4 w2v = cameraXfm->worldToView();
+	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * w2v.mat3ifyInPlace();
 
 	Shader *s = shader();
 	s->bind();

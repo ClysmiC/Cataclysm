@@ -127,21 +127,21 @@ void
 DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions)
 {
 	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
-	Mat4 transform;
-	transform.scaleInPlace(dimensions);
-	transform.translateInPlace(center);
+	// Mat4 transform;
+	// transform.scaleInPlace(dimensions);
+	// transform.translateInPlace(center);
 
-	Mat4 view = camera->worldToViewMatrix(); // TODO: pull this from the camera
+	// Mat4 view = camera->worldToViewMatrix(); // TODO: pull this from the camera
 	
-	shader->bind();
-	shader->setMat4("model", transform);
-	shader->setMat4("view", view);
-	shader->setMat4("projection", camera->projectionMatrix);
-	shader->setVec3("debugColor", color);
+	// shader->bind();
+	// shader->setMat4("model", transform);
+	// shader->setMat4("view", view);
+	// shader->setMat4("projection", camera->projectionMatrix);
+	// shader->setVec3("debugColor", color);
 
-	glBindVertexArray(vao);
-	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	// glBindVertexArray(vao);
+	// glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+	// glBindVertexArray(0);
 }
 
 void

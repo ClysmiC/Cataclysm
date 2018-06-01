@@ -8,10 +8,9 @@ struct Scene
 {
 	Ecs* ecs;
 	Cubemap* cubemap;
-	// Entity sceneEntity;
-
+	
 	Scene();
 
-	void renderScene(CameraEntity camera);
+	void renderScene(CameraComponent* camera, TransformComponent* cameraXfm);
 	void addCubemap(Cubemap* cubemap);
 };

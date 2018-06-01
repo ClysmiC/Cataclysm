@@ -14,5 +14,5 @@ struct RenderComponent : public Component
 	// TODO: can we copy a non-canonical set of the needed data here?
 	Material* material;
 
-	void draw(TransformComponent *xfm, CameraComponent *camera);
+	void draw(TransformComponent *xfm,  CameraComponent* camera, TransformComponent *cameraXfm);
 };

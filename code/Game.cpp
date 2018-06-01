@@ -12,6 +12,8 @@
 #include "Mesh.h"
 #include "GL/glew.h"
 
+#include "DebugGlobal.h"
+
 bool keys[1024];
 bool lastKeys[1024];
 
@@ -22,8 +24,15 @@ float mouseYPrev;
 
 real32 deltaTMs;
 
+void updateLastKeys()
+{
+	for (uint32 i = 0; i < 1024; i++)
+	{
+		lastKeys[i] = keys[i];
+	}
+}
 
-void updateCamera(CameraEntity camera)
+void updateCameraXfm(TransformComponent* xfm)
 {
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
 	
@@ -31,9 +40,9 @@ void updateCamera(CameraEntity camera)
 	real32 cameraSpeed = 5;
 	real32 deltaTS = deltaTMs / 1000.0f;
 
-	Vec3 moveRight   = normalize( project(camera.cameraComponent->right(), movementPlane) );
+	Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
 	Vec3 moveLeft    = normalize( -moveRight );
-	Vec3 moveForward = normalize( project(camera.cameraComponent->forward(), movementPlane) );
+	Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
 	Vec3 moveBack    = normalize( -moveForward );
 
 	assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
@@ -52,15 +61,15 @@ void updateCamera(CameraEntity camera)
 		deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS); // pitch
 
 
-		Quaternion oldOrientation = camera.transformComponent->orientation();
-		camera.transformComponent->setOrientation(deltaYawAndPitch * camera.transformComponent->orientation());
+		Quaternion oldOrientation = xfm->orientation();
+		xfm->setOrientation(deltaYawAndPitch * xfm->orientation());
 
-		float camRightY = camera.cameraComponent->right().y;
+		float camRightY = xfm->right().y;
 		assert(FLOAT_EQ(camRightY, 0, EPSILON));
 	}
 
 	// Translate
-	Vec3 position = camera.transformComponent->position();
+	Vec3 position = xfm->position();
 
 	
 	if (keys[GLFW_KEY_W])
@@ -81,7 +90,7 @@ void updateCamera(CameraEntity camera)
 		position += moveRight * cameraSpeed * deltaTS;
 	}
 
-	camera.transformComponent->setPosition(position);
+	xfm->setPosition(position);
 }
 
 
@@ -99,10 +108,8 @@ int WinMain()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	// glStencilMask(0xFF);
 
 	ResourceManager::instance().init();
 	
@@ -117,15 +124,10 @@ int WinMain()
 	// Set up camera
 	
 	Entity camera = scene.ecs->makeEntity();
-	{
-		TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
-		CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
-		cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-		cameraComponent->isOrthographic = false;
-	}
-	
-	CameraEntity cameraEntity(camera);
-
+	TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
+	CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
+	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+	cameraComponent->isOrthographic = false;
 
 	// DebugDraw::instance().init(camera);
 	
@@ -208,26 +210,17 @@ int WinMain()
     // TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
 
 	{
-		Entity portalCamera = scene.ecs->makeEntity();
-		TransformComponent* portalCameraXfm = scene.ecs->addTransformComponent(portalCamera);
-		CameraComponent* portalCameraComponent = scene.ecs->addCameraComponent(portalCamera);
-
-		CameraEntity portalCameraEntity(portalCamera);
-
-		portalCameraXfm->setPosition(Vec3(0, 0, -15));
-		portalCameraXfm->setOrientation(axisAngle(Vec3(0, 1, 0), 180));
-		
-		portalCameraComponent->isOrthographic = false;
-		portalCameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-		
 		Entity portal = scene.ecs->makeEntity();
-		TransformComponent* tc = scene.ecs->addTransformComponent(portal);
-		tc->setPosition(Vec3(0, 0, -5));
 		
 		PortalComponent* pc = scene.ecs->addPortalComponent(portal);
 		pc->setDimensions(Vec2(1, 6));
-		pc->connectedScene = &scene;
-		pc->cameraIntoConnectedScene = portalCameraEntity;
+		pc->destScene = &scene;
+
+		pc->sourceSceneXfm.setPosition(Vec3(0, 0, -5));
+		pc->sourceSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+
+		pc->destSceneXfm.setPosition(Vec3(0, 0, -15));
+		pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
 	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
@@ -242,15 +235,22 @@ int WinMain()
 		lastTimeMs = timeMs;
 
 		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
-		updateCamera(cameraEntity);
+		updateCameraXfm(cameraXfm);
 
-		scene.renderScene(cameraEntity);
+		if (keys[GLFW_KEY_1] && !lastKeys[GLFW_KEY_1])
+		{
+			debug_hidePortalContents = !debug_hidePortalContents;
+		}
+
+		scene.renderScene(cameraComponent, cameraXfm);
 		// DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
 
 		glfwSwapBuffers(window.glfwWindow);
 
 		mouseXPrev = mouseX;
 		mouseYPrev = mouseY;
+
+		updateLastKeys();
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(33));
 	}

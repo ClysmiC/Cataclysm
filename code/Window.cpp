@@ -20,8 +20,7 @@ void Window::glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, i
 	{
 		keys[key] = true;
 	}
-
-	if (action == GLFW_RELEASE)
+	else if (action == GLFW_RELEASE)
 	{
 		keys[key] = false;
 	}

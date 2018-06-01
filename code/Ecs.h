@@ -16,6 +16,8 @@
 // maybe each component type gets its own constant
 #define COMPONENT_ARRAY_SIZE 512
 
+struct Scene;
+
 struct Ecs
 {
 	
@@ -36,6 +38,7 @@ private:
 
 	
 public:
+	Scene* scene;
 	
     Ecs();
 
@@ -61,8 +64,8 @@ public:
 	ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents);
 	ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 
-	void renderAllRenderComponents(CameraEntity camera);
-	void renderContentsOfAllPortals(CameraEntity camera);
+	void renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm);
+	void renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm);
 	
 	PointLightComponent* closestPointLight(TransformComponent* xfm);
 

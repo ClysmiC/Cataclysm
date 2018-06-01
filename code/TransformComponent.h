@@ -27,18 +27,19 @@ struct TransformComponent : public Component
 	void setScale(real32 uniformScale);
 	void setScale(real32 x, real32 y, real32 z);
 	
-	Mat4 matrix();
+	Mat4 modelToWorld();
+	Mat4 worldToView();
 
 	inline Vec3 left()
 	{
-		Vec3 result = orientation_ * Vec3(1, 0, 0);
+		Vec3 result = orientation_ * Vec3(-1, 0, 0);
 		assert(FLOAT_EQ(length(result), 1, EPSILON));
 		return result;
 	}
 
 	inline Vec3 right()
 	{
-		Vec3 result = orientation_ * Vec3(-1, 0, 0);
+		Vec3 result = orientation_ * Vec3(1, 0, 0);
 		assert(FLOAT_EQ(length(result), 1, EPSILON));
 		return result;
 	}
@@ -59,22 +60,23 @@ struct TransformComponent : public Component
 
 	inline Vec3 forward()
 	{
-		Vec3 result = orientation_ * Vec3(0, 0, 1);
+		Vec3 result = orientation_ * Vec3(0, 0, -1);
 		assert(FLOAT_EQ(length(result), 1, EPSILON));
 		return result;
 	}
 
 	inline Vec3 back()
 	{
-		Vec3 result = orientation_ * Vec3(0, 0, -1);
+		Vec3 result = orientation_ * Vec3(0, 0, 1);
 		assert(FLOAT_EQ(length(result), 1, EPSILON));
 		return result;
 	}
 
 private:
-	Mat4 matrix_;
+	bool m2wCacheValid;
+	Mat4 modelToWorldMatrix_;
+	
 	Vec3 position_;
 	Quaternion orientation_;
 	Vec3 scale_;
-	bool cacheValid;
 };

@@ -25,7 +25,7 @@ struct Cubemap
 
 	uint32 openGlHandle;
 
-	void render(CameraEntity camera);
+	void render(CameraComponent* camera, TransformComponent* cameraXfm);
 
 private:
 	static void initVboAndVao();

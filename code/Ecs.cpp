@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "assert.h"
 
+#include "DebugGlobal.h"
+
 uint32 Ecs::nextEntityId = 1;
 
 Ecs::Ecs()
@@ -182,7 +184,7 @@ Ecs::getRenderComponents(Entity e)
 }
 
 void
-Ecs::renderContentsOfAllPortals(CameraEntity camera)
+Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	// 1. Render the portal rectangles to the stencil buffer
 	// 2. Render the scenes that the portals are looking into
@@ -192,46 +194,104 @@ Ecs::renderContentsOfAllPortals(CameraEntity camera)
 	for (uint32 i = 0; i < portals.size; i++)
 	{
 		//
-		// Render to stencil
+		// Calculate the position and orientation of the camera sitting in the dest scene and looking "through" the portal
+		// into the dest scene.
 		//
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
-		
 		PortalComponent &pc = portals.components[i];
-		TransformComponent* xfm = getTransformComponent(pc.entity);
-		Shader* portalShader = PortalComponent::shader();
-		uint32 portalVao = PortalComponent::quadVao();
 
-		Mat4 model = xfm->matrix();
-		Mat4 view = camera.cameraComponent->worldToViewMatrix();
-		Mat4 projection = camera.cameraComponent->projectionMatrix;
+		Vec3 eyeToPortal = pc.sourceSceneXfm.position() - cameraXfm->position();
 
-		auto v = glGetError();
+		Quaternion intoSourcePortalOrientation = axisAngle(pc.sourceSceneXfm.up(), 180) * pc.sourceSceneXfm.orientation();
+		Quaternion outOfDestPortalOrientation = pc.destSceneXfm.orientation();
+
+		Quaternion transitionFromSourceToDest = relativeRotation(intoSourcePortalOrientation, outOfDestPortalOrientation);
 		
-		portalShader->bind();
-		portalShader->setMat4("model", model);
-		portalShader->setMat4("view", view);
-		portalShader->setMat4("projection", projection);
-		portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+		Vec3 transformedEyeToPortal = transitionFromSourceToDest * eyeToPortal;
+		Vec3 portalViewpointPos = pc.destSceneXfm.position() - transformedEyeToPortal;
 
-		glBindVertexArray(pc.quadVao());
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
+		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation();
+		
+		TransformComponent portalViewpointXfm(portalViewpointPos, portalViewpointOrientation);
 
-		//
-		// Render from portal camera
-		//
-		glStencilFunc(GL_EQUAL, 1, 0xFF);
-		glStencilMask(0x00);
+		glEnable(GL_STENCIL_TEST);
+		{
+		
+			//
+			// Render the portal in the source scene and write to stencil buffer
+			//
+			{
+				//
+				// Render to stencil
+				//
+				glStencilFunc(GL_ALWAYS, 1, 0xFF);
+				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilMask(0xFF);
+			
+				Shader* portalShader = PortalComponent::shader();
+				uint32 portalVao = PortalComponent::quadVao();
 
-		pc.connectedScene->ecs->renderAllRenderComponents(pc.cameraIntoConnectedScene);
+				Mat4 model = pc.sourceSceneXfm.modelToWorld();
+				Mat4 view = cameraXfm->worldToView();
+				Mat4 projection = camera->projectionMatrix;
+
+				portalShader->bind();
+				portalShader->setMat4("model", model);
+				portalShader->setMat4("view", view);
+				portalShader->setMat4("projection", projection);
+				portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+
+				glBindVertexArray(pc.quadVao());
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glBindVertexArray(0);
+			}
+
+			// (DEBUG)
+			// Render the portal in the dest scene (if it is the same)
+			// as the source scene
+			//
+			if (pc.destScene == pc.ecs->scene)
+			{
+				Shader* portalShader = PortalComponent::shader();
+				uint32 portalVao = PortalComponent::quadVao();
+
+				Mat4 model = pc.destSceneXfm.modelToWorld();
+				Mat4 view = cameraXfm->worldToView();
+				Mat4 projection = camera->projectionMatrix;
+
+				portalShader->bind();
+				portalShader->setMat4("model", model);
+				portalShader->setMat4("view", view);
+				portalShader->setMat4("projection", projection);
+				portalShader->setVec3("debugColor", Vec3(1, 0, 0));
+
+				glBindVertexArray(pc.quadVao());
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glBindVertexArray(0);
+			}
+
+		
+
+			//
+			// Render from portal camera
+			//
+			{
+				glStencilFunc(GL_EQUAL, 1, 0xFF);
+				glStencilMask(0x00);
+		
+				if (!debug_hidePortalContents)
+				{
+					pc.destScene->ecs->renderAllRenderComponents(camera, &portalViewpointXfm);
+				}
+			}
+		}
+		glDisable(GL_STENCIL_TEST);
 		
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }
 
 void
-Ecs::renderAllRenderComponents(CameraEntity camera)
+Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	for (uint32 i = 0; i < renderComponents.size; i++)
 	{
@@ -259,7 +319,7 @@ Ecs::renderAllRenderComponents(CameraEntity camera)
 			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
 		}
 
-		rc.draw(xfm, camera.cameraComponent);
+		rc.draw(xfm, camera, cameraXfm);
 	}
 }
 

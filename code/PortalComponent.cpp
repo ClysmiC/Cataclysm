@@ -11,12 +11,12 @@ uint32 PortalComponent::quadVao_ = 0;
 real32 PortalComponent::quadVertices[] = {
 	// positions          
 	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
 	 0.5f,  0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
 
 	-0.5f, -0.5f, 0.0f,
-	 0.5f,  0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f
+	-0.5f,  0.5f, 0.0f,
+	 0.5f,  0.5f, 0.0f
 };
 
 Shader*
@@ -76,12 +76,9 @@ PortalComponent::getDimensions()
 void
 PortalComponent::setDimensions(Vec2 dim)
 {
-	TransformComponent* tc = ecs->getTransformComponent(entity);
 
-	if (tc != nullptr)
-	{
-		tc->setScale(dim.x, dim.y, 1);
-	}
+	sourceSceneXfm.setScale(dim.x, dim.y, 1);
+	destSceneXfm.setScale(dim.x, dim.y, 1);
 	
 	dimensions = dim;
 }

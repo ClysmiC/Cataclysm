@@ -168,13 +168,15 @@ Vec3& operator -= (Vec3& vectorA, Vec3 vectorB);
 Vec3& operator -= (Vec3& vector, real32 constant);
 Vec3 operator - (Vec3 vector);
 
-
 Vec3 operator * (real32 scalar, Vec3 vector);
 Vec3 operator * (Vec3 vector, real32 scalar);
 Vec3& operator *= (Vec3& vector, real32 scalar);
 
 Vec3 operator / (Vec3 vector, real32 scalar);
 Vec3& operator /= (Vec3& vector, real32 scalar);
+
+Vec3 operator * (Quaternion quaternion, Vec3 vector);
+Vec3 operator * (Mat3 m, Vec3 v);
 
 // Vec4
 Vec4 operator + (Vec4 vectorA, Vec4 vectorB);
@@ -188,12 +190,13 @@ Vec4& operator -= (Vec4& vectorA, Vec4 vectorB);
 Vec4& operator -= (Vec4& vector, real32 constant);
 Vec4 operator - (Vec4 vector);
 
-
 Vec4 operator * (real32 scalar, Vec4 vector);
 Vec4 operator * (Vec4 vector, real32 scalar);
 Vec4& operator *= (Vec4& vector, real32 scalar);
 Vec4 operator / (Vec4 vector, real32 scalar);
 Vec4& operator /= (Vec4& vector, real32 scalar);
+
+Vec4 operator * (Mat4 m, Vec4 v);
 
 // Quaternion
 Quaternion operator + (Quaternion quatA, Quaternion quatB);
@@ -207,12 +210,21 @@ Quaternion& operator -= (Quaternion& quatA, Quaternion quatB);
 Quaternion& operator -= (Quaternion& quat, real32 constant);
 Quaternion operator - (Quaternion quat);
 
-
 Quaternion operator * (real32 scalar, Quaternion quat);
 Quaternion operator * (Quaternion quat, real32 scalar);
 Quaternion& operator *= (Quaternion& quat, real32 scalar);
 Quaternion operator / (Quaternion quat, real32 scalar);
 Quaternion& operator /= (Quaternion& quat, real32 scalar);
+
+Quaternion operator * (Quaternion a, Quaternion b);
+Quaternion lookRotation(Vec3 forward, Vec3 up);
+
+// Mat
+Mat3 operator * (Mat3 left, Mat3 right);
+Mat4 operator * (Mat4 left, Mat4 right);
+
+
+
 
 //
 // FUNCTIONS
@@ -346,6 +358,16 @@ inline Quaternion inverse(Quaternion q)
 inline Quaternion normalize(Quaternion q)
 {
 	Quaternion result = q / length(q);
+	return result;
+}
+inline Quaternion relativeRotation(Quaternion start, Quaternion end)
+{
+	// NOTE: Returns the quaternion needed to transition something from orientation 'start'
+	//       to orientation 'end'
+	Quaternion result;
+
+	result = end * inverse(start);
+
 	return result;
 }
 inline bool equals(Quaternion quatA, Quaternion quatB)
@@ -630,24 +652,6 @@ inline Quaternion rotateVector(Vec3 initial, Vec3 target)
 	return result;
 }
 
-
-
-
-
-
-Quaternion lookRotation(Vec3 forward, Vec3 up);
-
-Mat3 operator * (Mat3 left, Mat3 right);
-
-Mat4 operator * (Mat4 left, Mat4 right);
-
-Vec3 operator * (Mat3 m, Vec3 v);
-
-Vec4 operator * (Mat4 m, Vec4 v);
-
-Quaternion operator * (Quaternion a, Quaternion b);
-
-Vec3 operator * (Quaternion quaternion, Vec3 vector);
 
 
 inline Mat3 transposeOf(Mat3 m)

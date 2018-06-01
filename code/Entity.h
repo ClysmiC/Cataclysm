@@ -14,20 +14,4 @@ struct Entity
     Ecs* ecs;
 };
 
-//
-// Below are some common entity "bundles"
-// Nothing enforces that they actually have these pointers
-// set to valid values, they are simply defined to make
-// code more understandable
-//
-struct CameraEntity : public Entity
-{
-	CameraEntity();
-	CameraEntity(Entity entity);
-
-	void init(Entity entity);
-	
-	TransformComponent *transformComponent = nullptr;
-	CameraComponent *cameraComponent = nullptr;
-};
 

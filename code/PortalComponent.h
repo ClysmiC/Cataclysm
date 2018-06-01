@@ -2,6 +2,7 @@
 
 #include "Component.h"
 #include "als_math.h"
+#include "TransformComponent.h"
 
 struct Scene;
 struct Shader;
@@ -19,8 +20,9 @@ struct PortalComponent : public Component
 	Vec2 getDimensions();
 	void setDimensions(Vec2 dim);
 
-	Scene *connectedScene;
-	CameraEntity cameraIntoConnectedScene;
+	Scene *destScene;
+	TransformComponent sourceSceneXfm;
+	TransformComponent destSceneXfm;
 
 private:
 	Vec2 dimensions;

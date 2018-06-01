@@ -7,15 +7,14 @@ void RenderComponent::init(const Submesh &submesh)
     material = submesh.material;
 }
 
-void RenderComponent::draw(TransformComponent *xfm, CameraComponent *camera)
+void RenderComponent::draw(TransformComponent *xfm, CameraComponent* camera, TransformComponent *cameraXfm)
 {
-	Mat4 view = camera->worldToViewMatrix();
-
-	Mat4 transform = xfm->matrix();
+	Mat4 m2w = xfm->modelToWorld();
+	Mat4 w2v = cameraXfm->worldToView();
 	
     material->bind();
-    material->shader->setMat4("model", transform);
-    material->shader->setMat4("view", view);
+    material->shader->setMat4("model", m2w);
+    material->shader->setMat4("view", w2v);
     material->shader->setMat4("projection", camera->projectionMatrix);
 
     glBindVertexArray(submeshOpenGlInfo.VAO);

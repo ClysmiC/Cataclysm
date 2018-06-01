@@ -3,8 +3,8 @@
 Scene::Scene()
 {
 	ecs = new Ecs();
+	ecs->scene = this;
 	cubemap = nullptr;
-	// sceneEntity = ecs.makeEntity();
 }
 
 void
@@ -14,10 +14,10 @@ Scene::addCubemap(Cubemap* cubemap_)
 }
 
 void
-Scene::renderScene(CameraEntity camera)
+Scene::renderScene(CameraComponent* camera, TransformComponent* cameraXfm)
 {
-	if (cubemap != nullptr) cubemap->render(camera);
+	if (cubemap != nullptr) cubemap->render(camera, cameraXfm);
 
-	ecs->renderContentsOfAllPortals(camera);
-	ecs->renderAllRenderComponents(camera);
+	ecs->renderContentsOfAllPortals(camera, cameraXfm);
+	ecs->renderAllRenderComponents(camera, cameraXfm);
 }
