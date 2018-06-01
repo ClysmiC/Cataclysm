@@ -219,7 +219,10 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 			//
 			// Render the portal in the source scene and write to stencil buffer
 			//
+			glDepthMask(GL_FALSE);
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 			{
+				
 				//
 				// Render to stencil
 				//
@@ -243,33 +246,10 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				glBindVertexArray(pc.quadVao());
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glBindVertexArray(0);
+
 			}
-
-			// (DEBUG)
-			// Render the portal in the dest scene (if it is the same)
-			// as the source scene
-			//
-			if (pc.destScene == pc.ecs->scene)
-			{
-				Shader* portalShader = PortalComponent::shader();
-				uint32 portalVao = PortalComponent::quadVao();
-
-				Mat4 model = pc.destSceneXfm.modelToWorld();
-				Mat4 view = cameraXfm->worldToView();
-				Mat4 projection = camera->projectionMatrix;
-
-				portalShader->bind();
-				portalShader->setMat4("model", model);
-				portalShader->setMat4("view", view);
-				portalShader->setMat4("projection", projection);
-				portalShader->setVec3("debugColor", Vec3(1, 0, 0));
-
-				glBindVertexArray(pc.quadVao());
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glBindVertexArray(0);
-			}
-
-		
+			glDepthMask(GL_TRUE);
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 			//
 			// Render from portal camera
@@ -280,12 +260,64 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 		
 				if (!debug_hidePortalContents)
 				{
+					glClear(GL_DEPTH_BUFFER_BIT);
 					pc.destScene->ecs->renderAllRenderComponents(camera, &portalViewpointXfm);
 				}
 			}
 		}
 		glDisable(GL_STENCIL_TEST);
-		
+
+		// (DEBUG)
+		// Render the portal in the dest scene (if it is the same)
+		// as the source scene
+		//
+		if (pc.destScene == pc.ecs->scene)
+		{
+			Shader* portalShader = PortalComponent::shader();
+			uint32 portalVao = PortalComponent::quadVao();
+
+			Mat4 model = pc.destSceneXfm.modelToWorld();
+			Mat4 view = cameraXfm->worldToView();
+			Mat4 projection = camera->projectionMatrix;
+
+			portalShader->bind();
+			portalShader->setMat4("model", model);
+			portalShader->setMat4("view", view);
+			portalShader->setMat4("projection", projection);
+			portalShader->setVec3("debugColor", Vec3(1, 0, 0));
+
+			glBindVertexArray(pc.quadVao());
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
+		}
+			
+		//
+		// Render the portal's depth to the depth buffer
+		//
+		glDepthFunc(GL_ALWAYS);
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		{
+			Shader* portalShader = PortalComponent::shader();
+			uint32 portalVao = PortalComponent::quadVao();
+
+			Mat4 model = pc.sourceSceneXfm.modelToWorld();
+			Mat4 view = cameraXfm->worldToView();
+			Mat4 projection = camera->projectionMatrix;
+
+			portalShader->bind();
+			portalShader->setMat4("model", model);
+			portalShader->setMat4("view", view);
+			portalShader->setMat4("projection", projection);
+			portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+
+			glBindVertexArray(pc.quadVao());
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
+		}
+		glDepthFunc(GL_LESS);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }

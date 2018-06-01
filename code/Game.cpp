@@ -183,13 +183,13 @@ int WinMain()
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
 	scene.addCubemap(cm);
 
-	Vec3 hexPositions[4];
-	hexPositions[0] = Vec3(-9, 8, -15);
-	hexPositions[1] = Vec3(3, 0, -20);
-	hexPositions[2] = Vec3(-18, -12, -40);
-	hexPositions[3] = Vec3(6, 5, -30);
+	Vec3 hexPositions[1];
+	// hexPositions[0] = Vec3(-9, 8, -15);
+	// hexPositions[1] = Vec3(3, 0, -20);
+	hexPositions[0] = Vec3(-18, -12, -40);
+	// hexPositions[3] = Vec3(6, 5, -30);
 
-	for (uint32 i = 0; i < 4; i++)
+	for (uint32 i = 0; i < 1; i++)
 	{
 		Entity e = scene.ecs->makeEntity();
 		TransformComponent *tc = scene.ecs->addTransformComponent(e);
@@ -219,15 +219,15 @@ int WinMain()
 		pc->sourceSceneXfm.setPosition(Vec3(0, 0, -5));
 		pc->sourceSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
 
-		pc->destSceneXfm.setPosition(Vec3(0, 0, -15));
-		pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+		pc->destSceneXfm.setPosition(Vec3(-18, -12, -25));
+		// pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
 	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
 		glfwPollEvents();
 		glClearColor(.5f, 0.5f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		real32 timeS = glfwGetTime();
 		real32 timeMs = timeS * 1000.0f;
