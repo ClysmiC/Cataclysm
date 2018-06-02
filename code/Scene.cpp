@@ -14,10 +14,12 @@ Scene::addCubemap(Cubemap* cubemap_)
 }
 
 void
-Scene::renderScene(CameraComponent* camera, TransformComponent* cameraXfm)
+Scene::renderScene(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
 {
+	if (recursionLevel > 3) return;
+	
 	if (cubemap != nullptr) cubemap->render(camera, cameraXfm);
 
-	ecs->renderContentsOfAllPortals(camera, cameraXfm);
-	ecs->renderAllRenderComponents(camera, cameraXfm);
+	ecs->renderContentsOfAllPortals(camera, cameraXfm, recursionLevel);
+	ecs->renderAllRenderComponents(camera, cameraXfm, recursionLevel > 0);
 }

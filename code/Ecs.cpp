@@ -184,7 +184,7 @@ Ecs::getRenderComponents(Entity e)
 }
 
 void
-Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm)
+Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
 {
 	// 1. Render the portal rectangles to the stencil buffer
 	// 2. Render the scenes that the portals are looking into
@@ -200,6 +200,10 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 		PortalComponent &pc = portals.components[i];
 
 		Vec3 eyeToPortal = pc.sourceSceneXfm.position() - cameraXfm->position();
+
+		bool isLookingTowardsPortal = dot(eyeToPortal, pc.sourceSceneXfm.forward()) < 0;
+
+		if (!isLookingTowardsPortal) continue;
 
 		Quaternion intoSourcePortalOrientation = axisAngle(pc.sourceSceneXfm.up(), 180) * pc.sourceSceneXfm.orientation();
 		Quaternion outOfDestPortalOrientation = pc.destSceneXfm.orientation();
@@ -261,7 +265,8 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				if (!debug_hidePortalContents)
 				{
 					glClear(GL_DEPTH_BUFFER_BIT);
-					pc.destScene->ecs->renderAllRenderComponents(camera, &portalViewpointXfm);
+					pc.destScene->renderScene(camera, &portalViewpointXfm, recursionLevel + 1);
+					// pc.destScene->ecs->renderAllRenderComponents(camera, &portalViewpointXfm);
 				}
 			}
 		}
@@ -323,7 +328,7 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 }
 
 void
-Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm)
+Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal)
 {
 	for (uint32 i = 0; i < renderComponents.size; i++)
 	{

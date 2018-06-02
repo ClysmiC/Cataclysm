@@ -15,10 +15,8 @@ DebugDraw::instance()
 }
 
 void
-DebugDraw::init(Entity camera_)
+DebugDraw::init()
 {
-	camera = camera_.ecs->getCameraComponent(camera_);
-	
 	color = Vec3(0, 1, 0);
 
 	shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
@@ -124,24 +122,24 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation)
 }
 
 void
-DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions)
+DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
-	// Mat4 transform;
-	// transform.scaleInPlace(dimensions);
-	// transform.translateInPlace(center);
+	Mat4 transform;
+	transform.scaleInPlace(dimensions);
+	transform.translateInPlace(center);
 
-	// Mat4 view = camera->worldToViewMatrix(); // TODO: pull this from the camera
+	Mat4 view = cameraXfm->worldToView();
 	
-	// shader->bind();
-	// shader->setMat4("model", transform);
-	// shader->setMat4("view", view);
-	// shader->setMat4("projection", camera->projectionMatrix);
-	// shader->setVec3("debugColor", color);
+	shader->bind();
+	shader->setMat4("model", transform);
+	shader->setMat4("view", view);
+	shader->setMat4("projection", camera->projectionMatrix);
+	shader->setVec3("debugColor", color);
 
-	// glBindVertexArray(vao);
-	// glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
-	// glBindVertexArray(0);
+	glBindVertexArray(vao);
+	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 void

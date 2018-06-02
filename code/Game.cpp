@@ -45,6 +45,10 @@ void updateCameraXfm(TransformComponent* xfm)
 	Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
 	Vec3 moveBack    = normalize( -moveForward );
 
+	// Uncomment this (and the asserts) to follow the pitch of the camera when
+	// moving forward or backward.
+	// Vec3 moveForward = normalize(xfm->forward());
+
 	assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
 	assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
 	assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
@@ -129,7 +133,7 @@ int WinMain()
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
-	// DebugDraw::instance().init(camera);
+	DebugDraw::instance().init();
 	
     // Entity test = scene.ecs->makeEntity();
     // // Set up test mesh
@@ -213,14 +217,14 @@ int WinMain()
 		Entity portal = scene.ecs->makeEntity();
 		
 		PortalComponent* pc = scene.ecs->addPortalComponent(portal);
-		pc->setDimensions(Vec2(1, 6));
+		pc->setDimensions(Vec2(2, 3));
 		pc->destScene = &scene;
 
 		pc->sourceSceneXfm.setPosition(Vec3(0, 0, -5));
 		pc->sourceSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
 
 		pc->destSceneXfm.setPosition(Vec3(-18, -12, -25));
-		// pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+		pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 20));
 	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
@@ -243,7 +247,7 @@ int WinMain()
 		}
 
 		scene.renderScene(cameraComponent, cameraXfm);
-		// DebugDraw::instance().drawAARect3(Vec3(2, 0, -6), Vec3(2, 3, 1));
+		DebugDraw::instance().drawAARect3(Vec3(0, 0, -5), Vec3(2, 3, 1), cameraComponent, cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 

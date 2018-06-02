@@ -7,16 +7,15 @@
 struct DebugDraw
 {
 	static DebugDraw& instance();
-	void init(Entity camera);
 	
-	CameraComponent* camera;
+	void init();
 	
 	Shader* shader;
 	Vec3 color;
 	
 	void drawSphere(Vec3 position, float radius);
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation);
-	void drawAARect3(Vec3 center, Vec3 dimensions);
+	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, TransformComponent* cameraXfm);
 	void drawLine(Vec3 start, Vec3 end);
 
 private:
