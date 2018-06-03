@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "assert.h"
 
+#include "DebugDraw.h"
 #include "DebugGlobal.h"
 
 uint32 Ecs::nextEntityId = 1;
@@ -186,9 +187,11 @@ Ecs::getRenderComponents(Entity e)
 void
 Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
 {
-	// 1. Render the portal rectangles to the stencil buffer
-	// 2. Render the scenes that the portals are looking into
-	//    but only where the the stencil is set from 1
+	if (recursionLevel > 0)
+	{
+		// TODO: handle recursive renders (i.e., looking through a portal through another portal)
+		return;
+	}
 
 
 	for (uint32 i = 0; i < portals.size; i++)
@@ -265,12 +268,12 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				if (!debug_hidePortalContents)
 				{
 					glClear(GL_DEPTH_BUFFER_BIT);
-					pc.destScene->renderScene(camera, &portalViewpointXfm, recursionLevel + 1);
-					// pc.destScene->ecs->renderAllRenderComponents(camera, &portalViewpointXfm);
+					pc.destScene->renderScene(camera, &portalViewpointXfm, recursionLevel + 1, &pc.destSceneXfm);
 				}
 			}
 		}
 		glDisable(GL_STENCIL_TEST);
+
 
 		// (DEBUG)
 		// Render the portal in the dest scene (if it is the same)
@@ -324,16 +327,24 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 
 		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
+
+		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position(), Vec3(pc.dimensions(), 0.2), camera, cameraXfm);
 	}
 }
 
 void
-Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal)
+Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal, TransformComponent* destPortalXfm)
 {
 	for (uint32 i = 0; i < renderComponents.size; i++)
 	{
 		RenderComponent &rc = renderComponents.components[i];
 		TransformComponent* xfm = getTransformComponent(rc.entity);
+
+		if (renderingViaPortal)
+		{
+			bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
+			if (behindDestPortal) continue;
+		}
 
 		assert(xfm != nullptr); // Render component cannot exist without corresponding transform component
 		if (xfm == nullptr) continue;

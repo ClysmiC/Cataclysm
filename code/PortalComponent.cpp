@@ -68,9 +68,9 @@ PortalComponent::initQuadVboAndVao()
 
 
 Vec2
-PortalComponent::getDimensions()
+PortalComponent::dimensions()
 {
-	return dimensions;
+	return dimensions_;
 }
 
 void
@@ -80,5 +80,5 @@ PortalComponent::setDimensions(Vec2 dim)
 	sourceSceneXfm.setScale(dim.x, dim.y, 1);
 	destSceneXfm.setScale(dim.x, dim.y, 1);
 	
-	dimensions = dim;
+	dimensions_ = dim;
 }

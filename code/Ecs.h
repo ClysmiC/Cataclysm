@@ -64,7 +64,7 @@ public:
 	ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents);
 	ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 
-	void renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal=false);
+	void renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal=false, TransformComponent* destPortalXfm=nullptr);
 	void renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel=0);
 	
 	PointLightComponent* closestPointLight(TransformComponent* xfm);

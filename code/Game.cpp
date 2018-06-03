@@ -32,6 +32,77 @@ void updateLastKeys()
 	}
 }
 
+Scene buildTestScene1()
+{
+	Scene result;
+	
+	ResourceManager& rm = ResourceManager::instance();
+	
+	Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, true);
+	Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, true);
+
+	// Set up light
+	{
+		Entity light = result.ecs->makeEntity();
+        Mesh* m = bulb;
+        
+        TransformComponent *tc = result.ecs->addTransformComponent(light);
+        tc->setPosition(0, 0, -2);
+        tc->setScale(.35);
+		
+        ComponentGroup<RenderComponent> rcc = result.ecs->addRenderComponents(light, m->submeshes.size());
+
+        for(uint32 i = 0; i < rcc.numComponents; i++)
+        {
+            RenderComponent *rc = rcc.components + i;
+            rc->init(m->submeshes[i]);
+        }
+
+		PointLightComponent *plc = result.ecs->addPointLightComponent(light);
+		plc->intensity = Vec3(1, 1, 1);
+
+		rm.initMaterial("", "bulbMaterial", true);
+		rm.initShader("shader/light.vert", "shader/light.frag", true);
+
+		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
+		bulb->submeshes[1].material->receiveLight = false;
+		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
+		bulb->submeshes[1].material->clearUniforms();
+		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
+	}
+
+	//
+	// Set up cubemap
+	//
+	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
+	result.addCubemap(cm);
+
+	//
+	// Set up hex meshes
+	//
+	const uint32 hexCount = 2;
+	Vec3 hexPositions[hexCount];
+	hexPositions[0] = Vec3(-18, -12, -40);
+	hexPositions[1] = Vec3(-18, -12, -18);
+
+	for (uint32 i = 0; i < hexCount; i++)
+	{
+		Entity e = result.ecs->makeEntity();
+		TransformComponent *tc = result.ecs->addTransformComponent(e);
+		tc->setPosition(hexPositions[i]);
+		
+		ComponentGroup<RenderComponent> rcc = result.ecs->addRenderComponents(e, hexMesh->submeshes.size());
+
+		for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
+		{
+			RenderComponent *rc = rcc.components + j;
+			rc->init(hexMesh->submeshes[j]);
+		}
+	}
+
+	return result;
+}
+
 void updateCameraXfm(TransformComponent* xfm)
 {
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -39,6 +110,11 @@ void updateCameraXfm(TransformComponent* xfm)
 	real32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
 	real32 cameraSpeed = 5;
 	real32 deltaTS = deltaTMs / 1000.0f;
+
+	if (keys[GLFW_KEY_LEFT_SHIFT])
+	{
+		cameraSpeed *= 2;
+	}
 
 	Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
 	Vec3 moveLeft    = normalize( -moveRight );
@@ -116,109 +192,29 @@ int WinMain()
 	glCullFace(GL_BACK);
 
 	ResourceManager::instance().init();
-	
-	// Mesh *mesh = ResourceManager::instance().initMesh("cyborg/cyborg.obj", true, true);
-	Mesh *hexMesh = ResourceManager::instance().initMesh("hex/hex.obj", true, true);
-	Mesh *bulb = ResourceManager::instance().initMesh("bulb/bulb.obj", false, true);
-	
+	DebugDraw::instance().init();
 	real32 lastTimeMs = 0;
 
-	Scene scene;
+	Scene testScene1 = buildTestScene1();
 	
 	// Set up camera
-	
-	Entity camera = scene.ecs->makeEntity();
-	TransformComponent* cameraXfm = scene.ecs->addTransformComponent(camera);
-	CameraComponent* cameraComponent = scene.ecs->addCameraComponent(camera);
+	Entity camera = testScene1.ecs->makeEntity();
+	TransformComponent* cameraXfm = testScene1.ecs->addTransformComponent(camera);
+	CameraComponent* cameraComponent = testScene1.ecs->addCameraComponent(camera);
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
-	DebugDraw::instance().init();
-	
-    // Entity test = scene.ecs->makeEntity();
-    // // Set up test mesh
-    // {
-    //     TransformComponent *tc = scene.ecs->addTransformComponent(test);
-    //     tc->setPosition(0, -2, -5);
-	// 	// tc->setScale(0.25);
-		
-    //     ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(test, mesh->submeshes.size());
 
-    //     for(uint32 i = 0; i < rcc.numComponents; i++)
-    //     {
-    //         RenderComponent *rc = rcc.components + i;
-    //         rc->init(mesh->submeshes[i]);
-    //     }
-    // }
-	
-	Entity light = scene.ecs->makeEntity();
-	// Set up light
+	//
+	// Set up portal
+	//
 	{
-		ResourceManager& rm = ResourceManager::instance();
+		Entity portal = testScene1.ecs->makeEntity();
 		
-        Mesh* m = bulb;
-        
-        TransformComponent *tc = scene.ecs->addTransformComponent(light);
-        tc->setPosition(0, 0, -2);
-        tc->setScale(.35);
-		
-        ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(light, m->submeshes.size());
-
-        for(uint32 i = 0; i < rcc.numComponents; i++)
-        {
-            RenderComponent *rc = rcc.components + i;
-            rc->init(m->submeshes[i]);
-        }
-
-		PointLightComponent *plc = scene.ecs->addPointLightComponent(light);
-		plc->intensity = Vec3(1, 1, 1);
-
-		rm.initMaterial("", "bulbMaterial", true);
-		rm.initShader("shader/light.vert", "shader/light.frag", true);
-
-		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
-		bulb->submeshes[1].material->receiveLight = false;
-		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
-		bulb->submeshes[1].material->clearUniforms();
-		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
-	}
-
-	ResourceManager& rm = ResourceManager::instance();
-	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
-	scene.addCubemap(cm);
-
-	Vec3 hexPositions[1];
-	// hexPositions[0] = Vec3(-9, 8, -15);
-	// hexPositions[1] = Vec3(3, 0, -20);
-	hexPositions[0] = Vec3(-18, -12, -40);
-	// hexPositions[3] = Vec3(6, 5, -30);
-
-	for (uint32 i = 0; i < 1; i++)
-	{
-		Entity e = scene.ecs->makeEntity();
-		TransformComponent *tc = scene.ecs->addTransformComponent(e);
-		tc->setPosition(hexPositions[i]);
-		
-		ComponentGroup<RenderComponent> rcc = scene.ecs->addRenderComponents(e, hexMesh->submeshes.size());
-
-		for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
-		{
-			RenderComponent *rc = rcc.components + j;
-			rc->init(hexMesh->submeshes[j]);
-		}
-	}
-
-	auto v = glGetError();
-
-	TransformComponent *lightXfm = scene.ecs->getTransformComponent(light);
-    // TransformComponent *testXfm = scene.ecs->getTransformComponent(test);
-
-	{
-		Entity portal = scene.ecs->makeEntity();
-		
-		PortalComponent* pc = scene.ecs->addPortalComponent(portal);
+		PortalComponent* pc = testScene1.ecs->addPortalComponent(portal);
 		pc->setDimensions(Vec2(2, 3));
-		pc->destScene = &scene;
+		pc->sourceScene = &testScene1;
+		pc->destScene = &testScene1;
 
 		pc->sourceSceneXfm.setPosition(Vec3(0, 0, -5));
 		pc->sourceSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
@@ -238,7 +234,6 @@ int WinMain()
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
 
-		lightXfm->setPosition(Vec3(2 * sinf(timeS), 0, -2));
 		updateCameraXfm(cameraXfm);
 
 		if (keys[GLFW_KEY_1] && !lastKeys[GLFW_KEY_1])
@@ -246,8 +241,7 @@ int WinMain()
 			debug_hidePortalContents = !debug_hidePortalContents;
 		}
 
-		scene.renderScene(cameraComponent, cameraXfm);
-		DebugDraw::instance().drawAARect3(Vec3(0, 0, -5), Vec3(2, 3, 1), cameraComponent, cameraXfm);
+		testScene1.renderScene(cameraComponent, cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 

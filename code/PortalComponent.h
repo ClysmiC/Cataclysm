@@ -17,15 +17,16 @@ struct PortalComponent : public Component
 	
 	PortalComponent();
 
-	Vec2 getDimensions();
+	Vec2 dimensions();
 	void setDimensions(Vec2 dim);
 
+	Scene *sourceScene;
 	Scene *destScene;
 	TransformComponent sourceSceneXfm;
 	TransformComponent destSceneXfm;
 
 private:
-	Vec2 dimensions;
+	Vec2 dimensions_;
 	static void initQuadVboAndVao();
 	static uint32 quadVbo_;
 	static uint32 quadVao_;
