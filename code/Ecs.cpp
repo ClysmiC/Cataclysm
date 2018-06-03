@@ -10,10 +10,6 @@
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 
-Ecs::Ecs()
-{
-}
-
 template<class T>
 T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
 {

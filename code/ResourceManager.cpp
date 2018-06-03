@@ -69,37 +69,32 @@ Shader* ResourceManager::getShader(std::string vertFilename, std::string fragFil
 
 Texture* ResourceManager::initTexture(std::string relFilename, bool gammaCorrect, bool loadNow)
 {
-    Texture t;
-	t.init(relFilename, gammaCorrect);
+    Texture t(relFilename, gammaCorrect);
     return initResource(t, textures, loadNow);
 }
 
 Material* ResourceManager::initMaterial(std::string relFilename, std::string materialName, bool loadNow)
 {
-    Material material;
-	material.init(relFilename, materialName);
+    Material material(relFilename, materialName);
     return initResource(material, materials, loadNow);
 }
 
 Shader* ResourceManager::initShader(std::string vertFilename, std::string fragFilename, bool loadNow)
 {
-    Shader shader;
-	shader.init(vertFilename, fragFilename);
+    Shader shader(vertFilename, fragFilename);
     return initResource(shader, shaders, loadNow);
 }
 
 Mesh* ResourceManager::initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow)
 {
-    Mesh m;
-	m.init(relFilename, useMaterialsRefrencedInObjFile);
+    Mesh m(relFilename, useMaterialsRefrencedInObjFile);
     return initResource(m, meshes, loadNow);
 }
 
 Cubemap*
 ResourceManager::initCubemap(std::string directoryName, std::string extension, bool loadNow)
 {
-	Cubemap c;
-	c.init(directoryName, extension);
+	Cubemap c(directoryName, extension);
 	return initResource(c, cubemaps, loadNow);
 }
 

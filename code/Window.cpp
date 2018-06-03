@@ -41,13 +41,13 @@ void Window::glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 	// TODO: recalculate the perspective matrix!
 }
 
-int Window::init(uint32 width, uint32 height)
+bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 {
 	// Initialize GLFW, create and open window with OpenGL context
 	if (!glfwInit())
 	{
 		printf("Failed to initialize GLFW. Exiting.\n");
-		return -1;
+		return false;
 	}
 
 	mouseXPrev = FLT_MAX;
@@ -60,16 +60,16 @@ int Window::init(uint32 width, uint32 height)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 	
-	glfwWindow = glfwCreateWindow(width, height, "Game", NULL, NULL);
-	glfwMakeContextCurrent(glfwWindow);
+	window->glfwWindow = glfwCreateWindow(width, height, "Game", NULL, NULL);
+	glfwMakeContextCurrent(window->glfwWindow);
 
 	glViewport(0, 0, width, height);
 	
-	glfwSetKeyCallback(glfwWindow, &glfwKeyPressedCallback);
-	glfwSetWindowSizeCallback(glfwWindow, &glfwWindowResizeCallback);
+	glfwSetKeyCallback(window->glfwWindow, &glfwKeyPressedCallback);
+	glfwSetWindowSizeCallback(window->glfwWindow, &glfwWindowResizeCallback);
 
-	glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(glfwWindow, &glfwMouseMovedCallback);
+	glfwSetInputMode(window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window->glfwWindow, &glfwMouseMovedCallback);
 	
 	glewExperimental = GL_TRUE;
 	GLenum glewInitStatus = glewInit();
@@ -78,7 +78,7 @@ int Window::init(uint32 width, uint32 height)
 	if(glewInitStatus != GLEW_OK)
 	{
 		printf("Failed to initialize GLEW. Exiting.\n");
-		return -1;
+		return false;
 	}
 
 	// OpenGL setup
@@ -91,6 +91,6 @@ int Window::init(uint32 width, uint32 height)
 	// be 2-sided, I'll draw two polygons with different winding orders.
 	glEnable(GL_CULL_FACE);
 
-	return 0;
+	return true;
 }
 

@@ -16,32 +16,42 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     assert(vertices.size() > 0);
     assert(indices.size() % 3 == 0);
 
-    recalculateTangentsAndBitangents();
-    setupGl();
+    recalculateTangentsAndBitangents(this);
+
+	//
+	// Setup OpenGL stuff
+	//
+	openGlInfo.indicesSize = indices.size();
+	
+    glGenVertexArrays(1, &openGlInfo.vao);
+    glGenBuffers(1, &openGlInfo.vbo);
+    glGenBuffers(1, &openGlInfo.ebo);
+
+    glBindVertexArray(openGlInfo.vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, openGlInfo.vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(MeshVertex), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlInfo.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32), indices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, texCoords));
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, tangent));
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
 }
 
-// void Submesh::draw(const Mat4 &transform, Camera camera)
-// {
-//     // Mat4 view = camera.worldToView();
-
-//     // Mat4 projection;
-//     // projection.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
-
-//     // auto v = glGetError();
-
-//     // material->bind();
-//     // material->shader->setMat4("model", transform);
-//     // material->shader->setMat4("view", view);
-//     // material->shader->setMat4("projection", projection);
-
-//     // v = glGetError();
-
-//     // glBindVertexArray(VAO);
-//     // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-//     // glBindVertexArray(0);
-// }
-
-void Submesh::recalculateTangentsAndBitangents()
+void recalculateTangentsAndBitangents(Submesh* submesh)
 {
     struct RunningAverages
     {
@@ -60,13 +70,13 @@ void Submesh::recalculateTangentsAndBitangents()
     };
 
     std::unordered_map<MeshVertex*, RunningAverages> runningAverages;
-    runningAverages.reserve(vertices.size());
+    runningAverages.reserve(submesh->vertices.size());
 
-    for (int i = 0; i < indices.size(); i += 3)
+    for (int i = 0; i < submesh->indices.size(); i += 3)
     {
-        MeshVertex *v1 = &(vertices[indices[i]]);
-        MeshVertex *v2 = &(vertices[indices[i + 1]]);
-        MeshVertex *v3 = &(vertices[indices[i + 2]]);
+        MeshVertex *v1 = &(submesh->vertices[submesh->indices[i]]);
+        MeshVertex *v2 = &(submesh->vertices[submesh->indices[i + 1]]);
+        MeshVertex *v3 = &(submesh->vertices[submesh->indices[i + 2]]);
 
         Vec3 edge12 = v2->position - v1->position;
         Vec3 edge13 = v3->position - v1->position;
@@ -124,7 +134,7 @@ void Submesh::recalculateTangentsAndBitangents()
         runningAverages[v3].update(t, b);
     }
 
-    for (MeshVertex& vertex : vertices)
+    for (MeshVertex& vertex : submesh->vertices)
     {
         RunningAverages avgs = runningAverages[&vertex];
 
@@ -157,7 +167,7 @@ void Submesh::recalculateTangentsAndBitangents()
         vertex.bitangent.normalizeInPlace();
     }
 
-    for (auto vertex : vertices)
+    for (auto vertex : submesh->vertices)
     {
         assert(length(vertex.bitangent) > .99 && length(vertex.bitangent) < 1.01);
         assert(length(vertex.tangent) > .99 && length(vertex.tangent) < 1.01);
@@ -165,40 +175,3 @@ void Submesh::recalculateTangentsAndBitangents()
     }
 }
 
-void Submesh::setupGl()
-{
-	openGlInfo.indicesSize = indices.size();
-	
-    glGenVertexArrays(1, &openGlInfo.VAO);
-
-    glGenBuffers(1, &openGlInfo.VBO);
-
-    glGenBuffers(1, &openGlInfo.EBO);
-
-    glBindVertexArray(openGlInfo.VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, openGlInfo.VBO);
-
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(MeshVertex), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlInfo.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32), indices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position));
-
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal));
-
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, texCoords));
-
-
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, tangent));
-
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
-}

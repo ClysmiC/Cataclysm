@@ -8,7 +8,7 @@
 
 struct Cubemap
 {
-	Cubemap();
+	Cubemap() = default;
 	Cubemap(std::string directoryName, std::string extension_);
 
 	std::string id;

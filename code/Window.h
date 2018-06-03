@@ -9,7 +9,6 @@
 struct Window
 {
 	GLFWwindow* glfwWindow;
-	int init(uint32 width, uint32 height);
 
 	// TODO: make these functions that request dimensions from
 	// glfwGetFramebufferSize(window, &w, &h);
@@ -24,4 +23,6 @@ private:
 	static void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
 	static void glfwErrorCallback(int e, const char* message);
 };
+
+bool initGlfwWindow(Window* window, uint32 width, uint32 height);
 

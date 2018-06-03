@@ -6,47 +6,48 @@
 #include "als_math.h"
 
 #include <GL/glew.h>
+#include "als.h"
 
 const std::string Material::COMPOSITE_ID_DELIMITER = "|";
 const std::string Material::DEFAULT_MATERIAL_FILENAME = "default/default.mtl";
 const std::string Material::DEFAULT_MATERIAL_NAME = "default";
 
-void Material::init(std::string filename_, std::string materialName)
+Material::Material(std::string filename_, std::string materialName)
 {
 	this->filename = filename_;
 	this->name = materialName;
 	this->id = filename + COMPOSITE_ID_DELIMITER + materialName;
 	
-	floatUniforms.emplace("material.specularExponent", 1);
-	vec3Uniforms.emplace(
+	this->floatUniforms.emplace("material.specularExponent", 1);
+	this->vec3Uniforms.emplace(
 		"material.ambient",
 		Vec3(0.5, 0.5, 0.5) 
 	);
 		
-	vec3Uniforms.emplace(
+	this->vec3Uniforms.emplace(
 		"material.diffuse",
 		Vec3(0.5, 0.5, 0.5) 
 	);
 		
-	vec3Uniforms.emplace(
+	this->vec3Uniforms.emplace(
 		"material.specular",
 		Vec3(0.5, 0.5, 0.5) 
 	);
 
-	textureUniforms.emplace("material.normalTex", Texture::defaultNormal());
-	textureUniforms.emplace("material.ambientTex", Texture::gray());
-	textureUniforms.emplace("material.diffuseTex", Texture::gray());
-	textureUniforms.emplace("material.specularTex", Texture::black());
+	this->textureUniforms.emplace("material.normalTex", Texture::defaultNormal());
+	this->textureUniforms.emplace("material.ambientTex", Texture::gray());
+	this->textureUniforms.emplace("material.diffuseTex", Texture::gray());
+	this->textureUniforms.emplace("material.specularTex", Texture::black());
 }
 
-bool Material::load()
+bool load(Material* material)
 {
-    if (isLoaded) return true;
+    if (material->isLoaded) return true;
 
-    std::string fullFilename = ResourceManager::instance().toFullPath(filename);
+    std::string fullFilename = ResourceManager::instance().toFullPath(material->filename);
     if (fullFilename.substr(fullFilename.length() - 4) == ".mtl")
     {
-        isLoaded = loadFromMtlFile(fullFilename);
+        isLoaded = loadFromMtlFile(material, fullFilename);
     }
     else
     {
@@ -56,27 +57,30 @@ bool Material::load()
     return isLoaded;
 }
 
-bool Material::unload()
+bool unload(Material* material)
 {
+	// TODO
     return false;
 }
 
-void Material::clearUniforms()
+void clearUniforms(Material* material)
 {
-    boolUniforms.clear();
-    intUniforms.clear();
-    floatUniforms.clear();
-    vec2Uniforms.clear();
-    vec3Uniforms.clear();
-    vec4Uniforms.clear();
-	mat4Uniforms.clear();
+    material->boolUniforms.clear();
+    material->intUniforms.clear();
+    material->floatUniforms.clear();
+    material->vec2Uniforms.clear();
+    material->vec3Uniforms.clear();
+    material->vec4Uniforms.clear();
+	material->mat4Uniforms.clear();
 	
-    // Note: potential memory leak
-    textureUniforms.clear();
+    // Note: potential GPU memory leak
+    material->textureUniforms.clear();
 }
 
-bool Material::bind()
+bool bind(Material* material)
 {
+	Shader* shader = material->shader;
+	
     if (!isLoaded) return false;
     assert(shader != nullptr);
     if (shader == nullptr) return false;
@@ -85,37 +89,37 @@ bool Material::bind()
 
     if (!success) return false;
 
-    for (auto kvp : intUniforms)
+    for (auto kvp : material->intUniforms)
     {
         shader->setInt(kvp.first, kvp.second);
     }
 
-    for (auto kvp : boolUniforms)
+    for (auto kvp : material->boolUniforms)
     {
         shader->setBool(kvp.first, kvp.second);
     }
 
-    for (auto kvp : floatUniforms)
+    for (auto kvp : material->floatUniforms)
     {
         shader->setFloat(kvp.first, kvp.second);
     }
 
-    for (auto kvp : vec2Uniforms)
+    for (auto kvp : material->vec2Uniforms)
     {
         shader->setVec2(kvp.first, kvp.second);
     }
 
-    for (auto kvp : vec3Uniforms)
+    for (auto kvp : material->vec3Uniforms)
     {
         shader->setVec3(kvp.first, kvp.second);
     }
 
-    for (auto kvp : vec4Uniforms)
+    for (auto kvp : material->vec4Uniforms)
     {
         shader->setVec4(kvp.first, kvp.second);
     }
 
-    for (auto kvp : mat4Uniforms)
+    for (auto kvp : material->mat4Uniforms)
     {
         shader->setMat4(kvp.first, kvp.second);
     }
@@ -138,9 +142,37 @@ bool Material::bind()
     return true;
 }
 
-bool Material::loadFromMtlFile(std::string fullFilename)
+bool loadFromMtlFile(Material* material, std::string fullFilename)
 {
+	// for every material declared in the .mtl file
+    // if not inited, skip it
+    // otherwise, get the reference to it and "load" it from within this function.
+    // this should include loading ourself (assert at end to make sure this happens).
+
+    // Thus, any subsequent material from within this file that gets "loaded" will just
+    // return true because we already loaded them and set their isLoaded.
+	
     using namespace std;
+
+	lambda handleTexture = [](Material* m, std::string texType, std::string texFilename) -> bool
+	{
+		using namespace std;
+
+		// Note: texFilename is relative to this material's directory, not the resource directory
+
+		string relFileDirectory = truncateFilenameAfterDirectory(filename);
+		string texRelFilename = relFileDirectory + texFilename;
+
+		bool gammaCorrect = texType == "material.diffuseTex";
+		Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
+
+		assert(tex != nullptr);
+		if (tex == nullptr) return false;
+
+		m->textureUniforms[texType] = tex;
+
+		return true;
+	}
 
     bool foundSelfInMtlFile = false;
 
@@ -179,7 +211,7 @@ bool Material::loadFromMtlFile(std::string fullFilename)
         {
             if (currentMaterial != nullptr)
             {
-                bool success = currentMaterial->setupShader();
+                bool success = ResourceManager::instance().initShader("shader/basic.vert", "shader/basic.frag", true);;
                 assert(success);
 
                 currentMaterial->isLoaded = true;
@@ -187,9 +219,9 @@ bool Material::loadFromMtlFile(std::string fullFilename)
 
             if (!eofFlush)
             {
-                currentMaterial = ResourceManager::instance().getMaterial(filename, tokens[1]);
+                currentMaterial = ResourceManager::instance().getMaterial(material->filename, tokens[1]);
 
-                if (currentMaterial == this) foundSelfInMtlFile = true;
+                if (currentMaterial == material) foundSelfInMtlFile = true;
             }
         }
 
@@ -265,42 +297,7 @@ bool Material::loadFromMtlFile(std::string fullFilename)
         }
     }
 
-    // for every material declared in the .mtl file
-    // if not inited, skip it
-    // otherwise, get the reference to it and "load" it from within this function.
-    // this should include loading ourself (add assert to make sure this happens).
-
-    // Thus, any subsequent material from within this file that gets "loaded" will just
-    // return true because we already loaded them and set their isLoaded.
-
     assert(foundSelfInMtlFile);
     return foundSelfInMtlFile;
 }
 
-bool Material::handleTexture(Material& material, std::string texType, std::string texFilename)
-{
-    using namespace std;
-
-    // Note: texFilename is relative to this material's directory, not the resource directory
-
-    string relFileDirectory = truncateFilenameAfterDirectory(filename);
-    string texRelFilename = relFileDirectory + texFilename;
-
-    bool gammaCorrect = texType == "material.diffuseTex";
-    Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
-
-    assert(tex != nullptr);
-    if (tex == nullptr) return false;
-
-    material.textureUniforms[texType] = tex;
-
-    return true;
-}
-
-bool Material::setupShader()
-{
-    ResourceManager::instance().initShader("shader/basic.vert", "shader/basic.frag", false);
-    Shader* s = ResourceManager::instance().getShader("shader/basic.vert", "shader/basic.frag");
-    shader = s;
-    return s->load();
-}

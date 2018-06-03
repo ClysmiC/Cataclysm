@@ -7,19 +7,17 @@ Scene::Scene()
 	cubemap = nullptr;
 }
 
-void
-Scene::addCubemap(Cubemap* cubemap_)
+void addCubemap(Scene* scene, Cubemap* cubemap)
 {
-	cubemap = cubemap_;
+	scene->cubemap = cubemap;
 }
 
-void
-Scene::renderScene(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel, TransformComponent* destPortalXfm)
+void renderScene(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel, TransformComponent* destPortalXfm)
 {
 	if (recursionLevel > 3) return;
 	
-	if (cubemap != nullptr) cubemap->render(camera, cameraXfm);
+	if (scene->cubemap != nullptr) renderCubemap(scene->cubemap, camera, cameraXfm);
 
-	ecs->renderContentsOfAllPortals(camera, cameraXfm, recursionLevel);
-	ecs->renderAllRenderComponents(camera, cameraXfm, recursionLevel > 0, destPortalXfm);
+	renderContentsOfAllPortals(scene->ecs, camera, cameraXfm, recursionLevel);
+	renderAllRenderComponents(scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
 }

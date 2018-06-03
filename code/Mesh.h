@@ -10,15 +10,15 @@
 
 struct Mesh
 {
-	void init(const std::string filename, bool useMaterialsReferencedInObjFile);
+	Mesh() = default;
+	Mesh(std::string filename, bool useMaterialsReferencedInObjFile);
 	
     bool useMaterialsReferencedInObjFile;
-    bool load();
-    bool unload();
-    // void draw(const Mat4 &transform, Camera camera);
-
 	bool isLoaded = false;
 	std::string id;
     std::vector<Submesh> submeshes;
 };
+
+bool load(Mesh* mesh);
+bool unload(Mesh* mesh);
 

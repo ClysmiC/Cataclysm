@@ -43,22 +43,22 @@ Scene buildTestScene1()
 
 	// Set up light
 	{
-		Entity light = result.ecs->makeEntity();
+		Entity light = makeEntity(result.ecs);
         Mesh* m = bulb;
         
-        TransformComponent *tc = result.ecs->addTransformComponent(light);
+        TransformComponent *tc = addTransformComponent(light);
         tc->setPosition(0, 0, -2);
         tc->setScale(.35);
 		
-        ComponentGroup<RenderComponent> rcc = result.ecs->addRenderComponents(light, m->submeshes.size());
+        ComponentGroup<RenderComponent> rcc = addRenderComponents(light, m->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
             RenderComponent *rc = rcc.components + i;
-            rc->init(m->submeshes[i]);
+			new (rc) RenderComponent(&(m->submeshes[i]));
         }
 
-		PointLightComponent *plc = result.ecs->addPointLightComponent(light);
+		PointLightComponent *plc = addPointLightComponent(light);
 		plc->intensity = Vec3(1, 1, 1);
 
 		rm.initMaterial("", "bulbMaterial", true);
@@ -67,14 +67,14 @@ Scene buildTestScene1()
 		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
 		bulb->submeshes[1].material->receiveLight = false;
 		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
-		bulb->submeshes[1].material->clearUniforms();
+		clearUniformrs(bulb->submeshes[1].material);
 		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
 	// Set up directional light
 	{
-		Entity dirLight = result.ecs->makeEntity();
-		DirectionalLightComponent* dlc = result.ecs->addDirectionalLightComponent(dirLight);
+		Entity dirLight = makeEntity(result.ecs);
+		DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
 
 		dlc->intensity = Vec3(.25, .25, .25);
 		dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
@@ -84,7 +84,7 @@ Scene buildTestScene1()
 	// Set up cubemap
 	//
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
-	result.addCubemap(cm);
+	addCubemap(result, cm);
 
 	//
 	// Set up hex meshes
@@ -96,16 +96,16 @@ Scene buildTestScene1()
 
 	for (uint32 i = 0; i < hexCount; i++)
 	{
-		Entity e = result.ecs->makeEntity();
-		TransformComponent *tc = result.ecs->addTransformComponent(e);
-		tc->setPosition(hexPositions[i]);
+		Entity e = makeEntity(result.ecs);
+		TransformComponent *tc = addTransformComponent(e);
+		tc->position = hexPositions[i];
 		
-		ComponentGroup<RenderComponent> rcc = result.ecs->addRenderComponents(e, hexMesh->submeshes.size());
+		ComponentGroup<RenderComponent> rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
 		for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
 		{
 			RenderComponent *rc = rcc.components + j;
-			rc->init(hexMesh->submeshes[j]);
+			new (rc) RenderComponent(&(hexMesh->submeshes[j]));
 		}
 	}
 
@@ -132,12 +132,12 @@ void updateCameraXfm(TransformComponent* xfm)
 
 	// Uncomment this (and the asserts) to follow the pitch of the camera when
 	// moving forward or backward.
-	moveForward = normalize(xfm->forward());
+	// moveForward = normalize(xfm->forward());
 
-	// assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
-	// assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
-	// assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
-	// assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
+	assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
 	
 	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
 	{
@@ -150,36 +150,29 @@ void updateCameraXfm(TransformComponent* xfm)
 		deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS); // pitch
 
 
-		Quaternion oldOrientation = xfm->orientation();
-		xfm->setOrientation(deltaYawAndPitch * xfm->orientation());
+		xfm->orientation = deltaYawAndPitch * xfm->orientation;
 
 		float camRightY = xfm->right().y;
-		// assert(FLOAT_EQ(camRightY, 0, EPSILON));
+		assert(FLOAT_EQ(camRightY, 0, EPSILON));
 	}
 
-	// Translate
-	Vec3 position = xfm->position();
-
-	
 	if (keys[GLFW_KEY_W])
 	{
-		position += moveForward * cameraSpeed * deltaTS;
+		xfm->position += moveForward * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_S])
 	{
-		position += moveBack * cameraSpeed * deltaTS;
+		xfm->position += moveBack * cameraSpeed * deltaTS;
 	}
 		
 	if (keys[GLFW_KEY_A])
 	{
-		position += moveLeft * cameraSpeed * deltaTS;
+		xfm->position += moveLeft * cameraSpeed * deltaTS;
 	}
 	else if (keys[GLFW_KEY_D])
 	{
-		position += moveRight * cameraSpeed * deltaTS;
+		xfm->position += moveRight * cameraSpeed * deltaTS;
 	}
-
-	xfm->setPosition(position);
 }
 
 
@@ -191,7 +184,7 @@ int WinMain()
 	
 	Window window;
 
-	if(window.init(windowWidth, windowHeight) < 0)
+	if(initGlfwWindowwindow(&window, windowWidth, windowHeight) < 0)
 	{
 		return -1;
 	}
@@ -207,9 +200,9 @@ int WinMain()
 	Scene testScene1 = buildTestScene1();
 	
 	// Set up camera
-	Entity camera = testScene1.ecs->makeEntity();
-	TransformComponent* cameraXfm = testScene1.ecs->addTransformComponent(camera);
-	CameraComponent* cameraComponent = testScene1.ecs->addCameraComponent(camera);
+	Entity camera = makeEntity(testScene1.ecs);
+	TransformComponent* cameraXfm = addTransformComponent(camera);
+	CameraComponent* cameraComponent = addCameraComponent(camera);
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
@@ -218,18 +211,18 @@ int WinMain()
 	// Set up portal
 	//
 	{
-		Entity portal = testScene1.ecs->makeEntity();
+		Entity portal = makeEntity(testScene1.ecs);
 		
-		PortalComponent* pc = testScene1.ecs->addPortalComponent(portal);
-		pc->setDimensions(Vec2(2, 3));
+		PortalComponent* pc = addPortalComponent(portal);
+		setDimensions(pc, Vec2(2, 3));
 		pc->sourceScene = &testScene1;
 		pc->destScene = &testScene1;
 
-		pc->sourceSceneXfm.setPosition(Vec3(0, 0, -5));
-		pc->sourceSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+		pc->sourceSceneXfm.position = Vec3(0, 0, -5);
+		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
 
-		pc->destSceneXfm.setPosition(Vec3(-18, -12, -25));
-		pc->destSceneXfm.setOrientation(axisAngle(Vec3(0, 1, 0), 20));
+		pc->destSceneXfm.position = Vec3(-18, -12, -25);
+		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 20);
 	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
@@ -250,7 +243,7 @@ int WinMain()
 			debug_hidePortalContents = !debug_hidePortalContents;
 		}
 
-		testScene1.renderScene(cameraComponent, cameraXfm);
+		renderScene(&testScene1, cameraComponent, cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 

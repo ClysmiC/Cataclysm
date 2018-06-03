@@ -10,9 +10,9 @@
 struct SubmeshOpenGlInfo
 {
 	uint32 indicesSize;
-	uint32 VAO;
-    uint32 VBO;
-    uint32 EBO;
+	uint32 vao;
+    uint32 vbo;
+    uint32 ebo;
 };
 
 // A mesh's data can be broken up into submeshes.
@@ -21,7 +21,8 @@ struct SubmeshOpenGlInfo
 // It is possible for a mesh to be entirely composed of 1 submesh (if the mesh only has 1 material).
 struct Submesh
 {
-	Submesh(const std::string filename, const std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material);
+	Submesh() = default;
+	Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material);
 
 	
     std::string meshFilename;
@@ -29,14 +30,10 @@ struct Submesh
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 
-    // void draw(const Mat4 &transform, Transf);
-    void recalculateTangentsAndBitangents();
-
     Material* material;
 
 	SubmeshOpenGlInfo openGlInfo;
-
-private:
-    void setupGl();
 };
+
+void recalculateTangentsAndBitangents(Submesh* submesh);
 

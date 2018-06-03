@@ -28,9 +28,6 @@ struct Ecs
 		uint32 size = 0;
 		std::unordered_map<uint32, ComponentGroup<T>> lookup;
 	};
-
-	
-    Ecs();
 	
 	static uint32 nextEntityId;
 	
@@ -43,19 +40,22 @@ struct Ecs
 	ComponentList<PointLightComponent> pointLights;
 	ComponentList<RenderComponent> renderComponents;
 	ComponentList<PortalComponent> portals;
-	
-
-
 };
 
 //
 // Component List functions
 //
+template<class T>
 T* addComponent(Ecs::ComponentList<T>* componentList, Entity e);
-T* getComponent(Ecs::ComponentList<T>* componentList, Entity e);
-ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, uint32 numComponents);
-ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e);
 
+template<class T>
+T* getComponent(Ecs::ComponentList<T>* componentList, Entity e);
+
+template<class T>
+ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, uint32 numComponents);
+
+template<class T>
+ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e);
 
 //
 // Entity functions

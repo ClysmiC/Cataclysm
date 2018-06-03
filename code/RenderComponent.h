@@ -7,12 +7,12 @@
 
 struct RenderComponent : public Component
 {
-    void init(const Submesh &submesh);
+	RenderComponent() = default;
+	RenderComponent(Submesh* submesh);
 
 	SubmeshOpenGlInfo submeshOpenGlInfo;
 
-	// TODO: can we copy a non-canonical set of the needed data here?
 	Material* material;
-
-	void draw(TransformComponent *xfm,  CameraComponent* camera, TransformComponent *cameraXfm);
 };
+
+void drawRenderComponent(RenderComponent* renderComponent, TransformComponent *xfm,  CameraComponent* camera, TransformComponent *cameraXfm);

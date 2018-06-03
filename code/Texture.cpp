@@ -7,20 +7,18 @@
 
 #include "GL/glew.h"
 
-void
-Texture::init(const std::string filename, bool gammaCorrect_)
+Texture::Texture(std::string filename, bool gammaCorrect_)
 {
 	this->id = filename;
 	this->gammaCorrect = gammaCorrect_;
 }
 
-bool
-Texture::load()
+bool load(Texture* texture)
 {
-    if (isLoaded) return true;
+    if (texture->isLoaded) return true;
 
     // Load file into image
-    std::string filename = ResourceManager::instance().toFullPath(id);
+    std::string filename = ResourceManager::instance().toFullPath(texture->id);
 
     int w, h, channels;
     stbi_set_flip_vertically_on_load(true);
@@ -35,12 +33,12 @@ Texture::load()
     }
     else if (channels == 3)
     {
-        internalFormat = gammaCorrect ? GL_SRGB : GL_RGB;
+        internalFormat = texture->gammaCorrect ? GL_SRGB : GL_RGB;
         dataFormat = GL_RGB;
     }
     else if (channels == 4)
     {
-        internalFormat = gammaCorrect ? GL_SRGB_ALPHA : GL_RGBA;
+        internalFormat = texture->gammaCorrect ? GL_SRGB_ALPHA : GL_RGBA;
         dataFormat = GL_RGBA;
     }
     else
@@ -51,8 +49,8 @@ Texture::load()
     }
 
     // Upload image to opengl texture and store handle
-    glGenTextures(1, &openGlHandle);
-    glBindTexture(GL_TEXTURE_2D, openGlHandle);
+    glGenTextures(1, &texture->openGlHandle);
+    glBindTexture(GL_TEXTURE_2D, texture->openGlHandle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -61,19 +59,18 @@ Texture::load()
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
-    isLoaded = true;
+    texture->isLoaded = true;
     return true;
 }
 
-bool
-Texture::unload()
+bool unload(Texture* texture)
 {
-    assert(isLoaded);
+    assert(texture->isLoaded);
 
     // Unload texture from OpenGL
-    glDeleteTextures(1, &openGlHandle);
+    glDeleteTextures(1, &texture->openGlHandle);
 
-    isLoaded = false;
+    texture->isLoaded = false;
 
     return true;
 }

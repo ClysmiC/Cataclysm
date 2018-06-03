@@ -12,98 +12,98 @@
 
 const std::string Shader::COMPOSITE_ID_DELIMITER = "|";
 
-void Shader::init(std::string vertFilename_, std::string fragFilename_)
+void Shader::Shader(std::string vertFilename, std::string fragFilename)
 {
-	this->id = idFromFilenames(vertFilename_, fragFilename_);
-	this->vertFilename = vertFilename_;
-	this->fragFilename = fragFilename_;
+	this->id = shaderIdFromFilenames(vertFilename, fragFilename);
+	this->vertFilename = vertFilename;
+	this->fragFilename = fragFilename;
 }
 
-bool Shader::bind() const
+bool bind(Shader* shader)
 {
-    assert(isLoaded);
+    assert(shader->isLoaded);
 
-    if (!isLoaded) return false;
+    if (!shader->isLoaded) return false;
 
-    glUseProgram(openGlHandle);
+    glUseProgram(shader->openGlHandle);
     return true;
 }
 
-std::string Shader::idFromFilenames(std::string vertFilename, std::string fragFilename)
+std::string shaderIdFromFilenames(std::string vertFilename, std::string fragFilename)
 {
-    return vertFilename + COMPOSITE_ID_DELIMITER + fragFilename;
+    return vertFilename + Shader::COMPOSITE_ID_DELIMITER + fragFilename;
 }
 
-void Shader::setBool(const std::string & name, bool value) const
+void setBool(Shader* shader, std::string & name, bool value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform1i(glGetUniformLocation(openGlHandle, name.c_str()), (int)value);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.c_str()), (int)value);
 }
 
-void Shader::setInt(const std::string & name, int value) const
+void setInt(Shader* shader, std::string & name, int value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform1i(glGetUniformLocation(openGlHandle, name.c_str()), value);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
 }
 
-void Shader::setFloat(const std::string & name, real32 value) const
+void setFloat(Shader* shader, std::string & name, real32 value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform1f(glGetUniformLocation(openGlHandle, name.c_str()), value);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform1f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
 }
 
-void Shader::setVec2(const std::string & name, Vec2 value) const
+void setVec2(Shader* shader, std::string & name, Vec2 value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform2f(glGetUniformLocation(openGlHandle, name.c_str()), value.x, value.y);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y);
 }
 
-void Shader::setVec2(const std::string & name, real32 x, real32 y) const
+void setVec2(Shader* shader std::string & name, real32 x, real32 y)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform2f(glGetUniformLocation(openGlHandle, name.c_str()), x, y);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y);
 }
 
-void Shader::setVec3(const std::string & name, Vec3 value) const
+void setVec3(Shader* shader std::string & name, Vec3 value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-	auto loc = glGetUniformLocation(openGlHandle, name.c_str());
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+	auto loc = glGetUniformLocation(shader->openGlHandle, name.c_str());
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void Shader::setVec3(const std::string & name, real32 x, real32 y, real32 z) const
+void setVec3(Shader* shader std::string & name, real32 x, real32 y, real32 z)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform3f(glGetUniformLocation(openGlHandle, name.c_str()), x, y, z);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform3f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z);
 }
 
-void Shader::setVec4(const std::string & name, Vec4 value) const
+void setVec4(Shader* shader std::string & name, Vec4 value)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform4f(glGetUniformLocation(openGlHandle, name.c_str()), value.x, value.y, value.z, value.w);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y, value.z, value.w);
 }
 
-void Shader::setVec4(const std::string & name, real32 x, real32 y, real32 z, real32 w) const
+void setVec4(Shader* shader std::string & name, real32 x, real32 y, real32 z, real32 w)
 {
-    assert(isLoaded); if (!isLoaded) return;
-    glUniform4f(glGetUniformLocation(openGlHandle, name.c_str()), x, y, z, w);
+    assert(shader->isLoaded); if (!shader->isLoaded) return;
+    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z, w);
 }
 
-void Shader::setMat4(const std::string & name, Mat4 &value) const
+void setMat4(Shader* shader std::string & name, Mat4 &value)
 {
 	// NOTE: Transpose matrix to make it column order
-    glUniformMatrix4fv(glGetUniformLocation(openGlHandle, name.c_str()), 1, GL_TRUE, value.dataPointer());
+    glUniformMatrix4fv(glGetUniformLocation(shader->openGlHandle, name.c_str()), 1, GL_TRUE, value.dataPointer());
 }
 
-bool Shader::load()
+bool load(Shader* shader)
 {
     // TODO: return false if file(s) not found
-    if (isLoaded) return true;
+    if (shader->isLoaded) return true;
 
     std::string vertexCode;
     std::string fragmentCode;
-    std::ifstream vStream(ResourceManager::instance().toFullPath(vertFilename));
-    std::ifstream fStream(ResourceManager::instance().toFullPath(fragFilename));
+    std::ifstream vStream(ResourceManager::instance().toFullPath(shader->vertFilename));
+    std::ifstream fStream(ResourceManager::instance().toFullPath(shader->fragFilename));
 
     std::stringstream vShaderStream, fShaderStream;
     vShaderStream << vStream.rdbuf();
@@ -162,20 +162,20 @@ bool Shader::load()
     }
 
     // shader Program
-    openGlHandle = glCreateProgram();
+    shader->openGlHandle = glCreateProgram();
 
-    glAttachShader(openGlHandle, vertex);
-    glAttachShader(openGlHandle, fragment);
-    glLinkProgram(openGlHandle);
+    glAttachShader(shader->openGlHandle, vertex);
+    glAttachShader(shader->openGlHandle, fragment);
+    glLinkProgram(shader->openGlHandle);
 
     // verify link
     {
         int success;
         char infoLog[1024];
-        glGetProgramiv(openGlHandle, GL_LINK_STATUS, &success);
+        glGetProgramiv(shader->openGlHandle, GL_LINK_STATUS, &success);
         if (!success)
         {
-            glGetProgramInfoLog(openGlHandle, 1024, NULL, infoLog);
+            glGetProgramInfoLog(shader->openGlHandle, 1024, NULL, infoLog);
             __debugbreak(); // check infoLog variable
 
             return false;
@@ -186,15 +186,15 @@ bool Shader::load()
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 
-    isLoaded = true;
+    shader->isLoaded = true;
     return true;
 }
 
-bool Shader::unload()
+bool unload(Shader* shader)
 {
-    glDeleteProgram(openGlHandle);
-    openGlHandle = 0;
-    isLoaded = false;
+    glDeleteProgram(shader->openGlHandle);
+    shader->openGlHandle = 0;
+    shader->isLoaded = false;
 
     return true;
 }

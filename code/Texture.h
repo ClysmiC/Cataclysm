@@ -5,10 +5,9 @@
 
 struct Texture
 {
-	void init(const std::string filename, bool gammaCorrect = false);
+	Texture() = default;
+	Texture(std::string filename, bool gammaCorrect = false);
 
-    bool load();
-    bool unload();
 
 	std::string id;
 	bool isLoaded = false;
@@ -21,4 +20,7 @@ struct Texture
 
     uint32 openGlHandle;
 };
+
+bool load(Texture* texture);
+bool unload(Texture* texture);
 

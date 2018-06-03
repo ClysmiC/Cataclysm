@@ -5,7 +5,6 @@
 
 #include "GL/glew.h"
 
-void
 Cubemap::Cubemap(std::string directory, std::string extension_)
 {
 	this->id = directory;
@@ -145,7 +144,7 @@ bool unload(Cubemap* cubemap)
 void renderCubemap(Cubemap* cubemap, CameraComponent* camera, TransformComponent* cameraXfm)
 {
 	Mat4 w2v = worldToView(cameraXfm);
-	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * mat3ifyInPlace(w2v);
+	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * w2v.mat3ifyInPlace();
 
 	Shader *s = cubemapShader();
 	s->bind();

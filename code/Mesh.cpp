@@ -8,17 +8,19 @@
 #include <unordered_set>
 #include "ResourceManager.h"
 
-void Mesh::init(const std::string filename, bool useMaterialsReferencedInObjFile_)
+void Mesh::Mesh(std::string filename, bool useMaterialsReferencedInObjFile_)
 {
 	this->id = filename;
 	this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile_;
 }
 
-bool Mesh::load()
+bool load(Mesh* mesh)
 {
     using namespace std;
 
-    string filename = ResourceManager::instance().toFullPath(id);
+	if (mesh->isLoaded) return true;
+
+    string filename = ResourceManager::instance().toFullPath(mesh->id);
     assert(filename.substr(filename.length() - 4) == ".obj");
 
     ifstream objFile(filename);
@@ -31,7 +33,7 @@ bool Mesh::load()
     string currentMaterialName = Material::DEFAULT_MATERIAL_NAME;
     vector<Material*> materialsToLoad;
 
-    string relFileDirectory = truncateFilenameAfterDirectory(id);
+    string relFileDirectory = truncateFilenameAfterDirectory(mesh->id);
     
     string currentSubmeshName = "[unnamed]";
     vector<MeshVertex> currentSubmeshVertices;
@@ -73,9 +75,9 @@ bool Mesh::load()
             assert(currentMaterialName != "");
 
             // FLUSH current submesh
-            submeshes.push_back(
+            mesh->submeshes.push_back(
                 Submesh(
-                    id,
+                    mesh->id,
                     currentSubmeshName,
                     currentSubmeshVertices,
                     currentSubmeshIndices,
@@ -96,7 +98,7 @@ bool Mesh::load()
             break;
         }
 
-        if (tokens[0] == "mtllib" && useMaterialsReferencedInObjFile)
+        if (tokens[0] == "mtllib" && mesh->useMaterialsReferencedInObjFile)
         {
             // material file
             currentMaterialFilename = relFileDirectory + tokens[1];
@@ -129,7 +131,7 @@ bool Mesh::load()
             real32 z = stof(tokens[3]);
             vn.push_back(normalize(Vec3(x, y, z)));
         }
-        else if (tokens[0] == "usemtl" && useMaterialsReferencedInObjFile)
+        else if (tokens[0] == "usemtl" && mesh->useMaterialsReferencedInObjFile)
         {
             // init material in resource manager if it doesnt already exist.
             // do NOT load on init.
@@ -226,7 +228,7 @@ bool Mesh::load()
         material->load();
     }
 
-    isLoaded = true;
+    mesh->isLoaded = true;
 
     return true;
 }
@@ -238,10 +240,3 @@ bool Mesh::unload()
     return true;
 }
 
-// void Mesh::draw(const Mat4 &transform, Camera camera)
-// {
-//     for (Submesh s : submeshes)
-//     {
-//         s.draw(transform, camera);
-//     }
-// }
