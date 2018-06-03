@@ -71,6 +71,15 @@ Scene buildTestScene1()
 		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
+	// Set up directional light
+	{
+		Entity dirLight = result.ecs->makeEntity();
+		DirectionalLightComponent* dlc = result.ecs->addDirectionalLightComponent(dirLight);
+
+		dlc->intensity = Vec3(.25, .25, .25);
+		dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
+	}
+
 	//
 	// Set up cubemap
 	//
@@ -123,12 +132,12 @@ void updateCameraXfm(TransformComponent* xfm)
 
 	// Uncomment this (and the asserts) to follow the pitch of the camera when
 	// moving forward or backward.
-	// Vec3 moveForward = normalize(xfm->forward());
+	moveForward = normalize(xfm->forward());
 
-	assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
-	assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
-	assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
-	assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
+	// assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
+	// assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
+	// assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
+	// assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
 	
 	if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
 	{
@@ -145,7 +154,7 @@ void updateCameraXfm(TransformComponent* xfm)
 		xfm->setOrientation(deltaYawAndPitch * xfm->orientation());
 
 		float camRightY = xfm->right().y;
-		assert(FLOAT_EQ(camRightY, 0, EPSILON));
+		// assert(FLOAT_EQ(camRightY, 0, EPSILON));
 	}
 
 	// Translate

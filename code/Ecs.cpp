@@ -7,6 +7,7 @@
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
 
+// ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 
 Ecs::Ecs()
@@ -14,35 +15,32 @@ Ecs::Ecs()
 }
 
 template<class T>
-T*
-Ecs::ComponentList<T>::addComponent(Entity e, Ecs* ecs)
+T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
 {
-	assert(lookup.find(e.id) == lookup.end()); // doesnt already exist
-	assert(size < COMPONENT_ARRAY_SIZE);
+	assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
+	assert(componentList->size < COMPONENT_ARRAY_SIZE);
 
 	T componentToAdd;
     componentToAdd.entity = e;
-	componentToAdd.ecs = ecs;
 	
-	components[size] = componentToAdd;
-	T* result = &(components[size]);
+	componentList->components[size] = componentToAdd;
+	T* result = &(componentList->components[size]);
 
-	size++;
+	componentList->size++;
 
 	ComponentGroup<T> cg;
 	cg.components = result;
 	cg.numComponents = 1;
-	lookup[e.id] = cg;
+	componentList->lookup[e.id] = cg;
 	
 	return result;	
 }
 
 template<class T>
-T*
-Ecs::ComponentList<T>::getComponent(Entity e)
+T* getComponent(Ecs::ComponentList<T>* componentList, Entity e)
 {
-	auto it = lookup.find(e.id);
-	if (it == lookup.end())
+	auto it = componentList->lookup.find(e.id);
+	if (it == componentList->lookup.end())
 	{
 		return nullptr;
 	}
@@ -51,45 +49,42 @@ Ecs::ComponentList<T>::getComponent(Entity e)
 }
 
 template<class T>
-ComponentGroup<T>
-Ecs::ComponentList<T>::addComponents(Entity e, uint32 numComponents, Ecs* ecs)
+ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, uint32 numComponents)
 {
-	assert(lookup.find(e.id) == lookup.end()); // doesnt already exist
+	assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
 	
 	T* firstComponent = nullptr;
 
     for (uint32 i = 0; i < numComponents; i++)
     {
-		assert(size < COMPONENT_ARRAY_SIZE);
+		assert(componentList->size < COMPONENT_ARRAY_SIZE);
 		
         T component;
         component.entity = e;
-		component.ecs = ecs;
 		
-        components[size] = component;
+        componentList->components[componentList->size] = component;
         if (i == 0)
         {
-            firstComponent = &(components[size]);
+            firstComponent = &(componentList->components[componentList->size]);
         }
 		
-		size++;
+		componentList->size++;
     }
 
     ComponentGroup<T> cg;
 	cg.entity = e;
     cg.components = firstComponent;
     cg.numComponents = numComponents;
-    lookup[e.id] = cg;
+    componentList->lookup[e.id] = cg;
 
     return cg;
 }
 
 template<class T>
-ComponentGroup<T>
-Ecs::ComponentList<T>::getComponents(Entity e)
+ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e)
 {
-	auto it = lookup.find(e.id);
-	if (it == lookup.end())
+	auto it = componentList->lookup.find(e.id);
+	if (it == componentList->lookup.end())
 	{
 		ComponentGroup<T> result;
 		result.components = nullptr;
@@ -100,92 +95,97 @@ Ecs::ComponentList<T>::getComponents(Entity e)
 	return it->second;
 }
 
-TransformComponent*
-Ecs::addTransformComponent(Entity e)
+Entity makeEntity(Ecs* ecs)
 {
-	return transforms.addComponent(e, this);
+	Entity result;
+	result.id = Ecs::nextEntityId;
+	result.ecs = ecs;
+	
+	Ecs::nextEntityId++;
+	return result;
 }
 
-TransformComponent*
-Ecs::getTransformComponent(Entity e)
+TransformComponent* addTransformComponent(Entity e)
 {
-	return transforms.getComponent(e);
+	return addComponent(e.ecs->transforms, e);
 }
 
-CameraComponent*
-Ecs::addCameraComponent(Entity e)
+TransformComponent* getTransformComponent(Entity e)
 {
-	return cameras.addComponent(e, this);
+	return getComponent(e.ecs->transforms, e);
 }
 
-CameraComponent*
-Ecs::getCameraComponent(Entity e)
+CameraComponent* addCameraComponent(Entity e)
 {
-	return cameras.getComponent(e);
+	return addComponent(e.ecs->cameras, e);
 }
 
-PortalComponent*
-Ecs::addPortalComponent(Entity e)
+CameraComponent* getCameraComponent(Entity e)
 {
-	return portals.addComponent(e, this);
+	return getComponent( e.ecs->cameras, e);
 }
 
-PortalComponent*
-Ecs::getPortalComponent(Entity e)
+PortalComponent* addPortalComponent(Entity e)
 {
-	return portals.getComponent(e);
+	return addComponent(e.ecs->portals, e);
 }
 
-PointLightComponent*
-Ecs::addPointLightComponent(Entity e)
+PortalComponent* getPortalComponent(Entity e)
 {
-	return pointLights.addComponent(e, this);
+	return getComponent(e.ecs->portals, e);
 }
 
-PointLightComponent*
-Ecs::getPointLightComponent(Entity e)
+DirectionalLightComponent* addDirectionalLightComponent(Entity e)
 {
-	return pointLights.getComponent(e);
+	return addComponent(e.ecs->directionalLights, e);
 }
 
-ComponentGroup<PointLightComponent>
-Ecs::addPointLightComponents(Entity e, uint32 numComponents)
+DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 {
-	return pointLights.addComponents(e, numComponents, this);
+	return getComponent(e.ecs->directionalLights, e);
 }
 
-ComponentGroup<PointLightComponent>
-Ecs::getPointLightComponents(Entity e)
+PointLightComponent* addPointLightComponent(Entity e)
 {
-	return pointLights.getComponents(e);
+	return addComponent(e.ecs->pointLights, e);
 }
 
-RenderComponent*
-Ecs::addRenderComponent(Entity e)
+PointLightComponent* getPointLightComponent(Entity e)
 {
-	return renderComponents.addComponent(e, this);
+	return getComponent(e.ecs->pointLights, e);
 }
 
-RenderComponent*
-Ecs::getRenderComponent(Entity e)
+ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents)
 {
-	return renderComponents.getComponent(e);
+	return addComponents(e.ecs->pointLights, e, numComponents);
 }
 
-ComponentGroup<RenderComponent>
-Ecs::addRenderComponents(Entity e, uint32 numComponents)
+ComponentGroup<PointLightComponent> getPointLightComponents(Entity e)
 {
-	return renderComponents.addComponents(e, numComponents, this);
+	return getComponents(e.ecs->pointLights, e);
 }
 
-ComponentGroup<RenderComponent>
-Ecs::getRenderComponents(Entity e)
+RenderComponent* addRenderComponent(Entity e)
 {
-	return renderComponents.getComponents(e);
+	return addComponent(e.ecs->renderComponents, e);
 }
 
-void
-Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
+RenderComponent* getRenderComponent(Entity e)
+{
+	return getComponent(e.ecs->renderComponents, e);
+}
+
+ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents)
+{
+	return addComponents(e.ecs->renderComponents, e, numComponents);
+}
+
+ComponentGroup<RenderComponent> getRenderComponents(Entity e)
+{
+	return getComponents(e.ecs->renderComponents, e);
+}
+
+void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
 {
 	if (recursionLevel > 0)
 	{
@@ -194,29 +194,29 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 	}
 
 
-	for (uint32 i = 0; i < portals.size; i++)
+	for (uint32 i = 0; i < ecs->portals.size; i++)
 	{
 		//
 		// Calculate the position and orientation of the camera sitting in the dest scene and looking "through" the portal
 		// into the dest scene.
 		//
-		PortalComponent &pc = portals.components[i];
+		PortalComponent &pc = ecs->portals.components[i];
 
-		Vec3 eyeToPortal = pc.sourceSceneXfm.position() - cameraXfm->position();
+		Vec3 eyeToPortal = pc.sourceSceneXfm.position - cameraXfm->position;
 
 		bool isLookingTowardsPortal = dot(eyeToPortal, pc.sourceSceneXfm.forward()) < 0;
 
 		if (!isLookingTowardsPortal) continue;
 
-		Quaternion intoSourcePortalOrientation = axisAngle(pc.sourceSceneXfm.up(), 180) * pc.sourceSceneXfm.orientation();
-		Quaternion outOfDestPortalOrientation = pc.destSceneXfm.orientation();
+		Quaternion intoSourcePortalOrientation = axisAngle(pc.sourceSceneXfm.up(), 180) * pc.sourceSceneXfm.orientation;
+		Quaternion outOfDestPortalOrientation = pc.destSceneXfm.orientation;
 
 		Quaternion transitionFromSourceToDest = relativeRotation(intoSourcePortalOrientation, outOfDestPortalOrientation);
 		
 		Vec3 transformedEyeToPortal = transitionFromSourceToDest * eyeToPortal;
-		Vec3 portalViewpointPos = pc.destSceneXfm.position() - transformedEyeToPortal;
+		Vec3 portalViewpointPos = pc.destSceneXfm.position - transformedEyeToPortal;
 
-		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation();
+		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation;
 		
 		TransformComponent portalViewpointXfm(portalViewpointPos, portalViewpointOrientation);
 
@@ -237,11 +237,11 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 				glStencilMask(0xFF);
 			
-				Shader* portalShader = PortalComponent::shader();
-				uint32 portalVao = PortalComponent::quadVao();
+				Shader* portalShader = portalShader();
+				uint32 portalVao = quadVao();
 
-				Mat4 model = pc.sourceSceneXfm.modelToWorld();
-				Mat4 view = cameraXfm->worldToView();
+				Mat4 model = modelToWorld(&pc.sourceSceneXfm);
+				Mat4 view = worldToView(cameraXfm);
 				Mat4 projection = camera->projectionMatrix;
 
 				portalShader->bind();
@@ -250,7 +250,7 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				portalShader->setMat4("projection", projection);
 				portalShader->setVec3("debugColor", Vec3(0, 1, 0));
 
-				glBindVertexArray(pc.quadVao());
+				glBindVertexArray(portalVao);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glBindVertexArray(0);
 
@@ -268,36 +268,12 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 				if (!debug_hidePortalContents)
 				{
 					glClear(GL_DEPTH_BUFFER_BIT);
-					pc.destScene->renderScene(camera, &portalViewpointXfm, recursionLevel + 1, &pc.destSceneXfm);
+					renderScene(pc.destScene, camera, &portalViewpointXfm, recursionLevel + 1, &pc.destSceneXfm);
 				}
 			}
 		}
 		glDisable(GL_STENCIL_TEST);
 
-
-		// (DEBUG)
-		// Render the portal in the dest scene (if it is the same)
-		// as the source scene
-		//
-		if (pc.destScene == pc.ecs->scene)
-		{
-			Shader* portalShader = PortalComponent::shader();
-			uint32 portalVao = PortalComponent::quadVao();
-
-			Mat4 model = pc.destSceneXfm.modelToWorld();
-			Mat4 view = cameraXfm->worldToView();
-			Mat4 projection = camera->projectionMatrix;
-
-			portalShader->bind();
-			portalShader->setMat4("model", model);
-			portalShader->setMat4("view", view);
-			portalShader->setMat4("projection", projection);
-			portalShader->setVec3("debugColor", Vec3(1, 0, 0));
-
-			glBindVertexArray(pc.quadVao());
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glBindVertexArray(0);
-		}
 			
 		//
 		// Render the portal's depth to the depth buffer
@@ -305,11 +281,11 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 		glDepthFunc(GL_ALWAYS);
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		{
-			Shader* portalShader = PortalComponent::shader();
-			uint32 portalVao = PortalComponent::quadVao();
+			Shader* portalShader = portalSshader();
+			uint32 portalVao = quadVao();
 
-			Mat4 model = pc.sourceSceneXfm.modelToWorld();
-			Mat4 view = cameraXfm->worldToView();
+			Mat4 model = modelToWorld(&pc.sourceSceneXfm);
+			Mat4 view = worldToView(cameraXfm);
 			Mat4 projection = camera->projectionMatrix;
 
 			portalShader->bind();
@@ -318,7 +294,7 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 			portalShader->setMat4("projection", projection);
 			portalShader->setVec3("debugColor", Vec3(0, 1, 0));
 
-			glBindVertexArray(pc.quadVao());
+			glBindVertexArray(portalVao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
 		}
@@ -328,21 +304,20 @@ Ecs::renderContentsOfAllPortals(CameraComponent* camera, TransformComponent* cam
 		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
-		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position(), Vec3(pc.dimensions(), 0.2), camera, cameraXfm);
+		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position, Vec3(pc.dimensions(), 0.2), camera, cameraXfm);
 	}
 }
 
-void
-Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal, TransformComponent* destPortalXfm)
+void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal, TransformComponent* destPortalXfm)
 {
-	for (uint32 i = 0; i < renderComponents.size; i++)
+	for (uint32 i = 0; i < ecs->renderComponents.size; i++)
 	{
-		RenderComponent &rc = renderComponents.components[i];
+		RenderComponent &rc = ecs->renderComponents.components[i];
 		TransformComponent* xfm = getTransformComponent(rc.entity);
 
 		if (renderingViaPortal)
 		{
-			bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
+			bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position - xfm->position) > 0;
 			if (behindDestPortal) continue;
 		}
 
@@ -355,37 +330,56 @@ Ecs::renderAllRenderComponents(CameraComponent* camera, TransformComponent* came
 		if (rc.material->receiveLight)
 		{
 			PointLightComponent* pl = closestPointLight(xfm);
-			TransformComponent* plXfm = getTransformComponent(pl->entity);
-
 			Shader* shader = rc.material->shader;
 			shader->bind();
+
+			if (pl != nullptr)
+			{
+				TransformComponent* plXfm = getTransformComponent(pl->entity);
+
 			
-			shader->setVec3("pointLights[0].posWorld", plXfm->position());
-			shader->setVec3("pointLights[0].intensity", pl->intensity);
-			shader->setFloat("pointLights[0].attenuationConstant", pl->attenuationConstant);
-			shader->setFloat("pointLights[0].attenuationLinear", pl->attenuationLinear);
-			shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+				shader->setVec3("pointLights[0].posWorld", plXfm->position);
+				shader->setVec3("pointLights[0].intensity", pl->intensity);
+				shader->setFloat("pointLights[0].attenuationConstant", pl->attenuationConstant);
+				shader->setFloat("pointLights[0].attenuationLinear", pl->attenuationLinear);
+				shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+			}
+
+			for (uint32 j = 0; j < directionalLights.size; j++)
+			{
+				// TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
+				// How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
+				// in the shader? Is that robust when we change the shader?
+				DirectionalLightComponent* dlc = directionalLights.components + j;
+
+				std::string directionVarName = "directionalLights[" + std::to_string(j) + "].direction";
+				std::string intensityVarName = "directionalLights[" + std::to_string(j) + "].intensity";
+				
+				shader->setVec3(directionVarName, dlc->direction);
+				shader->setVec3(intensityVarName, dlc->intensity);
+			}
 		}
 
-		rc.draw(xfm, camera, cameraXfm);
+		drawRenderComponent(&rc, xfm, camera, cameraXfm);
 	}
 }
 
-PointLightComponent*
-Ecs::closestPointLight(TransformComponent* xfm)
+PointLightComponent* closestPointLight(TransformComponent* xfm)
 {
+	Ecs* ecs = xfm->entity.ecs;
+	
 	PointLightComponent* closest = nullptr;
 	real32 closestDistance = FLT_MAX;
 
-	for (uint32 i = 0; i < pointLights.size; i++)
+	for (uint32 i = 0; i < ecs->pointLights.size; i++)
 	{
-		PointLightComponent* pl = &(pointLights.components[i]);
+		PointLightComponent* pl = &(ecs->pointLights.components[i]);
 		TransformComponent* plXfm = getTransformComponent(pl->entity);
 
 		assert(plXfm != nullptr);
 		if (plXfm == nullptr) continue;
 		
-		real32 distance = xfm->distance(plXfm);
+		real32 distance = distance(xfm->position, plXfm->position);
 
 		if (distance < closestDistance)
 		{
@@ -395,15 +389,4 @@ Ecs::closestPointLight(TransformComponent* xfm)
 	}
 
 	return closest;
-}
-
-Entity
-Ecs::makeEntity()
-{
-	Entity result;
-	result.id = nextEntityId;
-	result.ecs = this;
-	
-	nextEntityId++;
-	return result;
 }

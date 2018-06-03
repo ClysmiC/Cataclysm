@@ -5,5 +5,4 @@
 struct Component
 {
 	Entity entity;
-	Ecs* ecs;
 };

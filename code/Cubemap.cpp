@@ -5,89 +5,79 @@
 
 #include "GL/glew.h"
 
-uint32 Cubemap::vao_ = 0;
-uint32 Cubemap::vbo_ = 0;
-real32 Cubemap::vertices[] = {
-	// positions          
-	-1.0f,  1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	-1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f
-};
-
-uint32
-Cubemap::vao()
-{
-	if (vao_ == 0 || vbo_ == 0)
-	{
-		initVboAndVao();
-	}
-	
-	return vao_;
-}
-
-uint32
-Cubemap::vbo()
-{
-	if (vao_ == 0 || vbo_ == 0)
-	{
-		initVboAndVao();
-	}
-
-	return vbo_;
-}
-
 void
-Cubemap::initVboAndVao()
+Cubemap::Cubemap(std::string directory, std::string extension_)
 {
-	glGenBuffers(1, &vbo_);
-	glGenVertexArrays(1, &vao_);
-	glBindVertexArray(vao_);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+	this->id = directory;
+	this->extension = extension_;
 }
 
-Shader*
-Cubemap::shader()
+uint32 cubemapVao()
+{
+	static uint32 vao;
+
+	if (vao == 0)
+	{
+		uint32 vbo;
+
+		real32 vertices[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			-1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f, -1.0f,
+			1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			1.0f, -1.0f,  1.0f
+		};
+		
+		glGenBuffers(1, &vbo);
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+	}
+
+	return vao;
+}
+
+Shader* cubemapShader()
 {
 	static Shader* theShader = nullptr;
 
@@ -100,22 +90,14 @@ Cubemap::shader()
 	return theShader;
 }
 
-void
-Cubemap::init(const std::string& directory, const std::string& extension_)
-{
-	this->id = directory;
-	this->extension = extension_;
-}
-
-bool
-Cubemap::load()
+bool load(Cubemap* cubemap)
 {
 	using namespace std;
 	
-	if (isLoaded) return true;
+	if (cubemap->isLoaded) return true;
 
-	glGenTextures(1, &openGlHandle);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, openGlHandle);
+	glGenTextures(1, &cubemap->openGlHandle);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->openGlHandle);
 
 	std::string filenames[] = { "right", "left", "top", "bottom", "front", "back" };
 
@@ -124,7 +106,7 @@ Cubemap::load()
 	
 	for (std::string filename : filenames)
 	{
-		std::string fullName = ResourceManager::instance().toFullPath(this->id + "/" + filename) + this->extension;
+		std::string fullName = ResourceManager::instance().toFullPath(cubemap->id + "/" + filename) + cubemap->extension;
 		
 		int w = 0, h = 0, channels = 0;
 		unsigned char *data = stbi_load(fullName.c_str(), &w, &h, &channels, 0);
@@ -144,30 +126,28 @@ Cubemap::load()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	
-    isLoaded = true;
+    cubemap->isLoaded = true;
     return true;
 }
 
-bool
-Cubemap::unload()
+bool unload(Cubemap* cubemap)
 {
-	assert(isLoaded);
+	assert(cubemap->isLoaded);
 
     // Unload texture from OpenGL
-    glDeleteTextures(1, &openGlHandle);
+    glDeleteTextures(1, &cubemap->openGlHandle);
 
-    isLoaded = false;
+    cubemap->isLoaded = false;
 
     return true;
 }
 
-void
-Cubemap::render(CameraComponent* camera, TransformComponent* cameraXfm)
+void renderCubemap(Cubemap* cubemap, CameraComponent* camera, TransformComponent* cameraXfm)
 {
-	Mat4 w2v = cameraXfm->worldToView();
-	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * w2v.mat3ifyInPlace();
+	Mat4 w2v = worldToView(cameraXfm);
+	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * mat3ifyInPlace(w2v);
 
-	Shader *s = shader();
+	Shader *s = cubemapShader();
 	s->bind();
 			
 	glActiveTexture(GL_TEXTURE0);
@@ -175,8 +155,8 @@ Cubemap::render(CameraComponent* camera, TransformComponent* cameraXfm)
 	s->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
 
 	glDepthMask(GL_FALSE);
-	glBindVertexArray(vao());
-	glBindTexture(GL_TEXTURE_CUBE_MAP, openGlHandle);
+	glBindVertexArray(cubemapVao());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->openGlHandle);
 			
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 			

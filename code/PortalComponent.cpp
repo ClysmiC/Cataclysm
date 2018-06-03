@@ -6,21 +6,7 @@
 
 PortalComponent::PortalComponent() {}
 
-uint32 PortalComponent::quadVbo_ = 0;
-uint32 PortalComponent::quadVao_ = 0;
-real32 PortalComponent::quadVertices[] = {
-	// positions          
-	-0.5f, -0.5f, 0.0f,
-	 0.5f,  0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-
-	-0.5f, -0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f,
-	 0.5f,  0.5f, 0.0f
-};
-
-Shader*
-PortalComponent::shader()
+Shader* portalShader()
 {
 	static Shader* shader_ = nullptr;
 
@@ -32,53 +18,16 @@ PortalComponent::shader()
 	return shader_;
 }
 
-uint32
-PortalComponent::quadVbo()
+void setDimensions(PortalComponent* portal, Vec2 dimensions)
 {
-	if (quadVbo_ == 0 || quadVao_ == 0)
-	{
-		initQuadVboAndVao();
-	}
-
-	return quadVbo_;
+	Vec3 newScale(dimensions.x, dimensions.y, 1);
+	portal.sourceSceneXfm.scale = newScale;
+	portal.destSceneXfm.scale = newScale;
 }
 
-uint32
-PortalComponent::quadVao()
+Vec2 getDimensions(PortalComponent* portal)
 {
-	if (quadVbo_ == 0 || quadVao_ == 0)
-	{
-		initQuadVboAndVao();
-	}
+	Vec2 result = Vec2(portal.sourceSceneXfm.scale.x, portal.sourceSceneXfm.scale.y);
 
-	return quadVao_;
-}
-
-void
-PortalComponent::initQuadVboAndVao()
-{
-	glGenBuffers(1, &quadVbo_);
-	glGenVertexArrays(1, &quadVao_);
-	glBindVertexArray(quadVao_);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
-}
-
-
-Vec2
-PortalComponent::dimensions()
-{
-	return dimensions_;
-}
-
-void
-PortalComponent::setDimensions(Vec2 dim)
-{
-
-	sourceSceneXfm.setScale(dim.x, dim.y, 1);
-	destSceneXfm.setScale(dim.x, dim.y, 1);
-	
-	dimensions_ = dim;
+	return result;
 }

@@ -8,27 +8,19 @@
 
 struct Cubemap
 {
-	static real32 vertices[];
-	static uint32 vao();
-	static uint32 vbo();
-	static Shader* shader();
-	
-	void init(const std::string& directory, const std::string& extension);
-
-	bool load();
-	bool unload();
+	Cubemap();
+	Cubemap(std::string directoryName, std::string extension_);
 
 	std::string id;
 	std::string extension;
-	
-	bool isLoaded = false;
-
 	uint32 openGlHandle;
-
-	void render(CameraComponent* camera, TransformComponent* cameraXfm);
-
-private:
-	static void initVboAndVao();
-	static uint32 vbo_;
-	static uint32 vao_;
+	bool isLoaded = false;
 };
+
+Shader* cubemapShader();
+
+bool load(Cubemap* cubemap);
+bool unload(Cubemap* cubemap);
+void renderCubemap(Cubemap* cubemap, CameraComponent* camera, TransformComponent* cameraXfm);
+
+uint32 cubemapVao();

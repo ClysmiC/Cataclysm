@@ -135,18 +135,6 @@ bool Material::bind()
         textureUnitIndex++;
     }
 
-    v = glGetError();
-
-	// TEMP: lighting
-	shader->setVec3("directionalLights[0].direction", Vec3(.2, 0, -1));
-	shader->setVec3("directionalLights[0].ambientIntensity", Vec3(.1, .1, .1));
-	shader->setVec3("directionalLights[0].diffuseIntensity", Vec3(.4, .4, .4));
-	shader->setVec3("directionalLights[0].specularIntensity", Vec3(.5, .5, .5));
-
-    shader->setVec3("pointLights[0].ambientIntensity", Vec3(0, 0, 0));
-    shader->setVec3("pointLights[0].diffuseIntensity", Vec3(0, 0, 0));
-    shader->setVec3("pointLights[0].specularIntensity", Vec3(0, 0, 0));
-
     return true;
 }
 

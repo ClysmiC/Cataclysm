@@ -67,7 +67,8 @@ void Shader::setVec2(const std::string & name, real32 x, real32 y) const
 void Shader::setVec3(const std::string & name, Vec3 value) const
 {
     assert(isLoaded); if (!isLoaded) return;
-    glUniform3f(glGetUniformLocation(openGlHandle, name.c_str()), value.x, value.y, value.z);
+	auto loc = glGetUniformLocation(openGlHandle, name.c_str());
+    glUniform3f(loc, value.x, value.y, value.z);
 }
 
 void Shader::setVec3(const std::string & name, real32 x, real32 y, real32 z) const
