@@ -6,7 +6,7 @@
 
 struct Scene
 {
-	Ecs* ecs;
+	Ecs ecs;
 	Cubemap* cubemap;
 	
 	Scene();

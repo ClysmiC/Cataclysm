@@ -32,10 +32,20 @@ void updateLastKeys()
 	}
 }
 
-Scene buildTestScene1()
+Scene* makeScene(Game* game)
 {
-	Scene result;
+	assert(game->numScenes < MAX_SCENES);
+	Scene* result = game->scenes + game->numScenes;
 	
+	new (result) Scene();
+
+	game->numScenes++;
+
+	return result;
+}
+
+void buildTestScene1(Scene* scene)
+{
 	ResourceManager& rm = ResourceManager::instance();
 	
 	Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, true);
@@ -43,7 +53,7 @@ Scene buildTestScene1()
 
 	// Set up light
 	{
-		Entity light = makeEntity(result.ecs, "light");
+		Entity light = makeEntity(&scene->ecs, "light");
         Mesh* m = bulb;
         
         TransformComponent *tc = addTransformComponent(light);
@@ -73,7 +83,7 @@ Scene buildTestScene1()
 
 	// Set up directional light
 	{
-		Entity dirLight = makeEntity(result.ecs, "directional light");
+		Entity dirLight = makeEntity(&scene->ecs, "directional light");
 		DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
 
 		dlc->intensity = Vec3(.25, .25, .25);
@@ -84,7 +94,7 @@ Scene buildTestScene1()
 	// Set up cubemap
 	//
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
-	addCubemap(&result, cm);
+	addCubemap(scene, cm);
 
 	//
 	// Set up hex meshes
@@ -96,7 +106,7 @@ Scene buildTestScene1()
 
 	for (uint32 i = 0; i < hexCount; i++)
 	{
-		Entity e = makeEntity(result.ecs, "hex");
+		Entity e = makeEntity(&scene->ecs, "hex");
 		TransformComponent *tc = addTransformComponent(e);
 		tc->position = hexPositions[i];
 		
@@ -108,8 +118,6 @@ Scene buildTestScene1()
 			new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
 		}
 	}
-
-	return result;
 }
 
 void updateCameraXfm(TransformComponent* xfm)
@@ -197,10 +205,12 @@ int WinMain()
 	DebugDraw::instance().init();
 	real32 lastTimeMs = 0;
 
-	Scene testScene1 = buildTestScene1();
+	Game* game = new Game();
+	Scene* testScene1 = makeScene(game);
+	buildTestScene1(testScene1);
 	
 	// Set up camera
-	Entity camera = makeEntity(testScene1.ecs, "camera");
+	Entity camera = makeEntity(&testScene1->ecs, "camera");
 	TransformComponent* cameraXfm = addTransformComponent(camera);
 	CameraComponent* cameraComponent = addCameraComponent(camera);
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
@@ -211,12 +221,12 @@ int WinMain()
 	// Set up portal
 	//
 	{
-		Entity portal = makeEntity(testScene1.ecs, "portal");
+		Entity portal = makeEntity(&testScene1->ecs, "portal");
 		
 		PortalComponent* pc = addPortalComponent(portal);
 		setDimensions(pc, Vec2(2, 3));
-		pc->sourceScene = &testScene1;
-		pc->destScene = &testScene1;
+		pc->sourceScene = testScene1;
+		pc->destScene = testScene1;
 
 		pc->sourceSceneXfm.position = Vec3(0, 0, -5);
 		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
@@ -243,7 +253,7 @@ int WinMain()
 			debug_hidePortalContents = !debug_hidePortalContents;
 		}
 
-		renderScene(&testScene1, cameraComponent, cameraXfm);
+		renderScene(testScene1, cameraComponent, cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 

@@ -2,8 +2,7 @@
 
 Scene::Scene()
 {
-	ecs = new Ecs();
-	ecs->scene = this;
+	ecs.scene = this;
 	cubemap = nullptr;
 }
 
@@ -18,6 +17,6 @@ void renderScene(Scene* scene, CameraComponent* camera, TransformComponent* came
 	
 	if (scene->cubemap != nullptr) renderCubemap(scene->cubemap, camera, cameraXfm);
 
-	renderContentsOfAllPortals(scene->ecs, camera, cameraXfm, recursionLevel);
-	renderAllRenderComponents(scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
+	renderContentsOfAllPortals(&scene->ecs, camera, cameraXfm, recursionLevel);
+	renderAllRenderComponents(&scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
 }
