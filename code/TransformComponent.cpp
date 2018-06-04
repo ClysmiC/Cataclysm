@@ -16,7 +16,7 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
 }
 
 TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale)
-	: position_(position), orientation_(orientation), scale_(scale)
+	: position(position), orientation(orientation), scale(scale)
 {
 }
 

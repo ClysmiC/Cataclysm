@@ -1,6 +1,7 @@
 #pragma once
 
 #include "als_math.h"
+#include <string>
 
 struct TransformComponent;
 struct CameraComponent;
@@ -12,6 +13,7 @@ struct Entity
 {
 	uint32 id;
     Ecs* ecs;
+	std::string friendlyName;
 };
 
 

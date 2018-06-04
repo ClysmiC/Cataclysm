@@ -8,7 +8,7 @@
 struct RenderComponent : public Component
 {
 	RenderComponent() = default;
-	RenderComponent(Submesh* submesh);
+	RenderComponent(Entity entity, Submesh* submesh);
 
 	SubmeshOpenGlInfo submeshOpenGlInfo;
 

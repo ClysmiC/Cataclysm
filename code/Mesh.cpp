@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include "ResourceManager.h"
 
-void Mesh::Mesh(std::string filename, bool useMaterialsReferencedInObjFile_)
+Mesh::Mesh(std::string filename, bool useMaterialsReferencedInObjFile_)
 {
 	this->id = filename;
 	this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile_;
@@ -225,7 +225,7 @@ bool load(Mesh* mesh)
     // Load all materials that we discovered
     for (Material* material : materialsToLoad)
     {
-        material->load();
+        load(material);
     }
 
     mesh->isLoaded = true;
@@ -233,10 +233,9 @@ bool load(Mesh* mesh)
     return true;
 }
 
-bool Mesh::unload()
+bool unload(Mesh* mesh)
 {
     // TODO: what to do... remove self from resource manager?
-    isLoaded = false;
-    return true;
+    return false;
 }
 

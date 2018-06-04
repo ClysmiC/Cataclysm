@@ -4,8 +4,6 @@
 #include "ResourceManager.h"
 #include "Ecs.h"
 
-PortalComponent::PortalComponent() {}
-
 Shader* portalShader()
 {
 	static Shader* shader_ = nullptr;
@@ -21,13 +19,13 @@ Shader* portalShader()
 void setDimensions(PortalComponent* portal, Vec2 dimensions)
 {
 	Vec3 newScale(dimensions.x, dimensions.y, 1);
-	portal.sourceSceneXfm.scale = newScale;
-	portal.destSceneXfm.scale = newScale;
+	portal->sourceSceneXfm.scale = newScale;
+	portal->destSceneXfm.scale = newScale;
 }
 
 Vec2 getDimensions(PortalComponent* portal)
 {
-	Vec2 result = Vec2(portal.sourceSceneXfm.scale.x, portal.sourceSceneXfm.scale.y);
+	Vec2 result = Vec2(portal->sourceSceneXfm.scale.x, portal->sourceSceneXfm.scale.y);
 
 	return result;
 }

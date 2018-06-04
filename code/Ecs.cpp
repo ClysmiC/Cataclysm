@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "assert.h"
 
+#include "Quad.h"
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
 
@@ -19,8 +20,8 @@ T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
 	T componentToAdd;
     componentToAdd.entity = e;
 	
-	componentList->components[size] = componentToAdd;
-	T* result = &(componentList->components[size]);
+	componentList->components[componentList->size] = componentToAdd;
+	T* result = &(componentList->components[componentList->size]);
 
 	componentList->size++;
 
@@ -91,11 +92,12 @@ ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e)
 	return it->second;
 }
 
-Entity makeEntity(Ecs* ecs)
+Entity makeEntity(Ecs* ecs, std::string friendlyName)
 {
 	Entity result;
 	result.id = Ecs::nextEntityId;
 	result.ecs = ecs;
+	result.friendlyName = friendlyName;
 	
 	Ecs::nextEntityId++;
 	return result;
@@ -103,82 +105,82 @@ Entity makeEntity(Ecs* ecs)
 
 TransformComponent* addTransformComponent(Entity e)
 {
-	return addComponent(e.ecs->transforms, e);
+	return addComponent(&e.ecs->transforms, e);
 }
 
 TransformComponent* getTransformComponent(Entity e)
 {
-	return getComponent(e.ecs->transforms, e);
+	return getComponent(&e.ecs->transforms, e);
 }
 
 CameraComponent* addCameraComponent(Entity e)
 {
-	return addComponent(e.ecs->cameras, e);
+	return addComponent(&e.ecs->cameras, e);
 }
 
 CameraComponent* getCameraComponent(Entity e)
 {
-	return getComponent( e.ecs->cameras, e);
+	return getComponent(&e.ecs->cameras, e);
 }
 
 PortalComponent* addPortalComponent(Entity e)
 {
-	return addComponent(e.ecs->portals, e);
+	return addComponent(&e.ecs->portals, e);
 }
 
 PortalComponent* getPortalComponent(Entity e)
 {
-	return getComponent(e.ecs->portals, e);
+	return getComponent(&e.ecs->portals, e);
 }
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e)
 {
-	return addComponent(e.ecs->directionalLights, e);
+	return addComponent(&e.ecs->directionalLights, e);
 }
 
 DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 {
-	return getComponent(e.ecs->directionalLights, e);
+	return getComponent(&e.ecs->directionalLights, e);
 }
 
 PointLightComponent* addPointLightComponent(Entity e)
 {
-	return addComponent(e.ecs->pointLights, e);
+	return addComponent(&e.ecs->pointLights, e);
 }
 
 PointLightComponent* getPointLightComponent(Entity e)
 {
-	return getComponent(e.ecs->pointLights, e);
+	return getComponent(&e.ecs->pointLights, e);
 }
 
 ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents)
 {
-	return addComponents(e.ecs->pointLights, e, numComponents);
+	return addComponents(&e.ecs->pointLights, e, numComponents);
 }
 
 ComponentGroup<PointLightComponent> getPointLightComponents(Entity e)
 {
-	return getComponents(e.ecs->pointLights, e);
+	return getComponents(&e.ecs->pointLights, e);
 }
 
 RenderComponent* addRenderComponent(Entity e)
 {
-	return addComponent(e.ecs->renderComponents, e);
+	return addComponent(&e.ecs->renderComponents, e);
 }
 
 RenderComponent* getRenderComponent(Entity e)
 {
-	return getComponent(e.ecs->renderComponents, e);
+	return getComponent(&e.ecs->renderComponents, e);
 }
 
 ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents)
 {
-	return addComponents(e.ecs->renderComponents, e, numComponents);
+	return addComponents(&e.ecs->renderComponents, e, numComponents);
 }
 
 ComponentGroup<RenderComponent> getRenderComponents(Entity e)
 {
-	return getComponents(e.ecs->renderComponents, e);
+	return getComponents(&e.ecs->renderComponents, e);
 }
 
 void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
@@ -233,18 +235,18 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 				glStencilMask(0xFF);
 			
-				Shader* portalShader = portalShader();
+				Shader* shader = portalShader();
 				uint32 portalVao = quadVao();
 
 				Mat4 model = modelToWorld(&pc.sourceSceneXfm);
 				Mat4 view = worldToView(cameraXfm);
 				Mat4 projection = camera->projectionMatrix;
 
-				portalShader->bind();
-				portalShader->setMat4("model", model);
-				portalShader->setMat4("view", view);
-				portalShader->setMat4("projection", projection);
-				portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+				bind(shader);
+				setMat4(shader, "model", model);
+				setMat4(shader, "view", view);
+				setMat4(shader, "projection", projection);
+				setVec3(shader, "debugColor", Vec3(0, 1, 0));
 
 				glBindVertexArray(portalVao);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -277,18 +279,18 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 		glDepthFunc(GL_ALWAYS);
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		{
-			Shader* portalShader = portalSshader();
+			Shader* shader = portalShader();
 			uint32 portalVao = quadVao();
 
 			Mat4 model = modelToWorld(&pc.sourceSceneXfm);
 			Mat4 view = worldToView(cameraXfm);
 			Mat4 projection = camera->projectionMatrix;
 
-			portalShader->bind();
-			portalShader->setMat4("model", model);
-			portalShader->setMat4("view", view);
-			portalShader->setMat4("projection", projection);
-			portalShader->setVec3("debugColor", Vec3(0, 1, 0));
+			bind(shader);
+			setMat4(shader, "model", model);
+			setMat4(shader, "view", view);
+			setMat4(shader, "projection", projection);
+			setVec3(shader, "debugColor", Vec3(0, 1, 0));
 
 			glBindVertexArray(portalVao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -300,7 +302,7 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
-		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position, Vec3(pc.dimensions(), 0.2), camera, cameraXfm);
+		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position, Vec3(getDimensions(&pc), 0.2), camera, cameraXfm);
 	}
 }
 
@@ -327,32 +329,32 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, TransformCompo
 		{
 			PointLightComponent* pl = closestPointLight(xfm);
 			Shader* shader = rc.material->shader;
-			shader->bind();
+			bind(shader);
 
 			if (pl != nullptr)
 			{
 				TransformComponent* plXfm = getTransformComponent(pl->entity);
 
 			
-				shader->setVec3("pointLights[0].posWorld", plXfm->position);
-				shader->setVec3("pointLights[0].intensity", pl->intensity);
-				shader->setFloat("pointLights[0].attenuationConstant", pl->attenuationConstant);
-				shader->setFloat("pointLights[0].attenuationLinear", pl->attenuationLinear);
-				shader->setFloat("pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+				setVec3(shader, "pointLights[0].posWorld", plXfm->position);
+				setVec3(shader, "pointLights[0].intensity", pl->intensity);
+				setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
+				setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
+				setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
 			}
 
-			for (uint32 j = 0; j < directionalLights.size; j++)
+			for (uint32 j = 0; j < ecs->directionalLights.size; j++)
 			{
 				// TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
 				// How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
 				// in the shader? Is that robust when we change the shader?
-				DirectionalLightComponent* dlc = directionalLights.components + j;
+				DirectionalLightComponent* dlc = ecs->directionalLights.components + j;
 
 				std::string directionVarName = "directionalLights[" + std::to_string(j) + "].direction";
 				std::string intensityVarName = "directionalLights[" + std::to_string(j) + "].intensity";
 				
-				shader->setVec3(directionVarName, dlc->direction);
-				shader->setVec3(intensityVarName, dlc->intensity);
+				setVec3(shader, directionVarName, dlc->direction);
+				setVec3(shader, intensityVarName, dlc->intensity);
 			}
 		}
 
@@ -375,11 +377,11 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
 		assert(plXfm != nullptr);
 		if (plXfm == nullptr) continue;
 		
-		real32 distance = distance(xfm->position, plXfm->position);
+		real32 dist = distance(xfm->position, plXfm->position);
 
-		if (distance < closestDistance)
+		if (dist < closestDistance)
 		{
-			closestDistance = distance;
+			closestDistance = dist;
 			closest = pl;
 		}
 	}

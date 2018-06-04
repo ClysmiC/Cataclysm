@@ -5,7 +5,7 @@ uint32 quadVao()
 {
 	static uint32 vao;
 
-	if (vao = 0)
+	if (vao == 0)
 	{
 		uint32 vbo;
 

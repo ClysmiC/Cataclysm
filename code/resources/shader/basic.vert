@@ -23,6 +23,8 @@ out V2F {
 
 void main()
 {
+	v2f.debugColor = bitangent;
+	
     gl_Position = projection * view * model * vec4(position, 1.0);
 	
 	v2f.posWorld = (model * vec4(position, 1.0)).xyz;

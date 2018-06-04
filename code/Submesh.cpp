@@ -21,19 +21,19 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
 	//
 	// Setup OpenGL stuff
 	//
-	openGlInfo.indicesSize = indices.size();
+	this->openGlInfo.indicesSize = this->indices.size();
 	
-    glGenVertexArrays(1, &openGlInfo.vao);
-    glGenBuffers(1, &openGlInfo.vbo);
-    glGenBuffers(1, &openGlInfo.ebo);
+    glGenVertexArrays(1, &this->openGlInfo.vao);
+    glGenBuffers(1, &this->openGlInfo.vbo);
+    glGenBuffers(1, &this->openGlInfo.ebo);
 
     glBindVertexArray(openGlInfo.vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, openGlInfo.vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(MeshVertex), vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, this->openGlInfo.vbo);
+    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MeshVertex), this->vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openGlInfo.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->openGlInfo.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(uint32), this->indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position));

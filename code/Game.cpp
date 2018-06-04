@@ -43,19 +43,19 @@ Scene buildTestScene1()
 
 	// Set up light
 	{
-		Entity light = makeEntity(result.ecs);
+		Entity light = makeEntity(result.ecs, "light");
         Mesh* m = bulb;
         
         TransformComponent *tc = addTransformComponent(light);
-        tc->setPosition(0, 0, -2);
-        tc->setScale(.35);
+        tc->position = Vec3(0, 0, -2);
+        tc->scale = Vec3(.35);
 		
         ComponentGroup<RenderComponent> rcc = addRenderComponents(light, m->submeshes.size());
 
         for(uint32 i = 0; i < rcc.numComponents; i++)
         {
             RenderComponent *rc = rcc.components + i;
-			new (rc) RenderComponent(&(m->submeshes[i]));
+			new (rc) RenderComponent(light, &(m->submeshes[i]));
         }
 
 		PointLightComponent *plc = addPointLightComponent(light);
@@ -67,13 +67,13 @@ Scene buildTestScene1()
 		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
 		bulb->submeshes[1].material->receiveLight = false;
 		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
-		clearUniformrs(bulb->submeshes[1].material);
+		clearUniforms(bulb->submeshes[1].material);
 		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
 	}
 
 	// Set up directional light
 	{
-		Entity dirLight = makeEntity(result.ecs);
+		Entity dirLight = makeEntity(result.ecs, "directional light");
 		DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
 
 		dlc->intensity = Vec3(.25, .25, .25);
@@ -84,7 +84,7 @@ Scene buildTestScene1()
 	// Set up cubemap
 	//
 	Cubemap* cm = rm.initCubemap("cubemap/watersky", ".jpg", true);
-	addCubemap(result, cm);
+	addCubemap(&result, cm);
 
 	//
 	// Set up hex meshes
@@ -96,7 +96,7 @@ Scene buildTestScene1()
 
 	for (uint32 i = 0; i < hexCount; i++)
 	{
-		Entity e = makeEntity(result.ecs);
+		Entity e = makeEntity(result.ecs, "hex");
 		TransformComponent *tc = addTransformComponent(e);
 		tc->position = hexPositions[i];
 		
@@ -105,7 +105,7 @@ Scene buildTestScene1()
 		for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
 		{
 			RenderComponent *rc = rcc.components + j;
-			new (rc) RenderComponent(&(hexMesh->submeshes[j]));
+			new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
 		}
 	}
 
@@ -184,7 +184,7 @@ int WinMain()
 	
 	Window window;
 
-	if(initGlfwWindowwindow(&window, windowWidth, windowHeight) < 0)
+	if(!initGlfwWindow(&window, windowWidth, windowHeight))
 	{
 		return -1;
 	}
@@ -200,7 +200,7 @@ int WinMain()
 	Scene testScene1 = buildTestScene1();
 	
 	// Set up camera
-	Entity camera = makeEntity(testScene1.ecs);
+	Entity camera = makeEntity(testScene1.ecs, "camera");
 	TransformComponent* cameraXfm = addTransformComponent(camera);
 	CameraComponent* cameraComponent = addCameraComponent(camera);
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
@@ -211,7 +211,7 @@ int WinMain()
 	// Set up portal
 	//
 	{
-		Entity portal = makeEntity(testScene1.ecs);
+		Entity portal = makeEntity(testScene1.ecs, "portal");
 		
 		PortalComponent* pc = addPortalComponent(portal);
 		setDimensions(pc, Vec2(2, 3));

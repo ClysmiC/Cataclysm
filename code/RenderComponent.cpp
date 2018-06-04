@@ -1,7 +1,8 @@
 #include "RenderComponent.h"
 #include "GL/glew.h"
 
-void RenderComponent::RenderComponent(Submesh* submesh)
+RenderComponent::RenderComponent(Entity entity, Submesh* submesh)
+	: Component(entity)
 {
     submeshOpenGlInfo = submesh->openGlInfo;
     material = submesh->material;
@@ -9,15 +10,15 @@ void RenderComponent::RenderComponent(Submesh* submesh)
 
 void drawRenderComponent(RenderComponent* renderComponent, TransformComponent *xfm, CameraComponent* camera, TransformComponent *cameraXfm)
 {
-	Mat4 m2w = xfm->modelToWorld();
-	Mat4 w2v = cameraXfm->worldToView();
+	Mat4 m2w = modelToWorld(xfm);;
+	Mat4 w2v = worldToView(cameraXfm);
 	
-    renderComponent->material->bind();
-    renderComponent->material->shader->setMat4("model", m2w);
-    renderComponent->material->shader->setMat4("view", w2v);
-    renderComponent->material->shader->setMat4("projection", camera->projectionMatrix);
+    bind(renderComponent->material);
+    setMat4(renderComponent->material->shader, "model", m2w);
+    setMat4(renderComponent->material->shader, "view", w2v);
+    setMat4(renderComponent->material->shader, "projection", camera->projectionMatrix);
 
     glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
-    glDrawElements(GL_TRIANGLES, submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, renderComponent->submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

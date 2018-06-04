@@ -129,13 +129,13 @@ DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Tr
 	transform.scaleInPlace(dimensions);
 	transform.translateInPlace(center);
 
-	Mat4 view = cameraXfm->worldToView();
+	Mat4 view = worldToView(cameraXfm);
 	
-	shader->bind();
-	shader->setMat4("model", transform);
-	shader->setMat4("view", view);
-	shader->setMat4("projection", camera->projectionMatrix);
-	shader->setVec3("debugColor", color);
+	bind(shader);
+	setMat4(shader, "model", transform);
+	setMat4(shader, "view", view);
+	setMat4(shader, "projection", camera->projectionMatrix);
+	setVec3(shader, "debugColor", color);
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);

@@ -147,11 +147,11 @@ void renderCubemap(Cubemap* cubemap, CameraComponent* camera, TransformComponent
 	Mat4 viewProjectionSansTranslation = camera->projectionMatrix * w2v.mat3ifyInPlace();
 
 	Shader *s = cubemapShader();
-	s->bind();
+	bind(s);
 			
 	glActiveTexture(GL_TEXTURE0);
-	s->setInt("cubemap", 0);
-	s->setMat4("viewProjectionSansTranslation", viewProjectionSansTranslation);
+	setInt(s, "cubemap", 0);
+	setMat4(s, "viewProjectionSansTranslation", viewProjectionSansTranslation);
 
 	glDepthMask(GL_FALSE);
 	glBindVertexArray(cubemapVao());

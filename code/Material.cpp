@@ -47,14 +47,14 @@ bool load(Material* material)
     std::string fullFilename = ResourceManager::instance().toFullPath(material->filename);
     if (fullFilename.substr(fullFilename.length() - 4) == ".mtl")
     {
-        isLoaded = loadFromMtlFile(material, fullFilename);
+        material->isLoaded = loadFromMtlFile(material, fullFilename);
     }
     else
     {
-        isLoaded = true;
+        material->isLoaded = true;
     }
 
-    return isLoaded;
+    return material->isLoaded;
 }
 
 bool unload(Material* material)
@@ -81,47 +81,47 @@ bool bind(Material* material)
 {
 	Shader* shader = material->shader;
 	
-    if (!isLoaded) return false;
+    if (!material->isLoaded) return false;
     assert(shader != nullptr);
     if (shader == nullptr) return false;
 
-    bool success = shader->bind();
+    bool success = bind(shader);
 
     if (!success) return false;
 
     for (auto kvp : material->intUniforms)
     {
-        shader->setInt(kvp.first, kvp.second);
+        setInt(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->boolUniforms)
     {
-        shader->setBool(kvp.first, kvp.second);
+        setBool(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->floatUniforms)
     {
-        shader->setFloat(kvp.first, kvp.second);
+        setFloat(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->vec2Uniforms)
     {
-        shader->setVec2(kvp.first, kvp.second);
+        setVec2(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->vec3Uniforms)
     {
-        shader->setVec3(kvp.first, kvp.second);
+        setVec3(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->vec4Uniforms)
     {
-        shader->setVec4(kvp.first, kvp.second);
+        setVec4(shader, kvp.first, kvp.second);
     }
 
     for (auto kvp : material->mat4Uniforms)
     {
-        shader->setMat4(kvp.first, kvp.second);
+        setMat4(shader, kvp.first, kvp.second);
     }
 
     auto v = glGetError();
@@ -129,12 +129,12 @@ bool bind(Material* material)
     uint32 textureUnit = GL_TEXTURE0;
     uint32 textureUnitIndex = 0;
 
-    for (auto kvp : textureUniforms)
+    for (auto kvp : material->textureUniforms)
     {
         glActiveTexture(textureUnit);
         glBindTexture(GL_TEXTURE_2D, kvp.second->openGlHandle);
-        shader->setInt(kvp.first, textureUnitIndex);
-
+        setInt(shader, kvp.first, textureUnitIndex);
+		
         textureUnit++;
         textureUnitIndex++;
     }
@@ -154,25 +154,28 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
 	
     using namespace std;
 
-	lambda handleTexture = [](Material* m, std::string texType, std::string texFilename) -> bool
+	struct
 	{
-		using namespace std;
+		bool operator() (Material* m, std::string texType, std::string texFilename)
+		{
+			using namespace std;
 
-		// Note: texFilename is relative to this material's directory, not the resource directory
+			// Note: texFilename is relative to this material's directory, not the resource directory
 
-		string relFileDirectory = truncateFilenameAfterDirectory(filename);
-		string texRelFilename = relFileDirectory + texFilename;
+			string relFileDirectory = truncateFilenameAfterDirectory(m->filename);
+			string texRelFilename = relFileDirectory + texFilename;
 
-		bool gammaCorrect = texType == "material.diffuseTex";
-		Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
+			bool gammaCorrect = texType == "material.diffuseTex";
+			Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
 
-		assert(tex != nullptr);
-		if (tex == nullptr) return false;
+			assert(tex != nullptr);
+			if (tex == nullptr) return false;
 
-		m->textureUniforms[texType] = tex;
+			m->textureUniforms[texType] = tex;
 
-		return true;
-	}
+			return true;
+		}
+	} handleTexture;
 
     bool foundSelfInMtlFile = false;
 
@@ -211,8 +214,9 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
         {
             if (currentMaterial != nullptr)
             {
-                bool success = ResourceManager::instance().initShader("shader/basic.vert", "shader/basic.frag", true);;
-                assert(success);
+                currentMaterial->shader = ResourceManager::instance().initShader("shader/basic.vert", "shader/basic.frag", true);;
+				assert(currentMaterial->shader != nullptr);
+				assert(currentMaterial->shader->isLoaded);
 
                 currentMaterial->isLoaded = true;
             }
@@ -272,23 +276,23 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
         }
         else if (tokens[0] == "map_Bump")
         {
-            handleTexture(*currentMaterial, "material.normalTex", tokens[1]);
+            handleTexture(currentMaterial, "material.normalTex", tokens[1]);
         }
         else if (tokens[0] == "map_Ka")
         {
-            handleTexture(*currentMaterial, "material.ambientTex", tokens[1]);
+            handleTexture(currentMaterial, "material.ambientTex", tokens[1]);
         }
         else if (tokens[0] == "map_Kd")
         {
-            handleTexture(*currentMaterial, "material.diffuseTex", tokens[1]);
+            handleTexture(currentMaterial, "material.diffuseTex", tokens[1]);
         }
         else if (tokens[0] == "map_Ks")
         {
-            handleTexture(*currentMaterial, "material.specularTex", tokens[1]);
+            handleTexture(currentMaterial, "material.specularTex", tokens[1]);
         }
         else if (tokens[0] == "map_Ns")
         {
-            // handleTexture(*currentMaterial, "material.specularExponentTex", tokens[1]);
+            // handleTexture(currentMaterial, "material.specularExponentTex", tokens[1]);
         }
 
         if (!eofFlush)

@@ -10,6 +10,8 @@ struct Scene;
 
 struct PortalComponent : public Component
 {
+	PortalComponent() = default;
+	
 	Scene *sourceScene;
 	Scene *destScene;
 	TransformComponent sourceSceneXfm;

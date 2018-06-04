@@ -4,12 +4,12 @@
 #include <string>
 #include <fstream>
 
-void Window::glfwErrorCallback(int e, const char* message)
+void glfwErrorCallback(int e, const char* message)
 {
 	printf("%s\n", message);
 }
 	
-void Window::glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int mode)
+void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
@@ -26,19 +26,19 @@ void Window::glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, i
 	}
 }
 
-void Window::glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
+void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	mouseX = (float)xPos;
 	mouseY = (float)yPos;
 }
 
-void Window::glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
+void glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 {
 	glfwGetFramebufferSize(window, &w, &h);
 	
 	glViewport(0, 0, w, h);
 
-	// TODO: recalculate the perspective matrix!
+	// TODO: recalculate the perspective matrix?
 }
 
 bool initGlfwWindow(Window* window, uint32 width, uint32 height)
@@ -53,7 +53,7 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 	mouseXPrev = FLT_MAX;
 	mouseYPrev = FLT_MAX;
 
-	glfwSetErrorCallback(&glfwErrorCallback);
+	glfwSetErrorCallback(glfwErrorCallback);
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -65,11 +65,11 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 
 	glViewport(0, 0, width, height);
 	
-	glfwSetKeyCallback(window->glfwWindow, &glfwKeyPressedCallback);
-	glfwSetWindowSizeCallback(window->glfwWindow, &glfwWindowResizeCallback);
+	glfwSetKeyCallback(window->glfwWindow, glfwKeyPressedCallback);
+	glfwSetWindowSizeCallback(window->glfwWindow, glfwWindowResizeCallback);
 
 	glfwSetInputMode(window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(window->glfwWindow, &glfwMouseMovedCallback);
+	glfwSetCursorPosCallback(window->glfwWindow, glfwMouseMovedCallback);
 	
 	glewExperimental = GL_TRUE;
 	GLenum glewInitStatus = glewInit();

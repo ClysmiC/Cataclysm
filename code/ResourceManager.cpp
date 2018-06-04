@@ -64,7 +64,7 @@ Shader* ResourceManager::getShader(std::string id)
 
 Shader* ResourceManager::getShader(std::string vertFilename, std::string fragFilename)
 {
-    return getShader(Shader::idFromFilenames(vertFilename, fragFilename));
+    return getShader(shaderIdFromFilenames(vertFilename, fragFilename));
 }
 
 Texture* ResourceManager::initTexture(std::string relFilename, bool gammaCorrect, bool loadNow)
@@ -113,7 +113,7 @@ T* ResourceManager::initResource(T resourceArg, std::unordered_map<RESOURCE_HAND
         if (loadNow)
         {
             T &r = table.at(it->second);
-            r.load();
+            load(&r);
             return &r;
         }
 
@@ -130,7 +130,7 @@ T* ResourceManager::initResource(T resourceArg, std::unordered_map<RESOURCE_HAND
 
     if (loadNow)
     {
-        allocatedResource->load();
+        load(allocatedResource);
         return allocatedResource;
     }
 
