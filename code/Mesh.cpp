@@ -71,9 +71,6 @@ bool load(Mesh* mesh)
                 currentSubmeshName += unnamedSubmeshNameCount++;
             }
 
-            // submesh
-            assert(currentMaterialName != "");
-
             // FLUSH current submesh
             mesh->submeshes.push_back(
                 Submesh(
@@ -81,13 +78,15 @@ bool load(Mesh* mesh)
                     currentSubmeshName,
                     currentSubmeshVertices,
                     currentSubmeshIndices,
-                    ResourceManager::instance().getMaterial(currentMaterialFilename, currentMaterialName)));
+                    ResourceManager::instance().getMaterial(
+						(currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialFilename : Material::DEFAULT_MATERIAL_FILENAME,
+						(currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
+					)
+				)
+			);
 
             currentSubmeshVertices.clear();
             currentSubmeshIndices.clear();
-            // v.clear();
-            // vt.clear();
-            // vn.clear();
 
             currentSubmeshName = "[unnamed]";
         }
@@ -147,30 +146,42 @@ bool load(Mesh* mesh)
             // face
             buildingFaces = true;
 
-            vector<string> faceTokens;
-            {
-                string item;
-                istringstream ss1(tokens[1]);
-                istringstream ss2(tokens[2]);
-                istringstream ss3(tokens[3]);
-                while (getline(ss1, item, '/')) { faceTokens.push_back(item); }
-                while (getline(ss2, item, '/')) { faceTokens.push_back(item); }
-                while (getline(ss3, item, '/')) { faceTokens.push_back(item); }
-            }
+			// 2d array where each row is one point in a face and each column is one attribute of the point (position, uv, then normal)
+			vector<tuple<int, int, int>> vertexTuples;
 
-            // If UV's are omitted, set them to 0
-            if (faceTokens[1].size() == 0) { faceTokens[1] = "-1"; }
-            if (faceTokens[4].size() == 0) { faceTokens[4] = "-1"; }
-            if (faceTokens[7].size() == 0) { faceTokens[7] = "-1"; }
+			for(int i = 1; i < tokens.size(); i++)
+			{
+				vector<string> pointTokens;
+				istringstream pointSs(tokens[i]);
+				string token; 
+				while (getline(pointSs, token, '/')) { pointTokens.push_back(token); }
 
-            tuple<int, int, int> aTuple{ stoi(faceTokens[0]) - 1, stoi(faceTokens[1]) - 1, stoi(faceTokens[2]) - 1 };
-            tuple<int, int, int> bTuple{ stoi(faceTokens[3]) - 1, stoi(faceTokens[4]) - 1, stoi(faceTokens[5]) - 1 };
-            tuple<int, int, int> cTuple{ stoi(faceTokens[6]) - 1, stoi(faceTokens[7]) - 1, stoi(faceTokens[8]) - 1 };
+				assert(pointTokens.size() >= 1);
 
-            // PROCESS VERTEX FUNCTOR
+				int vIndex = -1;
+				int uvIndex = -1;
+				int nIndex = -1;
+
+				vIndex = stoi(pointTokens[0]) - 1;
+
+				if (pointTokens.size() > 1 && pointTokens[1].length() > 0)
+				{
+					uvIndex = stoi(pointTokens[1]) - 1;
+				}
+
+				if (pointTokens.size() > 2 && pointTokens[2].length() > 0)
+				{
+					nIndex = stoi(pointTokens[2]) - 1;
+				}
+				
+				tuple<int, int, int> point { vIndex, uvIndex, nIndex };
+				vertexTuples.push_back(point);
+			}
+
+            // PROCESS FACE FUNCTOR
             struct {
                 void operator() (
-                    const tuple<int, int, int> &vertexTuple,
+                    const vector<tuple<int, int, int>> &vertexTuples,
                     vector<MeshVertex> &currentSubmeshVertices,
                     vector<uint32> &currentSubmeshIndices,
                     const vector<Vec3> &objVertices,
@@ -178,41 +189,87 @@ bool load(Mesh* mesh)
                     const vector<Vec3> &objNormals
                     )
                 {
-                    MeshVertex vertex;
+					assert(vertexTuples.size() >= 3);
 
-                    // 0-based indices
-                    int pIndex, uvIndex, nIndex;
-                    pIndex = get<0>(vertexTuple);
-                    uvIndex = get<1>(vertexTuple);
-                    nIndex = get<2>(vertexTuple);
+					uint32 anchorIndex;
+					uint32 mostRecentlyAddedIndex;
+					
+					for (int i = 0; i < vertexTuples.size(); i++)
+					{
+						assert(vertexTuples.size() >= 3);
+						MeshVertex vertex;
 
-                    assert(pIndex >= 0);
-                    assert(nIndex >= 0);
+						bool computedFaceNormalSet = false;
+						Vec3 computedFaceNormal;
 
-                    vertex.position = objVertices[pIndex];
-                    vertex.texCoords = (uvIndex < 0) ? Vec2(0, 0) : objUvs[uvIndex];
-                    vertex.normal = objNormals[nIndex];
+						// 0-based indices
+						int pIndex, uvIndex, nIndex;
+						pIndex = get<0>(vertexTuples[i]);
+						uvIndex = get<1>(vertexTuples[i]);
+						nIndex = get<2>(vertexTuples[i]);
 
-                    auto it = find(currentSubmeshVertices.begin(), currentSubmeshVertices.end(), vertex);
-                    uint32 index;
+						assert(pIndex >= 0);
 
-                    if (it == currentSubmeshVertices.end())
-                    {
-                        currentSubmeshVertices.push_back(vertex);
-                        index = currentSubmeshVertices.size() - 1;
-                    }
-                    else
-                    {
-                        index = it - currentSubmeshVertices.begin();
-                    }
+						vertex.position = objVertices[pIndex];
+						vertex.texCoords = (uvIndex < 0) ? Vec2(0, 0) : objUvs[uvIndex];
 
-                    currentSubmeshIndices.push_back(index);
+						if (nIndex >= 0)
+						{
+							vertex.normal = objNormals[nIndex];
+						}
+						else
+						{
+							if (!computedFaceNormalSet)
+							{
+								int v0pIndex = get<0>(vertexTuples[0]);
+								Vec3 v0 = objVertices[v0pIndex];
+								int v1pIndex = get<0>(vertexTuples[1]);
+								Vec3 v1 = objVertices[v1pIndex];
+								int v2pIndex = get<0>(vertexTuples[2]);
+								Vec3 v2 = objVertices[v2pIndex];
+
+								Vec3 v01 = v1 - v0;
+								Vec3 v02 = v2 - v0;
+
+								computedFaceNormal = cross(v01, v02).normalizeOrXAxisInPlace();
+								assert(length(computedFaceNormal) > .99);
+								computedFaceNormalSet = true;
+							}
+							
+							vertex.normal = computedFaceNormal;
+						}
+
+						auto it = find(currentSubmeshVertices.begin(), currentSubmeshVertices.end(), vertex);
+						uint32 index;
+
+						if (it == currentSubmeshVertices.end())
+						{
+							currentSubmeshVertices.push_back(vertex);
+							index = currentSubmeshVertices.size() - 1;
+						}
+						else
+						{
+							index = it - currentSubmeshVertices.begin();
+						}
+
+						if (i == 0)
+						{
+							anchorIndex = index;
+						}
+
+						if (i >= 2)
+						{
+							currentSubmeshIndices.push_back(anchorIndex);
+							currentSubmeshIndices.push_back(mostRecentlyAddedIndex);
+							currentSubmeshIndices.push_back(index);
+						}
+
+						mostRecentlyAddedIndex = index;
+					}
                 }
-            } processVertex;
+            } processFace;
 
-            processVertex(aTuple, currentSubmeshVertices, currentSubmeshIndices, v, vt, vn);
-            processVertex(bTuple, currentSubmeshVertices, currentSubmeshIndices, v, vt, vn);
-            processVertex(cTuple, currentSubmeshVertices, currentSubmeshIndices, v, vt, vn);
+			processFace(vertexTuples, currentSubmeshVertices, currentSubmeshIndices, v, vt, vn);
         }
 
 

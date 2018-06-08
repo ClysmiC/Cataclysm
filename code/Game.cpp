@@ -51,36 +51,6 @@ void buildTestScene1(Scene* scene)
 	Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, true);
 	Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, true);
 
-	// Set up light
-	{
-		Entity light = makeEntity(&scene->ecs, "light");
-        Mesh* m = bulb;
-        
-        TransformComponent *tc = addTransformComponent(light);
-        tc->position = Vec3(0, 0, -2);
-        tc->scale = Vec3(.35);
-		
-        ComponentGroup<RenderComponent> rcc = addRenderComponents(light, m->submeshes.size());
-
-        for(uint32 i = 0; i < rcc.numComponents; i++)
-        {
-            RenderComponent *rc = rcc.components + i;
-			new (rc) RenderComponent(light, &(m->submeshes[i]));
-        }
-
-		PointLightComponent *plc = addPointLightComponent(light);
-		plc->intensity = Vec3(1, 1, 1);
-
-		rm.initMaterial("", "bulbMaterial", true);
-		rm.initShader("shader/light.vert", "shader/light.frag", true);
-
-		bulb->submeshes[1].material = rm.getMaterial("", "bulbMaterial");
-		bulb->submeshes[1].material->receiveLight = false;
-		bulb->submeshes[1].material->shader = rm.getShader("shader/light.vert", "shader/light.frag");
-		clearUniforms(bulb->submeshes[1].material);
-		bulb->submeshes[1].material->vec3Uniforms.emplace("lightColor", Vec3(1, 1, 1));
-	}
-
 	// Set up directional light
 	{
 		Entity dirLight = makeEntity(&scene->ecs, "directional light");
@@ -109,6 +79,7 @@ void buildTestScene1(Scene* scene)
 		Entity e = makeEntity(&scene->ecs, "hex");
 		TransformComponent *tc = addTransformComponent(e);
 		tc->position = hexPositions[i];
+		tc->scale = Vec3(.25);
 		
 		ComponentGroup<RenderComponent> rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
@@ -116,6 +87,99 @@ void buildTestScene1(Scene* scene)
 		{
 			RenderComponent *rc = rcc.components + j;
 			new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
+		}
+	}
+}
+
+void buildTestScene2(Scene* scene)
+{
+	ResourceManager& rm = ResourceManager::instance();
+	
+	Mesh *icosahedronMesh = rm.initMesh("icosahedron/icosahedron.obj", true, true);
+
+	// Set up directional light
+	{
+		Entity dirLight = makeEntity(&scene->ecs, "directional light");
+		DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
+
+		dlc->intensity = Vec3(.25, .25, .25);
+		dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
+	}
+
+	//
+	// Set up cubemap
+	//
+	Cubemap* cm = rm.initCubemap("cubemap/CloudyLightRays", ".png", true);
+	addCubemap(scene, cm);
+
+	//
+	// Set up icosahedron meshes
+	//
+	const uint32 icosahedronCount = 4;
+	Vec3 icosahedronPositions[icosahedronCount];
+	icosahedronPositions[0] = Vec3(-4, 2, 3);
+	icosahedronPositions[1] = Vec3(-5, 4, 3);
+	icosahedronPositions[2] = Vec3(-6, 0, 3);
+	icosahedronPositions[3] = Vec3(-2, 2, 1);
+
+	for (uint32 i = 0; i < icosahedronCount; i++)
+	{
+		Entity e = makeEntity(&scene->ecs, "icosahedron");
+		TransformComponent *tc = addTransformComponent(e);
+		tc->position = icosahedronPositions[i];
+		
+		ComponentGroup<RenderComponent> rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
+
+		for(uint32 j = 0; j < icosahedronMesh->submeshes.size(); j++)
+		{
+			RenderComponent *rc = rcc.components + j;
+			new (rc) RenderComponent(e, &(icosahedronMesh->submeshes[j]));
+		}
+	}
+}
+
+void buildTestScene3(Scene* scene)
+{
+	ResourceManager& rm = ResourceManager::instance();
+	
+	Mesh *shuttleMesh = rm.initMesh("shuttle/shuttle.obj", true, true);
+	Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, true);
+
+	// Set up directional light
+	{
+		Entity dirLight = makeEntity(&scene->ecs, "directional light");
+		DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
+
+		dlc->intensity = Vec3(.25, .25, .25);
+		dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
+	}
+
+	//
+	// Set up cubemap
+	//
+	Cubemap* cm = rm.initCubemap("cubemap/SunSet", ".png", true);
+	addCubemap(scene, cm);
+
+	//
+	// Set up shuttle meshes
+	//
+	const uint32 shuttleCount = 1;
+	Vec3 shuttlePositions[shuttleCount];
+	shuttlePositions[0] = Vec3(0, 0, -10);
+
+	for (uint32 i = 0; i < shuttleCount; i++)
+	{
+		Entity e = makeEntity(&scene->ecs, "shuttle");
+		TransformComponent *tc = addTransformComponent(e);
+		tc->position = shuttlePositions[i];
+		tc->scale = Vec3(.25);
+		
+		ComponentGroup<RenderComponent> rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
+
+		for(uint32 j = 0; j < shuttleMesh->submeshes.size(); j++)
+		{
+			RenderComponent *rc = rcc.components + j;
+			new (rc) RenderComponent(e, &(shuttleMesh->submeshes[j]));
 		}
 	}
 }
@@ -206,8 +270,15 @@ int WinMain()
 	real32 lastTimeMs = 0;
 
 	Game* game = new Game();
+	
 	Scene* testScene1 = makeScene(game);
 	buildTestScene1(testScene1);
+	
+	Scene* testScene2 = makeScene(game);
+	buildTestScene2(testScene2);
+
+	Scene* testScene3 = makeScene(game);
+	buildTestScene3(testScene3);
 	
 	// Set up camera
 	Entity camera = makeEntity(&testScene1->ecs, "camera");
@@ -216,9 +287,8 @@ int WinMain()
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
-
 	//
-	// Set up portal
+	// Set up portal from scene 1<->2
 	//
 	{
 		Entity portal = makeEntity(&testScene1->ecs, "portal");
@@ -226,13 +296,31 @@ int WinMain()
 		PortalComponent* pc = addPortalComponent(portal);
 		setDimensions(pc, Vec2(2, 3));
 		pc->sourceScene = testScene1;
-		pc->destScene = testScene1;
+		pc->destScene = testScene2;
 
-		pc->sourceSceneXfm.position = Vec3(0, 0, -5);
+		pc->sourceSceneXfm.position = Vec3(0, 0, -10);
 		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
 
-		pc->destSceneXfm.position = Vec3(-18, -12, -25);
-		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 20);
+		pc->destSceneXfm.position = Vec3(1, 2, 3);
+		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
+	}
+
+	//
+	// Set up portal from scene 1<->3
+	//
+	{
+		Entity portal = makeEntity(&testScene1->ecs, "portal");
+		
+		PortalComponent* pc = addPortalComponent(portal);
+		setDimensions(pc, Vec2(2, 3));
+		pc->sourceScene = testScene1;
+		pc->destScene = testScene3;
+
+		pc->sourceSceneXfm.position = Vec3(0, 0, -10);
+		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+
+		pc->destSceneXfm.position = Vec3(0, 0, 0);
+		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
 	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))

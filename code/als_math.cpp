@@ -84,12 +84,50 @@ Vec2& Vec2::normalizeInPlace()
 	return *this;
 }
 
+Vec2& Vec2::normalizeOrXAxisInPlace()
+{
+	real32 len = length(*this);
+
+	if (len < EPSILON)
+	{
+		x = 1;
+		y = 0;
+	}
+	else
+	{
+		x /= len;
+		y /= len;
+	}
+
+	return *this;
+}
+
 Vec3& Vec3::normalizeInPlace()
 {
 	real32 len = length(*this);
 	x /= len;
 	y /= len;
 	z /= len;
+
+	return *this;
+}
+
+Vec3& Vec3::normalizeOrXAxisInPlace()
+{
+	real32 len = length(*this);
+
+	if (len < EPSILON)
+	{
+		x = 1;
+		y = 0;
+		z = 0;
+	}
+	else
+	{
+		x /= len;
+		y /= len;
+		z /= len;
+	}
 
 	return *this;
 }

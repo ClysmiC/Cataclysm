@@ -11,8 +11,8 @@ struct Material
 	static const std::string COMPOSITE_ID_DELIMITER;
     static const std::string DEFAULT_MATERIAL_FILENAME;
     static const std::string DEFAULT_MATERIAL_NAME;
-	static const std::string DEBUG_MATERIAL_FILENAME;
-    static const std::string DEBUG_MATERIAL_NAME;
+	static const std::string ERROR_MATERIAL_FILENAME;
+    static const std::string ERROR_MATERIAL_NAME;
 
 	Material() = default;
 	Material(std::string filename, std::string name);

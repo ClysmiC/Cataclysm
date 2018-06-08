@@ -1,0 +1,9 @@
+newmtl error
+Ns 96.078431
+Ka 1.00000 0.400000 0.550000
+Kd 1.00000 0.400000 0.550000
+Ks 0.500000 0.500000 0.500000
+map_Bump normal.png
+map_Ka white.png
+map_Kd white.png
+map_Ks white.png

@@ -11,6 +11,8 @@
 const std::string Material::COMPOSITE_ID_DELIMITER = "|";
 const std::string Material::DEFAULT_MATERIAL_FILENAME = "default/default.mtl";
 const std::string Material::DEFAULT_MATERIAL_NAME = "default";
+const std::string Material::ERROR_MATERIAL_FILENAME = "default/error.mtl";
+const std::string Material::ERROR_MATERIAL_NAME = "error";
 
 Material::Material(std::string filename_, std::string materialName)
 {
@@ -301,7 +303,12 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
         }
     }
 
-    assert(foundSelfInMtlFile);
+	assert(foundSelfInMtlFile); // TODO: replace this with error material somewhere
+    if(!foundSelfInMtlFile)
+	{
+		// TODO: print or log some error... we are falling back to error material
+	}
+	
     return foundSelfInMtlFile;
 }
 

@@ -35,6 +35,7 @@ RESOURCE_HANDLE ResourceManager::getHandle(std::string id)
 void ResourceManager::initDefaults()
 {
     initMaterial(Material::DEFAULT_MATERIAL_FILENAME, Material::DEFAULT_MATERIAL_NAME, true);
+	initMaterial(Material::ERROR_MATERIAL_FILENAME, Material::ERROR_MATERIAL_NAME, true);
 }
 
 Texture* ResourceManager::getTexture(std::string id)

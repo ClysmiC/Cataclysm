@@ -334,7 +334,6 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, TransformCompo
 			if (pl != nullptr)
 			{
 				TransformComponent* plXfm = getTransformComponent(pl->entity);
-
 			
 				setVec3(shader, "pointLights[0].posWorld", plXfm->position);
 				setVec3(shader, "pointLights[0].intensity", pl->intensity);

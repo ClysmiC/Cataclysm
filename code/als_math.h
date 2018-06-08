@@ -22,6 +22,7 @@ union Vec2
     };
     real32 element[2];
 
+	Vec2& normalizeOrXAxisInPlace();
 	Vec2& normalizeInPlace();
 };
 
@@ -42,6 +43,7 @@ union Vec3
     };
     real32 element[3];
 
+	Vec3& normalizeOrXAxisInPlace();
 	Vec3& normalizeInPlace();
 };
 
