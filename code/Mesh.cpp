@@ -149,7 +149,7 @@ bool load(Mesh* mesh)
 			// 2d array where each row is one point in a face and each column is one attribute of the point (position, uv, then normal)
 			vector<tuple<int, int, int>> vertexTuples;
 
-			for(int i = 1; i < tokens.size(); i++)
+			for(uint32 i = 1; i < tokens.size(); i++)
 			{
 				vector<string> pointTokens;
 				istringstream pointSs(tokens[i]);
@@ -194,7 +194,7 @@ bool load(Mesh* mesh)
 					uint32 anchorIndex;
 					uint32 mostRecentlyAddedIndex;
 					
-					for (int i = 0; i < vertexTuples.size(); i++)
+					for (uint32 i = 0; i < vertexTuples.size(); i++)
 					{
 						assert(vertexTuples.size() >= 3);
 						MeshVertex vertex;

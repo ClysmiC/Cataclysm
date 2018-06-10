@@ -72,7 +72,7 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
     std::unordered_map<MeshVertex*, RunningAverages> runningAverages;
     runningAverages.reserve(submesh->vertices.size());
 
-    for (int i = 0; i < submesh->indices.size(); i += 3)
+    for (uint32 i = 0; i < submesh->indices.size(); i += 3)
     {
         MeshVertex *v1 = &(submesh->vertices[submesh->indices[i]]);
         MeshVertex *v2 = &(submesh->vertices[submesh->indices[i + 1]]);

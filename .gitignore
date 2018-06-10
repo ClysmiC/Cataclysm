@@ -1,2 +1,10 @@
 build/
-code/shell_setup.bat
+.vs/
+
+.#*
+
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs

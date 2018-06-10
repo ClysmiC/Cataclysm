@@ -248,7 +248,7 @@ void updateCameraXfm(TransformComponent* xfm)
 }
 
 
-int WinMain()
+int main()
 {
 	// INIT WINDOW
 	uint32 windowWidth = 1024;

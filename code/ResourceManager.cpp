@@ -12,7 +12,7 @@ ResourceManager & ResourceManager::instance()
 
 void ResourceManager::init()
 {
-    resourceDirectory = "x:/code/resources/";
+    resourceDirectory = "x:/resources/";
     initDefaults();
 }
 

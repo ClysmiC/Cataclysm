@@ -7,7 +7,9 @@ IF NOT DEFINED ALS_PATH_SETUP (
    set "path=x:\lib;%path%"
 )
 
-call "E:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x64
+call "E:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+
+REM x64
 
 x:
 
