@@ -11,7 +11,7 @@ void addCubemap(Scene* scene, Cubemap* cubemap)
 	scene->cubemap = cubemap;
 }
 
-void renderScene(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel, TransformComponent* destPortalXfm)
+void renderScene(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel, Transform* destPortalXfm)
 {
 	if (recursionLevel > 3) return;
 	

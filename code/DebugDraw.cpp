@@ -122,7 +122,7 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation)
 }
 
 void
-DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, TransformComponent* cameraXfm)
+DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm)
 {
 	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
 	Mat4 transform;

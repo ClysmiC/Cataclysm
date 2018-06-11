@@ -21,6 +21,6 @@ Shader* cubemapShader();
 
 bool load(Cubemap* cubemap);
 bool unload(Cubemap* cubemap);
-void renderCubemap(Cubemap* cubemap, CameraComponent* camera, TransformComponent* cameraXfm);
+void renderCubemap(Cubemap* cubemap, CameraComponent* camera, Transform* cameraXfm);
 
 uint32 cubemapVao();

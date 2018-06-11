@@ -8,6 +8,8 @@
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
 
+#include "Transform.h"
+
 #include "Game.h"
 
 // ID 0 is a null entity
@@ -185,7 +187,7 @@ ComponentGroup<RenderComponent> getRenderComponents(Entity e)
 	return getComponents(&e.ecs->renderComponents, e);
 }
 
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel)
 {
 	if (recursionLevel > 0)
 	{
@@ -203,8 +205,8 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 		//
 		PortalComponent* pc = portals[i];
 
-		TransformComponent* sourceSceneXfm = getSourceSceneXfm(pc, scene);
-		TransformComponent* destSceneXfm = getDestSceneXfm(pc, scene);
+		Transform* sourceSceneXfm = getSourceSceneXfm(pc, scene);
+		Transform* destSceneXfm = getDestSceneXfm(pc, scene);
 		
 		Vec3 eyeToPortal = sourceSceneXfm->position - cameraXfm->position;
 
@@ -222,7 +224,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 
 		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation;
 		
-		TransformComponent portalViewpointXfm(portalViewpointPos, portalViewpointOrientation);
+		Transform portalViewpointXfm(portalViewpointPos, portalViewpointOrientation);
 
 		glEnable(GL_STENCIL_TEST);
 		{
@@ -312,7 +314,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 	}
 }
 
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal, TransformComponent* destPortalXfm)
+void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal, Transform* destPortalXfm)
 {
 	for (uint32 i = 0; i < ecs->renderComponents.size; i++)
 	{

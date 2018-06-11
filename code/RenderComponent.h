@@ -2,7 +2,7 @@
 
 #include "Mesh.h"
 #include "Component.h"
-#include "TransformComponent.h"
+#include "Transform.h"
 #include "CameraComponent.h"
 
 struct RenderComponent : public Component
@@ -15,4 +15,4 @@ struct RenderComponent : public Component
 	Material* material;
 };
 
-void drawRenderComponent(RenderComponent* renderComponent, TransformComponent *xfm,  CameraComponent* camera, TransformComponent *cameraXfm);
+void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm,  CameraComponent* camera, Transform *cameraXfm);

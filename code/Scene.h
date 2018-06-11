@@ -15,5 +15,5 @@ struct Scene
 	Scene();
 };
 
-void renderScene(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel=0, TransformComponent* destPortalXfm=nullptr);
+void renderScene(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0, Transform* destPortalXfm=nullptr);
 void addCubemap(Scene* scene, Cubemap* cubemap);

@@ -15,7 +15,7 @@ struct DebugDraw
 	
 	void drawSphere(Vec3 position, float radius);
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation);
-	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, TransformComponent* cameraXfm);
+	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
 	void drawLine(Vec3 start, Vec3 end);
 
 private:

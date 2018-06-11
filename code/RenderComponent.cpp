@@ -8,7 +8,7 @@ RenderComponent::RenderComponent(Entity entity, Submesh* submesh)
     material = submesh->material;
 }
 
-void drawRenderComponent(RenderComponent* renderComponent, TransformComponent *xfm, CameraComponent* camera, TransformComponent *cameraXfm)
+void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm, CameraComponent* camera, Transform *cameraXfm)
 {
 	Mat4 m2w = modelToWorld(xfm);;
 	Mat4 w2v = worldToView(cameraXfm);

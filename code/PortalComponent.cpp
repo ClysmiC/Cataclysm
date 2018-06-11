@@ -38,7 +38,7 @@ Scene* getDestScene(PortalComponent* portal, Scene* sourceScene)
 	return nullptr;
 }
 
-TransformComponent* getSourceSceneXfm(PortalComponent* portal, Scene* sourceScene)
+Transform* getSourceSceneXfm(PortalComponent* portal, Scene* sourceScene)
 {
 	if (portal->scene1 == sourceScene) return &portal->scene1Xfm;
     if (portal->scene2 == sourceScene) return &portal->scene2Xfm;
@@ -46,7 +46,7 @@ TransformComponent* getSourceSceneXfm(PortalComponent* portal, Scene* sourceScen
 	return nullptr;
 }
 
-TransformComponent* getDestSceneXfm(PortalComponent* portal, Scene* sourceScene)
+Transform* getDestSceneXfm(PortalComponent* portal, Scene* sourceScene)
 {
 	if (portal->scene1 == sourceScene) return &portal->scene2Xfm;
 	if (portal->scene2 == sourceScene) return &portal->scene1Xfm;
