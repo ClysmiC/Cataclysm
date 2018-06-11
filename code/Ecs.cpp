@@ -8,6 +8,8 @@
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
 
+#include "Game.h"
+
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 
@@ -183,7 +185,7 @@ ComponentGroup<RenderComponent> getRenderComponents(Entity e)
 	return getComponents(&e.ecs->renderComponents, e);
 }
 
-void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel)
 {
 	if (recursionLevel > 0)
 	{
@@ -191,28 +193,32 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 		return;
 	}
 
+	std::vector<PortalComponent*> portals = portalsInScene(scene);
 
-	for (uint32 i = 0; i < ecs->portals.size; i++)
+	for (uint32 i = 0; i < portals.size(); i++)
 	{
 		//
 		// Calculate the position and orientation of the camera sitting in the dest scene and looking "through" the portal
 		// into the dest scene.
 		//
-		PortalComponent &pc = ecs->portals.components[i];
+		PortalComponent* pc = portals[i];
 
-		Vec3 eyeToPortal = pc.sourceSceneXfm.position - cameraXfm->position;
+		TransformComponent* sourceSceneXfm = getSourceSceneXfm(pc, scene);
+		TransformComponent* destSceneXfm = getDestSceneXfm(pc, scene);
+		
+		Vec3 eyeToPortal = sourceSceneXfm->position - cameraXfm->position;
 
-		bool isLookingTowardsPortal = dot(eyeToPortal, pc.sourceSceneXfm.forward()) < 0;
+		bool isLookingTowardsPortal = dot(eyeToPortal, sourceSceneXfm->forward()) < 0;
 
 		if (!isLookingTowardsPortal) continue;
 
-		Quaternion intoSourcePortalOrientation = axisAngle(pc.sourceSceneXfm.up(), 180) * pc.sourceSceneXfm.orientation;
-		Quaternion outOfDestPortalOrientation = pc.destSceneXfm.orientation;
+		Quaternion intoSourcePortalOrientation = axisAngle(sourceSceneXfm->up(), 180) * sourceSceneXfm->orientation;
+		Quaternion outOfDestPortalOrientation = destSceneXfm->orientation;
 
 		Quaternion transitionFromSourceToDest = relativeRotation(intoSourcePortalOrientation, outOfDestPortalOrientation);
 		
 		Vec3 transformedEyeToPortal = transitionFromSourceToDest * eyeToPortal;
-		Vec3 portalViewpointPos = pc.destSceneXfm.position - transformedEyeToPortal;
+		Vec3 portalViewpointPos = destSceneXfm->position - transformedEyeToPortal;
 
 		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation;
 		
@@ -238,7 +244,7 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 				Shader* shader = portalShader();
 				uint32 portalVao = quadVao();
 
-				Mat4 model = modelToWorld(&pc.sourceSceneXfm);
+				Mat4 model = modelToWorld(sourceSceneXfm);
 				Mat4 view = worldToView(cameraXfm);
 				Mat4 projection = camera->projectionMatrix;
 
@@ -266,7 +272,7 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 				if (!debug_hidePortalContents)
 				{
 					glClear(GL_DEPTH_BUFFER_BIT);
-					renderScene(pc.destScene, camera, &portalViewpointXfm, recursionLevel + 1, &pc.destSceneXfm);
+					renderScene(getDestScene(pc, scene), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
 				}
 			}
 		}
@@ -282,7 +288,7 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 			Shader* shader = portalShader();
 			uint32 portalVao = quadVao();
 
-			Mat4 model = modelToWorld(&pc.sourceSceneXfm);
+			Mat4 model = modelToWorld(sourceSceneXfm);
 			Mat4 view = worldToView(cameraXfm);
 			Mat4 projection = camera->projectionMatrix;
 
@@ -302,7 +308,7 @@ void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComp
 		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
-		DebugDraw::instance().drawAARect3(pc.sourceSceneXfm.position, Vec3(getDimensions(&pc), 0.2), camera, cameraXfm);
+		DebugDraw::instance().drawAARect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), camera, cameraXfm);
 	}
 }
 

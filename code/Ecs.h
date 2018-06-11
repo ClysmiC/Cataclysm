@@ -86,6 +86,6 @@ ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 
 // TODO: do these belong in Ecs.h?
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, bool renderingViaPortal=false, TransformComponent* destPortalXfm=nullptr);
-void renderContentsOfAllPortals(Ecs* ecs, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel=0);
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, TransformComponent* cameraXfm, uint32 recursionLevel=0);
 	
 PointLightComponent* closestPointLight(TransformComponent* xfm);

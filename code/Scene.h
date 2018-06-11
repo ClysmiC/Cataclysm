@@ -4,10 +4,13 @@
 #include "Entity.h"
 #include "Cubemap.h"
 
+struct Game;
+
 struct Scene
 {
 	Ecs ecs;
 	Cubemap* cubemap;
+	Game* game;
 	
 	Scene();
 };

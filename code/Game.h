@@ -17,14 +17,21 @@ struct Game
 	Game() = default;
 
 	// Any component that is not confined to a single scene should be in the "global" scene's ECS
-	Scene global;
+	Scene globalScene;
 
 	// Any component confined to a scene in this array's ECS.
 	// Only 1 (or maybe a few) of these scenes will be active at a time
 	Scene scenes[MAX_SCENES];
 
+	Scene* activeScene;
+	Entity activeCamera;
+
 	int numScenes;
 };
 
 Scene* makeScene(Game* game);
+void makeSceneActive(Game* game, Scene* scene);
+void makeCameraActive(Game* game, Entity camera);
+
+std::vector<PortalComponent*> portalsInScene(Scene* scene);
 

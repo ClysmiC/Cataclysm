@@ -3,8 +3,15 @@ build/
 
 .#*
 
+
+
+
+
+# Visual studio nonsense
+
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 *.userprefs
+*.VC.db

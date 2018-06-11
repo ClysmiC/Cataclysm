@@ -24,24 +24,15 @@ float mouseYPrev;
 
 real32 deltaTMs;
 
+///////////////////////////////////////////////////////////////////////
+//////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
+
 void updateLastKeys()
 {
 	for (uint32 i = 0; i < 1024; i++)
 	{
 		lastKeys[i] = keys[i];
 	}
-}
-
-Scene* makeScene(Game* game)
-{
-	assert(game->numScenes < MAX_SCENES);
-	Scene* result = game->scenes + game->numScenes;
-	
-	new (result) Scene();
-
-	game->numScenes++;
-
-	return result;
 }
 
 void buildTestScene1(Scene* scene)
@@ -247,6 +238,59 @@ void updateCameraXfm(TransformComponent* xfm)
 	}
 }
 
+void updateGame(Game* game)
+{
+	assert(game->activeScene != nullptr);
+	CameraComponent* camComponent = getCameraComponent(game->activeCamera);
+	TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+	renderScene(game->activeScene, camComponent, camXfm);
+}
+
+// END SCRATCHPAD
+///////////////////////////////////////////////////////////////////
+
+Scene* makeScene(Game* game)
+{
+	assert(game->numScenes < MAX_SCENES);
+	Scene* result = game->scenes + game->numScenes;
+	
+	new (result) Scene();
+
+	result->game = game;
+	game->numScenes++;
+
+	return result;
+}
+
+void makeSceneActive(Game* game, Scene* scene)
+{
+	game->activeScene = scene;
+}
+
+void makeCameraActive(Game* game, Entity camera)
+{
+	assert(getCameraComponent(camera) != nullptr);
+	assert(getTransformComponent(camera) != nullptr);
+
+	game->activeCamera = camera;
+}
+
+std::vector<PortalComponent*> portalsInScene(Scene* scene)
+{
+	std::vector<PortalComponent*> result;
+	
+	for (uint32 i = 0; i < scene->game->globalScene.ecs.portals.size; i++)
+	{
+		PortalComponent* pc = &scene->game->globalScene.ecs.portals.components[i];
+		
+		if (pc->scene1 == scene || pc->scene2 == scene)
+		{
+			result.push_back(pc);
+		}
+	}
+
+	return result;
+}
 
 int main()
 {
@@ -291,37 +335,40 @@ int main()
 	// Set up portal from scene 1<->2
 	//
 	{
-		Entity portal = makeEntity(&testScene1->ecs, "portal");
+		Entity portal = makeEntity(&game->globalScene.ecs, "portal");
 		
 		PortalComponent* pc = addPortalComponent(portal);
 		setDimensions(pc, Vec2(2, 3));
-		pc->sourceScene = testScene1;
-		pc->destScene = testScene2;
+		pc->scene1 = testScene1;
+		pc->scene2 = testScene2;
 
-		pc->sourceSceneXfm.position = Vec3(0, 0, -10);
-		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
+		pc->scene1Xfm.position = Vec3(0, 0, -10);
+		pc->scene1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
 
-		pc->destSceneXfm.position = Vec3(1, 2, 3);
-		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
+		pc->scene2Xfm.position = Vec3(1, 2, 3);
+		pc->scene2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
 	}
 
 	//
 	// Set up portal from scene 1<->3
 	//
 	{
-		Entity portal = makeEntity(&testScene1->ecs, "portal");
+		Entity portal = makeEntity(&game->globalScene.ecs, "portal");
 		
 		PortalComponent* pc = addPortalComponent(portal);
 		setDimensions(pc, Vec2(2, 3));
-		pc->sourceScene = testScene1;
-		pc->destScene = testScene3;
+		pc->scene1 = testScene1;
+		pc->scene2 = testScene3;
 
-		pc->sourceSceneXfm.position = Vec3(0, 0, -10);
-		pc->sourceSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+		pc->scene1Xfm.position = Vec3(0, 0, -10);
+		pc->scene1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
 
-		pc->destSceneXfm.position = Vec3(0, 0, 0);
-		pc->destSceneXfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+		pc->scene2Xfm.position = Vec3(0, 0, 0);
+		pc->scene2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
 	}
+
+	makeSceneActive(game, testScene1);
+	makeCameraActive(game, camera);
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
@@ -341,7 +388,7 @@ int main()
 			debug_hidePortalContents = !debug_hidePortalContents;
 		}
 
-		renderScene(testScene1, cameraComponent, cameraXfm);
+		updateGame(game);
 
 		glfwSwapBuffers(window.glfwWindow);
 
