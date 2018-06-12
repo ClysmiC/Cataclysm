@@ -187,6 +187,26 @@ ComponentGroup<RenderComponent> getRenderComponents(Entity e)
 	return getComponents(&e.ecs->renderComponents, e);
 }
 
+ColliderComponent* addColliderComponent(Entity e)
+{
+	return addComponent(&e.ecs->colliders, e);
+}
+
+ColliderComponent* getColliderComponent(Entity e)
+{
+	return getComponent(&e.ecs->colliders, e);
+}
+
+ComponentGroup<ColliderComponent> addColliderComponents(Entity e, uint32 numComponents)
+{
+	return addComponents(&e.ecs->colliders, e, numComponents);
+}
+
+ComponentGroup<ColliderComponent> getColliderComponents(Entity e)
+{
+	return getComponents(&e.ecs->colliders, e);
+}
+
 void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel)
 {
 	if (recursionLevel > 0)

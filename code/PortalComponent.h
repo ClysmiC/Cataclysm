@@ -29,3 +29,10 @@ Vec2 getDimensions(PortalComponent* portal);
 Scene* getDestScene(PortalComponent* portal, Scene* sourceScene);
 Transform* getSourceSceneXfm(PortalComponent* portal, Scene* sourceScene);
 Transform* getDestSceneXfm(PortalComponent* portal, Scene* sourceScene);
+
+Vec3 intoSourcePortalNormal(PortalComponent* portal, Scene* sourceScene);
+Vec3 outOfSourcePortalNormal(PortalComponent* portal, Scene* sourceScene);
+Vec3 intoDestPortalNormal(PortalComponent* portal, Scene* sourceScene);
+Vec3 outOfDestPortalNormal(PortalComponent* portal, Scene* sourceScene);
+void rebaseTransformInPlace(PortalComponent* portal, Scene* sourceScene, Transform* transform);
+

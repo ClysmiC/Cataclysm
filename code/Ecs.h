@@ -9,6 +9,7 @@
 #include "PointLightComponent.h"
 #include "DirectionalLightComponent.h"
 #include "RenderComponent.h"
+#include "ColliderComponent.h"
 
 #include <unordered_map>
 
@@ -40,6 +41,7 @@ struct Ecs
 	ComponentList<PointLightComponent> pointLights;
 	ComponentList<RenderComponent> renderComponents;
 	ComponentList<PortalComponent> portals;
+	ComponentList<ColliderComponent> colliders;
 };
 
 //
@@ -78,6 +80,11 @@ RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);
 ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents);
 ComponentGroup<RenderComponent> getRenderComponents(Entity e);
+
+ColliderComponent* addColliderComponent(Entity e);
+ColliderComponent* getColliderComponent(Entity e);
+ComponentGroup<ColliderComponent> addColliderComponents(Entity e, uint32 numComponents);
+ComponentGroup<ColliderComponent> getColliderComponents(Entity e);
 
 PointLightComponent* addPointLightComponent(Entity e);
 PointLightComponent* getPointLightComponent(Entity e);

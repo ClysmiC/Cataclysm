@@ -53,3 +53,42 @@ Transform* getDestSceneXfm(PortalComponent* portal, Scene* sourceScene)
 
 	return nullptr;
 }
+
+Vec3 intoSourcePortalNormal(PortalComponent* portal, Scene* sourceScene)
+{
+	Transform* xfm = getSourceSceneXfm(portal, sourceScene);
+	Vec3 result = xfm->back();
+	return result;
+}
+
+Vec3 outOfSourcePortalNormal(PortalComponent* portal, Scene* sourceScene)
+{
+	Transform* xfm = getSourceSceneXfm(portal, sourceScene);
+	Vec3 result = xfm->forward();
+	return result;
+}
+
+Vec3 intoDestPortalNormal(PortalComponent* portal, Scene* sourceScene)
+{
+	Transform* xfm = getDestSceneXfm(portal, sourceScene);
+	Vec3 result = xfm->back();
+	return result;
+}
+
+Vec3 outOfDestPortalNormal(PortalComponent* portal, Scene* sourceScene)
+{
+	Transform* xfm = getDestSceneXfm(portal, sourceScene);
+	Vec3 result = xfm->forward();
+	return result;
+}
+
+void rebaseTransformInPlace(PortalComponent* portal, Scene* sourceScene, Transform* transform)
+{
+	Transform* destSceneXfm = getDestSceneXfm(portal, sourceScene);
+	Vec3 deltaPos = destSceneXfm->position - getSourceSceneXfm(portal, sourceScene)->position;
+
+	Quaternion rotationNeeded = relativeRotation(transform->orientation, destSceneXfm->orientation);
+
+	transform->position += deltaPos;
+	transform->orientation = rotationNeeded * transform->orientation;
+}

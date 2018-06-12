@@ -10,6 +10,14 @@
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
+enum Axis3D
+{
+	X = 0,
+	Y = 1,
+	Z = 2
+};
+
+
 union Vec2
 {
 	Vec2();
@@ -238,6 +246,11 @@ inline real32 dot(Vec2 vectorA, Vec2 vectorB)
 	real32 result = vectorA.x * vectorB.x + vectorA.y * vectorB.y;
 	return result;
 }
+inline Vec2 hadamard(Vec2 v1, Vec2 v2)
+{
+	Vec2 result = Vec2(v1.x * v2.x, v1.y * v2.y);
+	return result;
+}
 inline real32 lengthSquared(Vec2 v)
 {
 	real32 result = v.x * v.x + v.y * v.y;
@@ -282,6 +295,11 @@ inline Vec3 cross(Vec3 vectorA, Vec3 vectorB)
 
 	return result;
 }
+inline Vec3 hadamard(Vec3 v1, Vec3 v2)
+{
+	Vec3 result = Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+	return result;
+}
 inline real32 lengthSquared(Vec3 v)
 {
 	real32 result = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -315,6 +333,11 @@ inline real32 dot(Vec4 vectorA, Vec4 vectorB)
 		vectorA.z * vectorB.z +
 		vectorA.w * vectorB.w;
 	
+	return result;
+}
+inline Vec4 hadamard(Vec4 v1, Vec4 v2)
+{
+	Vec4 result = Vec4(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w);
 	return result;
 }
 inline real32 lengthSquared(Vec4 v)
@@ -730,3 +753,20 @@ inline Mat4 scalingMatrix(Vec3 scale)
 	return result;
 }
 
+inline Vec3 unitAxis(Axis3D axis)
+{	
+	switch (axis)
+	{
+		case X: return Vec3(1, 0, 0);
+		case Y: return Vec3(0, 1, 0);
+		case Z: return Vec3(0, 0, 1);
+	}
+
+	assert(false);
+	return Vec3(1, 0, 0);
+}
+
+inline real32 getValue(Vec3 vector, Axis3D axis)
+{
+	return vector.element[axis];
+}
