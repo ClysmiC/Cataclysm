@@ -37,6 +37,7 @@ union Vec2
 union Vec3
 {
 	Vec3();
+	Vec3(Axis3D unitAxis);
 	Vec3(real32 value);
 	Vec3(Vec2 xy, real32 z);
 	Vec3(real32 x, real32 y, real32 z);
@@ -751,19 +752,6 @@ inline Mat4 scalingMatrix(Vec3 scale)
 	result[3][3] = 1;
 
 	return result;
-}
-
-inline Vec3 unitAxis(Axis3D axis)
-{	
-	switch (axis)
-	{
-		case X: return Vec3(1, 0, 0);
-		case Y: return Vec3(0, 1, 0);
-		case Z: return Vec3(0, 0, 1);
-	}
-
-	assert(false);
-	return Vec3(1, 0, 0);
 }
 
 inline real32 getValue(Vec3 vector, Axis3D axis)

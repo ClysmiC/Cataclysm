@@ -369,6 +369,23 @@ int main()
 
 	makeSceneActive(game, testScene1);
 	makeCameraActive(game, camera);
+
+	//
+	// Set up test collider
+	//
+	Entity testCollider = makeEntity(&game->globalScene.ecs, "testCollider");
+	TransformComponent* testColliderXfm = addTransformComponent(testCollider);
+	ColliderComponent* testColliderCollider = addColliderComponent(testCollider);
+	{
+		testColliderXfm->position = Vec3(1, 1, 1);
+		testColliderXfm->scale = Vec3(2, 2, 2);
+
+		testColliderCollider->type = ColliderType::RECT3;
+		testColliderCollider->xfmOffset = Vec3(0, 0, 0);
+		testColliderCollider->xLength = 1;
+		testColliderCollider->yLength = 2;
+		testColliderCollider->zLength = 1;
+	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
@@ -389,6 +406,25 @@ int main()
 		}
 
 		updateGame(game);
+
+		if (pointInsideCollider(testColliderCollider, cameraXfm->position))
+		{
+			DebugDraw::instance().color = Vec3(1, 0, 0);
+		}
+		
+		DebugDraw::instance().drawRect3(
+			colliderCenter(testColliderCollider),
+			Vec3(
+				scaledXLength(testColliderCollider),
+				scaledYLength(testColliderCollider),
+				scaledZLength(testColliderCollider)
+			),
+			testColliderXfm->orientation,
+			cameraComponent,
+			cameraXfm
+		);
+		
+		DebugDraw::instance().color = Vec3(0, 1, 0);
 
 		glfwSwapBuffers(window.glfwWindow);
 

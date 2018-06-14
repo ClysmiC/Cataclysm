@@ -5,6 +5,16 @@ Vec2::Vec2(real32 value) { this->x = value; this->y = value; }
 Vec2::Vec2(real32 x, real32 y) { this->x = x; this->y = y; }
 
 Vec3::Vec3() {}
+Vec3::Vec3(Axis3D unitAxis)
+{
+	switch (unitAxis) {
+		case X: this->x = 1; this->y = 0; this->z = 0; break;
+		case Y: this->x = 0; this->y = 1; this->z = 0; break;
+		case Z: this->x = 0; this->y = 0; this->z = 1; break;
+		default: assert(false);
+	}
+}
+
 Vec3::Vec3(real32 value) { this->x = value; this->y = value; this->z = value; }
 Vec3::Vec3(Vec2 xy, real32 z) { this->x = xy.x; this->y = xy.y; this->z = z; }
 Vec3::Vec3(real32 x, real32 y, real32 z) { this->x = x; this->y = y; this->z = z; }

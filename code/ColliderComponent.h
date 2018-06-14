@@ -13,8 +13,9 @@ enum ColliderType
 
 struct ColliderComponent : public Component
 {
+	ColliderComponent();
+	
 	Vec3 xfmOffset;
-
 	ColliderType type;
 
 	union
@@ -36,6 +37,7 @@ struct ColliderComponent : public Component
 	};
 };
 
+Vec3 colliderCenter(ColliderComponent* collider);
 Vec3 scaledXfmOffset(ColliderComponent* collider);
 real32 scaledLength(ColliderComponent* collider);
 real32 scaledRadius(ColliderComponent* collider);
@@ -43,3 +45,5 @@ real32 scaledRadius(ColliderComponent* collider);
 real32 scaledXLength(ColliderComponent* collider);
 real32 scaledYLength(ColliderComponent* collider);
 real32 scaledZLength(ColliderComponent* collider);
+
+bool pointInsideCollider(ColliderComponent* collider, Vec3 point);

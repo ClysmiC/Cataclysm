@@ -116,9 +116,25 @@ DebugDraw::drawSphere(Vec3 position, float radius)
 }
 
 void
-DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation)
+DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
 {
-	// TODO:
+	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
+	Mat4 transform;
+	transform.scaleInPlace(dimensions);
+	transform.rotateInPlace(orientation);
+	transform.translateInPlace(center);
+
+	Mat4 view = worldToView(cameraXfm);
+	
+	bind(shader);
+	setMat4(shader, "model", transform);
+	setMat4(shader, "view", view);
+	setMat4(shader, "projection", camera->projectionMatrix);
+	setVec3(shader, "debugColor", color);
+
+	glBindVertexArray(vao);
+	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 void
