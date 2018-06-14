@@ -227,28 +227,12 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 
 		Transform* sourceSceneXfm = getSourceSceneXfm(pc, scene);
 		Transform* destSceneXfm = getDestSceneXfm(pc, scene);
-		
-		Vec3 eyeToPortal = sourceSceneXfm->position - cameraXfm->position;
 
-		bool isLookingTowardsPortal = dot(eyeToPortal, sourceSceneXfm->forward()) < 0;
-
-		if (!isLookingTowardsPortal) continue;
-
-		Quaternion intoSourcePortalOrientation = axisAngle(sourceSceneXfm->up(), 180) * sourceSceneXfm->orientation;
-		Quaternion outOfDestPortalOrientation = destSceneXfm->orientation;
-
-		Quaternion transitionFromSourceToDest = relativeRotation(intoSourcePortalOrientation, outOfDestPortalOrientation);
-		
-		Vec3 transformedEyeToPortal = transitionFromSourceToDest * eyeToPortal;
-		Vec3 portalViewpointPos = destSceneXfm->position - transformedEyeToPortal;
-
-		Quaternion portalViewpointOrientation = transitionFromSourceToDest * cameraXfm->orientation;
-		
-		Transform portalViewpointXfm(portalViewpointPos, portalViewpointOrientation);
+		Transform portalViewpointXfm(cameraXfm->position, cameraXfm->orientation);
+		rebaseTransformInPlace(pc, scene, &portalViewpointXfm);
 
 		glEnable(GL_STENCIL_TEST);
 		{
-		
 			//
 			// Render the portal in the source scene and write to stencil buffer
 			//

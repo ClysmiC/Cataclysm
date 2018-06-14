@@ -84,11 +84,19 @@ Vec3 outOfDestPortalNormal(PortalComponent* portal, Scene* sourceScene)
 
 void rebaseTransformInPlace(PortalComponent* portal, Scene* sourceScene, Transform* transform)
 {
+	Transform* sourceSceneXfm = getSourceSceneXfm(portal, sourceScene);
 	Transform* destSceneXfm = getDestSceneXfm(portal, sourceScene);
-	Vec3 deltaPos = destSceneXfm->position - getSourceSceneXfm(portal, sourceScene)->position;
 
-	Quaternion rotationNeeded = relativeRotation(transform->orientation, destSceneXfm->orientation);
+	Quaternion intoSourcePortal = axisAngle(sourceSceneXfm->up(), 180) * sourceSceneXfm->orientation;
+	Quaternion outOfDestPortal = destSceneXfm->orientation;
+	
+	Quaternion rotationNeeded = relativeRotation(intoSourcePortal, outOfDestPortal);
+	
+	Vec3 offsetToSourcePortal = sourceSceneXfm->position - transform->position;
+	Vec3 offsetToSourcePortalTransformedToDestScene = rotationNeeded * offsetToSourcePortal;
 
-	transform->position += deltaPos;
+	Vec3 positionInDestScene = destSceneXfm->position - offsetToSourcePortalTransformedToDestScene; 
+
+	transform->position = positionInDestScene;
 	transform->orientation = rotationNeeded * transform->orientation;
 }
