@@ -275,7 +275,6 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 		
 				if (!debug_hidePortalContents)
 				{
-					glClear(GL_DEPTH_BUFFER_BIT);
 					renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
 				}
 			}
