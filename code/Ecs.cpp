@@ -215,21 +215,19 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 		return;
 	}
 
-	std::vector<PortalComponent*> portals = portalsInScene(scene);
-
-	for (uint32 i = 0; i < portals.size(); i++)
+	for (uint32 i = 0; i < scene->ecs.portals.size; i++)
 	{
 		//
 		// Calculate the position and orientation of the camera sitting in the dest scene and looking "through" the portal
 		// into the dest scene.
 		//
-		PortalComponent* pc = portals[i];
+		PortalComponent* pc = &scene->ecs.portals.components[i];
 
-		Transform* sourceSceneXfm = getSourceSceneXfm(pc, scene);
-		Transform* destSceneXfm = getDestSceneXfm(pc, scene);
+		Transform* sourceSceneXfm = getTransformComponent(pc->entity);
+		Transform* destSceneXfm = getConnectedSceneXfm(pc);
 
 		Transform portalViewpointXfm(cameraXfm->position, cameraXfm->orientation);
-		rebaseTransformInPlace(pc, scene, &portalViewpointXfm);
+		rebaseTransformInPlace(pc, &portalViewpointXfm);
 
 		glEnable(GL_STENCIL_TEST);
 		{
@@ -278,7 +276,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 				if (!debug_hidePortalContents)
 				{
 					glClear(GL_DEPTH_BUFFER_BIT);
-					renderScene(getDestScene(pc, scene), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
+					renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
 				}
 			}
 		}
@@ -314,7 +312,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 		glStencilMask(0xFF);
 		glClear(GL_STENCIL_BUFFER_BIT);
 
-		DebugDraw::instance().drawAARect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), camera, cameraXfm);
+		DebugDraw::instance().drawRect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), sourceSceneXfm->orientation, camera, cameraXfm);
 	}
 }
 

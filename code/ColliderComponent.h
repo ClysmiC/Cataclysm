@@ -47,3 +47,4 @@ real32 scaledYLength(ColliderComponent* collider);
 real32 scaledZLength(ColliderComponent* collider);
 
 bool pointInsideCollider(ColliderComponent* collider, Vec3 point);
+

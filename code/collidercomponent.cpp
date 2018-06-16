@@ -22,7 +22,9 @@ Vec3 scaledXfmOffset(ColliderComponent* collider)
 Vec3 colliderCenter(ColliderComponent* collider)
 {
 	TransformComponent *xfm = getTransformComponent(collider->entity);
-	return xfm->position + scaledXfmOffset(collider);
+	Vec3 unrotatedOffset = scaledXfmOffset(collider);
+	Vec3 rotatedOffset = xfm->orientation * unrotatedOffset;
+	return xfm->position + rotatedOffset;
 }
 
 real32 scaledLength(ColliderComponent* collider)
@@ -85,8 +87,8 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 		case RECT3:
 		{
 			real32 xLen = scaledXLength(collider);
-			real32 yLen = scaledXLength(collider);
-			real32 zLen = scaledXLength(collider);
+			real32 yLen = scaledYLength(collider);
+			real32 zLen = scaledZLength(collider);
 
 			Vec3 corner1 = center -
 				(xLen / 2) * localX -
@@ -99,13 +101,9 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 				(zLen / 2) * localZ;
 
 			return
-				(point.x >= corner1.x && point.x <= corner2.x &&
-				 point.y >= corner1.y && point.y <= corner2.y &&
-				 point.z >= corner1.z && point.z <= corner2.z)
-                       				||                            // OR
-				(point.x >= corner2.x && point.x <= corner1.x &&
-				 point.y >= corner2.y && point.y <= corner1.y &&
-				 point.z >= corner2.z && point.z <= corner1.z);
+ 				( (point.x >= corner1.x && point.x <= corner2.x) || (point.x >= corner2.x && point.x <= corner1.x) ) &&
+				( (point.y >= corner1.y && point.y <= corner2.y) || (point.y >= corner2.y && point.y <= corner1.y) ) &&
+				( (point.z >= corner1.z && point.z <= corner2.z) || (point.z >= corner2.z && point.z <= corner1.z) );
 		} break;
 
 		case SPHERE:

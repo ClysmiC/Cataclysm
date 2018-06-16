@@ -6,6 +6,8 @@
 #include "Entity.h"
 #include "Ecs.h"
 
+#include "TransformComponent.h"
+
 DebugDraw&
 DebugDraw::instance()
 {
@@ -164,4 +166,30 @@ DebugDraw::drawLine(Vec3 start, Vec3 end)
 	// TODO:
 	// set the two line slots in the VBO using world positions start and end
 	// use identity matrix as model
+}
+
+void
+DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComponent, Transform* cameraXfm)
+{
+	switch(collider->type)
+	{
+		case RECT3:
+		{
+			drawRect3(colliderCenter(collider),
+					  Vec3(
+						  scaledXLength(collider),
+						  scaledYLength(collider),
+						  scaledZLength(collider)
+					  ),
+					  getTransformComponent(collider->entity)->orientation,
+					  cameraComponent,
+					  cameraXfm);
+		} break;
+
+		default:
+		{
+			// Not yet implemented
+			assert(false);
+		}
+	}
 }

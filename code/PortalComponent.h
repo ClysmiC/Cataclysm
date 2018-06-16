@@ -11,28 +11,22 @@ struct Scene;
 struct PortalComponent : public Component
 {
 	PortalComponent() = default;
-	
-	Scene* scene1;
-	Scene* scene2;
-
-	// TODO: turn this into just a "transform" struct.
-	// The "transform" component will just be a wrapper around the transform struct
-	Transform scene1Xfm;
-	Transform scene2Xfm;
+	PortalComponent* connectedPortal;
 };
 
 Shader* portalShader();
 
-void setDimensions(PortalComponent* portal, Vec2 dimensions);
+void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToConnectedPortal=true);
 Vec2 getDimensions(PortalComponent* portal);
 
-Scene* getDestScene(PortalComponent* portal, Scene* sourceScene);
-Transform* getSourceSceneXfm(PortalComponent* portal, Scene* sourceScene);
-Transform* getDestSceneXfm(PortalComponent* portal, Scene* sourceScene);
+Scene* getConnectedScene(PortalComponent* portal);
+Transform* getConnectedSceneXfm(PortalComponent* portal);
 
-Vec3 intoSourcePortalNormal(PortalComponent* portal, Scene* sourceScene);
-Vec3 outOfSourcePortalNormal(PortalComponent* portal, Scene* sourceScene);
-Vec3 intoDestPortalNormal(PortalComponent* portal, Scene* sourceScene);
-Vec3 outOfDestPortalNormal(PortalComponent* portal, Scene* sourceScene);
-void rebaseTransformInPlace(PortalComponent* portal, Scene* sourceScene, Transform* transform);
+Vec3 intoPortalNormal(PortalComponent* portal);
+Vec3 outOfPortalNormal(PortalComponent* portal);
+Vec3 intoConnectedPortalNormal(PortalComponent* portal);
+Vec3 outOfConnectedPortalNormal(PortalComponent* portal);
+void rebaseTransformInPlace(PortalComponent* portal, Transform* transform);
+
+void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform portal1Xfm, Transform portal2Xfm, Vec2 dimensions);
 

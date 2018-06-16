@@ -2,7 +2,8 @@
 
 #include "Entity.h"
 #include "Shader.h"
-#include "Submesh.h"
+#include "Transform.h"
+#include "ColliderComponent.h"
 
 struct DebugDraw
 {
@@ -17,6 +18,8 @@ struct DebugDraw
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
 	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
 	void drawLine(Vec3 start, Vec3 end);
+
+	void drawCollider(ColliderComponent* collider, CameraComponent* camera, Transform* cameraXfm);
 
 private:
 	uint32 vbo;

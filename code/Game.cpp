@@ -175,8 +175,10 @@ void buildTestScene3(Scene* scene)
 	}
 }
 
-void updateCameraXfm(TransformComponent* xfm)
+void updateCameraXfm(TransformComponent* xfm, Game* game)
 {
+	Vec3 posBeforeMove = xfm->position;
+	
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
 	
 	real32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
@@ -236,6 +238,30 @@ void updateCameraXfm(TransformComponent* xfm)
 	{
 		xfm->position += moveRight * cameraSpeed * deltaTS;
 	}
+
+	for (uint32 i = 0; i < game->activeScene->ecs.portals.size; i++)
+	{
+		PortalComponent* pc = &game->activeScene->ecs.portals.components[i];
+		ColliderComponent* cc = getColliderComponent(pc->entity);
+
+		if (pointInsideCollider(cc, xfm->position))
+		{
+			Vec3 portalPos = getTransformComponent(pc->entity)->position;
+			Vec3 portalToOldPos = posBeforeMove - portalPos;
+			Vec3 portalToPos = xfm->position - portalPos;
+			
+			if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
+			{
+				if(dot(portalToPos, intoPortalNormal(pc)) < 0)
+				{
+					__debugbreak();
+				}
+
+				rebaseTransformInPlace(pc, xfm);
+				game->activeScene = pc->connectedPortal->entity.ecs->scene;
+			}
+		}
+	}
 }
 
 void updateGame(Game* game)
@@ -273,23 +299,6 @@ void makeCameraActive(Game* game, Entity camera)
 	assert(getTransformComponent(camera) != nullptr);
 
 	game->activeCamera = camera;
-}
-
-std::vector<PortalComponent*> portalsInScene(Scene* scene)
-{
-	std::vector<PortalComponent*> result;
-	
-	for (uint32 i = 0; i < scene->game->globalScene.ecs.portals.size; i++)
-	{
-		PortalComponent* pc = &scene->game->globalScene.ecs.portals.components[i];
-		
-		if (pc->scene1 == scene || pc->scene2 == scene)
-		{
-			result.push_back(pc);
-		}
-	}
-
-	return result;
 }
 
 int main()
@@ -331,61 +340,52 @@ int main()
 	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
+	ColliderComponent* debugCC;
+	
 	//
 	// Set up portal from scene 1<->2
 	//
 	{
-		Entity portal = makeEntity(&game->globalScene.ecs, "portal");
+		Entity portal1 = makeEntity(&testScene1->ecs, "portalA1");
+		Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
+
+		Transform portal1Xfm;
+		portal1Xfm.position = Vec3(0, 0, -10);
+		portal1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
 		
-		PortalComponent* pc = addPortalComponent(portal);
-		setDimensions(pc, Vec2(2, 3));
-		pc->scene1 = testScene1;
-		pc->scene2 = testScene2;
+		Transform portal2Xfm;
+		portal2Xfm.position = Vec3(1, 2, 3);
+		portal2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
 
-		pc->scene1Xfm.position = Vec3(0, 0, -10);
-		pc->scene1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
+		Vec2 dimensions(2, 3);
+		
+		createPortalFromTwoBlankEntities(portal1, portal2, portal1Xfm, portal2Xfm, dimensions);
 
-		pc->scene2Xfm.position = Vec3(1, 2, 3);
-		pc->scene2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
+		debugCC = getColliderComponent(portal1);
 	}
 
 	//
 	// Set up portal from scene 1<->3
 	//
 	{
-		Entity portal = makeEntity(&game->globalScene.ecs, "portal");
+		Entity portal1 = makeEntity(&testScene1->ecs, "portalB1");
+		Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
+
+		Transform portal1Xfm;
+		portal1Xfm.position = Vec3(0, 0, -10);
+		portal1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
 		
-		PortalComponent* pc = addPortalComponent(portal);
-		setDimensions(pc, Vec2(2, 3));
-		pc->scene1 = testScene1;
-		pc->scene2 = testScene3;
+		Transform portal3Xfm;
+		portal3Xfm.position = Vec3(0, 0, 0);
+		portal3Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
 
-		pc->scene1Xfm.position = Vec3(0, 0, -10);
-		pc->scene1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
-
-		pc->scene2Xfm.position = Vec3(0, 0, 0);
-		pc->scene2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+		Vec2 dimensions(2, 3);
+		
+		createPortalFromTwoBlankEntities(portal1, portal3, portal1Xfm, portal3Xfm, dimensions);
 	}
 
 	makeSceneActive(game, testScene1);
 	makeCameraActive(game, camera);
-
-	//
-	// Set up test collider
-	//
-	Entity testCollider = makeEntity(&game->globalScene.ecs, "testCollider");
-	TransformComponent* testColliderXfm = addTransformComponent(testCollider);
-	ColliderComponent* testColliderCollider = addColliderComponent(testCollider);
-	{
-		testColliderXfm->position = Vec3(1, 1, 1);
-		testColliderXfm->scale = Vec3(2, 2, 2);
-
-		testColliderCollider->type = ColliderType::RECT3;
-		testColliderCollider->xfmOffset = Vec3(0, 0, 0);
-		testColliderCollider->xLength = 1;
-		testColliderCollider->yLength = 2;
-		testColliderCollider->zLength = 1;
-	}
 	
 	while(!glfwWindowShouldClose(window.glfwWindow))
 	{
@@ -398,7 +398,7 @@ int main()
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
 
-		updateCameraXfm(cameraXfm);
+		updateCameraXfm(cameraXfm, game);
 
 		if (keys[GLFW_KEY_1] && !lastKeys[GLFW_KEY_1])
 		{
@@ -407,24 +407,7 @@ int main()
 
 		updateGame(game);
 
-		if (pointInsideCollider(testColliderCollider, cameraXfm->position))
-		{
-			DebugDraw::instance().color = Vec3(1, 0, 0);
-		}
-		
-		DebugDraw::instance().drawRect3(
-			colliderCenter(testColliderCollider),
-			Vec3(
-				scaledXLength(testColliderCollider),
-				scaledYLength(testColliderCollider),
-				scaledZLength(testColliderCollider)
-			),
-			testColliderXfm->orientation,
-			cameraComponent,
-			cameraXfm
-		);
-		
-		DebugDraw::instance().color = Vec3(0, 1, 0);
+		// DebugDraw::instance().drawCollider(debugCC, cameraComponent, cameraXfm);
 
 		glfwSwapBuffers(window.glfwWindow);
 
