@@ -14,8 +14,161 @@
     <ClCompile Include="code\*.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\*.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\*.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="code\*.h">
       <Filter>Header Files</Filter>
     </ClInclude>

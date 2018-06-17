@@ -84,6 +84,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4100;4201;4244;4267;4305;4189</DisableSpecificWarnings>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\glfw\lib\x86;$(SolutionDir)lib\glew\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

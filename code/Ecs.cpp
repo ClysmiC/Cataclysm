@@ -248,6 +248,18 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 				Shader* shader = portalShader();
 				uint32 portalVao = quadVao();
 
+				Transform perturbedPortalXfm;
+				perturbedPortalXfm.position = sourceSceneXfm->position;
+				perturbedPortalXfm.orientation = sourceSceneXfm->orientation;
+				perturbedPortalXfm.scale = sourceSceneXfm->scale;
+
+				Plane portalPlane = Plane(sourceSceneXfm->position, outOfPortalNormal(pc));
+				bool closeEnoughToClipThroughNearPlane = distanceSquared(cameraXfm->position, portalPlane) < .11 * .11;
+				if (closeEnoughToClipThroughNearPlane)
+				{
+					perturbedPortalXfm.position += (intoPortalNormal(pc) * .1);
+				}
+
 				Mat4 model = modelToWorld(sourceSceneXfm);
 				Mat4 view = worldToView(cameraXfm);
 				Mat4 projection = camera->projectionMatrix;

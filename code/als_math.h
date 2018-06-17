@@ -419,24 +419,25 @@ inline Vec3 project(Vec3 vectorA, Vec3 vectorB)
 	return result;
 }
 
-// inline real32 distanceSquared(Vec3 vector, Plane plane)
-// {
-// 	ALS_ASSERT(isNormal(plane.normal));
+bool isNormal(Vec3);
+inline real32 distanceSquared(Vec3 vector, Plane plane)
+{
+	assert(isNormal(plane.normal));
 
-// 	Vec3 toVector = vector - plane.point;
-// 	Vec3 projection = project(toVector, plane.normal);
-// 	real32 result = lengthSquared(projection);
+	Vec3 toVector = vector - plane.point;
+	Vec3 projection = project(toVector, plane.normal);
+	real32 result = lengthSquared(projection);
 	
-// 	return result;
-// }
+	return result;
+}
 
-// inline real32 distance(Vec3 vector, Plane plane)
-// {
-// 	real32 result = distanceSquared(vector, plane);
-// 	result = sqrtf(result);
+inline real32 distance(Vec3 vector, Plane plane)
+{
+	real32 result = distanceSquared(vector, plane);
+	result = sqrtf(result);
 	
-// 	return result;
-// }
+	return result;
+}
 
 inline real32 distance(Vec2 vectorA, Vec2 vectorB)
 {

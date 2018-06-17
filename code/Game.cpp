@@ -337,7 +337,7 @@ int main()
 	Entity camera = makeEntity(&testScene1->ecs, "camera");
 	TransformComponent* cameraXfm = addTransformComponent(camera);
 	CameraComponent* cameraComponent = addCameraComponent(camera);
-	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.01f, 1000.0f);
 	cameraComponent->isOrthographic = false;
 
 	ColliderComponent* debugCC;
