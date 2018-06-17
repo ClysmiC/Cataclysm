@@ -90,20 +90,52 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 			real32 yLen = scaledYLength(collider);
 			real32 zLen = scaledZLength(collider);
 
-			Vec3 corner1 = center -
+            //   a
+            //    |
+			//    |  b
+			//    | /
+			//    |/
+			//    -------- c
+			// corner
+					 
+			Vec3 corner = center -
 				(xLen / 2) * localX -
 				(yLen / 2) * localY -
 				(zLen / 2) * localZ;
 
-			Vec3 corner2 = center +
+			Vec3 a = center +
+				(xLen / 2) * localX -
+				(yLen / 2) * localY -
+				(zLen / 2) * localZ; 	 
+
+			Vec3 b = center -
 				(xLen / 2) * localX +
+				(yLen / 2) * localY -
+				(zLen / 2) * localZ;
+
+			Vec3 c = center -
+				(xLen / 2) * localX -
 				(yLen / 2) * localY +
 				(zLen / 2) * localZ;
 
-			return
- 				( (point.x >= corner1.x && point.x <= corner2.x) || (point.x >= corner2.x && point.x <= corner1.x) ) &&
-				( (point.y >= corner1.y && point.y <= corner2.y) || (point.y >= corner2.y && point.y <= corner1.y) ) &&
-				( (point.z >= corner1.z && point.z <= corner2.z) || (point.z >= corner2.z && point.z <= corner1.z) );
+			Vec3 edge1 = a - corner;
+			Vec3 edge2 = b - corner;
+			Vec3 edge3 = c - corner;
+
+
+			if (isBetween(dot(point, edge1), dot(corner, edge1), dot(a, edge1)))
+			{
+				if (isBetween(dot(point, edge2), dot(corner, edge2), dot(b, edge2)))
+				{
+					if (isBetween(dot(point, edge3), dot(corner, edge3), dot(c, edge3)))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+			
 		} break;
 
 		case SPHERE:

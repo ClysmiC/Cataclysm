@@ -759,3 +759,10 @@ inline real32 getValue(Vec3 vector, Axis3D axis)
 {
 	return vector.element[axis];
 }
+
+inline bool isBetween(real32 value, real32 bound1, real32 bound2)
+{
+	if (value >= bound1 && value <= bound2) return true;
+	if (value >= bound2 && value <= bound1) return true;
+	return false;
+}

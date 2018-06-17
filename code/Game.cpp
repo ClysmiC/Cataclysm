@@ -355,7 +355,7 @@ int main()
 		
 		Transform portal2Xfm;
 		portal2Xfm.position = Vec3(1, 2, 3);
-		portal2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 90);
+		portal2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 45);
 
 		Vec2 dimensions(2, 3);
 		
