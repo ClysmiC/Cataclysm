@@ -10,9 +10,10 @@ struct RenderComponent : public Component
 	RenderComponent() = default;
 	RenderComponent(Entity entity, Submesh* submesh);
 
-	SubmeshOpenGlInfo submeshOpenGlInfo;
-
+	Submesh* submesh;
 	Material* material;
+
+	SubmeshOpenGlInfo submeshOpenGlInfo;
 };
 
 void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm,  CameraComponent* camera, Transform *cameraXfm);

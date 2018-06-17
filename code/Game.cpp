@@ -22,7 +22,10 @@ float mouseY;
 float mouseXPrev;
 float mouseYPrev;
 
+real32 timeMs;
 real32 deltaTMs;
+
+Entity testEntity;
 
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
@@ -62,12 +65,15 @@ void buildTestScene1(Scene* scene)
 	//
 	const uint32 hexCount = 2;
 	Vec3 hexPositions[hexCount];
-	hexPositions[0] = Vec3(-18, -12, -40);
-	hexPositions[1] = Vec3(-18, -12, -18);
+	hexPositions[0] = Vec3(-18, 0, -40);
+	hexPositions[1] = Vec3(6, 0, -4);
 
 	for (uint32 i = 0; i < hexCount; i++)
 	{
 		Entity e = makeEntity(&scene->ecs, "hex");
+
+		if (i == 1) testEntity = e;
+		
 		TransformComponent *tc = addTransformComponent(e);
 		tc->position = hexPositions[i];
 		tc->scale = Vec3(.25);
@@ -266,6 +272,17 @@ void updateCameraXfm(TransformComponent* xfm, Game* game)
 
 void updateGame(Game* game)
 {
+	//
+	// Rotate/scale test entity
+	TransformComponent* testXfm = getTransformComponent(testEntity);
+	real32 timeS = timeMs / 1000.0f;
+
+	testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
+	testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
+	testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
+
+	testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
+	
 	assert(game->activeScene != nullptr);
 	CameraComponent* camComponent = getCameraComponent(game->activeCamera);
 	TransformComponent* camXfm = getTransformComponent(game->activeCamera);
@@ -394,7 +411,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		real32 timeS = glfwGetTime();
-		real32 timeMs = timeS * 1000.0f;
+		timeMs = timeS * 1000.0f;
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
 

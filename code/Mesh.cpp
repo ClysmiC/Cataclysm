@@ -7,6 +7,7 @@
 #include <tuple>
 #include <unordered_set>
 #include "ResourceManager.h"
+#include <algorithm>
 
 Mesh::Mesh(std::string filename, bool useMaterialsReferencedInObjFile_)
 {
@@ -81,7 +82,8 @@ bool load(Mesh* mesh)
                     ResourceManager::instance().getMaterial(
 						(currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialFilename : Material::DEFAULT_MATERIAL_FILENAME,
 						(currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
-					)
+					),
+					mesh
 				)
 			);
 
@@ -284,6 +286,44 @@ bool load(Mesh* mesh)
     {
         load(material);
     }
+
+	//
+	// Calculate bounds
+	//
+	{
+		real32 minX = FLT_MAX;
+		real32 minY = FLT_MAX;
+		real32 minZ = FLT_MAX;
+
+		real32 maxX = -FLT_MAX;
+		real32 maxY = -FLT_MAX;
+		real32 maxZ = -FLT_MAX;
+
+		for (Submesh& submesh : mesh->submeshes)
+		{
+			Vec3 minPoint = submesh.bounds.center - submesh.bounds.halfDim;
+			Vec3 maxPoint = submesh.bounds.center + submesh.bounds.halfDim;
+			
+			minX = std::min(minX, minPoint.x);
+			minY = std::min(minY, minPoint.y);
+			minZ = std::min(minZ, minPoint.z);
+		
+			maxX = std::max(maxX, maxPoint.x);
+			maxY = std::max(maxY, maxPoint.y);
+			maxZ = std::max(maxZ, maxPoint.z);
+		}
+
+		Vec3 minPoint = Vec3(minX, minY, minZ);
+		Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
+		
+		mesh->bounds.halfDim = Vec3(
+			(maxPoint.x - minPoint.x) / 2.0f,
+			(maxPoint.y - minPoint.y) / 2.0f,
+			(maxPoint.z - minPoint.z) / 2.0f
+		);
+	
+		mesh->bounds.center = minPoint + mesh->bounds.halfDim;
+	}
 
     mesh->isLoaded = true;
 

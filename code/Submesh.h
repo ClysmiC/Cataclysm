@@ -7,6 +7,10 @@
 #include <vector>
 #include "CameraComponent.h"
 
+#include "Aabb.h"
+
+struct Mesh;
+
 struct SubmeshOpenGlInfo
 {
 	uint32 indicesSize;
@@ -22,14 +26,16 @@ struct SubmeshOpenGlInfo
 struct Submesh
 {
 	Submesh() = default;
-	Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material);
-
+	Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
 	
     std::string meshFilename;
     std::string submeshName;
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 
+	Aabb bounds;
+
+	Mesh* mesh;
     Material* material;
 
 	SubmeshOpenGlInfo openGlInfo;

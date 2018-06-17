@@ -4,19 +4,60 @@
 #include "assert.h"
 #include "als_math.h"
 
+#include <algorithm>
 
-Submesh::Submesh(const std::string filename, const std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material)
+
+Submesh::Submesh(const std::string filename, const std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh)
     :
     meshFilename(filename),
     submeshName(submeshName),
     vertices(std::move(vertices)),
     indices(std::move(indices)),
-    material(material)
+    material(material),
+	mesh(mesh)
 {
     assert(vertices.size() > 0);
     assert(indices.size() % 3 == 0);
 
+	//
+	// Recalculate tangents and bitangents
+	//
     recalculateTangentsAndBitangents(this);
+
+	//
+	// Calculate bounds
+	//
+	{
+		real32 minX = FLT_MAX;
+		real32 minY = FLT_MAX;
+		real32 minZ = FLT_MAX;
+
+		real32 maxX = -FLT_MAX;
+		real32 maxY = -FLT_MAX;
+		real32 maxZ = -FLT_MAX;
+
+		for (const MeshVertex& vertex : vertices)
+		{
+			minX = std::min(minX, vertex.position.x);
+			minY = std::min(minY, vertex.position.y);
+			minZ = std::min(minZ, vertex.position.z);
+		
+			maxX = std::max(maxX, vertex.position.x);
+			maxY = std::max(maxY, vertex.position.y);
+			maxZ = std::max(maxZ, vertex.position.z);
+		}
+
+		Vec3 minPoint = Vec3(minX, minY, minZ);
+		Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
+
+		this->bounds.halfDim = Vec3(
+			(maxPoint.x - minPoint.x) / 2.0f,
+			(maxPoint.y - minPoint.y) / 2.0f,
+			(maxPoint.z - minPoint.z) / 2.0f
+		);
+	
+		this->bounds.center = minPoint + this->bounds.halfDim;
+	}
 
 	//
 	// Setup OpenGL stuff
@@ -27,7 +68,7 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     glGenBuffers(1, &this->openGlInfo.vbo);
     glGenBuffers(1, &this->openGlInfo.ebo);
 
-    glBindVertexArray(openGlInfo.vao);
+    glBindVertexArray(this->openGlInfo.vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, this->openGlInfo.vbo);
     glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MeshVertex), this->vertices.data(), GL_STATIC_DRAW);
@@ -167,7 +208,7 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         vertex.bitangent.normalizeInPlace();
     }
 
-    for (auto vertex : submesh->vertices)
+    for (MeshVertex& vertex : submesh->vertices)
     {
         assert(length(vertex.bitangent) > .99 && length(vertex.bitangent) < 1.01);
         assert(length(vertex.tangent) > .99 && length(vertex.tangent) < 1.01);

@@ -5,6 +5,7 @@
 #include "MeshVertex.h"
 #include "Submesh.h"
 #include "CameraComponent.h"
+#include "Aabb.h"
 
 #include "als_math.h"
 
@@ -17,6 +18,8 @@ struct Mesh
 	bool isLoaded = false;
 	std::string id;
     std::vector<Submesh> submeshes;
+
+	Aabb bounds;
 };
 
 bool load(Mesh* mesh);
