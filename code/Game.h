@@ -10,6 +10,9 @@ extern float mouseYPrev;
 extern bool keys[1024];
 extern bool lastKeys[1024];
 
+extern bool mouseButtons[8];
+extern bool lastMouseButtons[8];
+
 #define MAX_SCENES 8
 
 struct Game

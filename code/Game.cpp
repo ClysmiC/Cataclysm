@@ -17,6 +17,9 @@
 bool keys[1024];
 bool lastKeys[1024];
 
+bool mouseButtons[8];
+bool lastMouseButtons[8];
+
 float mouseX;
 float mouseY;
 float mouseXPrev;
@@ -30,11 +33,16 @@ Entity testEntity;
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
 
-void updateLastKeys()
+void updateLastKeysAndMouseButtons()
 {
 	for (uint32 i = 0; i < 1024; i++)
 	{
 		lastKeys[i] = keys[i];
+	}
+
+	for (uint32 i = 0; i < 8; i++)
+	{
+		lastMouseButtons[i] = mouseButtons[i];
 	}
 }
 
@@ -431,7 +439,7 @@ int main()
 		mouseXPrev = mouseX;
 		mouseYPrev = mouseY;
 
-		updateLastKeys();
+		updateLastKeysAndMouseButtons();
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(33));
 	}

@@ -9,11 +9,11 @@ void glfwErrorCallback(int e, const char* message)
 	printf("%s\n", message);
 }
 	
-void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int mode)
+void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
+		glfwSetWindowShouldClose(window, true);
 	}
 
 	if (action == GLFW_PRESS)
@@ -23,6 +23,18 @@ void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int actio
 	else if (action == GLFW_RELEASE)
 	{
 		keys[key] = false;
+	}
+}
+
+void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers)
+{
+	if (action == GLFW_PRESS)
+	{
+		mouseButtons[button] = true;
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		mouseButtons[button] = false;
 	}
 }
 
@@ -66,6 +78,7 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 	glViewport(0, 0, width, height);
 	
 	glfwSetKeyCallback(window->glfwWindow, glfwKeyPressedCallback);
+	glfwSetMouseButtonCallback(window->glfwWindow, glfwMousePressedCallback);
 	glfwSetWindowSizeCallback(window->glfwWindow, glfwWindowResizeCallback);
 
 	glfwSetInputMode(window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

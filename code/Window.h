@@ -22,7 +22,8 @@ struct Window
 bool initGlfwWindow(Window* window, uint32 width, uint32 height);
 
 static void glfwWindowResizeCallback(GLFWwindow* window, int width, int height);
-static void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int mode);
+static void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers);
+static void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers);
 static void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
 static void glfwErrorCallback(int e, const char* message);
 

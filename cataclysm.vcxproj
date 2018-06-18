@@ -135,7 +135,36 @@
     <ClCompile Include="code\*.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="code\*.h" />
+    <ClInclude Include="code\Aabb.h" />
+    <ClInclude Include="code\als.h" />
+    <ClInclude Include="code\als_math.h" />
+    <ClInclude Include="code\CameraComponent.h" />
+    <ClInclude Include="code\ColliderComponent.h" />
+    <ClInclude Include="code\Component.h" />
+    <ClInclude Include="code\ComponentGroup.h" />
+    <ClInclude Include="code\Cubemap.h" />
+    <ClInclude Include="code\DebugDraw.h" />
+    <ClInclude Include="code\DebugGlobal.h" />
+    <ClInclude Include="code\DirectionalLightComponent.h" />
+    <ClInclude Include="code\Ecs.h" />
+    <ClInclude Include="code\Entity.h" />
+    <ClInclude Include="code\Game.h" />
+    <ClInclude Include="code\Material.h" />
+    <ClInclude Include="code\Mesh.h" />
+    <ClInclude Include="code\MeshVertex.h" />
+    <ClInclude Include="code\PointLightComponent.h" />
+    <ClInclude Include="code\PortalComponent.h" />
+    <ClInclude Include="code\Quad.h" />
+    <ClInclude Include="code\RenderComponent.h" />
+    <ClInclude Include="code\ResourceManager.h" />
+    <ClInclude Include="code\Scene.h" />
+    <ClInclude Include="code\Shader.h" />
+    <ClInclude Include="code\Submesh.h" />
+    <ClInclude Include="code\Texture.h" />
+    <ClInclude Include="code\Transform.h" />
+    <ClInclude Include="code\TransformComponent.h" />
+    <ClInclude Include="code\Types.h" />
+    <ClInclude Include="code\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
