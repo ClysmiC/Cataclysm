@@ -17,7 +17,6 @@ enum Axis3D
 	Z = 2
 };
 
-
 union Vec2
 {
 	Vec2();
@@ -137,6 +136,7 @@ struct Mat4
 	Mat4& transposeInPlace();
 	Mat4& mat3ifyInPlace();
 	Mat4& perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
+	Mat4& orthoInPlace(real32 width, real32 aspectRatio, real32 near, real32 far);
 };
 
 struct Plane
@@ -411,6 +411,7 @@ inline bool equals(Quaternion quatA, Quaternion quatB)
 
 inline Vec3 project(Vec3 vectorA, Vec3 vectorB)
 {
+	// Note: project vectorA ONTO vectorB
 	Vec3 result;
 
 	real32 dotValue = dot(vectorA, vectorB);
@@ -760,9 +761,20 @@ inline real32 getValue(Vec3 vector, Axis3D axis)
 	return vector.element[axis];
 }
 
+
+//
+// Random utilities
+//
 inline bool isBetween(real32 value, real32 bound1, real32 bound2)
 {
 	if (value >= bound1 && value <= bound2) return true;
 	if (value >= bound2 && value <= bound1) return true;
 	return false;
+}
+
+inline real32 clamp(real32 value, real32 min, real32 max)
+{
+	if (value < min) return min;
+	if (value > max) return max;
+	return value;
 }

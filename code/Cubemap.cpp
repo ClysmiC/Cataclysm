@@ -3,6 +3,10 @@
 #include "ResourceManager.h"
 #include "stb/stb_image.h"
 
+#include "Shader.h"
+#include "TransformComponent.h"
+#include "CameraComponent.h"
+
 #include "GL/glew.h"
 
 Cubemap::Cubemap(std::string directory, std::string extension_)

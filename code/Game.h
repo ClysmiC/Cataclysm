@@ -15,6 +15,8 @@ extern bool lastMouseButtons[8];
 
 #define MAX_SCENES 8
 
+struct Window;
+
 struct Game
 {
 	Game() = default;
@@ -24,9 +26,12 @@ struct Game
 	Scene scenes[MAX_SCENES];
 
 	Scene* activeScene;
+	Window* window;
 	Entity activeCamera;
 
 	int numScenes;
+
+	bool isEditorMode;
 };
 
 Scene* makeScene(Game* game);

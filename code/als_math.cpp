@@ -291,11 +291,6 @@ Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real
 	real32 right = near * tanf(TO_RAD(halfFov));
 	real32 top = right / (aspectRatio);
 
-	// TEMP: interpret fov as vertical fov (the way Qt does)
-	// real32 halfVFov = fov / 2;
-	// real32 top = near * tan(TO_RAD(halfVFov));
-	// real32 right = top * aspectRatio;
-
 	(*this)[0][0] = near / right;
 	(*this)[0][1] = 0;
 	(*this)[0][2] = 0;
@@ -315,6 +310,45 @@ Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real
 	(*this)[3][1] = 0;
 	(*this)[3][2] = -1;
 	(*this)[3][3] = 0;
+	
+	return *this;
+}
+
+Mat4& Mat4::orthoInPlace(real32 width, real32 aspectRatio, real32 near, real32 far)
+{
+	assert(width > 0);
+	assert(aspectRatio > 0);
+	assert(near > 0);
+	assert(far > 0);
+	assert(far > near);
+
+	real32 right = width / 2.0f;
+	real32 top = right / (aspectRatio);
+
+	// TEMP: interpret fov as vertical fov (the way Qt does)
+	// real32 halfVFov = fov / 2;
+	// real32 top = near * tan(TO_RAD(halfVFov));
+	// real32 right = top * aspectRatio;
+
+	(*this)[0][0] = 1 / right;
+	(*this)[0][1] = 0;
+	(*this)[0][2] = 0;
+	(*this)[0][3] = 0;
+
+	(*this)[1][0] = 0;
+	(*this)[1][1] = 1 / top;
+	(*this)[1][2] = 0;
+	(*this)[1][3] = 0;
+
+	(*this)[2][0] = 0;
+	(*this)[2][1] = 0;
+	(*this)[2][2] = -2 / (far - near);
+	(*this)[2][3] = - (far + near) / (far - near);
+
+	(*this)[3][0] = 0;
+	(*this)[3][1] = 0;
+	(*this)[3][2] = 0;
+	(*this)[3][3] = 1;
 	
 	return *this;
 }

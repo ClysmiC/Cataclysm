@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <cmath>
 
 void glfwErrorCallback(int e, const char* message)
 {
@@ -40,15 +41,21 @@ void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int mo
 
 void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
 {
+	// TODO: querying this every frame might be slow depending on how it's implemented
+	//       is there a way for us to directly set it on our Window struct?
+	//       We would need a way to map from GLFWwindow to Window
+	int32 w, h;
+	glfwGetFramebufferSize(window, &w, &h);
+	
 	mouseX = (float)xPos;
-	mouseY = (float)yPos;
+	mouseY = ((float)-yPos) + h;
 }
 
 void glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 {
-	glfwGetFramebufferSize(window, &w, &h);
+	// glfwGetFramebufferSize(window, &window->width, &window->height);
 	
-	glViewport(0, 0, w, h);
+	// glViewport(0, 0, w, h);
 
 	// TODO: recalculate the perspective matrix?
 }
@@ -61,6 +68,9 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 		printf("Failed to initialize GLFW. Exiting.\n");
 		return false;
 	}
+
+	window->width = width;
+	window->height = height;
 
 	mouseXPrev = FLT_MAX;
 	mouseYPrev = FLT_MAX;
@@ -107,3 +117,46 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 	return true;
 }
 
+int32 windowWidth(Window* window)
+{
+	int32 w, h;
+	glfwGetFramebufferSize(window->glfwWindow, &w, &h);
+	return w;
+}
+
+int32 windowHeight(Window* window)
+{
+	int32 w, h;
+	glfwGetFramebufferSize(window->glfwWindow, &w, &h);
+	return h;
+}
+
+Vec2 pixelToViewportCoordinate(Window* window, Vec2 pixel)
+{
+	int32 w, h;
+	glfwGetFramebufferSize(window->glfwWindow, &w, &h);
+
+	Vec2 result;
+	result.x = clamp(pixel.x / (real32)w, 0, 1);
+	result.y = clamp(pixel.y / (real32)h, 0, 1);
+
+	return result;
+}
+
+Vec2 viewportCoordinateToPixel(Window* window, Vec2 viewportCoordinate)
+{
+	int32 w, h;
+	glfwGetFramebufferSize(window->glfwWindow, &w, &h);
+
+	clamp(viewportCoordinate.x, 0, 1);
+	clamp(viewportCoordinate.y, 0, 1);
+
+	Vec2 result;
+	result.x = std::floor(viewportCoordinate.x * w);
+	result.y = std::floor(viewportCoordinate.y * h);
+
+	if (result.x >= w - EPSILON) result.x = w - 1;
+	if (result.y >= h - EPSILON) result.y = h - 1;
+
+	return result;
+}

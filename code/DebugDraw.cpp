@@ -161,11 +161,26 @@ DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Tr
 }
 
 void
-DebugDraw::drawLine(Vec3 start, Vec3 end)
+DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm)
 {
 	// TODO:
 	// set the two line slots in the VBO using world positions start and end
 	// use identity matrix as model
+
+	// temporary hack: using existing rect3 debug drawing to draw a line
+	Vec3 rectCenter = (start + end) / 2;
+	real32 dist = distance(start, end);
+
+	Vec3 dimensions = Vec3(0.1, 0.1, dist);
+
+	Vec3 defaultForward = -Vec3(Axis3D::Z);
+	Vec3 rotationAxis = cross(defaultForward, end - start).normalizeInPlace();
+	real32 cosTheta = dot(defaultForward, normalize(end - start));
+	real32 angle = TO_DEG(acos(cosTheta));
+
+	Quaternion rotationNeeded = axisAngle(rotationAxis, angle);
+
+	drawRect3(rectCenter, dimensions, rotationNeeded, camera, cameraXfm);
 }
 
 void

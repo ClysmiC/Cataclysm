@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "Window.h"
 
+#include <iostream>
 #include <thread>
 
 #include "Ecs.h"
@@ -11,6 +12,7 @@
 #include "DebugDraw.h"
 #include "Mesh.h"
 #include "GL/glew.h"
+#include "Ray.h"
 
 #include "DebugGlobal.h"
 
@@ -29,6 +31,9 @@ real32 timeMs;
 real32 deltaTMs;
 
 Entity testEntity;
+
+Ray lastCastRay;
+bool hasCastRayYet = false;
 
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
@@ -189,8 +194,9 @@ void buildTestScene3(Scene* scene)
 	}
 }
 
-void updateCameraXfm(TransformComponent* xfm, Game* game)
+void updateCameraXfm(Game* game)
 {
+	TransformComponent* xfm = getTransformComponent(game->activeCamera);
 	Vec3 posBeforeMove = xfm->position;
 	
 	Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -226,8 +232,7 @@ void updateCameraXfm(TransformComponent* xfm, Game* game)
 
 		Quaternion deltaYawAndPitch;
 		deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-		deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * -deltaMouseY * deltaTS); // pitch
-
+		deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
 
 		xfm->orientation = deltaYawAndPitch * xfm->orientation;
 
@@ -280,6 +285,11 @@ void updateCameraXfm(TransformComponent* xfm, Game* game)
 
 void updateGame(Game* game)
 {
+	if (!game->isEditorMode)
+	{
+		updateCameraXfm(game);
+	}
+	
 	//
 	// Rotate/scale test entity
 	TransformComponent* testXfm = getTransformComponent(testEntity);
@@ -290,11 +300,37 @@ void updateGame(Game* game)
 	testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
 
 	testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
-	
+
 	assert(game->activeScene != nullptr);
 	CameraComponent* camComponent = getCameraComponent(game->activeCamera);
 	TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+
+	if (keys[GLFW_KEY_TAB] && !lastKeys[GLFW_KEY_TAB])
+	{
+		game->isEditorMode = !game->isEditorMode;
+
+		if (game->isEditorMode)
+		{
+			glfwSetInputMode(game->window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		else
+		{
+			glfwSetInputMode(game->window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+	}
+	
+	if (game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !lastMouseButtons[GLFW_MOUSE_BUTTON_1])
+	{
+		lastCastRay = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
+		hasCastRayYet = true;
+	}
+
 	renderScene(game->activeScene, camComponent, camXfm);
+	
+	if (hasCastRayYet)
+	{
+		DebugDraw::instance().drawLine(lastCastRay.position, lastCastRay.position + 10 * lastCastRay.direction, camComponent, camXfm);
+	}
 }
 
 // END SCRATCHPAD
@@ -348,6 +384,8 @@ int main()
 	real32 lastTimeMs = 0;
 
 	Game* game = new Game();
+	game->isEditorMode = false;
+	game->window = &window;
 	
 	Scene* testScene1 = makeScene(game);
 	buildTestScene1(testScene1);
@@ -362,8 +400,13 @@ int main()
 	Entity camera = makeEntity(&testScene1->ecs, "camera");
 	TransformComponent* cameraXfm = addTransformComponent(camera);
 	CameraComponent* cameraComponent = addCameraComponent(camera);
-	cameraComponent->projectionMatrix.perspectiveInPlace(60.0f, 4.0f / 3.0f, 0.01f, 1000.0f);
+	cameraComponent->window = &window;
 	cameraComponent->isOrthographic = false;
+	cameraComponent->perspectiveFov = 60.0f;
+	cameraComponent->aspectRatio = 4.0f / 3.0f;
+	cameraComponent->near = 0.01f;
+	cameraComponent->far = 1000.0f;
+	recalculateProjectionMatrix(cameraComponent);
 
 	ColliderComponent* debugCC;
 	
@@ -422,8 +465,6 @@ int main()
 		timeMs = timeS * 1000.0f;
 		deltaTMs = timeMs - lastTimeMs;
 		lastTimeMs = timeMs;
-
-		updateCameraXfm(cameraXfm, game);
 
 		if (keys[GLFW_KEY_1] && !lastKeys[GLFW_KEY_1])
 		{

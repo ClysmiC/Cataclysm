@@ -2,9 +2,12 @@
 
 #include <string>
 #include "Types.h"
-#include "Shader.h"
 
 #include "CameraComponent.h"
+
+struct Transform;
+struct CameraComponent;
+struct Shader;
 
 struct Cubemap
 {

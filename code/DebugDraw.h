@@ -13,11 +13,15 @@ struct DebugDraw
 	
 	Shader* shader;
 	Vec3 color;
-	
+
+	// todo
 	void drawSphere(Vec3 position, float radius);
+	
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
 	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
-	void drawLine(Vec3 start, Vec3 end);
+
+	// todo
+	void drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm);
 
 	void drawCollider(ColliderComponent* collider, CameraComponent* camera, Transform* cameraXfm);
 
