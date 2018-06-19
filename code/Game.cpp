@@ -401,8 +401,15 @@ int main()
 	TransformComponent* cameraXfm = addTransformComponent(camera);
 	CameraComponent* cameraComponent = addCameraComponent(camera);
 	cameraComponent->window = &window;
+	
+#if 1
 	cameraComponent->isOrthographic = false;
 	cameraComponent->perspectiveFov = 60.0f;
+#else
+	cameraComponent->isOrthographic = true;
+	cameraComponent->orthoWidth = 10.0f;
+#endif
+	
 	cameraComponent->aspectRatio = 4.0f / 3.0f;
 	cameraComponent->near = 0.01f;
 	cameraComponent->far = 1000.0f;

@@ -175,10 +175,8 @@ DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* ca
 
 	Vec3 defaultForward = -Vec3(Axis3D::Z);
 	Vec3 rotationAxis = cross(defaultForward, end - start).normalizeInPlace();
-	real32 cosTheta = dot(defaultForward, normalize(end - start));
-	real32 angle = TO_DEG(acos(cosTheta));
 
-	Quaternion rotationNeeded = axisAngle(rotationAxis, angle);
+	Quaternion rotationNeeded = relativeRotation(defaultForward, end - start);
 
 	drawRect3(rectCenter, dimensions, rotationNeeded, camera, cameraXfm);
 }

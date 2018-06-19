@@ -1,4 +1,5 @@
 #include "als_math.h"
+#include <cmath>
 
 Vec2::Vec2() {}
 Vec2::Vec2(real32 value) { this->x = value; this->y = value; }
@@ -987,4 +988,35 @@ Quaternion lookRotation(Vec3 forward, Vec3 up)
 	quaternion.w = (m01 - m10) * num2;
 	
 	return normalize(quaternion);
+}
+
+Quaternion relativeRotation(Vec3 start, Vec3 end)
+{
+	Quaternion result;
+	start.normalizeInPlace();
+	end.normalizeInPlace();
+	
+	real32 startDotEnd = dot(start, end);
+	
+	if (startDotEnd >= 1.0f)
+	{
+		return result;
+	}
+	
+	if (startDotEnd <= -1.0f)
+	{
+		Vec3 someVector = someNonParallelAxis(start);
+		Vec3 axis = cross(start, someVector);
+		return axisAngle(axis, 180);
+	}
+
+	Vec3 axis = cross(start, end);
+	result.x = axis.x;
+	result.y = axis.y;
+	result.z = axis.z;
+	result.w = std::sqrt(lengthSquared(start) * lengthSquared(end)) + startDotEnd;
+
+	result.normalizeInPlace();
+
+	return result;
 }

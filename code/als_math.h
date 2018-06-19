@@ -396,6 +396,30 @@ inline Quaternion relativeRotation(Quaternion start, Quaternion end)
 
 	return result;
 }
+Quaternion relativeRotation(Vec3 start, Vec3 end);
+
+
+inline Vec3 someNonParallelAxis(Vec3 vector)
+{
+	if (!FLOAT_EQ(vector.x, 0, EPSILON))
+	{
+		return Vec3(0, 0, -1);
+	}
+
+	if (!FLOAT_EQ(vector.y, 0, EPSILON))
+	{
+		return Vec3(0, 0, -1);
+	}
+
+	if (!FLOAT_EQ(vector.z, 0, EPSILON))
+	{
+		return Vec3(1, 0, 0);
+	}
+
+	assert(false);
+	return Vec3(1, 0, 0);
+}
+
 inline bool equals(Quaternion quatA, Quaternion quatB)
 {
 	real32 deltaX = fabs(quatA.x - quatB.x);

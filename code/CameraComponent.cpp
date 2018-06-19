@@ -29,20 +29,36 @@ Ray rayThroughViewportCoordinate(CameraComponent* camera, Vec2 viewportCoordinat
 	
 	Ray result;
 	
+	TransformComponent* camXfm = getTransformComponent(camera->entity);
+
+	Vec3 cameraForward = camXfm->forward();
+	Vec3 cameraRight = camXfm->right();
+	Vec3 cameraUp = camXfm->up();
+		
+	Vec3 nearPlaneCenter = camXfm->position + cameraForward * camera->near;
+	
 	if (camera->isOrthographic)
 	{
+		real32 halfWidth = camera->orthoWidth / 2.0f;
+		real32 halfHeight = halfWidth / camera->aspectRatio;
+		
+		Vec3 nearPlaneBottomLeft = nearPlaneCenter - cameraRight * halfWidth - cameraUp * halfHeight;
+		Vec3 nearPlaneTopRight = nearPlaneCenter + cameraRight * halfWidth + cameraUp * halfHeight;
+		Vec3 nearPlaneBlToTr = nearPlaneTopRight - nearPlaneBottomLeft;
+
+		real32 nearPlaneWorldSpaceWidth = length(project(nearPlaneBlToTr, cameraRight));
+		real32 nearPlaneWorldSpaceHeight = nearPlaneWorldSpaceWidth / camera->aspectRatio;
+
+		result.position =
+			nearPlaneBottomLeft +
+			viewportCoordinate.x * nearPlaneWorldSpaceWidth * cameraRight +
+			viewportCoordinate.y * nearPlaneWorldSpaceHeight * cameraUp;
+
+		result.direction = cameraForward;
 	}
 	else
 	{
-		TransformComponent* camXfm = getTransformComponent(camera->entity);
-
-		Vec3 cameraForward = camXfm->forward();
-		Vec3 cameraRight = camXfm->right();
-		Vec3 cameraUp = camXfm->up();
-		
-		Vec3 nearPlaneCenter = camXfm->position + cameraForward * camera->near;
-
-		real32 halfFov = camera->perspectiveFov;
+		real32 halfFov = camera->perspectiveFov / 2.0f;
 		real32 halfWidth = camera->near * tanf(TO_RAD(halfFov));
 		real32 halfHeight = halfWidth / camera->aspectRatio;
 		
