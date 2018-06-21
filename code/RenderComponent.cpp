@@ -25,12 +25,4 @@ void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm, Camer
     glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
     glDrawElements(GL_TRIANGLES, renderComponent->submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-
-	// temp
-	// TODO: test with scale
-	// TODO: use recalculateAaBbAfterXfm
-	// TODO: find a way to do this per mesh or per entity... not per rendercomponent (i.e., submesh)
-	Aabb bounds = transformedAabb(renderComponent->submesh->mesh->bounds, xfm);
-	
-	DebugDraw::instance().drawAARect3(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
 }

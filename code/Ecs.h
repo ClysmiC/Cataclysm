@@ -2,6 +2,7 @@
 
 
 #include "Entity.h"
+#include "Ray.h"
 #include "ComponentGroup.h"
 #include "TransformComponent.h"
 #include "PortalComponent.h"
@@ -12,6 +13,7 @@
 #include "ColliderComponent.h"
 
 #include <unordered_map>
+#include <vector>
 
 
 // TODO better solution for this.
@@ -33,6 +35,8 @@ struct Ecs
 	static uint32 nextEntityId;
 	
 	Scene* scene;
+
+	std::vector<Entity> entities;
 
 	// TODO: make a dynamic array of pointers to contiguous "batches/buckets"
 	ComponentList<TransformComponent> transforms;
@@ -94,5 +98,6 @@ ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 // TODO: do these belong in Ecs.h?
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal=false, Transform* destPortalXfm=nullptr);
 void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0);
+RaycastResult castRay(Ecs* ecs, Ray ray);
 	
 PointLightComponent* closestPointLight(TransformComponent* xfm);

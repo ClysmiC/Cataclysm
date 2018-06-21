@@ -1,14 +1,15 @@
 #pragma once
 
 #include "als_math.h"
-// #include "Aabb.h"
+#include "Entity.h"
 
 struct Aabb;
 
 struct RaycastResult
 {
-	bool hit;
+	Entity hitEntity;
 	real32 t;
+	bool hit;
 };
 
 struct Ray
@@ -20,5 +21,5 @@ struct Ray
 	Vec3 direction;
 };
 
-RaycastResult rayPlaneTest(Ray ray, Plane plane);
-RaycastResult rayAabbTest(Ray ray, Aabb aabb);
+real32 rayPlaneTest(Ray ray, Plane plane);
+real32 rayAabbTest(Ray ray, Aabb aabb);

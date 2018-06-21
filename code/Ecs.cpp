@@ -102,6 +102,8 @@ Entity makeEntity(Ecs* ecs, std::string friendlyName)
 	result.id = Ecs::nextEntityId;
 	result.ecs = ecs;
 	result.friendlyName = friendlyName;
+
+	ecs->entities.push_back(result);
 	
 	Ecs::nextEntityId++;
 	return result;
@@ -380,6 +382,37 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
 
 		drawRenderComponent(&rc, xfm, camera, cameraXfm);
 	}
+}
+
+RaycastResult castRay(Ecs* ecs, Ray ray)
+{
+	RaycastResult result;
+	result.hit = false;
+	result.t = -1;
+
+	for (Entity& e : ecs->entities)
+	{
+		TransformComponent* xfm = getTransformComponent(e);
+		RenderComponent* rc = getRenderComponent(e);
+	
+		if (rc != nullptr && xfm != nullptr)
+		{
+			Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
+			real32 t = rayAabbTest(ray, bounds);
+
+			if (t >= 0)
+			{
+				if (!result.hit || t < result.t)
+				{
+					result.hit = true;
+					result.t = t;
+					result.hitEntity = e;
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 PointLightComponent* closestPointLight(TransformComponent* xfm)

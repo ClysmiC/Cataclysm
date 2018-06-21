@@ -323,13 +323,30 @@ void updateGame(Game* game)
 	{
 		lastCastRay = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
 		hasCastRayYet = true;
+
+		RaycastResult rayResult = castRay(&game->activeScene->ecs, lastCastRay);
+		if (rayResult.hit)
+		{
+			testEntity = rayResult.hitEntity;
+		}
 	}
 
 	renderScene(game->activeScene, camComponent, camXfm);
+
+	for (Entity& e : game->activeScene->ecs.entities)
+	{
+		if (e.id == testEntity.id)
+		{
+			DebugDraw::instance().color = Vec3(1, 0, 0);
+		}
+
+		DebugDraw::instance().drawAabb(e, camComponent, camXfm);
+		DebugDraw::instance().color = Vec3(0, 1, 0);
+	}
 	
 	if (hasCastRayYet)
 	{
-		DebugDraw::instance().drawLine(lastCastRay.position, lastCastRay.position + 10 * lastCastRay.direction, camComponent, camXfm);
+		// DebugDraw::instance().drawLine(lastCastRay.position, lastCastRay.position + 10 * lastCastRay.direction, camComponent, camXfm);
 	}
 }
 

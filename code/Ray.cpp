@@ -7,33 +7,36 @@ Ray::Ray(Vec3 position, Vec3 direction)
 {
 }
 
-RaycastResult rayPlaneTest(Ray ray, Plane plane)
+real32 rayPlaneTest(Ray ray, Plane plane)
 {
 	assert(isNormal(ray.direction));
 	
-	RaycastResult result;
+	// Todo: this doesn't collide with back faces. Should it? Should it be a boolean option?
+	if (dot(ray.direction, plane.normal) > 0)
+	{
+		return -1;
+	}
+
+	if (dot(plane.point - ray.position, ray.direction) < 0)
+	{
+		return -1;
+	}
 
 	real32 rayDotNormal = dot(ray.direction, plane.normal);
 
 	if (FLOAT_EQ(rayDotNormal, 0, EPSILON))
 	{
-		result.hit = false;
+		return -1;
 	}
 	else
 	{
-		result.hit = true;
-		result.t = dot(plane.point - ray.position, plane.normal) / rayDotNormal;
+		return dot(plane.point - ray.position, plane.normal) / rayDotNormal;
 	}
-
-	return result;
 }
 
-RaycastResult rayAabbTest(Ray ray, Aabb aabb)
+real32 rayAabbTest(Ray ray, Aabb aabb)
 {
 	assert(isNormal(ray.direction));
-	
-	RaycastResult result;
-	result.hit = false;
 
 	Vec3 minPoint = aabb.center - aabb.halfDim;
 	Vec3 maxPoint = aabb.center + aabb.halfDim;
@@ -42,15 +45,14 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test left face
 		Plane leftFace = Plane(aabb.center - aabb.halfDim.x * Vec3(Axis3D::X), -Vec3(Axis3D::X));
-		RaycastResult leftFaceResult = rayPlaneTest(ray, leftFace);
-		if (leftFaceResult.hit)
+		real32 leftFaceResult = rayPlaneTest(ray, leftFace);
+		if (leftFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * leftFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * leftFaceResult;
 			if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
 				hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
 			{
-				result = leftFaceResult;
-				return result;
+				return leftFaceResult;
 			}
 		}
 	}
@@ -58,15 +60,14 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test right face
 		Plane rightFace = Plane(aabb.center + aabb.halfDim.x * Vec3(Axis3D::X), Vec3(Axis3D::X));
-		RaycastResult rightFaceResult = rayPlaneTest(ray, rightFace);
-		if (rightFaceResult.hit)
+		real32 rightFaceResult = rayPlaneTest(ray, rightFace);
+		if (rightFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * rightFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * rightFaceResult;
 			if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
 				hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
 			{
-				result = rightFaceResult;
-				return result;
+				return rightFaceResult;
 			}
 		}
 	}
@@ -75,15 +76,14 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test bottom face
 		Plane bottomFace = Plane(aabb.center - aabb.halfDim.y * Vec3(Axis3D::Y), -Vec3(Axis3D::Y));
-		RaycastResult bottomFaceResult = rayPlaneTest(ray, bottomFace);
-		if (bottomFaceResult.hit)
+		real32 bottomFaceResult = rayPlaneTest(ray, bottomFace);
+		if (bottomFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * bottomFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * bottomFaceResult;
 			if (hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x &&
 				hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
 			{
-				result = bottomFaceResult;
-				return result;
+				return bottomFaceResult;
 			}
 		}
 	}
@@ -91,15 +91,14 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test top face
 		Plane topFace = Plane(aabb.center + aabb.halfDim.y * Vec3(Axis3D::Y), Vec3(Axis3D::Y));
-		RaycastResult topFaceResult = rayPlaneTest(ray, topFace);
-		if (topFaceResult.hit)
+		real32 topFaceResult = rayPlaneTest(ray, topFace);
+		if (topFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * topFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * topFaceResult;
 			if (hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x &&
 				hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
 			{
-				result = topFaceResult;
-				return result;
+				return topFaceResult;
 			}
 		}
 	}
@@ -108,15 +107,14 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test back face
 		Plane backFace = Plane(aabb.center - aabb.halfDim.z * Vec3(Axis3D::Z), -Vec3(Axis3D::Z));
-		RaycastResult backFaceResult = rayPlaneTest(ray, backFace);
-		if (backFaceResult.hit)
+		real32 backFaceResult = rayPlaneTest(ray, backFace);
+		if (backFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * backFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * backFaceResult;
 			if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
 				hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x)
 			{
-				result = backFaceResult;
-				return result;
+				return backFaceResult;
 			}
 		}
 	}
@@ -124,18 +122,17 @@ RaycastResult rayAabbTest(Ray ray, Aabb aabb)
 	{
 		// test front face
 		Plane frontFace = Plane(aabb.center + aabb.halfDim.z * Vec3(Axis3D::Z), Vec3(Axis3D::Z));
-		RaycastResult frontFaceResult = rayPlaneTest(ray, frontFace);
-		if (frontFaceResult.hit)
+		real32 frontFaceResult = rayPlaneTest(ray, frontFace);
+		if (frontFaceResult >= 0)
 		{
-			Vec3 hitPoint = ray.position + ray.direction * frontFaceResult.t;
+			Vec3 hitPoint = ray.position + ray.direction * frontFaceResult;
 			if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
 				hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x)
 			{
-				result = frontFaceResult;
-				return result;
+				return frontFaceResult;
 			}
 		}
 	}
 
-	return result;
+	return -1;
 }

@@ -20,6 +20,8 @@ struct DebugDraw
 	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
 	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
 
+	void drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm);
+
 	// todo
 	void drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm);
 

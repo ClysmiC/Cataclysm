@@ -206,3 +206,15 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
 		}
 	}
 }
+
+void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)
+{
+	TransformComponent* xfm = getTransformComponent(entity);
+	RenderComponent* rc = getRenderComponent(entity);
+	
+	if (rc != nullptr && xfm != nullptr)
+	{
+		Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
+		drawAARect3(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
+	}
+}
