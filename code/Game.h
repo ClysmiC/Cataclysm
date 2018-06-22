@@ -19,19 +19,19 @@ struct Window;
 
 struct Game
 {
-	Game() = default;
+    Game() = default;
 
-	// Any component confined to a scene in this array's ECS.
-	// Only 1 (or maybe a few) of these scenes will be active at a time
-	Scene scenes[MAX_SCENES];
+    // Any component confined to a scene in this array's ECS.
+    // Only 1 (or maybe a few) of these scenes will be active at a time
+    Scene scenes[MAX_SCENES];
 
-	Scene* activeScene;
-	Window* window;
-	Entity activeCamera;
+    Scene* activeScene;
+    Window* window;
+    Entity activeCamera;
 
-	int numScenes;
+    int numScenes;
 
-	bool isEditorMode;
+    bool isEditorMode;
 };
 
 Scene* makeScene(Game* game);

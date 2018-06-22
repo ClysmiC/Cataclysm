@@ -8,24 +8,24 @@ struct Window;
 
 struct CameraComponent : public Component
 {
-	Mat4 projectionMatrix;
-	bool isOrthographic;
+    Mat4 projectionMatrix;
+    bool isOrthographic;
 
-	real32 aspectRatio;
-	real32 near;
-	real32 far;
+    real32 aspectRatio;
+    real32 near;
+    real32 far;
 
-	Window* window;
-	
-	union
-	{
-		real32 perspectiveFov;
-		real32 orthoWidth;
-	};
+    Window* window;
+    
+    union
+    {
+        real32 perspectiveFov;
+        real32 orthoWidth;
+    };
 
-	// TODO: wrappers around the math library calls
-	// initPerspective(..)
-	// initOrtho(..)
+    // TODO: wrappers around the math library calls
+    // initPerspective(..)
+    // initOrtho(..)
 };
 
 void recalculateProjectionMatrix(CameraComponent* camera);

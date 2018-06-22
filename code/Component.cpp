@@ -2,5 +2,5 @@
 
 Component::Component(Entity entity)
 {
-	this->entity = entity;
+    this->entity = entity;
 }

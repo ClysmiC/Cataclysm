@@ -14,56 +14,56 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     vertices(std::move(vertices)),
     indices(std::move(indices)),
     material(material),
-	mesh(mesh)
+    mesh(mesh)
 {
     assert(vertices.size() > 0);
     assert(indices.size() % 3 == 0);
 
-	//
-	// Recalculate tangents and bitangents
-	//
+    //
+    // Recalculate tangents and bitangents
+    //
     recalculateTangentsAndBitangents(this);
 
-	//
-	// Calculate bounds
-	//
-	{
-		real32 minX = FLT_MAX;
-		real32 minY = FLT_MAX;
-		real32 minZ = FLT_MAX;
+    //
+    // Calculate bounds
+    //
+    {
+        real32 minX = FLT_MAX;
+        real32 minY = FLT_MAX;
+        real32 minZ = FLT_MAX;
 
-		real32 maxX = -FLT_MAX;
-		real32 maxY = -FLT_MAX;
-		real32 maxZ = -FLT_MAX;
+        real32 maxX = -FLT_MAX;
+        real32 maxY = -FLT_MAX;
+        real32 maxZ = -FLT_MAX;
 
-		for (const MeshVertex& vertex : vertices)
-		{
-			minX = std::min(minX, vertex.position.x);
-			minY = std::min(minY, vertex.position.y);
-			minZ = std::min(minZ, vertex.position.z);
-		
-			maxX = std::max(maxX, vertex.position.x);
-			maxY = std::max(maxY, vertex.position.y);
-			maxZ = std::max(maxZ, vertex.position.z);
-		}
+        for (const MeshVertex& vertex : vertices)
+        {
+            minX = std::min(minX, vertex.position.x);
+            minY = std::min(minY, vertex.position.y);
+            minZ = std::min(minZ, vertex.position.z);
+        
+            maxX = std::max(maxX, vertex.position.x);
+            maxY = std::max(maxY, vertex.position.y);
+            maxZ = std::max(maxZ, vertex.position.z);
+        }
 
-		Vec3 minPoint = Vec3(minX, minY, minZ);
-		Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
+        Vec3 minPoint = Vec3(minX, minY, minZ);
+        Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
 
-		this->bounds.halfDim = Vec3(
-			(maxPoint.x - minPoint.x) / 2.0f,
-			(maxPoint.y - minPoint.y) / 2.0f,
-			(maxPoint.z - minPoint.z) / 2.0f
-		);
-	
-		this->bounds.center = minPoint + this->bounds.halfDim;
-	}
+        this->bounds.halfDim = Vec3(
+            (maxPoint.x - minPoint.x) / 2.0f,
+            (maxPoint.y - minPoint.y) / 2.0f,
+            (maxPoint.z - minPoint.z) / 2.0f
+        );
+    
+        this->bounds.center = minPoint + this->bounds.halfDim;
+    }
 
-	//
-	// Setup OpenGL stuff
-	//
-	this->openGlInfo.indicesSize = this->indices.size();
-	
+    //
+    // Setup OpenGL stuff
+    //
+    this->openGlInfo.indicesSize = this->indices.size();
+    
     glGenVertexArrays(1, &this->openGlInfo.vao);
     glGenBuffers(1, &this->openGlInfo.vbo);
     glGenBuffers(1, &this->openGlInfo.ebo);

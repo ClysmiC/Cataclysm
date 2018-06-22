@@ -11,9 +11,9 @@ struct Ecs;
 
 struct Entity
 {
-	uint32 id;
+    uint32 id;
     Ecs* ecs;
-	std::string friendlyName;
+    std::string friendlyName;
 };
 
 

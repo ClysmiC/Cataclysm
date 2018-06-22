@@ -16,30 +16,30 @@ const std::string Material::ERROR_MATERIAL_NAME = "error";
 
 Material::Material(std::string filename_, std::string materialName)
 {
-	this->filename = filename_;
-	this->name = materialName;
-	this->id = filename + COMPOSITE_ID_DELIMITER + materialName;
-	
-	this->floatUniforms.emplace("material.specularExponent", 1);
-	this->vec3Uniforms.emplace(
-		"material.ambient",
-		Vec3(0.5, 0.5, 0.5) 
-	);
-		
-	this->vec3Uniforms.emplace(
-		"material.diffuse",
-		Vec3(0.5, 0.5, 0.5) 
-	);
-		
-	this->vec3Uniforms.emplace(
-		"material.specular",
-		Vec3(0.5, 0.5, 0.5) 
-	);
+    this->filename = filename_;
+    this->name = materialName;
+    this->id = filename + COMPOSITE_ID_DELIMITER + materialName;
+    
+    this->floatUniforms.emplace("material.specularExponent", 1);
+    this->vec3Uniforms.emplace(
+        "material.ambient",
+        Vec3(0.5, 0.5, 0.5) 
+    );
+        
+    this->vec3Uniforms.emplace(
+        "material.diffuse",
+        Vec3(0.5, 0.5, 0.5) 
+    );
+        
+    this->vec3Uniforms.emplace(
+        "material.specular",
+        Vec3(0.5, 0.5, 0.5) 
+    );
 
-	this->textureUniforms.emplace("material.normalTex", Texture::defaultNormal());
-	this->textureUniforms.emplace("material.ambientTex", Texture::gray());
-	this->textureUniforms.emplace("material.diffuseTex", Texture::gray());
-	this->textureUniforms.emplace("material.specularTex", Texture::black());
+    this->textureUniforms.emplace("material.normalTex", Texture::defaultNormal());
+    this->textureUniforms.emplace("material.ambientTex", Texture::gray());
+    this->textureUniforms.emplace("material.diffuseTex", Texture::gray());
+    this->textureUniforms.emplace("material.specularTex", Texture::black());
 }
 
 bool load(Material* material)
@@ -61,7 +61,7 @@ bool load(Material* material)
 
 bool unload(Material* material)
 {
-	// TODO
+    // TODO
     return false;
 }
 
@@ -73,16 +73,16 @@ void clearUniforms(Material* material)
     material->vec2Uniforms.clear();
     material->vec3Uniforms.clear();
     material->vec4Uniforms.clear();
-	material->mat4Uniforms.clear();
-	
+    material->mat4Uniforms.clear();
+    
     // Note: potential GPU memory leak
     material->textureUniforms.clear();
 }
 
 bool bind(Material* material)
 {
-	Shader* shader = material->shader;
-	
+    Shader* shader = material->shader;
+    
     if (!material->isLoaded) return false;
     assert(shader != nullptr);
     if (shader == nullptr) return false;
@@ -136,7 +136,7 @@ bool bind(Material* material)
         glActiveTexture(textureUnit);
         glBindTexture(GL_TEXTURE_2D, kvp.second->openGlHandle);
         setInt(shader, kvp.first, textureUnitIndex);
-		
+        
         textureUnit++;
         textureUnitIndex++;
     }
@@ -146,38 +146,38 @@ bool bind(Material* material)
 
 bool loadFromMtlFile(Material* material, std::string fullFilename)
 {
-	// for every material declared in the .mtl file
+    // for every material declared in the .mtl file
     // if not inited, skip it
     // otherwise, get the reference to it and "load" it from within this function.
     // this should include loading ourself (assert at end to make sure this happens).
 
     // Thus, any subsequent material from within this file that gets "loaded" will just
     // return true because we already loaded them and set their isLoaded.
-	
+    
     using namespace std;
 
-	struct
-	{
-		bool operator() (Material* m, std::string texType, std::string texFilename)
-		{
-			using namespace std;
+    struct
+    {
+        bool operator() (Material* m, std::string texType, std::string texFilename)
+        {
+            using namespace std;
 
-			// Note: texFilename is relative to this material's directory, not the resource directory
+            // Note: texFilename is relative to this material's directory, not the resource directory
 
-			string relFileDirectory = truncateFilenameAfterDirectory(m->filename);
-			string texRelFilename = relFileDirectory + texFilename;
+            string relFileDirectory = truncateFilenameAfterDirectory(m->filename);
+            string texRelFilename = relFileDirectory + texFilename;
 
-			bool gammaCorrect = texType == "material.diffuseTex";
-			Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
+            bool gammaCorrect = texType == "material.diffuseTex";
+            Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
 
-			assert(tex != nullptr);
-			if (tex == nullptr) return false;
+            assert(tex != nullptr);
+            if (tex == nullptr) return false;
 
-			m->textureUniforms[texType] = tex;
+            m->textureUniforms[texType] = tex;
 
-			return true;
-		}
-	} handleTexture;
+            return true;
+        }
+    } handleTexture;
 
     bool foundSelfInMtlFile = false;
 
@@ -217,8 +217,8 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
             if (currentMaterial != nullptr)
             {
                 currentMaterial->shader = ResourceManager::instance().initShader("shader/basic.vert", "shader/basic.frag", true);;
-				assert(currentMaterial->shader != nullptr);
-				assert(currentMaterial->shader->isLoaded);
+                assert(currentMaterial->shader != nullptr);
+                assert(currentMaterial->shader->isLoaded);
 
                 currentMaterial->isLoaded = true;
             }
@@ -303,12 +303,12 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
         }
     }
 
-	assert(foundSelfInMtlFile); // TODO: replace this with error material somewhere
+    assert(foundSelfInMtlFile); // TODO: replace this with error material somewhere
     if(!foundSelfInMtlFile)
-	{
-		// TODO: print or log some error... we are falling back to error material
-	}
-	
+    {
+        // TODO: print or log some error... we are falling back to error material
+    }
+    
     return foundSelfInMtlFile;
 }
 

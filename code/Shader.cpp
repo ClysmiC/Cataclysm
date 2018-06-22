@@ -14,9 +14,9 @@ const std::string Shader::COMPOSITE_ID_DELIMITER = "|";
 
 Shader::Shader(std::string vertFilename, std::string fragFilename)
 {
-	this->id = shaderIdFromFilenames(vertFilename, fragFilename);
-	this->vertFilename = vertFilename;
-	this->fragFilename = fragFilename;
+    this->id = shaderIdFromFilenames(vertFilename, fragFilename);
+    this->vertFilename = vertFilename;
+    this->fragFilename = fragFilename;
 }
 
 bool bind(Shader* shader)
@@ -67,7 +67,7 @@ void setVec2(Shader* shader, std::string name, real32 x, real32 y)
 void setVec3(Shader* shader, std::string name, Vec3 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-	auto loc = glGetUniformLocation(shader->openGlHandle, name.c_str());
+    auto loc = glGetUniformLocation(shader->openGlHandle, name.c_str());
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
@@ -91,7 +91,7 @@ void setVec4(Shader* shader, std::string name, real32 x, real32 y, real32 z, rea
 
 void setMat4(Shader* shader, std::string name, Mat4 &value)
 {
-	// NOTE: Transpose matrix to make it column order
+    // NOTE: Transpose matrix to make it column order
     glUniformMatrix4fv(glGetUniformLocation(shader->openGlHandle, name.c_str()), 1, GL_TRUE, value.dataPointer());
 }
 

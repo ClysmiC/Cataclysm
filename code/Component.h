@@ -4,8 +4,8 @@
 
 struct Component
 {
-	Component() = default;
-	Component(Entity entity);
-	
-	Entity entity;
+    Component() = default;
+    Component(Entity entity);
+    
+    Entity entity;
 };

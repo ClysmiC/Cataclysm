@@ -5,36 +5,36 @@
 
 enum ColliderType
 {
-	RECT3,
-	SPHERE,
-	CYLINDER,
-	CAPSULE,
+    RECT3,
+    SPHERE,
+    CYLINDER,
+    CAPSULE,
 };
 
 struct ColliderComponent : public Component
 {
-	ColliderComponent();
-	
-	Vec3 xfmOffset;
-	ColliderType type;
+    ColliderComponent();
+    
+    Vec3 xfmOffset;
+    ColliderType type;
 
-	union
-	{
-		// Sphere, Cylinder, and Capsule types
-		struct
-		{
-			real32 length; // unused for sphere
-			real32 radius;
-			Axis3D axis; 
-		};
+    union
+    {
+        // Sphere, Cylinder, and Capsule types
+        struct
+        {
+            real32 length; // unused for sphere
+            real32 radius;
+            Axis3D axis; 
+        };
 
-		struct
-		{
-			real32 xLength; // use 'length' to address this memory
-			real32 yLength;
-			real32 zLength;
-		};
-	};
+        struct
+        {
+            real32 xLength; // use 'length' to address this memory
+            real32 yLength;
+            real32 zLength;
+        };
+    };
 };
 
 Vec3 colliderCenter(ColliderComponent* collider);

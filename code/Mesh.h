@@ -11,15 +11,15 @@
 
 struct Mesh
 {
-	Mesh() = default;
-	Mesh(std::string filename, bool useMaterialsReferencedInObjFile);
-	
+    Mesh() = default;
+    Mesh(std::string filename, bool useMaterialsReferencedInObjFile);
+    
     bool useMaterialsReferencedInObjFile;
-	bool isLoaded = false;
-	std::string id;
+    bool isLoaded = false;
+    std::string id;
     std::vector<Submesh> submeshes;
 
-	Aabb bounds;
+    Aabb bounds;
 };
 
 bool load(Mesh* mesh);

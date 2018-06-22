@@ -10,8 +10,8 @@ struct Scene;
 
 struct PortalComponent : public Component
 {
-	PortalComponent() = default;
-	PortalComponent* connectedPortal;
+    PortalComponent() = default;
+    PortalComponent* connectedPortal;
 };
 
 Shader* portalShader();

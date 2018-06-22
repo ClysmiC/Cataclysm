@@ -8,14 +8,14 @@
 
 struct Window
 {
-	GLFWwindow* glfwWindow;
+    GLFWwindow* glfwWindow;
 
-	// TODO: these get set at the start, but don't get updated
-	// when the window is resized
-	int32 height;
-	int32 width;
+    // TODO: these get set at the start, but don't get updated
+    // when the window is resized
+    int32 height;
+    int32 width;
 
-	// Callbacks the window registers with GLFW
+    // Callbacks the window registers with GLFW
 };
 
 bool initGlfwWindow(Window* window, uint32 width, uint32 height);

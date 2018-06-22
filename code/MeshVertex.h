@@ -16,9 +16,9 @@ public:
         return
             equals(this->position, other.position)    &&
             equals(this->normal, other.normal)        &&
-			equals(this->texCoords, other.texCoords)  &&
-			equals(this->tangent, other.tangent)      &&
-			equals(this->bitangent, other.bitangent);
+            equals(this->texCoords, other.texCoords)  &&
+            equals(this->tangent, other.tangent)      &&
+            equals(this->bitangent, other.bitangent);
     }
 };
 

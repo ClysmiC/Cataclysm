@@ -5,18 +5,18 @@
 #include "DebugDraw.h"
 
 RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
-	: Component(entity)
+    : Component(entity)
 {
     submesh = submesh_;
-	submeshOpenGlInfo = submesh->openGlInfo;
+    submeshOpenGlInfo = submesh->openGlInfo;
     material = submesh->material;
 }
 
 void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm, CameraComponent* camera, Transform *cameraXfm)
 {
-	Mat4 m2w = modelToWorld(xfm);;
-	Mat4 w2v = worldToView(cameraXfm);
-	
+    Mat4 m2w = modelToWorld(xfm);;
+    Mat4 w2v = worldToView(cameraXfm);
+    
     bind(renderComponent->material);
     setMat4(renderComponent->material->shader, "model", m2w);
     setMat4(renderComponent->material->shader, "view", w2v);

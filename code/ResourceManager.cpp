@@ -35,7 +35,7 @@ RESOURCE_HANDLE ResourceManager::getHandle(std::string id)
 void ResourceManager::initDefaults()
 {
     initMaterial(Material::DEFAULT_MATERIAL_FILENAME, Material::DEFAULT_MATERIAL_NAME, true);
-	initMaterial(Material::ERROR_MATERIAL_FILENAME, Material::ERROR_MATERIAL_NAME, true);
+    initMaterial(Material::ERROR_MATERIAL_FILENAME, Material::ERROR_MATERIAL_NAME, true);
 }
 
 Texture* ResourceManager::getTexture(std::string id)
@@ -95,14 +95,14 @@ Mesh* ResourceManager::initMesh(std::string relFilename, bool useMaterialsRefren
 Cubemap*
 ResourceManager::initCubemap(std::string directoryName, std::string extension, bool loadNow)
 {
-	Cubemap c(directoryName, extension);
-	return initResource(c, cubemaps, loadNow);
+    Cubemap c(directoryName, extension);
+    return initResource(c, cubemaps, loadNow);
 }
 
 Cubemap*
 ResourceManager::getCubemap(std::string id)
 {
-	return getResource(id, cubemaps);
+    return getResource(id, cubemaps);
 }
 
 template<class T>
@@ -155,9 +155,9 @@ T* ResourceManager::getResource(std::string id, std::unordered_map<RESOURCE_HAND
 
 std::string truncateFilenameAfterDirectory(std::string filename)
 {
-	size_t index = filename.find_last_of('/');
+    size_t index = filename.find_last_of('/');
 
-	if (index == std::string::npos) return "";
+    if (index == std::string::npos) return "";
 
-	return filename.substr(0, index + 1);
+    return filename.substr(0, index + 1);
 }

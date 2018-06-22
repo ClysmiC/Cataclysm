@@ -11,13 +11,13 @@ struct Shader;
 
 struct Cubemap
 {
-	Cubemap() = default;
-	Cubemap(std::string directoryName, std::string extension_);
+    Cubemap() = default;
+    Cubemap(std::string directoryName, std::string extension_);
 
-	std::string id;
-	std::string extension;
-	uint32 openGlHandle;
-	bool isLoaded = false;
+    std::string id;
+    std::string extension;
+    uint32 openGlHandle;
+    bool isLoaded = false;
 };
 
 Shader* cubemapShader();

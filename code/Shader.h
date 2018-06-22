@@ -6,17 +6,17 @@
 
 struct Shader
 {
-	Shader() = default;
-	Shader(std::string vertFile, std::string fragFile);
+    Shader() = default;
+    Shader(std::string vertFile, std::string fragFile);
 
-	bool isLoaded = false;
-	std::string id;
+    bool isLoaded = false;
+    std::string id;
     std::string vertFilename;
     std::string fragFilename;
 
     uint32 openGlHandle;
 
-	static const std::string COMPOSITE_ID_DELIMITER;
+    static const std::string COMPOSITE_ID_DELIMITER;
 };
 
 bool load(Shader* shader);

@@ -8,15 +8,15 @@
 
 struct Material
 {
-	static const std::string COMPOSITE_ID_DELIMITER;
+    static const std::string COMPOSITE_ID_DELIMITER;
     static const std::string DEFAULT_MATERIAL_FILENAME;
     static const std::string DEFAULT_MATERIAL_NAME;
-	static const std::string ERROR_MATERIAL_FILENAME;
+    static const std::string ERROR_MATERIAL_FILENAME;
     static const std::string ERROR_MATERIAL_NAME;
 
-	Material() = default;
-	Material(std::string filename, std::string name);
-	
+    Material() = default;
+    Material(std::string filename, std::string name);
+    
     Shader *shader;
     std::unordered_map<std::string, int32> intUniforms;
     std::unordered_map<std::string, bool> boolUniforms;
@@ -27,10 +27,10 @@ struct Material
     std::unordered_map<std::string, Mat4> mat4Uniforms;
     std::unordered_map<std::string, Texture*> textureUniforms;
 
-	bool isLoaded = false;
-	bool receiveLight = true;
-	
-	std::string id;
+    bool isLoaded = false;
+    bool receiveLight = true;
+    
+    std::string id;
     std::string filename;
     std::string name;
 };

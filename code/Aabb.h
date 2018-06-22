@@ -5,8 +5,8 @@
 
 struct Aabb
 {
-	Vec3 center;
-	Vec3 halfDim;
+    Vec3 center;
+    Vec3 halfDim;
 };
 
 Aabb transformedAabb(Aabb aabb, Transform* xfm);

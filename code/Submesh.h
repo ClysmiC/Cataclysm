@@ -13,8 +13,8 @@ struct Mesh;
 
 struct SubmeshOpenGlInfo
 {
-	uint32 indicesSize;
-	uint32 vao;
+    uint32 indicesSize;
+    uint32 vao;
     uint32 vbo;
     uint32 ebo;
 };
@@ -25,20 +25,20 @@ struct SubmeshOpenGlInfo
 // It is possible for a mesh to be entirely composed of 1 submesh (if the mesh only has 1 material).
 struct Submesh
 {
-	Submesh() = default;
-	Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
-	
+    Submesh() = default;
+    Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
+    
     std::string meshFilename;
     std::string submeshName;
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 
-	Aabb bounds;
+    Aabb bounds;
 
-	Mesh* mesh;
+    Mesh* mesh;
     Material* material;
 
-	SubmeshOpenGlInfo openGlInfo;
+    SubmeshOpenGlInfo openGlInfo;
 };
 
 void recalculateTangentsAndBitangents(Submesh* submesh);

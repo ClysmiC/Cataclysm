@@ -6,9 +6,9 @@
 
 struct TransformComponent : public Component, public Transform
 {
-	TransformComponent();
-	TransformComponent(Vec3 position);
-	TransformComponent(Vec3 position, Quaternion orientation);
-	TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
+    TransformComponent();
+    TransformComponent(Vec3 position);
+    TransformComponent(Vec3 position, Quaternion orientation);
+    TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
 };
 

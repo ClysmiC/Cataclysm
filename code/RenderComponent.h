@@ -7,13 +7,13 @@
 
 struct RenderComponent : public Component
 {
-	RenderComponent() = default;
-	RenderComponent(Entity entity, Submesh* submesh);
+    RenderComponent() = default;
+    RenderComponent(Entity entity, Submesh* submesh);
 
-	Submesh* submesh;
-	Material* material;
+    Submesh* submesh;
+    Material* material;
 
-	SubmeshOpenGlInfo submeshOpenGlInfo;
+    SubmeshOpenGlInfo submeshOpenGlInfo;
 };
 
 void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm,  CameraComponent* camera, Transform *cameraXfm);
