@@ -15,6 +15,8 @@
 #include "Ray.h"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #include "DebugGlobal.h"
 
@@ -394,8 +396,14 @@ int main()
         return -1;
     }
 
+    IMGUI_CHECKVERSION();
+
     ImGui::CreateContext();
     ImGuiIO* io = &ImGui::GetIO();
+    ImGui_ImplGlfw_InitForOpenGL(window.glfwWindow, false);
+    ImGui_ImplOpenGL3_Init();
+    
+    ImGui::StyleColorsDark();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -487,6 +495,16 @@ int main()
     while(!glfwWindowShouldClose(window.glfwWindow))
     {
         glfwPollEvents();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        bool someBool = true;
+        ImGui::Begin("Test Window", &someBool);
+
+        ImGui::Text("Testing, one two three...");
+        ImGui::End();
+        
         glClearColor(.5f, 0.5f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -510,10 +528,19 @@ int main()
         mouseYPrev = mouseY;
 
         updateLastKeysAndMouseButtons();
+
+        // Rendering
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         std::this_thread::sleep_for(std::chrono::milliseconds(33));
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window.glfwWindow);
     glfwTerminate();
     return 0;
 }
