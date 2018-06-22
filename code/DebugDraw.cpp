@@ -11,105 +11,105 @@
 DebugDraw&
 DebugDraw::instance()
 {
-	static DebugDraw *instance = new DebugDraw();
+    static DebugDraw *instance = new DebugDraw();
 
-	return *instance;
+    return *instance;
 }
 
 void
 DebugDraw::init()
 {
-	color = Vec3(0, 1, 0);
+    color = Vec3(0, 1, 0);
 
-	shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
+    shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
-	auto v = glGetError();
-	
-	real32 cubeVertices[] = {
-		-.5, -.5,  .5,  // front-bot-left
-		 .5, -.5,  .5,  // front-bot-right
-		 .5,  .5,  .5,  // front-top-right
-		-.5,  .5,  .5,  // front-top-left
-		-.5, -.5, -.5,  // back-bot-left
-		 .5, -.5, -.5,  // back-bot-right
-		 .5,  .5, -.5,  // back-top-right
-		-.5,  .5, -.5,  // back-top-left
-	};
+    auto v = glGetError();
+    
+    real32 cubeVertices[] = {
+        -.5, -.5,  .5,  // front-bot-left
+         .5, -.5,  .5,  // front-bot-right
+         .5,  .5,  .5,  // front-top-right
+        -.5,  .5,  .5,  // front-top-left
+        -.5, -.5, -.5,  // back-bot-left
+         .5, -.5, -.5,  // back-bot-right
+         .5,  .5, -.5,  // back-top-right
+        -.5,  .5, -.5,  // back-top-left
+    };
 
-	uint32 cubeIndices[] = {
-		// Front square
-		0, 1,
-		1, 2,
-		2, 3,
-		3, 0,
+    uint32 cubeIndices[] = {
+        // Front square
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0,
 
-		// Back square
-		4, 5,
-		5, 6,
-		6, 7,
-		7, 4,
+        // Back square
+        4, 5,
+        5, 6,
+        6, 7,
+        7, 4,
 
-		// Connecting lines
-		0, 4,
-		1, 5,
-		2, 6,
-		3, 7
-	};
+        // Connecting lines
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7
+    };
 
-	uint32 cubeVerticesCount = 8;
-	uint32 sphereVerticesCount = 1; // TODO
-	uint32 lineVerticesCount = 2;
+    uint32 cubeVerticesCount = 8;
+    uint32 sphereVerticesCount = 1; // TODO
+    uint32 lineVerticesCount = 2;
 
-	uint32 cubeIndicesCount = 24;
-	uint32 sphereIndicesCount = 1; // TODO
-	uint32 lineIndicesCount = 2;
+    uint32 cubeIndicesCount = 24;
+    uint32 sphereIndicesCount = 1; // TODO
+    uint32 lineIndicesCount = 2;
 
-	uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
-	uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount;
-	
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	glGenVertexArrays(1, &vao);
-	
-	glBindVertexArray(vao);
-	{
-		v = glGetError();
+    uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
+    uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount;
+    
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &vao);
+    
+    glBindVertexArray(vao);
+    {
+        v = glGetError();
 
-		// Allocate
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(
-			GL_ARRAY_BUFFER,
-			sizeof(real32) * 3 * verticesCount,
-			0,
-			GL_STATIC_DRAW);
+        // Allocate
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(real32) * 3 * verticesCount,
+            0,
+            GL_STATIC_DRAW);
 
-		v = glGetError();
-		// Fill in
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(cubeVertices), cubeVertices);
+        v = glGetError();
+        // Fill in
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(cubeVertices), cubeVertices);
 
-		v = glGetError();
+        v = glGetError();
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(
-			GL_ELEMENT_ARRAY_BUFFER,
-			sizeof(uint32) * indicesCount,
-			0,
-			GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            sizeof(uint32) * indicesCount,
+            0,
+            GL_STATIC_DRAW);
 
 
-		GLint size;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+        GLint size;
+        glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
-		v = glGetError();
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(cubeIndices), cubeIndices);
+        v = glGetError();
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(cubeIndices), cubeIndices);
 
-		v = glGetError();
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
-		glEnableVertexAttribArray(0);
-	}
-	glBindVertexArray(0);
+        v = glGetError();
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+        glEnableVertexAttribArray(0);
+    }
+    glBindVertexArray(0);
 
-	v = glGetError();
+    v = glGetError();
 }
 
 void
@@ -120,101 +120,101 @@ DebugDraw::drawSphere(Vec3 position, float radius)
 void
 DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
 {
-	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
-	Mat4 transform;
-	transform.scaleInPlace(dimensions);
-	transform.rotateInPlace(orientation);
-	transform.translateInPlace(center);
+    // Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
+    Mat4 transform;
+    transform.scaleInPlace(dimensions);
+    transform.rotateInPlace(orientation);
+    transform.translateInPlace(center);
 
-	Mat4 view = worldToView(cameraXfm);
-	
-	bind(shader);
-	setMat4(shader, "model", transform);
-	setMat4(shader, "view", view);
-	setMat4(shader, "projection", camera->projectionMatrix);
-	setVec3(shader, "debugColor", color);
+    Mat4 view = worldToView(cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", camera->projectionMatrix);
+    setVec3(shader, "debugColor", color);
 
-	glBindVertexArray(vao);
-	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+    glBindVertexArray(vao);
+    glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void
 DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm)
 {
-	// Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
-	Mat4 transform;
-	transform.scaleInPlace(dimensions);
-	transform.translateInPlace(center);
+    // Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
+    Mat4 transform;
+    transform.scaleInPlace(dimensions);
+    transform.translateInPlace(center);
 
-	Mat4 view = worldToView(cameraXfm);
-	
-	bind(shader);
-	setMat4(shader, "model", transform);
-	setMat4(shader, "view", view);
-	setMat4(shader, "projection", camera->projectionMatrix);
-	setVec3(shader, "debugColor", color);
+    Mat4 view = worldToView(cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", camera->projectionMatrix);
+    setVec3(shader, "debugColor", color);
 
-	glBindVertexArray(vao);
-	glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+    glBindVertexArray(vao);
+    glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void
 DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm)
 {
-	// TODO:
-	// set the two line slots in the VBO using world positions start and end
-	// use identity matrix as model
+    // TODO:
+    // set the two line slots in the VBO using world positions start and end
+    // use identity matrix as model
 
-	// temporary hack: using existing rect3 debug drawing to draw a line
-	Vec3 rectCenter = (start + end) / 2;
-	real32 dist = distance(start, end);
+    // temporary hack: using existing rect3 debug drawing to draw a line
+    Vec3 rectCenter = (start + end) / 2;
+    real32 dist = distance(start, end);
 
-	Vec3 dimensions = Vec3(0.1, 0.1, dist);
+    Vec3 dimensions = Vec3(0.1, 0.1, dist);
 
-	Vec3 defaultForward = -Vec3(Axis3D::Z);
-	Vec3 rotationAxis = cross(defaultForward, end - start).normalizeInPlace();
+    Vec3 defaultForward = -Vec3(Axis3D::Z);
+    Vec3 rotationAxis = cross(defaultForward, end - start).normalizeInPlace();
 
-	Quaternion rotationNeeded = relativeRotation(defaultForward, end - start);
+    Quaternion rotationNeeded = relativeRotation(defaultForward, end - start);
 
-	drawRect3(rectCenter, dimensions, rotationNeeded, camera, cameraXfm);
+    drawRect3(rectCenter, dimensions, rotationNeeded, camera, cameraXfm);
 }
 
 void
 DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComponent, Transform* cameraXfm)
 {
-	switch(collider->type)
-	{
-		case RECT3:
-		{
-			drawRect3(colliderCenter(collider),
-					  Vec3(
-						  scaledXLength(collider),
-						  scaledYLength(collider),
-						  scaledZLength(collider)
-					  ),
-					  getTransformComponent(collider->entity)->orientation,
-					  cameraComponent,
-					  cameraXfm);
-		} break;
+    switch(collider->type)
+    {
+        case RECT3:
+        {
+            drawRect3(colliderCenter(collider),
+                      Vec3(
+                          scaledXLength(collider),
+                          scaledYLength(collider),
+                          scaledZLength(collider)
+                      ),
+                      getTransformComponent(collider->entity)->orientation,
+                      cameraComponent,
+                      cameraXfm);
+        } break;
 
-		default:
-		{
-			// Not yet implemented
-			assert(false);
-		}
-	}
+        default:
+        {
+            // Not yet implemented
+            assert(false);
+        }
+    }
 }
 
 void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)
 {
-	TransformComponent* xfm = getTransformComponent(entity);
-	RenderComponent* rc = getRenderComponent(entity);
-	
-	if (rc != nullptr && xfm != nullptr)
-	{
-		Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
-		drawAARect3(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
-	}
+    TransformComponent* xfm = getTransformComponent(entity);
+    RenderComponent* rc = getRenderComponent(entity);
+    
+    if (rc != nullptr && xfm != nullptr)
+    {
+        Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
+        drawAARect3(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
+    }
 }

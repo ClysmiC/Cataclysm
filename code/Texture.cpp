@@ -9,8 +9,8 @@
 
 Texture::Texture(std::string filename, bool gammaCorrect_)
 {
-	this->id = filename;
-	this->gammaCorrect = gammaCorrect_;
+    this->id = filename;
+    this->gammaCorrect = gammaCorrect_;
 }
 
 bool load(Texture* texture)

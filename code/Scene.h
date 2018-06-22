@@ -8,11 +8,11 @@ struct Game;
 
 struct Scene
 {
-	Ecs ecs;
-	Cubemap* cubemap;
-	Game* game;
-	
-	Scene();
+    Ecs ecs;
+    Cubemap* cubemap;
+    Game* game;
+    
+    Scene();
 };
 
 void renderScene(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0, Transform* destPortalXfm=nullptr);

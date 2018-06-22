@@ -14,6 +14,8 @@
 #include "GL/glew.h"
 #include "Ray.h"
 
+#include "imgui/imgui.h"
+
 #include "DebugGlobal.h"
 
 bool keys[1024];
@@ -391,6 +393,9 @@ int main()
     {
         return -1;
     }
+
+    ImGui::CreateContext();
+    ImGuiIO* io = &ImGui::GetIO();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

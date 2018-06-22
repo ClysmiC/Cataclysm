@@ -5,12 +5,12 @@
 
 struct Texture
 {
-	Texture() = default;
-	Texture(std::string filename, bool gammaCorrect = false);
+    Texture() = default;
+    Texture(std::string filename, bool gammaCorrect = false);
 
 
-	std::string id;
-	bool isLoaded = false;
+    std::string id;
+    bool isLoaded = false;
     bool gammaCorrect;
 
     static Texture* white();

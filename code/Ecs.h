@@ -24,28 +24,28 @@ struct Scene;
 
 struct Ecs
 {
-	template<class T>
-	struct ComponentList
-	{
-		T components[COMPONENT_ARRAY_SIZE];
-		uint32 size = 0;
-		std::unordered_map<uint32, ComponentGroup<T>> lookup;
-	};
-	
-	static uint32 nextEntityId;
-	
-	Scene* scene;
+    template<class T>
+    struct ComponentList
+    {
+        T components[COMPONENT_ARRAY_SIZE];
+        uint32 size = 0;
+        std::unordered_map<uint32, ComponentGroup<T>> lookup;
+    };
+    
+    static uint32 nextEntityId;
+    
+    Scene* scene;
 
-	std::vector<Entity> entities;
+    std::vector<Entity> entities;
 
-	// TODO: make a dynamic array of pointers to contiguous "batches/buckets"
-	ComponentList<TransformComponent> transforms;
-	ComponentList<CameraComponent> cameras;
-	ComponentList<DirectionalLightComponent> directionalLights;
-	ComponentList<PointLightComponent> pointLights;
-	ComponentList<RenderComponent> renderComponents;
-	ComponentList<PortalComponent> portals;
-	ComponentList<ColliderComponent> colliders;
+    // TODO: make a dynamic array of pointers to contiguous "batches/buckets"
+    ComponentList<TransformComponent> transforms;
+    ComponentList<CameraComponent> cameras;
+    ComponentList<DirectionalLightComponent> directionalLights;
+    ComponentList<PointLightComponent> pointLights;
+    ComponentList<RenderComponent> renderComponents;
+    ComponentList<PortalComponent> portals;
+    ComponentList<ColliderComponent> colliders;
 };
 
 //
@@ -79,7 +79,7 @@ PortalComponent* getPortalComponent(Entity e);
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e);
 DirectionalLightComponent* getDirectionalLightComponent(Entity e);
-	
+    
 RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);
 ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents);
@@ -99,5 +99,5 @@ ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal=false, Transform* destPortalXfm=nullptr);
 void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0);
 RaycastResult castRay(Ecs* ecs, Ray ray);
-	
+    
 PointLightComponent* closestPointLight(TransformComponent* xfm);

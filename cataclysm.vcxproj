@@ -73,7 +73,7 @@
     <IncludePath>$(SolutionDir)lib\stb\include;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)lib\stb\include;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lib\stb\include\stb;$(SolutionDir)lib\imgui\include\imgui;$(SolutionDir)lib\imgui\include;$(SolutionDir)lib\stb\include;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\x86 debug\</OutDir>
     <IntDir>$(SolutionDir)build\x86 debug\</IntDir>
   </PropertyGroup>
@@ -134,6 +134,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="code\*.cpp" />
+    <ClCompile Include="lib\imgui\src\imgui.cpp" />
+    <ClCompile Include="lib\imgui\src\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\src\imgui_impl_glfw.cpp" />
+    <ClCompile Include="lib\imgui\src\imgui_impl_opengl3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\Aabb.h" />
@@ -166,6 +171,21 @@
     <ClInclude Include="code\TransformComponent.h" />
     <ClInclude Include="code\Types.h" />
     <ClInclude Include="code\Window.h" />
+    <ClInclude Include="lib\glew\include\GL\eglew.h" />
+    <ClInclude Include="lib\glew\include\GL\glew.h" />
+    <ClInclude Include="lib\glew\include\GL\glxew.h" />
+    <ClInclude Include="lib\glew\include\GL\wglew.h" />
+    <ClInclude Include="lib\glfw\include\GLFW\glfw3.h" />
+    <ClInclude Include="lib\glfw\include\GLFW\glfw3native.h" />
+    <ClInclude Include="lib\imgui\include\imgui\imconfig.h" />
+    <ClInclude Include="lib\imgui\include\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="lib\imgui\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="lib\imgui\include\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\stb\include\stb\stb_image.h" />
+    <ClInclude Include="lib\stb\include\stb\stb_rect_pack.h" />
+    <ClInclude Include="lib\stb\include\stb\stb_textedit.h" />
+    <ClInclude Include="lib\stb\include\stb\stb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

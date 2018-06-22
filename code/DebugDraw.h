@@ -7,31 +7,31 @@
 
 struct DebugDraw
 {
-	static DebugDraw& instance();
-	
-	void init();
-	
-	Shader* shader;
-	Vec3 color;
+    static DebugDraw& instance();
+    
+    void init();
+    
+    Shader* shader;
+    Vec3 color;
 
-	// todo
-	void drawSphere(Vec3 position, float radius);
-	
-	void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
-	void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
+    // todo
+    void drawSphere(Vec3 position, float radius);
+    
+    void drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+    void drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
 
-	void drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm);
+    void drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm);
 
-	// todo
-	void drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm);
+    // todo
+    void drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm);
 
-	void drawCollider(ColliderComponent* collider, CameraComponent* camera, Transform* cameraXfm);
+    void drawCollider(ColliderComponent* collider, CameraComponent* camera, Transform* cameraXfm);
 
 private:
-	uint32 vbo;
-	uint32 ebo;
-	uint32 vao;
+    uint32 vbo;
+    uint32 ebo;
+    uint32 vao;
 
-	DebugDraw() = default;
+    DebugDraw() = default;
 };
 
