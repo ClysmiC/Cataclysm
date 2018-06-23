@@ -16,4 +16,3 @@ struct Entity
     std::string friendlyName;
 };
 
-

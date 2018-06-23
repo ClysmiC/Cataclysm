@@ -19,6 +19,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "DebugGlobal.h"
+#include "Reflection.h"
 
 bool keys[1024];
 bool lastKeys[1024];
@@ -341,6 +342,7 @@ void updateGame(Game* game)
     {
         if (e.id == testEntity.id)
         {
+            testUiReflection(e);
             DebugDraw::instance().color = Vec3(1, 0, 0);
         }
 
@@ -522,16 +524,25 @@ int main()
 
         // DebugDraw::instance().drawCollider(debugCC, cameraComponent, cameraXfm);
 
+        // Rendering
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
         glfwSwapBuffers(window.glfwWindow);
+
+        //
+        //
+        //
+        // After Swap Buffers
+        //
+        //
+        //
 
         mouseXPrev = mouseX;
         mouseYPrev = mouseY;
 
         updateLastKeysAndMouseButtons();
 
-        // Rendering
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         std::this_thread::sleep_for(std::chrono::milliseconds(33));
     }

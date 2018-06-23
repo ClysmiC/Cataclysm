@@ -161,6 +161,7 @@
     <ClInclude Include="code\PointLightComponent.h" />
     <ClInclude Include="code\PortalComponent.h" />
     <ClInclude Include="code\Quad.h" />
+    <ClInclude Include="code\Reflection.h" />
     <ClInclude Include="code\RenderComponent.h" />
     <ClInclude Include="code\ResourceManager.h" />
     <ClInclude Include="code\Scene.h" />
