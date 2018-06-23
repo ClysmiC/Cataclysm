@@ -12,7 +12,13 @@ void cata_glfwErrorCallback(int e, const char* message)
     
 void cata_glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    // HACK: I don't know of a good way to get the layout-specific key that was pressed,
+    // other than to get the layout-specific localized string and check it.....
+    // surely there is a better way?
+    const char* keyName = glfwGetKeyName(key, 0);
+    bool isWKey = keyName != nullptr && (keyName[0] == 'W' && keyName[1] == '\0');
+
+    if (isWKey && action == GLFW_PRESS && (modifiers & GLFW_MOD_CONTROL))
     {
         glfwSetWindowShouldClose(window, true);
     }

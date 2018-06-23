@@ -231,39 +231,51 @@ void updateCameraXfm(Game* game)
     assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
     assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
     assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
-    
-    if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
+
+    bool draggingCameraInEditMode = game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse;
+
+    if (!game->isEditorMode || draggingCameraInEditMode)
     {
-        // Rotate
-        float32 deltaMouseX = mouseX - mouseXPrev;
-        float32 deltaMouseY = mouseY - mouseYPrev;
+        if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
+        {
+            // Rotate
+            float32 deltaMouseX = mouseX - mouseXPrev;
+            float32 deltaMouseY = mouseY - mouseYPrev;
 
-        Quaternion deltaYawAndPitch;
-        deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-        deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+            if (draggingCameraInEditMode)
+            {
+                // Drag gesture moves in opposite direction
+                deltaMouseX = -deltaMouseX;
+                deltaMouseY = -deltaMouseY;
+            }
 
-        xfm->orientation = deltaYawAndPitch * xfm->orientation;
+            Quaternion deltaYawAndPitch;
+            deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
+            deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
 
-        float camRightY = xfm->right().y;
-        assert(FLOAT_EQ(camRightY, 0, EPSILON));
-    }
+            xfm->orientation = deltaYawAndPitch * xfm->orientation;
 
-    if (keys[GLFW_KEY_W])
-    {
-        xfm->position += moveForward * cameraSpeed * deltaTS;
-    }
-    else if (keys[GLFW_KEY_S])
-    {
-        xfm->position += moveBack * cameraSpeed * deltaTS;
-    }
+            float camRightY = xfm->right().y;
+            assert(FLOAT_EQ(camRightY, 0, EPSILON));
+        }
+
+        if (keys[GLFW_KEY_W])
+        {
+            xfm->position += moveForward * cameraSpeed * deltaTS;
+        }
+        else if (keys[GLFW_KEY_S])
+        {
+            xfm->position += moveBack * cameraSpeed * deltaTS;
+        }
         
-    if (keys[GLFW_KEY_A])
-    {
-        xfm->position += moveLeft * cameraSpeed * deltaTS;
-    }
-    else if (keys[GLFW_KEY_D])
-    {
-        xfm->position += moveRight * cameraSpeed * deltaTS;
+        if (keys[GLFW_KEY_A])
+        {
+            xfm->position += moveLeft * cameraSpeed * deltaTS;
+        }
+        else if (keys[GLFW_KEY_D])
+        {
+            xfm->position += moveRight * cameraSpeed * deltaTS;
+        }
     }
 
     for (uint32 i = 0; i < game->activeScene->ecs.portals.size; i++)
@@ -293,10 +305,7 @@ void updateCameraXfm(Game* game)
 
 void updateGame(Game* game)
 {
-    if (!game->isEditorMode)
-    {
-        updateCameraXfm(game);
-    }
+    updateCameraXfm(game);
     
     //
     // Rotate/scale test entity
