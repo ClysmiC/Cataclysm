@@ -28,13 +28,13 @@ Submesh::Submesh(const std::string filename, const std::string submeshName, cons
     // Calculate bounds
     //
     {
-        real32 minX = FLT_MAX;
-        real32 minY = FLT_MAX;
-        real32 minZ = FLT_MAX;
+        float32 minX = FLT_MAX;
+        float32 minY = FLT_MAX;
+        float32 minZ = FLT_MAX;
 
-        real32 maxX = -FLT_MAX;
-        real32 maxY = -FLT_MAX;
-        real32 maxZ = -FLT_MAX;
+        float32 maxX = -FLT_MAX;
+        float32 maxY = -FLT_MAX;
+        float32 maxZ = -FLT_MAX;
 
         for (const MeshVertex& vertex : vertices)
         {
@@ -122,11 +122,11 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         Vec3 edge12 = v2->position - v1->position;
         Vec3 edge13 = v3->position - v1->position;
 
-        real32 deltaU12 = v2->texCoords.x - v1->texCoords.x;
-        real32 deltaV12 = v2->texCoords.y - v1->texCoords.y;
+        float32 deltaU12 = v2->texCoords.x - v1->texCoords.x;
+        float32 deltaV12 = v2->texCoords.y - v1->texCoords.y;
 
-        real32 deltaU13 = v3->texCoords.x - v1->texCoords.x;
-        real32 deltaV13 = v3->texCoords.y - v1->texCoords.y;
+        float32 deltaU13 = v3->texCoords.x - v1->texCoords.x;
+        float32 deltaV13 = v3->texCoords.y - v1->texCoords.y;
 
         // Solve system of equations below for X, Y, and Z
         // to get T and B:
@@ -153,7 +153,7 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         // | T | = 1 / det * |  deltaV13  -deltaV12 | | edge12 | 
         // | B |             | -deltaU13   deltaU12 | | edge13 |
 
-        real32 det = (deltaU12 * deltaV13 - deltaU13 * deltaV12);
+        float32 det = (deltaU12 * deltaV13 - deltaU13 * deltaV12);
 
         if (det == 0.0f)
         {
@@ -165,7 +165,7 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
             continue;
         }
 
-        real32 oneOverDet = 1.0f / det;
+        float32 oneOverDet = 1.0f / det;
 
         Vec3 t = oneOverDet * ( deltaV13 * edge12 + -deltaV12 * edge13);
         Vec3 b = oneOverDet * (-deltaU13 * edge12 +  deltaU12 * edge13);
@@ -183,7 +183,7 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         Vec3 t = avgs.tangent;
         Vec3 b = avgs.bitangent;
 
-        real32 tripleProduct = dot(cross(n, t), b);
+        float32 tripleProduct = dot(cross(n, t), b);
         if (fabs(tripleProduct) < 0.00001)
         {
             // Coplanar averages, just punt

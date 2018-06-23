@@ -39,15 +39,15 @@ Ray rayThroughViewportCoordinate(CameraComponent* camera, Vec2 viewportCoordinat
     
     if (camera->isOrthographic)
     {
-        real32 halfWidth = camera->orthoWidth / 2.0f;
-        real32 halfHeight = halfWidth / camera->aspectRatio;
+        float32 halfWidth = camera->orthoWidth / 2.0f;
+        float32 halfHeight = halfWidth / camera->aspectRatio;
         
         Vec3 nearPlaneBottomLeft = nearPlaneCenter - cameraRight * halfWidth - cameraUp * halfHeight;
         Vec3 nearPlaneTopRight = nearPlaneCenter + cameraRight * halfWidth + cameraUp * halfHeight;
         Vec3 nearPlaneBlToTr = nearPlaneTopRight - nearPlaneBottomLeft;
 
-        real32 nearPlaneWorldSpaceWidth = length(project(nearPlaneBlToTr, cameraRight));
-        real32 nearPlaneWorldSpaceHeight = nearPlaneWorldSpaceWidth / camera->aspectRatio;
+        float32 nearPlaneWorldSpaceWidth = length(project(nearPlaneBlToTr, cameraRight));
+        float32 nearPlaneWorldSpaceHeight = nearPlaneWorldSpaceWidth / camera->aspectRatio;
 
         result.position =
             nearPlaneBottomLeft +
@@ -58,16 +58,16 @@ Ray rayThroughViewportCoordinate(CameraComponent* camera, Vec2 viewportCoordinat
     }
     else
     {
-        real32 halfFov = camera->perspectiveFov / 2.0f;
-        real32 halfWidth = camera->near * tanf(TO_RAD(halfFov));
-        real32 halfHeight = halfWidth / camera->aspectRatio;
+        float32 halfFov = camera->perspectiveFov / 2.0f;
+        float32 halfWidth = camera->near * tanf(TO_RAD(halfFov));
+        float32 halfHeight = halfWidth / camera->aspectRatio;
         
         Vec3 nearPlaneBottomLeft = nearPlaneCenter - cameraRight * halfWidth - cameraUp * halfHeight;
         Vec3 nearPlaneTopRight = nearPlaneCenter + cameraRight * halfWidth + cameraUp * halfHeight;
         Vec3 nearPlaneBlToTr = nearPlaneTopRight - nearPlaneBottomLeft;
 
-        real32 nearPlaneWorldSpaceWidth = length(project(nearPlaneBlToTr, cameraRight));
-        real32 nearPlaneWorldSpaceHeight = nearPlaneWorldSpaceWidth / camera->aspectRatio;
+        float32 nearPlaneWorldSpaceWidth = length(project(nearPlaneBlToTr, cameraRight));
+        float32 nearPlaneWorldSpaceHeight = nearPlaneWorldSpaceWidth / camera->aspectRatio;
 
         result.position =
             nearPlaneBottomLeft +

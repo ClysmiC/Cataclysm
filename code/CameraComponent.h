@@ -8,19 +8,20 @@ struct Window;
 
 struct CameraComponent : public Component
 {
-    Mat4 projectionMatrix;
+    Mat4 projectionMatrix; // Calculated and cached. After changing a camera value, call recalculateProjectionMatrix() to update
+    
     bool isOrthographic;
 
-    real32 aspectRatio;
-    real32 near;
-    real32 far;
+    float32 aspectRatio;
+    float32 near;
+    float32 far;
 
     Window* window;
     
     union
     {
-        real32 perspectiveFov;
-        real32 orthoWidth;
+        float32 perspectiveFov;
+        float32 orthoWidth;
     };
 
     // TODO: wrappers around the math library calls

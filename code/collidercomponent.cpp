@@ -13,6 +13,15 @@ ColliderComponent::ColliderComponent()
     this->zLength = 1;
 }
 
+ColliderComponent::ColliderComponent(Aabb aabb)
+{
+    this->xfmOffset = Vec3(0, 0, 0);
+    this->type = ColliderType::RECT3;
+    this->xLength = aabb.halfDim.x * 2;
+    this->yLength = aabb.halfDim.y * 2;
+    this->zLength = aabb.halfDim.z * 2;
+}
+
 Vec3 scaledXfmOffset(ColliderComponent* collider)
 {
     TransformComponent *xfm = getTransformComponent(collider->entity);

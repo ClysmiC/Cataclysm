@@ -134,7 +134,7 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform 
     portal2XfmComponent->scale = portal2Xfm.scale;
 
     // The collider is a box "behind" the portal (think of the loading zone behind a painting in sm64, where the painting is the portal)
-    real32 colliderDepth = 1.0f;
+    float32 colliderDepth = 1.0f;
     
     ColliderComponent* portal1Collider = addColliderComponent(portal1);
     portal1Collider->xfmOffset = Vec3(Axis3D::Z) * colliderDepth / 2;

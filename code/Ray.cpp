@@ -7,7 +7,7 @@ Ray::Ray(Vec3 position, Vec3 direction)
 {
 }
 
-real32 rayPlaneTest(Ray ray, Plane plane)
+float32 rayPlaneTest(Ray ray, Plane plane)
 {
     assert(isNormal(ray.direction));
     
@@ -22,7 +22,7 @@ real32 rayPlaneTest(Ray ray, Plane plane)
         return -1;
     }
 
-    real32 rayDotNormal = dot(ray.direction, plane.normal);
+    float32 rayDotNormal = dot(ray.direction, plane.normal);
 
     if (FLOAT_EQ(rayDotNormal, 0, EPSILON))
     {
@@ -34,7 +34,7 @@ real32 rayPlaneTest(Ray ray, Plane plane)
     }
 }
 
-real32 rayAabbTest(Ray ray, Aabb aabb)
+float32 rayAabbTest(Ray ray, Aabb aabb)
 {
     assert(isNormal(ray.direction));
 
@@ -45,7 +45,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test left face
         Plane leftFace = Plane(aabb.center - aabb.halfDim.x * Vec3(Axis3D::X), -Vec3(Axis3D::X));
-        real32 leftFaceResult = rayPlaneTest(ray, leftFace);
+        float32 leftFaceResult = rayPlaneTest(ray, leftFace);
         if (leftFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * leftFaceResult;
@@ -60,7 +60,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test right face
         Plane rightFace = Plane(aabb.center + aabb.halfDim.x * Vec3(Axis3D::X), Vec3(Axis3D::X));
-        real32 rightFaceResult = rayPlaneTest(ray, rightFace);
+        float32 rightFaceResult = rayPlaneTest(ray, rightFace);
         if (rightFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * rightFaceResult;
@@ -76,7 +76,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test bottom face
         Plane bottomFace = Plane(aabb.center - aabb.halfDim.y * Vec3(Axis3D::Y), -Vec3(Axis3D::Y));
-        real32 bottomFaceResult = rayPlaneTest(ray, bottomFace);
+        float32 bottomFaceResult = rayPlaneTest(ray, bottomFace);
         if (bottomFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * bottomFaceResult;
@@ -91,7 +91,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test top face
         Plane topFace = Plane(aabb.center + aabb.halfDim.y * Vec3(Axis3D::Y), Vec3(Axis3D::Y));
-        real32 topFaceResult = rayPlaneTest(ray, topFace);
+        float32 topFaceResult = rayPlaneTest(ray, topFace);
         if (topFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * topFaceResult;
@@ -107,7 +107,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test back face
         Plane backFace = Plane(aabb.center - aabb.halfDim.z * Vec3(Axis3D::Z), -Vec3(Axis3D::Z));
-        real32 backFaceResult = rayPlaneTest(ray, backFace);
+        float32 backFaceResult = rayPlaneTest(ray, backFace);
         if (backFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * backFaceResult;
@@ -122,7 +122,7 @@ real32 rayAabbTest(Ray ray, Aabb aabb)
     {
         // test front face
         Plane frontFace = Plane(aabb.center + aabb.halfDim.z * Vec3(Axis3D::Z), Vec3(Axis3D::Z));
-        real32 frontFaceResult = rayPlaneTest(ray, frontFace);
+        float32 frontFaceResult = rayPlaneTest(ray, frontFace);
         if (frontFaceResult >= 0)
         {
             Vec3 hitPoint = ray.position + ray.direction * frontFaceResult;

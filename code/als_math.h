@@ -10,7 +10,7 @@
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
-enum Axis3D
+enum Axis3D : int32
 {
     X = 0,
     Y = 1,
@@ -20,14 +20,14 @@ enum Axis3D
 union Vec2
 {
     Vec2();
-    Vec2(real32 value);
-    Vec2(real32 x, real32 y);
+    Vec2(float32 value);
+    Vec2(float32 x, float32 y);
     
     struct
     {
-        real32 x, y;
+        float32 x, y;
     };
-    real32 element[2];
+    float32 element[2];
 
     Vec2& normalizeOrXAxisInPlace();
     Vec2& normalizeInPlace();
@@ -37,19 +37,19 @@ union Vec3
 {
     Vec3();
     Vec3(Axis3D unitAxis);
-    Vec3(real32 value);
-    Vec3(Vec2 xy, real32 z);
-    Vec3(real32 x, real32 y, real32 z);
+    Vec3(float32 value);
+    Vec3(Vec2 xy, float32 z);
+    Vec3(float32 x, float32 y, float32 z);
     
     struct
     {
-        real32 x, y, z;
+        float32 x, y, z;
     };
     struct
     {
-        real32 r, g, b;
+        float32 r, g, b;
     };
-    real32 element[3];
+    float32 element[3];
 
     Vec3& normalizeOrXAxisInPlace();
     Vec3& normalizeInPlace();
@@ -58,21 +58,21 @@ union Vec3
 union Vec4
 {
     Vec4();
-    Vec4(real32 value);
-    Vec4(Vec2 xy, real32 z, real32 w);
+    Vec4(float32 value);
+    Vec4(Vec2 xy, float32 z, float32 w);
     Vec4(Vec2 xy, Vec2 zw);
-    Vec4(Vec3 xyz, real32 w);
-    Vec4(real32 x, real32 y, real32 z, real32 w);
+    Vec4(Vec3 xyz, float32 w);
+    Vec4(float32 x, float32 y, float32 z, float32 w);
     
     struct
     {
-        real32 x, y, z, w;
+        float32 x, y, z, w;
     };
     struct
     {
-        real32 r, g, b, a;
+        float32 r, g, b, a;
     };
-    real32 element[4];
+    float32 element[4];
 
     Vec4& normalizeInPlace();
 };
@@ -80,15 +80,15 @@ union Vec4
 union Quaternion
 {
     Quaternion();
-    Quaternion(Vec3 vector, real32 scalar);
+    Quaternion(Vec3 vector, float32 scalar);
     Quaternion(Vec4 xyzw);
-    Quaternion(real32 x, real32 y, real32 z, real32 w);
+    Quaternion(float32 x, float32 y, float32 z, float32 w);
     
     struct
     {
-        real32 x, y, z, w;
+        float32 x, y, z, w;
     };
-    real32 element[4];
+    float32 element[4];
 
     Quaternion& normalizeInPlace();
     Quaternion& invertInPlace();
@@ -99,7 +99,7 @@ struct Mat3
 {
     // Mat3(Mat4 mat4);
     
-    real32 _e[3][3] = {
+    float32 _e[3][3] = {
         { 1, 0, 0},
         { 0, 1, 0},
         { 0, 0, 1}
@@ -107,8 +107,8 @@ struct Mat3
 
     // Only overloads the first index to point to the correct array, then
     // the second index is handled by built-in c++
-    real32* operator [] (int32 i);
-    real32* dataPointer();
+    float32* operator [] (int32 i);
+    float32* dataPointer();
 
     Mat3& transposeInPlace();
 };
@@ -117,7 +117,7 @@ struct Mat4
 {
     // Mat4(Mat3 mat3);
     
-    real32 _e[4][4] = {
+    float32 _e[4][4] = {
         { 1, 0, 0, 0},
         { 0, 1, 0, 0},
         { 0, 0, 1, 0},
@@ -126,8 +126,8 @@ struct Mat4
 
     // Only overloads the first index to point to the correct array, then
     // the second index is handled by built-in c++
-    real32* operator [] (int32 i);
-    real32* dataPointer();
+    float32* operator [] (int32 i);
+    float32* dataPointer();
 
     Mat4& scaleInPlace(Vec3 scale);
     Mat4& rotateInPlace(Quaternion rotation);
@@ -135,8 +135,8 @@ struct Mat4
     
     Mat4& transposeInPlace();
     Mat4& mat3ifyInPlace();
-    Mat4& perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far);
-    Mat4& orthoInPlace(real32 width, real32 aspectRatio, real32 near, real32 far);
+    Mat4& perspectiveInPlace(float32 fov, float32 aspectRatio, float32 near, float32 far);
+    Mat4& orthoInPlace(float32 width, float32 aspectRatio, float32 near, float32 far);
 };
 
 struct Plane
@@ -148,84 +148,84 @@ struct Plane
 };
 
 Vec2 operator + (Vec2 vectorA, Vec2 vectorB);
-Vec2 operator + (Vec2 vector, real32 constant);
+Vec2 operator + (Vec2 vector, float32 constant);
 Vec2& operator += (Vec2& vectorA, Vec2 vectorB);
-Vec2& operator += (Vec2& vector, real32 constant);
+Vec2& operator += (Vec2& vector, float32 constant);
 
 Vec2 operator - (Vec2 vectorA, Vec2 vectorB);
-Vec2 operator - (Vec2 vector, real32 constant);
+Vec2 operator - (Vec2 vector, float32 constant);
 Vec2& operator -= (Vec2& vectorA, Vec2 vectorB);
-Vec2& operator -= (Vec2& vector, real32 constant);
+Vec2& operator -= (Vec2& vector, float32 constant);
 Vec2 operator - (Vec2 vector);
 
 
-Vec2 operator * (real32 scalar, Vec2 vector);
-Vec2 operator * (Vec2 vector, real32 scalar);
-Vec2& operator *= (Vec2& vector, real32 scalar);
+Vec2 operator * (float32 scalar, Vec2 vector);
+Vec2 operator * (Vec2 vector, float32 scalar);
+Vec2& operator *= (Vec2& vector, float32 scalar);
 
-Vec2 operator / (Vec2 vector, real32 scalar);
-Vec2& operator /= (Vec2& vector, real32 scalar);
+Vec2 operator / (Vec2 vector, float32 scalar);
+Vec2& operator /= (Vec2& vector, float32 scalar);
 
 
 // Vec3
 Vec3 operator + (Vec3 vectorA, Vec3 vectorB);
-Vec3 operator + (Vec3 vector, real32 constant);
+Vec3 operator + (Vec3 vector, float32 constant);
 Vec3& operator += (Vec3& vectorA, Vec3 vectorB);
-Vec3& operator += (Vec3& vector, real32 constant);
+Vec3& operator += (Vec3& vector, float32 constant);
 
 Vec3 operator - (Vec3 vectorA, Vec3 vectorB);
-Vec3 operator - (Vec3 vector, real32 constant);
+Vec3 operator - (Vec3 vector, float32 constant);
 Vec3& operator -= (Vec3& vectorA, Vec3 vectorB);
-Vec3& operator -= (Vec3& vector, real32 constant);
+Vec3& operator -= (Vec3& vector, float32 constant);
 Vec3 operator - (Vec3 vector);
 
-Vec3 operator * (real32 scalar, Vec3 vector);
-Vec3 operator * (Vec3 vector, real32 scalar);
-Vec3& operator *= (Vec3& vector, real32 scalar);
+Vec3 operator * (float32 scalar, Vec3 vector);
+Vec3 operator * (Vec3 vector, float32 scalar);
+Vec3& operator *= (Vec3& vector, float32 scalar);
 
-Vec3 operator / (Vec3 vector, real32 scalar);
-Vec3& operator /= (Vec3& vector, real32 scalar);
+Vec3 operator / (Vec3 vector, float32 scalar);
+Vec3& operator /= (Vec3& vector, float32 scalar);
 
 Vec3 operator * (Quaternion quaternion, Vec3 vector);
 Vec3 operator * (Mat3 m, Vec3 v);
 
 // Vec4
 Vec4 operator + (Vec4 vectorA, Vec4 vectorB);
-Vec4 operator + (Vec4 vector, real32 constant);
+Vec4 operator + (Vec4 vector, float32 constant);
 Vec4& operator += (Vec4& vectorA, Vec4 vectorB);
-Vec4& operator += (Vec4& vector, real32 constant);
+Vec4& operator += (Vec4& vector, float32 constant);
 
 Vec4 operator - (Vec4 vectorA, Vec4 vectorB);
-Vec4 operator - (Vec4 vector, real32 constant);
+Vec4 operator - (Vec4 vector, float32 constant);
 Vec4& operator -= (Vec4& vectorA, Vec4 vectorB);
-Vec4& operator -= (Vec4& vector, real32 constant);
+Vec4& operator -= (Vec4& vector, float32 constant);
 Vec4 operator - (Vec4 vector);
 
-Vec4 operator * (real32 scalar, Vec4 vector);
-Vec4 operator * (Vec4 vector, real32 scalar);
-Vec4& operator *= (Vec4& vector, real32 scalar);
-Vec4 operator / (Vec4 vector, real32 scalar);
-Vec4& operator /= (Vec4& vector, real32 scalar);
+Vec4 operator * (float32 scalar, Vec4 vector);
+Vec4 operator * (Vec4 vector, float32 scalar);
+Vec4& operator *= (Vec4& vector, float32 scalar);
+Vec4 operator / (Vec4 vector, float32 scalar);
+Vec4& operator /= (Vec4& vector, float32 scalar);
 
 Vec4 operator * (Mat4 m, Vec4 v);
 
 // Quaternion
 Quaternion operator + (Quaternion quatA, Quaternion quatB);
-Quaternion operator + (Quaternion quat, real32 constant);
+Quaternion operator + (Quaternion quat, float32 constant);
 Quaternion& operator += (Quaternion& quatA, Quaternion quatB);
-Quaternion& operator += (Quaternion& quat, real32 constant);
+Quaternion& operator += (Quaternion& quat, float32 constant);
 
 Quaternion operator - (Quaternion quatA, Quaternion quatB);
-Quaternion operator - (Quaternion quat, real32 constant);
+Quaternion operator - (Quaternion quat, float32 constant);
 Quaternion& operator -= (Quaternion& quatA, Quaternion quatB);
-Quaternion& operator -= (Quaternion& quat, real32 constant);
+Quaternion& operator -= (Quaternion& quat, float32 constant);
 Quaternion operator - (Quaternion quat);
 
-Quaternion operator * (real32 scalar, Quaternion quat);
-Quaternion operator * (Quaternion quat, real32 scalar);
-Quaternion& operator *= (Quaternion& quat, real32 scalar);
-Quaternion operator / (Quaternion quat, real32 scalar);
-Quaternion& operator /= (Quaternion& quat, real32 scalar);
+Quaternion operator * (float32 scalar, Quaternion quat);
+Quaternion operator * (Quaternion quat, float32 scalar);
+Quaternion& operator *= (Quaternion& quat, float32 scalar);
+Quaternion operator / (Quaternion quat, float32 scalar);
+Quaternion& operator /= (Quaternion& quat, float32 scalar);
 
 Quaternion operator * (Quaternion a, Quaternion b);
 Quaternion lookRotation(Vec3 forward, Vec3 up);
@@ -242,9 +242,9 @@ Mat4 operator * (Mat4 left, Mat4 right);
 //
 
 // Vec2
-inline real32 dot(Vec2 vectorA, Vec2 vectorB)
+inline float32 dot(Vec2 vectorA, Vec2 vectorB)
 {
-    real32 result = vectorA.x * vectorB.x + vectorA.y * vectorB.y;
+    float32 result = vectorA.x * vectorB.x + vectorA.y * vectorB.y;
     return result;
 }
 inline Vec2 hadamard(Vec2 v1, Vec2 v2)
@@ -252,14 +252,14 @@ inline Vec2 hadamard(Vec2 v1, Vec2 v2)
     Vec2 result = Vec2(v1.x * v2.x, v1.y * v2.y);
     return result;
 }
-inline real32 lengthSquared(Vec2 v)
+inline float32 lengthSquared(Vec2 v)
 {
-    real32 result = v.x * v.x + v.y * v.y;
+    float32 result = v.x * v.x + v.y * v.y;
     return result;
 }
-inline real32 length(Vec2 v)
+inline float32 length(Vec2 v)
 {
-    real32 result = sqrtf(lengthSquared(v));
+    float32 result = sqrtf(lengthSquared(v));
     return result;
 }
 inline Vec2 normalize(Vec2 v)
@@ -269,17 +269,17 @@ inline Vec2 normalize(Vec2 v)
 }
 inline bool equals(Vec2 vectorA, Vec2 vectorB)
 {
-    real32 deltaX = fabs(vectorA.x - vectorB.x);
-    real32 deltaY = fabs(vectorA.y - vectorB.y);
+    float32 deltaX = fabs(vectorA.x - vectorB.x);
+    float32 deltaY = fabs(vectorA.y - vectorB.y);
 
     return deltaX < EPSILON && deltaY < EPSILON;
 }
 
 
 // Vec3
-inline real32 dot(Vec3 vectorA, Vec3 vectorB)
+inline float32 dot(Vec3 vectorA, Vec3 vectorB)
 {
-    real32 result =
+    float32 result =
         vectorA.x * vectorB.x +
         vectorA.y * vectorB.y +
         vectorA.z * vectorB.z;
@@ -301,14 +301,14 @@ inline Vec3 hadamard(Vec3 v1, Vec3 v2)
     Vec3 result = Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
     return result;
 }
-inline real32 lengthSquared(Vec3 v)
+inline float32 lengthSquared(Vec3 v)
 {
-    real32 result = v.x * v.x + v.y * v.y + v.z * v.z;
+    float32 result = v.x * v.x + v.y * v.y + v.z * v.z;
     return result;
 }
-inline real32 length(Vec3 v)
+inline float32 length(Vec3 v)
 {
-    real32 result = sqrtf(lengthSquared(v));
+    float32 result = sqrtf(lengthSquared(v));
     return result;
 }
 inline Vec3 normalize(Vec3 v)
@@ -318,17 +318,17 @@ inline Vec3 normalize(Vec3 v)
 }
 inline bool equals(Vec3 vectorA, Vec3 vectorB)
 {
-    real32 deltaX = fabs(vectorA.x - vectorB.x);
-    real32 deltaY = fabs(vectorA.y - vectorB.y);
-    real32 deltaZ = fabs(vectorA.z - vectorB.z);
+    float32 deltaX = fabs(vectorA.x - vectorB.x);
+    float32 deltaY = fabs(vectorA.y - vectorB.y);
+    float32 deltaZ = fabs(vectorA.z - vectorB.z);
 
     return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON;
 }
 
 // Vec4
-inline real32 dot(Vec4 vectorA, Vec4 vectorB)
+inline float32 dot(Vec4 vectorA, Vec4 vectorB)
 {
-    real32 result =
+    float32 result =
         vectorA.x * vectorB.x +
         vectorA.y * vectorB.y +
         vectorA.z * vectorB.z +
@@ -341,14 +341,14 @@ inline Vec4 hadamard(Vec4 v1, Vec4 v2)
     Vec4 result = Vec4(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w);
     return result;
 }
-inline real32 lengthSquared(Vec4 v)
+inline float32 lengthSquared(Vec4 v)
 {
-    real32 result = v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
+    float32 result = v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
     return result;
 }
-inline real32 length(Vec4 v)
+inline float32 length(Vec4 v)
 {
-    real32 result = sqrtf(lengthSquared(v));
+    float32 result = sqrtf(lengthSquared(v));
     return result;
 }
 inline Vec4 normalize(Vec4 v)
@@ -358,23 +358,23 @@ inline Vec4 normalize(Vec4 v)
 }
 inline bool equals(Vec4 vectorA, Vec4 vectorB)
 {
-    real32 deltaX = fabs(vectorA.x - vectorB.x);
-    real32 deltaY = fabs(vectorA.y - vectorB.y);
-    real32 deltaZ = fabs(vectorA.z - vectorB.z);
-    real32 deltaW = fabs(vectorA.w - vectorB.w);
+    float32 deltaX = fabs(vectorA.x - vectorB.x);
+    float32 deltaY = fabs(vectorA.y - vectorB.y);
+    float32 deltaZ = fabs(vectorA.z - vectorB.z);
+    float32 deltaW = fabs(vectorA.w - vectorB.w);
 
     return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON && deltaW < EPSILON;
 }
 
 // Quat
-inline real32 lengthSquared(Quaternion q)
+inline float32 lengthSquared(Quaternion q)
 {
-    real32 result = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+    float32 result = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
     return result;
 }
-inline real32 length(Quaternion q)
+inline float32 length(Quaternion q)
 {
-    real32 result = sqrtf(lengthSquared(q));
+    float32 result = sqrtf(lengthSquared(q));
     return result;
 }
 inline Quaternion inverse(Quaternion q)
@@ -422,10 +422,10 @@ inline Vec3 someNonParallelAxis(Vec3 vector)
 
 inline bool equals(Quaternion quatA, Quaternion quatB)
 {
-    real32 deltaX = fabs(quatA.x - quatB.x);
-    real32 deltaY = fabs(quatA.y - quatB.y);
-    real32 deltaZ = fabs(quatA.z - quatB.z);
-    real32 deltaW = fabs(quatA.w - quatB.w);
+    float32 deltaX = fabs(quatA.x - quatB.x);
+    float32 deltaY = fabs(quatA.y - quatB.y);
+    float32 deltaZ = fabs(quatA.z - quatB.z);
+    float32 deltaW = fabs(quatA.w - quatB.w);
 
     return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON && deltaW < EPSILON;
 }
@@ -438,47 +438,47 @@ inline Vec3 project(Vec3 vectorA, Vec3 vectorB)
     // Note: project vectorA ONTO vectorB
     Vec3 result;
 
-    real32 dotValue = dot(vectorA, vectorB);
+    float32 dotValue = dot(vectorA, vectorB);
     result = (vectorB * dotValue) / lengthSquared(vectorB);
     
     return result;
 }
 
 bool isNormal(Vec3);
-inline real32 distanceSquared(Vec3 vector, Plane plane)
+inline float32 distanceSquared(Vec3 vector, Plane plane)
 {
     assert(isNormal(plane.normal));
 
     Vec3 toVector = vector - plane.point;
     Vec3 projection = project(toVector, plane.normal);
-    real32 result = lengthSquared(projection);
+    float32 result = lengthSquared(projection);
     
     return result;
 }
 
-inline real32 distance(Vec3 vector, Plane plane)
+inline float32 distance(Vec3 vector, Plane plane)
 {
-    real32 result = distanceSquared(vector, plane);
+    float32 result = distanceSquared(vector, plane);
     result = sqrtf(result);
     
     return result;
 }
 
-inline real32 distance(Vec2 vectorA, Vec2 vectorB)
+inline float32 distance(Vec2 vectorA, Vec2 vectorB)
 {
-    real32 result = length(vectorA - vectorB);
+    float32 result = length(vectorA - vectorB);
     return result;
 }
 
-inline real32 distance(Vec3 vectorA, Vec3 vectorB)
+inline float32 distance(Vec3 vectorA, Vec3 vectorB)
 {
-    real32 result = length(vectorA - vectorB);
+    float32 result = length(vectorA - vectorB);
     return result;
 }
 
-inline real32 distance(Vec4 vectorA, Vec4 vectorB)
+inline float32 distance(Vec4 vectorA, Vec4 vectorB)
 {
-    real32 result = length(vectorA - vectorB);
+    float32 result = length(vectorA - vectorB);
     return result;
 }
 
@@ -548,7 +548,7 @@ inline Vec3 project(Vec3 vector, Plane plane)
 inline bool isOrthogonal(Vec3 vectorA, Vec3 vectorB)
 {
     assert(!isZeroVector(vectorA) && !isZeroVector(vectorB));
-    real32 result = fabs(dot(vectorA, vectorB));
+    float32 result = fabs(dot(vectorA, vectorB));
 
     /* return result < .0001; */
     return result < .02; // WHYYYYYYYYYYY
@@ -585,8 +585,8 @@ inline bool isCollinear(Vec3 pointA, Vec3 pointB, Vec3 pointC)
             }
 
             // All points have different X values
-            real32 abDyDx = ab.y / ab.x;
-            real32 acDyDx = ac.y / ac.x;
+            float32 abDyDx = ab.y / ab.x;
+            float32 acDyDx = ac.y / ac.x;
 
             return FLOAT_EQ(abDyDx, acDyDx, EPSILON);
         }
@@ -597,11 +597,11 @@ inline bool isCollinear(Vec3 pointA, Vec3 pointB, Vec3 pointC)
     }
 
     // All points have different Z values
-    real32 abDxDz = ab.x / ab.z;
-    real32 abDyDz = ab.y / ab.z;
+    float32 abDxDz = ab.x / ab.z;
+    float32 abDyDz = ab.y / ab.z;
 
-    real32 acDxDz = ac.x / ac.z;
-    real32 acDyDz = ac.y / ac.z;
+    float32 acDxDz = ac.x / ac.z;
+    float32 acDyDz = ac.y / ac.z;
 
     return FLOAT_EQ(abDxDz, acDxDz, EPSILON) && FLOAT_EQ(abDyDz, acDyDz, EPSILON);
 }
@@ -663,12 +663,12 @@ inline Quaternion identityQuaternion()
     return q;
 }
 
-inline Quaternion axisAngle(Vec3 axis, real32 degrees)
+inline Quaternion axisAngle(Vec3 axis, float32 degrees)
 {
     axis = normalize(axis);
     
     Quaternion q;
-    real32 sinHalfAngle = sinf(TO_RAD(degrees / 2.0f));
+    float32 sinHalfAngle = sinf(TO_RAD(degrees / 2.0f));
     
     q.x = axis.x * sinHalfAngle;
     q.y = axis.y * sinHalfAngle;
@@ -690,7 +690,7 @@ inline Quaternion rotateVector(Vec3 initial, Vec3 target)
     }
 
     Vec3 axis = cross(initial, target);
-    real32 angle = TO_DEG(
+    float32 angle = TO_DEG(
         acos(
             dot(
                 normalize(initial),
@@ -780,7 +780,7 @@ inline Mat4 scalingMatrix(Vec3 scale)
     return result;
 }
 
-inline real32 getValue(Vec3 vector, Axis3D axis)
+inline float32 getValue(Vec3 vector, Axis3D axis)
 {
     return vector.element[axis];
 }
@@ -789,14 +789,14 @@ inline real32 getValue(Vec3 vector, Axis3D axis)
 //
 // Random utilities
 //
-inline bool isBetween(real32 value, real32 bound1, real32 bound2)
+inline bool isBetween(float32 value, float32 bound1, float32 bound2)
 {
     if (value >= bound1 && value <= bound2) return true;
     if (value >= bound2 && value <= bound1) return true;
     return false;
 }
 
-inline real32 clamp(real32 value, real32 min, real32 max)
+inline float32 clamp(float32 value, float32 min, float32 max)
 {
     if (value < min) return min;
     if (value > max) return max;

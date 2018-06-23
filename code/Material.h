@@ -20,7 +20,7 @@ struct Material
     Shader *shader;
     std::unordered_map<std::string, int32> intUniforms;
     std::unordered_map<std::string, bool> boolUniforms;
-    std::unordered_map<std::string, real32> floatUniforms;
+    std::unordered_map<std::string, float32> floatUniforms;
     std::unordered_map<std::string, Vec2> vec2Uniforms;
     std::unordered_map<std::string, Vec3> vec3Uniforms;
     std::unordered_map<std::string, Vec4> vec4Uniforms;

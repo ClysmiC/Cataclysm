@@ -112,24 +112,24 @@ bool load(Mesh* mesh)
         else if (tokens[0] == "v")
         {
             // vertex
-            real32 x = stof(tokens[1]);
-            real32 y = stof(tokens[2]);
-            real32 z = stof(tokens[3]);
+            float32 x = stof(tokens[1]);
+            float32 y = stof(tokens[2]);
+            float32 z = stof(tokens[3]);
             v.push_back(Vec3(x, y, z));
         }
         else if (tokens[0] == "vt")
         {
             // tex coord
-            real32 uCoord = stof(tokens[1]);
-            real32 vCoord = stof(tokens[2]);
+            float32 uCoord = stof(tokens[1]);
+            float32 vCoord = stof(tokens[2]);
             vt.push_back(Vec2(uCoord, vCoord));
         }
         else if (tokens[0] == "vn")
         {
             // normal
-            real32 x = stof(tokens[1]);
-            real32 y = stof(tokens[2]);
-            real32 z = stof(tokens[3]);
+            float32 x = stof(tokens[1]);
+            float32 y = stof(tokens[2]);
+            float32 z = stof(tokens[3]);
             vn.push_back(normalize(Vec3(x, y, z)));
         }
         else if (tokens[0] == "usemtl" && mesh->useMaterialsReferencedInObjFile)
@@ -291,13 +291,13 @@ bool load(Mesh* mesh)
     // Calculate bounds
     //
     {
-        real32 minX = FLT_MAX;
-        real32 minY = FLT_MAX;
-        real32 minZ = FLT_MAX;
+        float32 minX = FLT_MAX;
+        float32 minY = FLT_MAX;
+        float32 minZ = FLT_MAX;
 
-        real32 maxX = -FLT_MAX;
-        real32 maxY = -FLT_MAX;
-        real32 maxZ = -FLT_MAX;
+        float32 maxX = -FLT_MAX;
+        float32 maxY = -FLT_MAX;
+        float32 maxZ = -FLT_MAX;
 
         for (Submesh& submesh : mesh->submeshes)
         {

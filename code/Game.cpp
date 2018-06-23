@@ -142,9 +142,12 @@ void buildTestScene2(Scene* scene)
         Entity e = makeEntity(&scene->ecs, "icosahedron");
         TransformComponent *tc = addTransformComponent(e);
         tc->position = icosahedronPositions[i];
-        
+
         ComponentGroup<RenderComponent> rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
 
+        ColliderComponent *cc = addColliderComponent(e);
+        new (cc) ColliderComponent(icosahedronMesh->bounds);
+                                   
         for(uint32 j = 0; j < icosahedronMesh->submeshes.size(); j++)
         {
             RenderComponent *rc = rcc.components + j;

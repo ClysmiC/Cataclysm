@@ -46,7 +46,7 @@ void setInt(Shader* shader, std::string name, int value)
     glUniform1i(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
 }
 
-void setFloat(Shader* shader, std::string name, real32 value)
+void setFloat(Shader* shader, std::string name, float32 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
     glUniform1f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
@@ -58,7 +58,7 @@ void setVec2(Shader* shader, std::string name, Vec2 value)
     glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y);
 }
 
-void setVec2(Shader* shader, std::string name, real32 x, real32 y)
+void setVec2(Shader* shader, std::string name, float32 x, float32 y)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
     glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y);
@@ -71,7 +71,7 @@ void setVec3(Shader* shader, std::string name, Vec3 value)
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void setVec3(Shader* shader, std::string name, real32 x, real32 y, real32 z)
+void setVec3(Shader* shader, std::string name, float32 x, float32 y, float32 z)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
     glUniform3f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z);
@@ -83,7 +83,7 @@ void setVec4(Shader* shader, std::string name, Vec4 value)
     glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y, value.z, value.w);
 }
 
-void setVec4(Shader* shader, std::string name, real32 x, real32 y, real32 z, real32 w)
+void setVec4(Shader* shader, std::string name, float32 x, float32 y, float32 z, float32 w)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
     glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z, w);

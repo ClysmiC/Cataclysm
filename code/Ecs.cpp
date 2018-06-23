@@ -100,6 +100,7 @@ Entity makeEntity(Ecs* ecs, std::string friendlyName)
 {
     Entity result;
     result.id = Ecs::nextEntityId;
+    result.flags = 0;
     result.ecs = ecs;
     result.friendlyName = friendlyName;
 
@@ -398,7 +399,7 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
         if (rc != nullptr && xfm != nullptr)
         {
             Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
-            real32 t = rayAabbTest(ray, bounds);
+            float32 t = rayAabbTest(ray, bounds);
 
             if (t >= 0)
             {
@@ -420,7 +421,7 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
     Ecs* ecs = xfm->entity.ecs;
     
     PointLightComponent* closest = nullptr;
-    real32 closestDistance = FLT_MAX;
+    float32 closestDistance = FLT_MAX;
 
     for (uint32 i = 0; i < ecs->pointLights.size; i++)
     {
@@ -430,7 +431,7 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
         assert(plXfm != nullptr);
         if (plXfm == nullptr) continue;
         
-        real32 dist = distance(xfm->position, plXfm->position);
+        float32 dist = distance(xfm->position, plXfm->position);
 
         if (dist < closestDistance)
         {

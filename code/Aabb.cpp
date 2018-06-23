@@ -11,13 +11,13 @@ Aabb transformedAabb(Aabb aabb, Transform* xfm)
     result.center = hadamard(aabb.center, xfm->scale);
     result.halfDim = hadamard(aabb.halfDim, xfm->scale);
     
-    real32 minX = FLT_MAX;
-    real32 minY = FLT_MAX;
-    real32 minZ = FLT_MAX;
+    float32 minX = FLT_MAX;
+    float32 minY = FLT_MAX;
+    float32 minZ = FLT_MAX;
 
-    real32 maxX = -FLT_MAX;
-    real32 maxY = -FLT_MAX;
-    real32 maxZ = -FLT_MAX;
+    float32 maxX = -FLT_MAX;
+    float32 maxY = -FLT_MAX;
+    float32 maxZ = -FLT_MAX;
 
     //
     // Resize based on rotate

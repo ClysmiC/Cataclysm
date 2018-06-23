@@ -137,8 +137,8 @@ Vec2 pixelToViewportCoordinate(Window* window, Vec2 pixel)
     glfwGetFramebufferSize(window->glfwWindow, &w, &h);
 
     Vec2 result;
-    result.x = clamp(pixel.x / (real32)w, 0, 1);
-    result.y = clamp(pixel.y / (real32)h, 0, 1);
+    result.x = clamp(pixel.x / (float32)w, 0, 1);
+    result.y = clamp(pixel.y / (float32)h, 0, 1);
 
     return result;
 }

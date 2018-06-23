@@ -12,6 +12,7 @@ struct Ecs;
 struct Entity
 {
     uint32 id;
+    uint64 flags;
     Ecs* ecs;
     std::string friendlyName;
 };

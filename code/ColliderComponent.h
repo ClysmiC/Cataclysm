@@ -2,8 +2,9 @@
 
 #include "Component.h"
 #include "als_math.h"
+#include "Aabb.h"
 
-enum ColliderType
+enum ColliderType : int32
 {
     RECT3,
     SPHERE,
@@ -14,6 +15,7 @@ enum ColliderType
 struct ColliderComponent : public Component
 {
     ColliderComponent();
+    ColliderComponent(Aabb aabb);
     
     Vec3 xfmOffset;
     ColliderType type;

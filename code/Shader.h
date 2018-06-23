@@ -24,16 +24,16 @@ bool unload(Shader* shader);
 
 void setBool(Shader* shader, std::string name, bool value);
 void setInt(Shader* shader, std::string name, int value);
-void setFloat(Shader* shader, std::string name, real32 value);
+void setFloat(Shader* shader, std::string name, float32 value);
 
 void setVec2(Shader* shader, std::string name, Vec2 value);
-void setVec2(Shader* shader, std::string name, real32 x, real32 y);
+void setVec2(Shader* shader, std::string name, float32 x, float32 y);
 
 void setVec3(Shader* shader, std::string name, Vec3 value);
-void setVec3(Shader* shader, std::string name, real32 x, real32 y, real32 z);
+void setVec3(Shader* shader, std::string name, float32 x, float32 y, float32 z);
 
 void setVec4(Shader* shader, std::string name, Vec4 value);
-void setVec4(Shader* shader, std::string name, real32 x, real32 y, real32 z, real32 w);
+void setVec4(Shader* shader, std::string name, float32 x, float32 y, float32 z, float32 w);
 
 void setMat4(Shader* shader, std::string name, Mat4 &value);
 

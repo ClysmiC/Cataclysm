@@ -2,8 +2,8 @@
 #include <cmath>
 
 Vec2::Vec2() {}
-Vec2::Vec2(real32 value) { this->x = value; this->y = value; }
-Vec2::Vec2(real32 x, real32 y) { this->x = x; this->y = y; }
+Vec2::Vec2(float32 value) { this->x = value; this->y = value; }
+Vec2::Vec2(float32 x, float32 y) { this->x = x; this->y = y; }
 
 Vec3::Vec3() {}
 Vec3::Vec3(Axis3D unitAxis)
@@ -16,21 +16,21 @@ Vec3::Vec3(Axis3D unitAxis)
     }
 }
 
-Vec3::Vec3(real32 value) { this->x = value; this->y = value; this->z = value; }
-Vec3::Vec3(Vec2 xy, real32 z) { this->x = xy.x; this->y = xy.y; this->z = z; }
-Vec3::Vec3(real32 x, real32 y, real32 z) { this->x = x; this->y = y; this->z = z; }
+Vec3::Vec3(float32 value) { this->x = value; this->y = value; this->z = value; }
+Vec3::Vec3(Vec2 xy, float32 z) { this->x = xy.x; this->y = xy.y; this->z = z; }
+Vec3::Vec3(float32 x, float32 y, float32 z) { this->x = x; this->y = y; this->z = z; }
 
 Vec4::Vec4() {}
-Vec4::Vec4(real32 value) { this->x = value; this->y = value; this->z = value; }
-Vec4::Vec4(Vec2 xy, real32 z, real32 w) { this->x = xy.x; this->y = xy.y; this->z = z; this->w = w; }
+Vec4::Vec4(float32 value) { this->x = value; this->y = value; this->z = value; }
+Vec4::Vec4(Vec2 xy, float32 z, float32 w) { this->x = xy.x; this->y = xy.y; this->z = z; this->w = w; }
 Vec4::Vec4(Vec2 xy, Vec2 zw) { this->x = xy.x; this->y = xy.y; this->z = zw.x; this->w = zw.y; }
-Vec4::Vec4(Vec3 xyz, real32 w) { this->x = xyz.x; this->y = xyz.y; this->z = xyz.z; this->w = w; }
-Vec4::Vec4(real32 x, real32 y, real32 z, real32 w) { this->x = x; this->y = y; this->z = z; this->w = w; }
+Vec4::Vec4(Vec3 xyz, float32 w) { this->x = xyz.x; this->y = xyz.y; this->z = xyz.z; this->w = w; }
+Vec4::Vec4(float32 x, float32 y, float32 z, float32 w) { this->x = x; this->y = y; this->z = z; this->w = w; }
 
 Quaternion::Quaternion()                           { x = 0; y = 0; z = 0; w = 1;}
-Quaternion::Quaternion(Vec3 vector, real32 scalar) { x = vector.x; y = vector.y; z = vector.z; w = scalar; }
+Quaternion::Quaternion(Vec3 vector, float32 scalar) { x = vector.x; y = vector.y; z = vector.z; w = scalar; }
 Quaternion::Quaternion(Vec4 xyzw)                  { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
-Quaternion::Quaternion(real32 x_, real32 y_, real32 z_, real32 w_) { x = x_; y = y_; z = z_; w = w_; }
+Quaternion::Quaternion(float32 x_, float32 y_, float32 z_, float32 w_) { x = x_; y = y_; z = z_; w = w_; }
 
 // Mat3::Mat3(Mat4 mat4)
 // {
@@ -88,7 +88,7 @@ Plane::Plane(Vec3 pointA, Vec3 pointB, Vec3 pointC)
 
 Vec2& Vec2::normalizeInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
     x /= len;
     y /= len;
 
@@ -97,7 +97,7 @@ Vec2& Vec2::normalizeInPlace()
 
 Vec2& Vec2::normalizeOrXAxisInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
 
     if (len < EPSILON)
     {
@@ -115,7 +115,7 @@ Vec2& Vec2::normalizeOrXAxisInPlace()
 
 Vec3& Vec3::normalizeInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
     x /= len;
     y /= len;
     z /= len;
@@ -125,7 +125,7 @@ Vec3& Vec3::normalizeInPlace()
 
 Vec3& Vec3::normalizeOrXAxisInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
 
     if (len < EPSILON)
     {
@@ -145,7 +145,7 @@ Vec3& Vec3::normalizeOrXAxisInPlace()
 
 Vec4& Vec4::normalizeInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
     x /= len;
     y /= len;
     z /= len;
@@ -156,7 +156,7 @@ Vec4& Vec4::normalizeInPlace()
 
 Quaternion& Quaternion::normalizeInPlace()
 {
-    real32 len = length(*this);
+    float32 len = length(*this);
     x /= len;
     y /= len;
     z /= len;
@@ -167,30 +167,30 @@ Quaternion& Quaternion::normalizeInPlace()
 
 
 
-real32* Mat3::operator [] (int32 i)
+float32* Mat3::operator [] (int32 i)
 {
     assert(i < 3);
-    real32* result = _e[i];
+    float32* result = _e[i];
     return result;
 }
 
-real32* Mat3::dataPointer()
+float32* Mat3::dataPointer()
 {
-    real32* result = _e[0];
+    float32* result = _e[0];
     return result;
 }
 
 
-real32* Mat4::operator [] (int32 i)
+float32* Mat4::operator [] (int32 i)
 {
     assert(i < 4);
-    real32* result = _e[i];
+    float32* result = _e[i];
     return result;
 }
 
-real32* Mat4::dataPointer()
+float32* Mat4::dataPointer()
 {
-    real32* result = _e[0];
+    float32* result = _e[0];
     return result;
 }
 
@@ -217,7 +217,7 @@ Mat4& Mat4::translateInPlace(Vec3 translation)
 
 Mat3& Mat3::transposeInPlace()
 {
-    real32 temp;
+    float32 temp;
 
     temp = (*this)[0][1];
     (*this)[0][1] = (*this)[1][0];
@@ -236,7 +236,7 @@ Mat3& Mat3::transposeInPlace()
 
 Mat4& Mat4::transposeInPlace()
 {
-    real32 temp;
+    float32 temp;
 
     temp = (*this)[0][1];
     (*this)[0][1] = (*this)[1][0];
@@ -280,7 +280,7 @@ Mat4& Mat4::mat3ifyInPlace()
     return *this;
 }
 
-Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real32 far)
+Mat4& Mat4::perspectiveInPlace(float32 fov, float32 aspectRatio, float32 near, float32 far)
 {
     assert(fov > 0);
     assert(aspectRatio > 0);
@@ -288,9 +288,9 @@ Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real
     assert(far > 0);
     assert(far > near);
 
-    real32 halfFov = fov / 2;
-    real32 right = near * tanf(TO_RAD(halfFov));
-    real32 top = right / (aspectRatio);
+    float32 halfFov = fov / 2;
+    float32 right = near * tanf(TO_RAD(halfFov));
+    float32 top = right / (aspectRatio);
 
     (*this)[0][0] = near / right;
     (*this)[0][1] = 0;
@@ -315,7 +315,7 @@ Mat4& Mat4::perspectiveInPlace(real32 fov, real32 aspectRatio, real32 near, real
     return *this;
 }
 
-Mat4& Mat4::orthoInPlace(real32 width, real32 aspectRatio, real32 near, real32 far)
+Mat4& Mat4::orthoInPlace(float32 width, float32 aspectRatio, float32 near, float32 far)
 {
     assert(width > 0);
     assert(aspectRatio > 0);
@@ -323,13 +323,13 @@ Mat4& Mat4::orthoInPlace(real32 width, real32 aspectRatio, real32 near, real32 f
     assert(far > 0);
     assert(far > near);
 
-    real32 right = width / 2.0f;
-    real32 top = right / (aspectRatio);
+    float32 right = width / 2.0f;
+    float32 top = right / (aspectRatio);
 
     // TEMP: interpret fov as vertical fov (the way Qt does)
-    // real32 halfVFov = fov / 2;
-    // real32 top = near * tan(TO_RAD(halfVFov));
-    // real32 right = top * aspectRatio;
+    // float32 halfVFov = fov / 2;
+    // float32 top = near * tan(TO_RAD(halfVFov));
+    // float32 right = top * aspectRatio;
 
     (*this)[0][0] = 1 / right;
     (*this)[0][1] = 0;
@@ -369,7 +369,7 @@ Vec2 operator + (Vec2 vectorA, Vec2 vectorB)
     
     return result;
 }
-Vec2 operator + (Vec2 vector, real32 constant)
+Vec2 operator + (Vec2 vector, float32 constant)
 {
     Vec2 result;
 
@@ -385,7 +385,7 @@ Vec2& operator += (Vec2& vectorA, Vec2 vectorB)
 
     return vectorA;
 }
-Vec2& operator += (Vec2& vector, real32 constant)
+Vec2& operator += (Vec2& vector, float32 constant)
 {
     vector = vector + constant;
     return vector;
@@ -399,7 +399,7 @@ Vec2 operator - (Vec2 vectorA, Vec2 vectorB)
     
     return result;
 }
-Vec2 operator - (Vec2 vector, real32 constant)
+Vec2 operator - (Vec2 vector, float32 constant)
 {
     Vec2 result;
 
@@ -415,7 +415,7 @@ Vec2& operator -= (Vec2& vectorA, Vec2 vectorB)
 
     return vectorA;
 }
-Vec2& operator -= (Vec2& vector, real32 constant)
+Vec2& operator -= (Vec2& vector, float32 constant)
 {
     vector = vector - constant;
     return vector;
@@ -430,7 +430,7 @@ Vec2 operator - (Vec2 vector)
 }
 
 
-Vec2 operator * (real32 scalar, Vec2 vector)
+Vec2 operator * (float32 scalar, Vec2 vector)
 {
     Vec2 result;
 
@@ -439,17 +439,17 @@ Vec2 operator * (real32 scalar, Vec2 vector)
 
     return result;
 }
-Vec2 operator * (Vec2 vector, real32 scalar)
+Vec2 operator * (Vec2 vector, float32 scalar)
 {
     return scalar * vector;
 }
-Vec2& operator *= (Vec2& vector, real32 scalar)
+Vec2& operator *= (Vec2& vector, float32 scalar)
 {
     vector = vector * scalar;
     return vector;
 }
 
-Vec2 operator / (Vec2 vector, real32 scalar)
+Vec2 operator / (Vec2 vector, float32 scalar)
 {
     Vec2 result;
 
@@ -458,7 +458,7 @@ Vec2 operator / (Vec2 vector, real32 scalar)
 
     return result;
 }
-Vec2& operator /= (Vec2& vector, real32 scalar)
+Vec2& operator /= (Vec2& vector, float32 scalar)
 {
     vector = vector / scalar;
     return vector;
@@ -476,7 +476,7 @@ Vec3 operator + (Vec3 vectorA, Vec3 vectorB)
     
     return result;
 }
-Vec3 operator + (Vec3 vector, real32 constant)
+Vec3 operator + (Vec3 vector, float32 constant)
 {
     Vec3 result;
 
@@ -494,7 +494,7 @@ Vec3& operator += (Vec3& vectorA, Vec3 vectorB)
 
     return vectorA;
 }
-Vec3& operator += (Vec3& vector, real32 constant)
+Vec3& operator += (Vec3& vector, float32 constant)
 {
     vector = vector + constant;
     return vector;
@@ -510,7 +510,7 @@ Vec3 operator - (Vec3 vectorA, Vec3 vectorB)
     
     return result;
 }
-Vec3 operator - (Vec3 vector, real32 constant)
+Vec3 operator - (Vec3 vector, float32 constant)
 {
     Vec3 result;
 
@@ -528,7 +528,7 @@ Vec3& operator -= (Vec3& vectorA, Vec3 vectorB)
 
     return vectorA;
 }
-Vec3& operator -= (Vec3& vector, real32 constant)
+Vec3& operator -= (Vec3& vector, float32 constant)
 {
     vector = vector - constant;
     return vector;
@@ -544,7 +544,7 @@ Vec3 operator - (Vec3 vector)
 }
 
 
-Vec3 operator * (real32 scalar, Vec3 vector)
+Vec3 operator * (float32 scalar, Vec3 vector)
 {
     Vec3 result;
 
@@ -554,17 +554,17 @@ Vec3 operator * (real32 scalar, Vec3 vector)
 
     return result;
 }
-Vec3 operator * (Vec3 vector, real32 scalar)
+Vec3 operator * (Vec3 vector, float32 scalar)
 {
     return scalar * vector;
 }
-Vec3& operator *= (Vec3& vector, real32 scalar)
+Vec3& operator *= (Vec3& vector, float32 scalar)
 {
     vector = vector * scalar;
     return vector;
 }
 
-Vec3 operator / (Vec3 vector, real32 scalar)
+Vec3 operator / (Vec3 vector, float32 scalar)
 {
     Vec3 result;
 
@@ -574,7 +574,7 @@ Vec3 operator / (Vec3 vector, real32 scalar)
 
     return result;
 }
-Vec3& operator /= (Vec3& vector, real32 scalar)
+Vec3& operator /= (Vec3& vector, float32 scalar)
 {
     vector = vector / scalar;
     return vector;
@@ -592,7 +592,7 @@ Vec4 operator + (Vec4 vectorA, Vec4 vectorB)
     
     return result;
 }
-Vec4 operator + (Vec4 vector, real32 constant)
+Vec4 operator + (Vec4 vector, float32 constant)
 {
     Vec4 result;
 
@@ -613,7 +613,7 @@ Vec4& operator += (Vec4& vectorA, Vec4 vectorB)
 
     return vectorA;
 }
-Vec4& operator += (Vec4& vector, real32 constant)
+Vec4& operator += (Vec4& vector, float32 constant)
 {
     vector = vector + constant;
     return vector;
@@ -630,7 +630,7 @@ Vec4 operator - (Vec4 vectorA, Vec4 vectorB)
     
     return result;
 }
-Vec4 operator - (Vec4 vector, real32 constant)
+Vec4 operator - (Vec4 vector, float32 constant)
 {
     Vec4 result;
 
@@ -650,7 +650,7 @@ Vec4& operator -= (Vec4& vectorA, Vec4 vectorB)
 
     return vectorA;
 }
-Vec4& operator -= (Vec4& vector, real32 constant)
+Vec4& operator -= (Vec4& vector, float32 constant)
 {
     vector = vector - constant;
     return vector;
@@ -667,7 +667,7 @@ Vec4 operator - (Vec4 vector)
 }
 
 
-Vec4 operator * (real32 scalar, Vec4 vector)
+Vec4 operator * (float32 scalar, Vec4 vector)
 {
     Vec4 result;
 
@@ -678,17 +678,17 @@ Vec4 operator * (real32 scalar, Vec4 vector)
 
     return result;
 }
-Vec4 operator * (Vec4 vector, real32 scalar)
+Vec4 operator * (Vec4 vector, float32 scalar)
 {
     return scalar * vector;
 }
-Vec4& operator *= (Vec4& vector, real32 scalar)
+Vec4& operator *= (Vec4& vector, float32 scalar)
 {
     vector = vector * scalar;
     return vector;
 }
 
-Vec4 operator / (Vec4 vector, real32 scalar)
+Vec4 operator / (Vec4 vector, float32 scalar)
 {
     Vec4 result;
 
@@ -699,7 +699,7 @@ Vec4 operator / (Vec4 vector, real32 scalar)
 
     return result;
 }
-Vec4& operator /= (Vec4& vector, real32 scalar)
+Vec4& operator /= (Vec4& vector, float32 scalar)
 {
     vector = vector / scalar;
     return vector;
@@ -717,7 +717,7 @@ Quaternion operator + (Quaternion quatA, Quaternion quatB)
     
     return result;
 }
-Quaternion operator + (Quaternion quat, real32 constant)
+Quaternion operator + (Quaternion quat, float32 constant)
 {
     Quaternion result;
 
@@ -738,7 +738,7 @@ Quaternion& operator += (Quaternion& quatA, Quaternion quatB)
 
     return quatA;
 }
-Quaternion& operator += (Quaternion& quat, real32 constant)
+Quaternion& operator += (Quaternion& quat, float32 constant)
 {
     quat = quat + constant;
     return quat;
@@ -755,7 +755,7 @@ Quaternion operator - (Quaternion quatA, Quaternion quatB)
     
     return result;
 }
-Quaternion operator - (Quaternion quat, real32 constant)
+Quaternion operator - (Quaternion quat, float32 constant)
 {
     Quaternion result;
 
@@ -775,7 +775,7 @@ Quaternion& operator -= (Quaternion& quatA, Quaternion quatB)
 
     return quatA;
 }
-Quaternion& operator -= (Quaternion& quat, real32 constant)
+Quaternion& operator -= (Quaternion& quat, float32 constant)
 {
     quat = quat - constant;
     return quat;
@@ -792,7 +792,7 @@ Quaternion operator - (Quaternion quat)
 }
 
 
-Quaternion operator * (real32 scalar, Quaternion quat)
+Quaternion operator * (float32 scalar, Quaternion quat)
 {
     Quaternion result;
 
@@ -803,17 +803,17 @@ Quaternion operator * (real32 scalar, Quaternion quat)
 
     return result;
 }
-Quaternion operator * (Quaternion quat, real32 scalar)
+Quaternion operator * (Quaternion quat, float32 scalar)
 {
     return scalar * quat;
 }
-Quaternion& operator *= (Quaternion& quat, real32 scalar)
+Quaternion& operator *= (Quaternion& quat, float32 scalar)
 {
     quat = quat * scalar;
     return quat;
 }
 
-Quaternion operator / (Quaternion quat, real32 scalar)
+Quaternion operator / (Quaternion quat, float32 scalar)
 {
     Quaternion result;
 
@@ -824,7 +824,7 @@ Quaternion operator / (Quaternion quat, real32 scalar)
 
     return result;
 }
-Quaternion& operator /= (Quaternion& quat, real32 scalar)
+Quaternion& operator /= (Quaternion& quat, float32 scalar)
 {
     quat = quat / scalar;
     return quat;
@@ -842,7 +842,7 @@ Mat3 operator * (Mat3 left, Mat3 right)
     {
         for(int across = 0; across < matDimension; across++)
         {
-            real32 sum = 0;
+            float32 sum = 0;
             
             for(int i = 0; i < matDimension; i++)
             {
@@ -866,7 +866,7 @@ Mat4 operator * (Mat4 left, Mat4 right)
     {
         for(int across = 0; across < matDimension; across++)
         {
-            real32 sum = 0;
+            float32 sum = 0;
             
             for(int i = 0; i < matDimension; i++)
             {
@@ -935,24 +935,24 @@ Quaternion lookRotation(Vec3 forward, Vec3 up)
     Vec3 vector = normalize(forward);
     Vec3 vector2 = normalize(cross(up, vector));
     Vec3 vector3 = cross(vector, vector2);
-    real32 m00 = vector2.x;
-    real32 m01 = vector2.y;
-    real32 m02 = vector2.z;
-    real32 m10 = vector3.x;
-    real32 m11 = vector3.y;
-    real32 m12 = vector3.z;
-    real32 m20 = vector.x;
-    real32 m21 = vector.y;
-    real32 m22 = vector.z;
+    float32 m00 = vector2.x;
+    float32 m01 = vector2.y;
+    float32 m02 = vector2.z;
+    float32 m10 = vector3.x;
+    float32 m11 = vector3.y;
+    float32 m12 = vector3.z;
+    float32 m20 = vector.x;
+    float32 m21 = vector.y;
+    float32 m22 = vector.z;
  
  
-    real32 num8 = (m00 + m11) + m22;
+    float32 num8 = (m00 + m11) + m22;
     
     Quaternion quaternion;
     
     if (num8 > 0.0f)
     {
-        real32 num = (real32)sqrt(num8 + 1.0f);
+        float32 num = (float32)sqrt(num8 + 1.0f);
         quaternion.w = num * 0.5f;
         num = 0.5f / num;
         quaternion.x = (m12 - m21) * num;
@@ -962,8 +962,8 @@ Quaternion lookRotation(Vec3 forward, Vec3 up)
     }
     if ((m00 >= m11) && (m00 >= m22))
     {
-        real32 num7 = (real32)sqrt(((1.0f + m00) - m11) - m22);
-        real32 num4 = 0.5f / num7;
+        float32 num7 = (float32)sqrt(((1.0f + m00) - m11) - m22);
+        float32 num4 = 0.5f / num7;
         quaternion.x = 0.5f * num7;
         quaternion.y = (m01 + m10) * num4;
         quaternion.z = (m02 + m20) * num4;
@@ -972,16 +972,16 @@ Quaternion lookRotation(Vec3 forward, Vec3 up)
     }
     if (m11 > m22)
     {
-        real32 num6 = (real32)sqrt(((1.0f + m11) - m00) - m22);
-        real32 num3 = 0.5f / num6;
+        float32 num6 = (float32)sqrt(((1.0f + m11) - m00) - m22);
+        float32 num3 = 0.5f / num6;
         quaternion.x = (m10+ m01) * num3;
         quaternion.y = 0.5f * num6;
         quaternion.z = (m21 + m12) * num3;
         quaternion.w = (m20 - m02) * num3;
         return quaternion; 
     }
-    real32 num5 = (real32)sqrt(((1.0f + m22) - m00) - m11);
-    real32 num2 = 0.5f / num5;
+    float32 num5 = (float32)sqrt(((1.0f + m22) - m00) - m11);
+    float32 num2 = 0.5f / num5;
     quaternion.x = (m20 + m02) * num2;
     quaternion.y = (m21 + m12) * num2;
     quaternion.z = 0.5f * num5;
@@ -996,7 +996,7 @@ Quaternion relativeRotation(Vec3 start, Vec3 end)
     start.normalizeInPlace();
     end.normalizeInPlace();
     
-    real32 startDotEnd = dot(start, end);
+    float32 startDotEnd = dot(start, end);
     
     if (startDotEnd >= 1.0f)
     {

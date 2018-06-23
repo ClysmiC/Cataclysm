@@ -23,7 +23,7 @@ uint32 cubemapVao()
     {
         uint32 vbo;
 
-        real32 vertices[] = {
+        float32 vertices[] = {
             // positions          
             -1.0f,  1.0f, -1.0f,
             -1.0f, -1.0f, -1.0f,
@@ -74,7 +74,7 @@ uint32 cubemapVao()
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float32), (void*)0);
     }
 
     return vao;

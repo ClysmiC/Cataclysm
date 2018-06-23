@@ -25,7 +25,7 @@ DebugDraw::init()
 
     auto v = glGetError();
     
-    real32 cubeVertices[] = {
+    float32 cubeVertices[] = {
         -.5, -.5,  .5,  // front-bot-left
          .5, -.5,  .5,  // front-bot-right
          .5,  .5,  .5,  // front-top-right
@@ -79,7 +79,7 @@ DebugDraw::init()
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            sizeof(real32) * 3 * verticesCount,
+            sizeof(float32) * 3 * verticesCount,
             0,
             GL_STATIC_DRAW);
 
@@ -104,7 +104,7 @@ DebugDraw::init()
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(cubeIndices), cubeIndices);
 
         v = glGetError();
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(real32), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float32), (void*)0);
         glEnableVertexAttribArray(0);
     }
     glBindVertexArray(0);
@@ -169,7 +169,7 @@ DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* ca
 
     // temporary hack: using existing rect3 debug drawing to draw a line
     Vec3 rectCenter = (start + end) / 2;
-    real32 dist = distance(start, end);
+    float32 dist = distance(start, end);
 
     Vec3 dimensions = Vec3(0.1, 0.1, dist);
 
