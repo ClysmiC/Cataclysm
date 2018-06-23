@@ -9,6 +9,8 @@
 #include "PortalComponent.h"
 #include "RenderComponent.h"
 
+#include <cmath>
+
 void reflectVec2(IReflector* reflector, uint32 startingOffset)
 {
     reflector->consumeFloat32("X", startingOffset + offsetof(Vec2, x));
@@ -68,8 +70,66 @@ void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
 
 void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider, uint32 startingOffset)
 {
-    // TODO: change this to consume enum when implemented
-    reflector->consumeInt32("Type", startingOffset + offsetof(ColliderComponent, type));
+    ColliderComponent origCc = *collider;
+    reflector->consumeEnum("Type", startingOffset + offsetof(ColliderComponent, type), ColliderTypeNames, (uint32)ColliderType::ENUM_VALUE_COUNT);
+
+    //
+    // If type was toggled, try to replace some of the union values with sane estimates based on the
+    // collider before it was changed.
+    //
+    {
+        if (origCc.type == ColliderType::RECT3 && collider->type != ColliderType::RECT3)
+        {
+            if (collider->type == ColliderType::SPHERE)
+            {
+                collider->radius = fmax(fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y), origCc.rect3Lengths.z);
+            }
+            else if (collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE)
+            {
+                if (origCc.rect3Lengths.x >= origCc.rect3Lengths.y && origCc.rect3Lengths.x >= origCc.rect3Lengths.z)
+                {
+                    collider->axis = Axis3D::X;
+                    collider->length = origCc.rect3Lengths.x;
+                    collider->radius = fmax(origCc.rect3Lengths.y, origCc.rect3Lengths.z);
+                }
+                else if (origCc.rect3Lengths.y >= origCc.rect3Lengths.x && origCc.rect3Lengths.y >= origCc.rect3Lengths.z)
+                {
+                    collider->axis = Axis3D::Y;
+                    collider->length = origCc.rect3Lengths.y;
+                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.z);
+                }
+                else
+                {
+                    collider->axis = Axis3D::Z;
+                    collider->length = origCc.rect3Lengths.z;
+                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y);
+                }
+            }
+            
+        }
+        else if (origCc.type != ColliderType::RECT3 && collider->type == ColliderType::RECT3)
+        {
+            collider->rect3Lengths.x = origCc.radius;
+            collider->rect3Lengths.y = origCc.radius;
+            collider->rect3Lengths.z = origCc.radius;
+            
+            if (origCc.type == ColliderType::CYLINDER || origCc.type == ColliderType::CAPSULE)
+            {
+                if (origCc.axis == Axis3D::X)
+                {
+                    collider->rect3Lengths.x = origCc.length;
+                }
+                else if (origCc.axis == Axis3D::Y)
+                {
+                    collider->rect3Lengths.y = origCc.length;
+                }
+                else // Z
+                {
+                    collider->rect3Lengths.z = origCc.length;
+                }
+            }
+        }
+    }
 
     if (reflector->pushStruct("Offset"))
     {
@@ -79,21 +139,21 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
     
     if (collider->type == ColliderType::RECT3)
     {
-        reflector->consumeFloat32("X Len", startingOffset + offsetof(ColliderComponent, xLength));
-        reflector->consumeFloat32("Y Len", startingOffset + offsetof(ColliderComponent, yLength));
-        reflector->consumeFloat32("Z Len", startingOffset + offsetof(ColliderComponent, zLength));
+        if (reflector->pushStruct("Lengths"))
+        {
+            reflectVec3(reflector, startingOffset + offsetof(ColliderComponent, rect3Lengths));
+            reflector->popStruct();
+        }
     }
     else // sphere, cylinder, capsule 
     {
         if (collider->type != ColliderType::SPHERE)
         {
             reflector->consumeFloat32("Length", startingOffset + offsetof(ColliderComponent, length));
+            reflector->consumeEnum("Axis", startingOffset + offsetof(ColliderComponent, axis), Axis3DNames, (uint32)Axis3D::ENUM_VALUE_COUNT);
         }
         
         reflector->consumeFloat32("Radius", startingOffset + offsetof(ColliderComponent, radius));
-
-        // todo change this to enum
-        reflector->consumeInt32("Axis", startingOffset + offsetof(ColliderComponent, axis));
     }
 }
 
@@ -163,10 +223,17 @@ UiReflector::UiReflector()
 {
 }
 
-void UiReflector::startReflection(std::string label)
+bool UiReflector::startReflection(std::string label)
 {
-    bool someBool;
-    ImGui::Begin(("Entity: " + label).c_str(), &someBool);
+    bool shouldClose;
+    ImGui::Begin(("Entity: " + label).c_str(), &shouldClose);
+
+    if (shouldClose)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void UiReflector::endReflection()
@@ -191,27 +258,31 @@ void UiReflector::popStruct()
     this->indentationLevel--;
 }
 
-void UiReflector::consumeInt32(std::string name, uint32 offset)
+int32 UiReflector::consumeInt32(std::string name, uint32 offset)
 {
     int32* valuePtr = (int32*)((char*)reflectionTarget + offset);
     int32 value = *valuePtr;
 
-    std::string text = name + ": " + std::to_string(value);
+    // std::string text = name + ": " + std::to_string(value);
 
-    ImGui::Text(text.c_str());
+    // ImGui::Text(text.c_str());
+
+    return *valuePtr;
 }
 
-void UiReflector::consumeUInt32(std::string name, uint32 offset)
+uint32 UiReflector::consumeUInt32(std::string name, uint32 offset)
 {
     uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
     uint32 value = *valuePtr;
 
-    std::string text = name + ": " + std::to_string(value);
+    // std::string text = name + ": " + std::to_string(value);
     
-    ImGui::Text(text.c_str());
+    // ImGui::Text(text.c_str());
+
+    return *valuePtr;
 }
 
-void UiReflector::consumeFloat32(std::string name, uint32 offset)
+float32 UiReflector::consumeFloat32(std::string name, uint32 offset)
 {
     float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
     float32 valueCopy = *valuePtr;
@@ -225,38 +296,63 @@ void UiReflector::consumeFloat32(std::string name, uint32 offset)
         // This updates the actual value
         *valuePtr = valueCopy;
     }
+
+    return *valuePtr;
 }
 
-void UiReflector::consumeFloat64(std::string name, uint32 offset)
+float64 UiReflector::consumeFloat64(std::string name, uint32 offset)
 {
     float64* valuePtr = (float64*)((char*)reflectionTarget + offset);
     float64 value = *valuePtr;
 
-    std::string text = name + ": " + std::to_string(value);
+    // std::string text = name + ": " + std::to_string(value);
     
-    ImGui::Text(text.c_str());
+    // ImGui::Text(text.c_str());
+
+    return *valuePtr;
 }
 
-void UiReflector::consumeBool(std::string name, uint32 offset)
+bool UiReflector::consumeBool(std::string name, uint32 offset)
 {
     bool* valuePtr = (bool*)((char*)reflectionTarget + offset);
     bool value = *valuePtr;
 
-    std::string text = name + ": " + std::to_string(value);
-    
-    ImGui::Text(text.c_str());
-}
-
-void UiReflector::consumeEnum(std::string name, uint32 offset)
-{
-    // TODO: not sure how this should work...
-    
-    // float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
-    // float32 value = *valuePtr;
-
     // std::string text = name + ": " + std::to_string(value);
     
     // ImGui::Text(text.c_str());
+
+    return *valuePtr;
+}
+
+uint32 UiReflector::consumeEnum(std::string name, uint32 offset, std::string* enumNames, uint32 enumValueCount)
+{
+    // TODO: not sure how this should work...
+    
+    uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
+    uint32 value = *valuePtr;
+
+    assert(value < enumValueCount);
+    
+    std::string* selectedValueName = enumNames + value;
+
+    if (ImGui::TreeNode((name + ": " + *selectedValueName).c_str()))
+    {
+        for (uint32 i = 0; i < enumValueCount; i++)
+        {
+            bool selected = (i == value);
+            std::string* valueName = enumNames + i;
+            
+            if (ImGui::Selectable(valueName->c_str(), selected))
+            {
+                // Update actual value
+                *valuePtr = i;
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
+    return *valuePtr;
 }
 
 #include "Entity.h"
@@ -267,11 +363,15 @@ void UiReflector::consumeEnum(std::string name, uint32 offset)
 #include "PointLightComponent.h"
 #include "PortalComponent.h"
 #include "Ecs.h"
-void testUiReflection(Entity e)
+bool testUiReflection(Entity e)
 {
     // TODO: handle component groups
     UiReflector reflector;
-    reflector.startReflection(e.friendlyName);
+    if (!reflector.startReflection(e.friendlyName))
+    {
+        // todo, how to make this close ?
+        // return false;
+    }
     
     TransformComponent* transform = getTransformComponent(e);
     if (transform)
@@ -338,4 +438,5 @@ void testUiReflection(Entity e)
     
 
     reflector.endReflection();
+    return true;
 }

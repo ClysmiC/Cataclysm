@@ -4,22 +4,24 @@
 #include "TransformComponent.h"
 #include "Ecs.h"
 
+std::string ColliderTypeNames[(uint32)ColliderType::ENUM_VALUE_COUNT] = { "Rect3", "Sphere", "Cylinder", "Capsule" };
+
 ColliderComponent::ColliderComponent()
 {
     this->xfmOffset = Vec3(0, 0, 0);
     this->type = ColliderType::RECT3;
-    this->xLength = 1;
-    this->yLength = 1;
-    this->zLength = 1;
+    this->rect3Lengths.x = 1;
+    this->rect3Lengths.y = 1;
+    this->rect3Lengths.z = 1;
 }
 
 ColliderComponent::ColliderComponent(Aabb aabb)
 {
     this->xfmOffset = Vec3(0, 0, 0);
     this->type = ColliderType::RECT3;
-    this->xLength = aabb.halfDim.x * 2;
-    this->yLength = aabb.halfDim.y * 2;
-    this->zLength = aabb.halfDim.z * 2;
+    this->rect3Lengths.x = aabb.halfDim.x * 2;
+    this->rect3Lengths.y = aabb.halfDim.y * 2;
+    this->rect3Lengths.z = aabb.halfDim.z * 2;
 }
 
 Vec3 scaledXfmOffset(ColliderComponent* collider)
@@ -61,7 +63,7 @@ float32 scaledXLength(ColliderComponent* collider)
     assert(collider->type == ColliderType::RECT3);
     
     TransformComponent *xfm = getTransformComponent(collider->entity);
-    return xfm->scale.x * collider->xLength;
+    return xfm->scale.x * collider->rect3Lengths.x;
 }
 
 float32 scaledYLength(ColliderComponent* collider)
@@ -69,7 +71,7 @@ float32 scaledYLength(ColliderComponent* collider)
     assert(collider->type == ColliderType::RECT3);
     
     TransformComponent *xfm = getTransformComponent(collider->entity);
-    return xfm->scale.y * collider->yLength;
+    return xfm->scale.y * collider->rect3Lengths.y;
 }
 
 float32 scaledZLength(ColliderComponent* collider)
@@ -77,7 +79,7 @@ float32 scaledZLength(ColliderComponent* collider)
     assert(collider->type == ColliderType::RECT3);
     
     TransformComponent *xfm = getTransformComponent(collider->entity);
-    return xfm->scale.z * collider->zLength;
+    return xfm->scale.z * collider->rect3Lengths.z;
 }
 
 bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
@@ -93,7 +95,7 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 
     switch(collider->type)
     {
-        case RECT3:
+        case ColliderType::RECT3:
         {
             float32 xLen = scaledXLength(collider);
             float32 yLen = scaledYLength(collider);
@@ -147,7 +149,7 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
             
         } break;
 
-        case SPHERE:
+        case ColliderType::SPHERE:
         {
             Vec3 deltaPos = center - point;
             
@@ -157,11 +159,11 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
             return (lengthSquared(deltaPos) < radiusSquared);
         } break;
 
-        case CYLINDER:
+        case ColliderType::CYLINDER:
         {
         } break;
 
-        case CAPSULE:
+        case ColliderType::CAPSULE:
         {
         } break;
 

@@ -186,7 +186,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
 {
     switch(collider->type)
     {
-        case RECT3:
+        case ColliderType::RECT3:
         {
             drawRect3(colliderCenter(collider),
                       Vec3(

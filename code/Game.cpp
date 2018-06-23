@@ -322,7 +322,7 @@ void updateGame(Game* game)
     CameraComponent* camComponent = getCameraComponent(game->activeCamera);
     TransformComponent* camXfm = getTransformComponent(game->activeCamera);
 
-    if (keys[GLFW_KEY_TAB] && !lastKeys[GLFW_KEY_TAB])
+    if (keys[GLFW_KEY_GRAVE_ACCENT] && !lastKeys[GLFW_KEY_GRAVE_ACCENT])
     {
         game->isEditorMode = !game->isEditorMode;
 
@@ -356,7 +356,9 @@ void updateGame(Game* game)
         {
             if (e.id == testEntity.id)
             {
-                testUiReflection(e);
+                if(!testUiReflection(e))
+                {
+                }
                 DebugDraw::instance().color = Vec3(1, 0, 0);
             }
 

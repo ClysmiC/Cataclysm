@@ -1,6 +1,8 @@
 #include "als_math.h"
 #include <cmath>
 
+std::string Axis3DNames[(uint32)Axis3D::ENUM_VALUE_COUNT] = { "X", "Y", "Z" };
+
 Vec2::Vec2() {}
 Vec2::Vec2(float32 value) { this->x = value; this->y = value; }
 Vec2::Vec2(float32 x, float32 y) { this->x = x; this->y = y; }
@@ -9,9 +11,9 @@ Vec3::Vec3() {}
 Vec3::Vec3(Axis3D unitAxis)
 {
     switch (unitAxis) {
-        case X: this->x = 1; this->y = 0; this->z = 0; break;
-        case Y: this->x = 0; this->y = 1; this->z = 0; break;
-        case Z: this->x = 0; this->y = 0; this->z = 1; break;
+        case Axis3D::X: this->x = 1; this->y = 0; this->z = 0; break;
+        case Axis3D::Y: this->x = 0; this->y = 1; this->z = 0; break;
+        case Axis3D::Z: this->x = 0; this->y = 0; this->z = 1; break;
         default: assert(false);
     }
 }

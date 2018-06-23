@@ -3,14 +3,19 @@
 #include "Component.h"
 #include "als_math.h"
 #include "Aabb.h"
+#include <string>
 
-enum ColliderType : int32
+enum class ColliderType : uint32
 {
     RECT3,
     SPHERE,
     CYLINDER,
     CAPSULE,
+
+    ENUM_VALUE_COUNT
 };
+
+extern std::string ColliderTypeNames[(uint32)ColliderType::ENUM_VALUE_COUNT];
 
 struct ColliderComponent : public Component
 {
@@ -26,15 +31,14 @@ struct ColliderComponent : public Component
         struct
         {
             float32 length; // unused for sphere
+            Axis3D axis;    // unused for sphere
+            
             float32 radius;
-            Axis3D axis; 
         };
 
         struct
         {
-            float32 xLength; // use 'length' to address this memory
-            float32 yLength;
-            float32 zLength;
+            Vec3 rect3Lengths;
         };
     };
 };

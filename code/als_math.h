@@ -3,6 +3,7 @@
 #include "math.h"
 #include "assert.h"
 #include "Types.h"
+#include <string> // TODO: remove this if we implement our own fixed-sized strings
 
 #define FLOAT_EQ(x, y, epsilon) (fabs((x) - (y)) < epsilon)
 #define PI 3.14159265359f
@@ -10,12 +11,16 @@
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
-enum Axis3D : int32
+enum class Axis3D : uint32
 {
-    X = 0,
-    Y = 1,
-    Z = 2
+    X,
+    Y,
+    Z,
+
+    ENUM_VALUE_COUNT
 };
+
+extern std::string Axis3DNames[(uint32)Axis3D::ENUM_VALUE_COUNT];
 
 union Vec2
 {
@@ -782,7 +787,7 @@ inline Mat4 scalingMatrix(Vec3 scale)
 
 inline float32 getValue(Vec3 vector, Axis3D axis)
 {
-    return vector.element[axis];
+    return vector.element[(uint32)axis];
 }
 
 

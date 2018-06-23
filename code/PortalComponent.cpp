@@ -138,16 +138,16 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform 
     
     ColliderComponent* portal1Collider = addColliderComponent(portal1);
     portal1Collider->xfmOffset = Vec3(Axis3D::Z) * colliderDepth / 2;
-    portal1Collider->xLength = 1;
-    portal1Collider->yLength = 1;
-    portal1Collider->zLength = colliderDepth;
+    portal1Collider->rect3Lengths.x = 1;
+    portal1Collider->rect3Lengths.y = 1;
+    portal1Collider->rect3Lengths.z = colliderDepth;
     portal1Collider->type = ColliderType::RECT3;
 
     ColliderComponent* portal2Collider = addColliderComponent(portal2);
     portal2Collider->xfmOffset = Vec3(Axis3D::Z) * colliderDepth / 2;
-    portal2Collider->xLength = 1;
-    portal2Collider->yLength = 1;
-    portal2Collider->zLength = colliderDepth;
+    portal2Collider->rect3Lengths.x = 1;
+    portal2Collider->rect3Lengths.y = 1;
+    portal2Collider->rect3Lengths.z = colliderDepth;
     portal2Collider->type = ColliderType::RECT3;
 
     setDimensions(portal1Component, dimensions, true);
