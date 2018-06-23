@@ -36,27 +36,27 @@ Vec3 colliderCenter(ColliderComponent* collider)
     return xfm->position + rotatedOffset;
 }
 
-real32 scaledLength(ColliderComponent* collider)
+float32 scaledLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE);
     
     TransformComponent *xfm = getTransformComponent(collider->entity);
     
-    real32 scaleValue = getValue(xfm->scale, collider->axis);
+    float32 scaleValue = getValue(xfm->scale, collider->axis);
     return collider->length * scaleValue;
 }
 
-real32 scaledRadius(ColliderComponent* collider)
+float32 scaledRadius(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE || collider->type == ColliderType::SPHERE);
 
     TransformComponent *xfm = getTransformComponent(collider->entity);
-    real32 scaleValue = std::max(std::max(xfm->scale.x, xfm->scale.y), xfm->scale.z);
+    float32 scaleValue = std::max(std::max(xfm->scale.x, xfm->scale.y), xfm->scale.z);
 
     return scaleValue * collider->radius;
 }
 
-real32 scaledXLength(ColliderComponent* collider)
+float32 scaledXLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
@@ -64,7 +64,7 @@ real32 scaledXLength(ColliderComponent* collider)
     return xfm->scale.x * collider->xLength;
 }
 
-real32 scaledYLength(ColliderComponent* collider)
+float32 scaledYLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
@@ -72,7 +72,7 @@ real32 scaledYLength(ColliderComponent* collider)
     return xfm->scale.y * collider->yLength;
 }
 
-real32 scaledZLength(ColliderComponent* collider)
+float32 scaledZLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
@@ -95,9 +95,9 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
     {
         case RECT3:
         {
-            real32 xLen = scaledXLength(collider);
-            real32 yLen = scaledYLength(collider);
-            real32 zLen = scaledZLength(collider);
+            float32 xLen = scaledXLength(collider);
+            float32 yLen = scaledYLength(collider);
+            float32 zLen = scaledZLength(collider);
 
             //   a
             //    |
@@ -151,8 +151,8 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
         {
             Vec3 deltaPos = center - point;
             
-            real32 radius = scaledRadius(collider);
-            real32 radiusSquared = radius * radius;
+            float32 radius = scaledRadius(collider);
+            float32 radiusSquared = radius * radius;
             
             return (lengthSquared(deltaPos) < radiusSquared);
         } break;

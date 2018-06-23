@@ -32,8 +32,8 @@ float mouseY;
 float mouseXPrev;
 float mouseYPrev;
 
-real32 timeMs;
-real32 deltaTMs;
+float32 timeMs;
+float32 deltaTMs;
 
 Entity testEntity;
 
@@ -209,9 +209,9 @@ void updateCameraXfm(Game* game)
     
     Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
     
-    real32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
-    real32 cameraSpeed = 5;
-    real32 deltaTS = deltaTMs / 1000.0f;
+    float32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
+    float32 cameraSpeed = 5;
+    float32 deltaTS = deltaTMs / 1000.0f;
 
     if (keys[GLFW_KEY_LEFT_SHIFT])
     {
@@ -235,8 +235,8 @@ void updateCameraXfm(Game* game)
     if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
     {
         // Rotate
-        real32 deltaMouseX = mouseX - mouseXPrev;
-        real32 deltaMouseY = mouseY - mouseYPrev;
+        float32 deltaMouseX = mouseX - mouseXPrev;
+        float32 deltaMouseY = mouseY - mouseYPrev;
 
         Quaternion deltaYawAndPitch;
         deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
@@ -301,7 +301,7 @@ void updateGame(Game* game)
     //
     // Rotate/scale test entity
     TransformComponent* testXfm = getTransformComponent(testEntity);
-    real32 timeS = timeMs / 1000.0f;
+    float32 timeS = timeMs / 1000.0f;
 
     testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
     testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
@@ -341,16 +341,19 @@ void updateGame(Game* game)
 
     renderScene(game->activeScene, camComponent, camXfm);
 
-    for (Entity& e : game->activeScene->ecs.entities)
+    if (game->isEditorMode)
     {
-        if (e.id == testEntity.id)
+        for (Entity& e : game->activeScene->ecs.entities)
         {
-            testUiReflection(e);
-            DebugDraw::instance().color = Vec3(1, 0, 0);
-        }
+            if (e.id == testEntity.id)
+            {
+                testUiReflection(e);
+                DebugDraw::instance().color = Vec3(1, 0, 0);
+            }
 
-        DebugDraw::instance().drawAabb(e, camComponent, camXfm);
-        DebugDraw::instance().color = Vec3(0, 1, 0);
+            DebugDraw::instance().drawAabb(e, camComponent, camXfm);
+            DebugDraw::instance().color = Vec3(0, 1, 0);
+        }
     }
     
     if (hasCastRayYet)
@@ -405,7 +408,7 @@ int main()
 
     ImGui::CreateContext();
     ImGuiIO* io = &ImGui::GetIO();
-    ImGui_ImplGlfw_InitForOpenGL(window.glfwWindow, false);
+    ImGui_ImplGlfw_InitForOpenGL(window.glfwWindow, true);
     ImGui_ImplOpenGL3_Init();
     
     ImGui::StyleColorsDark();
@@ -416,7 +419,7 @@ int main()
 
     ResourceManager::instance().init();
     DebugDraw::instance().init();
-    real32 lastTimeMs = 0;
+    float32 lastTimeMs = 0;
 
     Game* game = new Game();
     game->isEditorMode = false;
@@ -504,16 +507,14 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        bool someBool = true;
-        ImGui::Begin("Test Window", &someBool);
-
-        ImGui::Text("Testing, one two three...");
-        ImGui::End();
+#if 0
+        ImGui::ShowDemoWindow();
+#endif
         
         glClearColor(.5f, 0.5f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        real32 timeS = glfwGetTime();
+        float32 timeS = glfwGetTime();
         timeMs = timeS * 1000.0f;
         deltaTMs = timeMs - lastTimeMs;
         lastTimeMs = timeMs;

@@ -25,28 +25,28 @@ struct ColliderComponent : public Component
         // Sphere, Cylinder, and Capsule types
         struct
         {
-            real32 length; // unused for sphere
-            real32 radius;
+            float32 length; // unused for sphere
+            float32 radius;
             Axis3D axis; 
         };
 
         struct
         {
-            real32 xLength; // use 'length' to address this memory
-            real32 yLength;
-            real32 zLength;
+            float32 xLength; // use 'length' to address this memory
+            float32 yLength;
+            float32 zLength;
         };
     };
 };
 
 Vec3 colliderCenter(ColliderComponent* collider);
 Vec3 scaledXfmOffset(ColliderComponent* collider);
-real32 scaledLength(ColliderComponent* collider);
-real32 scaledRadius(ColliderComponent* collider);
+float32 scaledLength(ColliderComponent* collider);
+float32 scaledRadius(ColliderComponent* collider);
 
-real32 scaledXLength(ColliderComponent* collider);
-real32 scaledYLength(ColliderComponent* collider);
-real32 scaledZLength(ColliderComponent* collider);
+float32 scaledXLength(ColliderComponent* collider);
+float32 scaledYLength(ColliderComponent* collider);
+float32 scaledZLength(ColliderComponent* collider);
 
 bool pointInsideCollider(ColliderComponent* collider, Vec3 point);
 

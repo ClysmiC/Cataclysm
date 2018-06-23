@@ -21,7 +21,7 @@ struct IReflector
     void* reflectionTarget;
     ReflectionPurpose purpose = OTHER;
     
-    virtual void pushStruct(std::string name) = 0;
+    virtual bool pushStruct(std::string name) = 0;
     virtual void popStruct() = 0;
     
     virtual void startReflection(std::string label) = 0;
@@ -34,24 +34,13 @@ struct IReflector
     virtual void endReflection() = 0;
 };
 
-inline std::string tabString(uint32 indentationLevel)
-{
-    std::string result;
-    for (uint32 i = 0; i < indentationLevel; i++)
-    {
-        result += "\t";
-    }
-
-    return result;
-}
-
 struct UiReflector : public IReflector
 {
     UiReflector();
     
     uint32 indentationLevel = 0;
     
-    void pushStruct(std::string name) override;
+    bool pushStruct(std::string name) override;
     void popStruct() override;
 
     void startReflection(std::string label) override;

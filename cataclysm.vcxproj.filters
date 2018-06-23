@@ -985,5 +985,8 @@
     <ClInclude Include="code\Reflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="code\Ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

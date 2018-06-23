@@ -8,7 +8,7 @@ struct Aabb;
 struct RaycastResult
 {
 	Entity hitEntity;
-	real32 t;
+	float32 t;
 	bool hit;
 };
 
@@ -21,5 +21,5 @@ struct Ray
 	Vec3 direction;
 };
 
-real32 rayPlaneTest(Ray ray, Plane plane);
-real32 rayAabbTest(Ray ray, Aabb aabb);
+float32 rayPlaneTest(Ray ray, Plane plane);
+float32 rayAabbTest(Ray ray, Aabb aabb);

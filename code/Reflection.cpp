@@ -47,17 +47,23 @@ void reflectQuaternion(IReflector* reflector, uint32 startingOffset)
 
 void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
 {
-    reflector->pushStruct("Position");
-    reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
-    reflector->popStruct();
+    if (reflector->pushStruct("Position"))
+    {
+        reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
+        reflector->popStruct();
+    }
 
-    reflector->pushStruct("Orientation");
-    reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
-    reflector->popStruct();
+    if (reflector->pushStruct("Orientation"))
+    {
+        reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
+        reflector->popStruct();
+    }
 
-    reflector->pushStruct("Scale");
-    reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
-    reflector->popStruct();
+    if (reflector->pushStruct("Scale"))
+    {
+        reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
+        reflector->popStruct();
+    }
 }
 
 void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider, uint32 startingOffset)
@@ -65,9 +71,11 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
     // TODO: change this to consume enum when implemented
     reflector->consumeInt32("Type", startingOffset + offsetof(ColliderComponent, type));
 
-    reflector->pushStruct("Offset");
-    reflectVec3(reflector, startingOffset + offsetof(ColliderComponent, xfmOffset));
-    reflector->popStruct();
+    if (reflector->pushStruct("Offset"))
+    {
+        reflectVec3(reflector, startingOffset + offsetof(ColliderComponent, xfmOffset));
+        reflector->popStruct();
+    }
     
     if (collider->type == ColliderType::RECT3)
     {
@@ -109,20 +117,26 @@ void reflectCameraComponent(IReflector* reflector, CameraComponent* camera, uint
 
 void reflectDirectionalLightComponent(IReflector* reflector, uint32 startingOffset)
 {
-    reflector->pushStruct("Intensity");
-    reflectVec3Rgb(reflector, startingOffset + offsetof(DirectionalLightComponent, intensity));
-    reflector->popStruct();
+    if (reflector->pushStruct("Intensity"))
+    {
+        reflectVec3Rgb(reflector, startingOffset + offsetof(DirectionalLightComponent, intensity));
+        reflector->popStruct();
+    }
 
-    reflector->pushStruct("Direction");
-    reflectVec3(reflector, startingOffset + offsetof(DirectionalLightComponent, direction));
-    reflector->popStruct();
+    if (reflector->pushStruct("Direction"))
+    {
+        reflectVec3(reflector, startingOffset + offsetof(DirectionalLightComponent, direction));
+        reflector->popStruct();
+    }
 }
 
 void reflectPointLightComponent(IReflector* reflector, uint32 startingOffset)
 {
-    reflector->pushStruct("Intensity");
-    reflectVec3Rgb(reflector, startingOffset + offsetof(PointLightComponent, intensity));
-    reflector->popStruct();
+    if (reflector->pushStruct("Intensity"))
+    {
+        reflectVec3Rgb(reflector, startingOffset + offsetof(PointLightComponent, intensity));
+        reflector->popStruct();
+    }
 
     reflector->consumeFloat32("Attenuation Constant", startingOffset + offsetof(PointLightComponent, attenuationConstant));
     reflector->consumeFloat32("Attenuation Linear", startingOffset + offsetof(PointLightComponent, attenuationLinear));
@@ -160,17 +174,20 @@ void UiReflector::endReflection()
     ImGui::End();
 }
 
-void UiReflector::pushStruct(std::string name)
+bool UiReflector::pushStruct(std::string name)
 {
-    std::string text = tabString(this->indentationLevel);
-    text += name;
-    
-    ImGui::Text(text.c_str());
-    this->indentationLevel++;
+    bool result = ImGui::TreeNode(name.c_str());
+    if (result)
+    {
+        this->indentationLevel++;
+    }
+
+    return result;
 }
 
 void UiReflector::popStruct()
 {
+    ImGui::TreePop();
     this->indentationLevel--;
 }
 
@@ -179,9 +196,8 @@ void UiReflector::consumeInt32(std::string name, uint32 offset)
     int32* valuePtr = (int32*)((char*)reflectionTarget + offset);
     int32 value = *valuePtr;
 
-    std::string text = tabString(this->indentationLevel);
-    text += name + ": " + std::to_string(value);
-    
+    std::string text = name + ": " + std::to_string(value);
+
     ImGui::Text(text.c_str());
 }
 
@@ -190,30 +206,33 @@ void UiReflector::consumeUInt32(std::string name, uint32 offset)
     uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
     uint32 value = *valuePtr;
 
-    std::string text = tabString(this->indentationLevel);
-    text += name + ": " + std::to_string(value);
+    std::string text = name + ": " + std::to_string(value);
     
     ImGui::Text(text.c_str());
 }
 
 void UiReflector::consumeFloat32(std::string name, uint32 offset)
 {
-    real32* valuePtr = (real32*)((char*)reflectionTarget + offset);
-    real32 value = *valuePtr;
+    float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
+    float32 valueCopy = *valuePtr;
 
-    std::string text = tabString(this->indentationLevel);
-    text += name + ": " + std::to_string(value);
+    typedef ImGuiInputTextFlags_ Flags;
     
-    ImGui::Text(text.c_str());
+    uint32 flags = Flags::ImGuiInputTextFlags_CharsDecimal | Flags::ImGuiInputTextFlags_AutoSelectAll | Flags::ImGuiInputTextFlags_EnterReturnsTrue;
+        
+    if (ImGui::InputScalar(name.c_str(), ImGuiDataType_Float, &valueCopy))
+    {
+        // This updates the actual value
+        *valuePtr = valueCopy;
+    }
 }
 
 void UiReflector::consumeFloat64(std::string name, uint32 offset)
 {
-    real64* valuePtr = (real64*)((char*)reflectionTarget + offset);
-    real64 value = *valuePtr;
+    float64* valuePtr = (float64*)((char*)reflectionTarget + offset);
+    float64 value = *valuePtr;
 
-    std::string text = tabString(this->indentationLevel);
-    text += name + ": " + std::to_string(value);
+    std::string text = name + ": " + std::to_string(value);
     
     ImGui::Text(text.c_str());
 }
@@ -223,8 +242,7 @@ void UiReflector::consumeBool(std::string name, uint32 offset)
     bool* valuePtr = (bool*)((char*)reflectionTarget + offset);
     bool value = *valuePtr;
 
-    std::string text = tabString(this->indentationLevel);
-    text += name + ": " + std::to_string(value);
+    std::string text = name + ": " + std::to_string(value);
     
     ImGui::Text(text.c_str());
 }
@@ -233,11 +251,10 @@ void UiReflector::consumeEnum(std::string name, uint32 offset)
 {
     // TODO: not sure how this should work...
     
-    // real32* valuePtr = (real32*)((char*)reflectionTarget + offset);
-    // real32 value = *valuePtr;
+    // float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
+    // float32 value = *valuePtr;
 
-    // std::string text = tabString(this->indentationLevel);
-    // text += name + ": " + std::to_string(value);
+    // std::string text = name + ": " + std::to_string(value);
     
     // ImGui::Text(text.c_str());
 }

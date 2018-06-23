@@ -29,6 +29,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 
+#include "../../../code/Window.h"
+
 // GLFW
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -65,8 +67,13 @@ static void ImGui_ImplGlfw_SetClipboardText(void* user_data, const char* text)
     glfwSetClipboardString((GLFWwindow*)user_data, text);
 }
 
-void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/)
+void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int action, int modifiers)
 {
+    // Andrew:
+    {
+        cata_glfwMousePressedCallback(window, button, action, modifiers);
+    }
+
     if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(g_MouseJustPressed))
         g_MouseJustPressed[button] = true;
 }
@@ -78,8 +85,13 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow*, double xoffset, double yoffset)
     io.MouseWheel += (float)yoffset;
 }
 
-void ImGui_ImplGlfw_KeyCallback(GLFWwindow*, int key, int, int action, int mods)
+void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
+    // Andrew:
+    {
+        cata_glfwKeyPressedCallback(window, key, scanCode, action, mods);
+    }
+
     ImGuiIO& io = ImGui::GetIO();
     if (action == GLFW_PRESS)
         io.KeysDown[key] = true;
@@ -104,6 +116,10 @@ void ImGui_ImplGlfw_InstallCallbacks(GLFWwindow* window)
 {
     glfwSetMouseButtonCallback(window, ImGui_ImplGlfw_MouseButtonCallback);
     glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
+
+    glfwSetCursorPosCallback(window, cata_glfwMouseMovedCallback);
+    glfwSetWindowSizeCallback(window, cata_glfwWindowResizeCallback);
+
     glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
 }

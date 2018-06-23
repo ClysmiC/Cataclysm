@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Types.h"
+#include "als_math.h"
 
 struct Window
 {
@@ -25,11 +26,11 @@ int32 windowHeight(Window* window);
 Vec2 pixelToViewportCoordinate(Window* window, Vec2 pixel);
 Vec2 viewportCoordinateToPixel(Window* window, Vec2 viewportCoordinate);
 
-static void glfwWindowResizeCallback(GLFWwindow* window, int width, int height);
-static void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers);
-static void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers);
-static void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
-static void glfwErrorCallback(int e, const char* message);
+void cata_glfwWindowResizeCallback(GLFWwindow* window, int width, int height);
+void cata_glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers);
+void cata_glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers);
+void cata_glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
+void cata_glfwErrorCallback(int e, const char* message);
 
 
 

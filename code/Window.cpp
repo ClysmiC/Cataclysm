@@ -5,12 +5,12 @@
 #include <fstream>
 #include <cmath>
 
-void glfwErrorCallback(int e, const char* message)
+void cata_glfwErrorCallback(int e, const char* message)
 {
     printf("%s\n", message);
 }
     
-void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers)
+void cata_glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int action, int modifiers)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
@@ -27,7 +27,7 @@ void glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int actio
     }
 }
 
-void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers)
+void cata_glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers)
 {
     if (action == GLFW_PRESS)
     {
@@ -39,7 +39,7 @@ void glfwMousePressedCallback(GLFWwindow* window, int button, int action, int mo
     }
 }
 
-void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
+void cata_glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
 {
     // TODO: querying this every frame might be slow depending on how it's implemented
     //       is there a way for us to directly set it on our Window struct?
@@ -51,7 +51,7 @@ void glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos)
     mouseY = ((float)-yPos) + h;
 }
 
-void glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
+void cata_glfwWindowResizeCallback(GLFWwindow* window, int w, int h)
 {
     // glfwGetFramebufferSize(window, &window->width, &window->height);
     
@@ -75,7 +75,7 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
     mouseXPrev = FLT_MAX;
     mouseYPrev = FLT_MAX;
 
-    glfwSetErrorCallback(glfwErrorCallback);
+    //glfwSetErrorCallback(glfwErrorCallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -87,12 +87,15 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
 
     glViewport(0, 0, width, height);
     
-    glfwSetKeyCallback(window->glfwWindow, glfwKeyPressedCallback);
+    // TODO: moved registering these to imgui_impl_glfw.cpp
+    // TODO: unify this file and that file
+
+    /*glfwSetKeyCallback(window->glfwWindow, glfwKeyPressedCallback);
     glfwSetMouseButtonCallback(window->glfwWindow, glfwMousePressedCallback);
     glfwSetWindowSizeCallback(window->glfwWindow, glfwWindowResizeCallback);
+    glfwSetCursorPosCallback(window->glfwWindow, glfwMouseMovedCallback);*/
 
     glfwSetInputMode(window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window->glfwWindow, glfwMouseMovedCallback);
     
     glewExperimental = GL_TRUE;
     GLenum glewInitStatus = glewInit();
