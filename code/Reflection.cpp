@@ -239,11 +239,11 @@ UiReflector::UiReflector()
 {
 }
 
-bool UiReflector::startReflection(std::string label)
+bool UiReflector::startReflection(EntityNameString label)
 {
-    bool shouldStayOpen;
+    bool shouldStayOpen = true;
     ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
-    ImGui::Begin(("Entity: " + label).c_str(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin(("Entity: " + label), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
 
     if (!shouldStayOpen)
     {
@@ -258,9 +258,9 @@ void UiReflector::endReflection()
     ImGui::End();
 }
 
-bool UiReflector::pushStruct(std::string name)
+bool UiReflector::pushStruct(StructNameString name)
 {
-    bool result = ImGui::TreeNode(name.c_str());
+    bool result = ImGui::TreeNode(name);
     if (result)
     {
         this->indentationLevel++;
@@ -275,7 +275,7 @@ void UiReflector::popStruct()
     this->indentationLevel--;
 }
 
-int32 UiReflector::consumeInt32(std::string name, uint32 offset)
+int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset)
 {
     int32* valuePtr = (int32*)((char*)reflectionTarget + offset);
     int32 value = *valuePtr;
@@ -287,7 +287,7 @@ int32 UiReflector::consumeInt32(std::string name, uint32 offset)
     return *valuePtr;
 }
 
-uint32 UiReflector::consumeUInt32(std::string name, uint32 offset)
+uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset)
 {
     uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
     uint32 value = *valuePtr;
@@ -299,7 +299,7 @@ uint32 UiReflector::consumeUInt32(std::string name, uint32 offset)
     return *valuePtr;
 }
 
-float32 UiReflector::consumeFloat32(std::string name, uint32 offset)
+float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
 {
     float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
     float32 valueCopy = *valuePtr;
@@ -308,7 +308,7 @@ float32 UiReflector::consumeFloat32(std::string name, uint32 offset)
     
     uint32 flags = Flags::ImGuiInputTextFlags_CharsDecimal | Flags::ImGuiInputTextFlags_AutoSelectAll | Flags::ImGuiInputTextFlags_EnterReturnsTrue;
         
-    if (ImGui::InputScalar(name.c_str(), ImGuiDataType_Float, &valueCopy))
+    if (ImGui::InputScalar(name, ImGuiDataType_Float, &valueCopy))
     {
         // This updates the actual value
         *valuePtr = valueCopy;
@@ -317,7 +317,7 @@ float32 UiReflector::consumeFloat32(std::string name, uint32 offset)
     return *valuePtr;
 }
 
-float64 UiReflector::consumeFloat64(std::string name, uint32 offset)
+float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset)
 {
     float64* valuePtr = (float64*)((char*)reflectionTarget + offset);
     float64 value = *valuePtr;
@@ -329,7 +329,7 @@ float64 UiReflector::consumeFloat64(std::string name, uint32 offset)
     return *valuePtr;
 }
 
-bool UiReflector::consumeBool(std::string name, uint32 offset)
+bool UiReflector::consumeBool(FieldNameString name, uint32 offset)
 {
     bool* valuePtr = (bool*)((char*)reflectionTarget + offset);
     bool value = *valuePtr;
@@ -341,7 +341,7 @@ bool UiReflector::consumeBool(std::string name, uint32 offset)
     return *valuePtr;
 }
 
-uint32 UiReflector::consumeEnum(std::string name, uint32 offset, std::string* enumNames, uint32 enumValueCount)
+uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount)
 {
     // TODO: not sure how this should work...
     
@@ -350,16 +350,16 @@ uint32 UiReflector::consumeEnum(std::string name, uint32 offset, std::string* en
 
     assert(value < enumValueCount);
     
-    std::string* selectedValueName = enumNames + value;
+    EnumValueNameString* selectedValueName = enumNames + value;
 
-    if (ImGui::TreeNode((name + ": " + *selectedValueName).c_str()))
+    if (ImGui::TreeNode((name + ": " + *selectedValueName)))
     {
         for (uint32 i = 0; i < enumValueCount; i++)
         {
             bool selected = (i == value);
-            std::string* valueName = enumNames + i;
+            EnumValueNameString* valueName = enumNames + i;
             
-            if (ImGui::Selectable(valueName->c_str(), selected))
+            if (ImGui::Selectable(*valueName, selected))
             {
                 // Update actual value
                 *valuePtr = i;
@@ -386,7 +386,7 @@ bool testUiReflection(Entity e)
     UiReflector reflector;
 
     bool shouldStayOpen = true;
-    if (!reflector.startReflection(e.friendlyName))
+    if (!reflector.startReflection(e.friendlyName.c_str()))
     {
         shouldStayOpen = false;;
     }
@@ -458,3 +458,9 @@ bool testUiReflection(Entity e)
     reflector.endReflection();
     return shouldStayOpen;
 }
+
+//
+// Enums whose names are exposed via reflection
+//
+EnumValueNameString Axis3DNames[(uint32)Axis3D::ENUM_VALUE_COUNT] = { "X", "Y", "Z" };
+EnumValueNameString ColliderTypeNames[(uint32)ColliderType::ENUM_VALUE_COUNT] = { "Rect3", "Sphere", "Cylinder", "Capsule" };

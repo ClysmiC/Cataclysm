@@ -3,7 +3,6 @@
 #include "math.h"
 #include "assert.h"
 #include "Types.h"
-#include <string> // TODO: remove this if we implement our own fixed-sized strings
 
 #define FLOAT_EQ(x, y, epsilon) (fabs((x) - (y)) < epsilon)
 #define PI 3.14159265359f
@@ -19,8 +18,6 @@ enum class Axis3D : uint32
 
     ENUM_VALUE_COUNT
 };
-
-extern std::string Axis3DNames[(uint32)Axis3D::ENUM_VALUE_COUNT];
 
 union Vec2
 {

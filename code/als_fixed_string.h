@@ -31,6 +31,11 @@ template <uint16 SIZE> struct _als_fixed_string
         }
     }
 
+    operator char* ()
+    {
+        return this->data;
+    }
+
     char operator[] (int i)
     {
         return this->data[i];
@@ -88,22 +93,22 @@ _als_fixed_string<_myUInt16Max(LHS_SIZE, RHS_SIZE)> operator + (const _als_fixed
 // Appends a fixed string to an existing fixed string. If the modified string overflows, truncate it.
 //
 template <uint16 LHS_SIZE, uint16 RHS_SIZE>
-_als_fixed_string<LHS_SIZE>& operator += (_als_fixed_string<RHS_SIZE> &lhs, const _als_fixed_string<RHS_SIZE> &rhs)
+_als_fixed_string<LHS_SIZE>& operator += (_als_fixed_string<LHS_SIZE> &lhs, const _als_fixed_string<RHS_SIZE> &rhs)
 {
     for (uint16 i = 0; i < rhs.length; i++)
     {
         uint16 index = lhs.length + i;
 
-        if (index >= SIZE) break;
+        if (index >= LHS_SIZE) break;
         
         lhs.data[index] = rhs.data[i];
     }
 
     lhs.length += rhs.length;
 
-    if (lhs.length > SIZE)
+    if (lhs.length > LHS_SIZE)
     {
-        lhs.length = SIZE;
+        lhs.length = LHS_SIZE;
     }
     else
     {

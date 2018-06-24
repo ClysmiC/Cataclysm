@@ -1,8 +1,6 @@
 #include "als_math.h"
 #include <cmath>
 
-std::string Axis3DNames[(uint32)Axis3D::ENUM_VALUE_COUNT] = { "X", "Y", "Z" };
-
 Vec2::Vec2() {}
 Vec2::Vec2(float32 value) { this->x = value; this->y = value; }
 Vec2::Vec2(float32 x, float32 y) { this->x = x; this->y = y; }

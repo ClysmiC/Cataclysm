@@ -4,8 +4,6 @@
 #include "TransformComponent.h"
 #include "Ecs.h"
 
-std::string ColliderTypeNames[(uint32)ColliderType::ENUM_VALUE_COUNT] = { "Rect3", "Sphere", "Cylinder", "Capsule" };
-
 ColliderComponent::ColliderComponent()
 {
     this->xfmOffset = Vec3(0, 0, 0);

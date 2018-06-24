@@ -15,8 +15,6 @@ enum class ColliderType : uint32
     ENUM_VALUE_COUNT
 };
 
-extern std::string ColliderTypeNames[(uint32)ColliderType::ENUM_VALUE_COUNT];
-
 struct ColliderComponent : public Component
 {
     ColliderComponent();
