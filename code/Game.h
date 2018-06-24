@@ -17,6 +17,11 @@ extern bool lastMouseButtons[8];
 
 struct Window;
 
+struct EditorState
+{
+    Entity selectedEntity;
+};
+
 struct Game
 {
     Game() = default;
@@ -24,6 +29,8 @@ struct Game
     // Any component confined to a scene in this array's ECS.
     // Only 1 (or maybe a few) of these scenes will be active at a time
     Scene scenes[MAX_SCENES];
+
+    EditorState editor;
 
     Scene* activeScene;
     Window* window;

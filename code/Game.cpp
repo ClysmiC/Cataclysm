@@ -35,8 +35,6 @@ float mouseYPrev;
 float32 timeMs;
 float32 deltaTMs;
 
-Entity testEntity;
-
 Ray lastCastRay;
 bool hasCastRayYet = false;
 
@@ -89,8 +87,6 @@ void buildTestScene1(Scene* scene)
     for (uint32 i = 0; i < hexCount; i++)
     {
         Entity e = makeEntity(&scene->ecs, "hex");
-
-        if (i == 1) testEntity = e;
         
         TransformComponent *tc = addTransformComponent(e);
         tc->position = hexPositions[i];
@@ -309,14 +305,18 @@ void updateGame(Game* game)
     
     //
     // Rotate/scale test entity
-    TransformComponent* testXfm = getTransformComponent(testEntity);
-    float32 timeS = timeMs / 1000.0f;
+    TransformComponent* testXfm = getTransformComponent(game->editor.selectedEntity);
 
-    testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
-    testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
-    testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
+    if (testXfm)
+    {
+        float32 timeS = timeMs / 1000.0f;
 
-    testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
+        testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
+        testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
+        testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
+
+        testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
+    }
 
     assert(game->activeScene != nullptr);
     CameraComponent* camComponent = getCameraComponent(game->activeCamera);
@@ -336,7 +336,7 @@ void updateGame(Game* game)
         }
     }
     
-    if (game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !lastMouseButtons[GLFW_MOUSE_BUTTON_1])
+    if (game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !lastMouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse)
     {
         lastCastRay = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
         hasCastRayYet = true;
@@ -344,7 +344,7 @@ void updateGame(Game* game)
         RaycastResult rayResult = castRay(&game->activeScene->ecs, lastCastRay);
         if (rayResult.hit)
         {
-            testEntity = rayResult.hitEntity;
+            game->editor.selectedEntity = rayResult.hitEntity;
         }
     }
 
@@ -354,12 +354,16 @@ void updateGame(Game* game)
     {
         for (Entity& e : game->activeScene->ecs.entities)
         {
-            if (e.id == testEntity.id)
+            if (e.id == game->editor.selectedEntity.id)
             {
                 if(!testUiReflection(e))
                 {
+                    game->editor.selectedEntity.id = 0;
                 }
-                DebugDraw::instance().color = Vec3(1, 0, 0);
+                else
+                {
+                    DebugDraw::instance().color = Vec3(1, 0, 0);
+                }
             }
 
             DebugDraw::instance().drawAabb(e, camComponent, camXfm);
@@ -419,6 +423,7 @@ int main()
 
     ImGui::CreateContext();
     ImGuiIO* io = &ImGui::GetIO();
+    io->IniFilename = nullptr;
     ImGui_ImplGlfw_InitForOpenGL(window.glfwWindow, true);
     ImGui_ImplOpenGL3_Init();
     

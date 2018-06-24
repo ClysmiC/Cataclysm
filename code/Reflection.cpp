@@ -78,6 +78,9 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
     // collider before it was changed.
     //
     {
+        //
+        // Switching away from Rect3
+        //
         if (origCc.type == ColliderType::RECT3 && collider->type != ColliderType::RECT3)
         {
             if (collider->type == ColliderType::SPHERE)
@@ -107,6 +110,9 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
             }
             
         }
+        //
+        // Switching toward Rect3
+        //
         else if (origCc.type != ColliderType::RECT3 && collider->type == ColliderType::RECT3)
         {
             collider->rect3Lengths.x = origCc.radius;
@@ -127,6 +133,16 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
                 {
                     collider->rect3Lengths.z = origCc.length;
                 }
+            }
+        }
+        //
+        // Switching away from sphere
+        //
+        else if (origCc.type == ColliderType::SPHERE && collider->type != ColliderType::SPHERE)
+        {
+            if (collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE)
+            {
+                collider->axis = Axis3D::Y;
             }
         }
     }
@@ -225,10 +241,11 @@ UiReflector::UiReflector()
 
 bool UiReflector::startReflection(std::string label)
 {
-    bool shouldClose;
-    ImGui::Begin(("Entity: " + label).c_str(), &shouldClose);
+    bool shouldStayOpen;
+    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
+    ImGui::Begin(("Entity: " + label).c_str(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
 
-    if (shouldClose)
+    if (!shouldStayOpen)
     {
         return false;
     }
@@ -367,10 +384,11 @@ bool testUiReflection(Entity e)
 {
     // TODO: handle component groups
     UiReflector reflector;
+
+    bool shouldStayOpen = true;
     if (!reflector.startReflection(e.friendlyName))
     {
-        // todo, how to make this close ?
-        // return false;
+        shouldStayOpen = false;;
     }
     
     TransformComponent* transform = getTransformComponent(e);
@@ -438,5 +456,5 @@ bool testUiReflection(Entity e)
     
 
     reflector.endReflection();
-    return true;
+    return shouldStayOpen;
 }

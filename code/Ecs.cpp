@@ -112,101 +112,121 @@ Entity makeEntity(Ecs* ecs, std::string friendlyName)
 
 TransformComponent* addTransformComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->transforms, e);
 }
 
 TransformComponent* getTransformComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->transforms, e);
 }
 
 CameraComponent* addCameraComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->cameras, e);
 }
 
 CameraComponent* getCameraComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->cameras, e);
 }
 
 PortalComponent* addPortalComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->portals, e);
 }
 
 PortalComponent* getPortalComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->portals, e);
 }
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->directionalLights, e);
 }
 
 DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->directionalLights, e);
 }
 
 PointLightComponent* addPointLightComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->pointLights, e);
 }
 
 PointLightComponent* getPointLightComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->pointLights, e);
 }
 
 ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents)
 {
+    if (e.id == 0) return ComponentGroup<PointLightComponent>();
     return addComponents(&e.ecs->pointLights, e, numComponents);
 }
 
 ComponentGroup<PointLightComponent> getPointLightComponents(Entity e)
 {
+    if (e.id == 0) return ComponentGroup<PointLightComponent>();
     return getComponents(&e.ecs->pointLights, e);
 }
 
 RenderComponent* addRenderComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->renderComponents, e);
 }
 
 RenderComponent* getRenderComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->renderComponents, e);
 }
 
 ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents)
 {
+    if (e.id == 0) return ComponentGroup<RenderComponent>();
     return addComponents(&e.ecs->renderComponents, e, numComponents);
 }
 
 ComponentGroup<RenderComponent> getRenderComponents(Entity e)
 {
+    if (e.id == 0) return ComponentGroup<RenderComponent>();
     return getComponents(&e.ecs->renderComponents, e);
 }
 
 ColliderComponent* addColliderComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return addComponent(&e.ecs->colliders, e);
 }
 
 ColliderComponent* getColliderComponent(Entity e)
 {
+    if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->colliders, e);
 }
 
 ComponentGroup<ColliderComponent> addColliderComponents(Entity e, uint32 numComponents)
 {
+    if (e.id == 0) return ComponentGroup<ColliderComponent>();
     return addComponents(&e.ecs->colliders, e, numComponents);
 }
 
 ComponentGroup<ColliderComponent> getColliderComponents(Entity e)
 {
+    if (e.id == 0) return ComponentGroup<ColliderComponent>();
     return getComponents(&e.ecs->colliders, e);
 }
 
