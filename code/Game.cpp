@@ -21,6 +21,8 @@
 #include "DebugGlobal.h"
 #include "Reflection.h"
 
+#include "als_fixed_string.h"
+
 bool keys[1024];
 bool lastKeys[1024];
 
@@ -408,6 +410,18 @@ void makeCameraActive(Game* game, Entity camera)
 
 int main()
 {
+     string32 s1 = "Hello";
+     string32 s2("My");
+     string32 s3;
+     s3 = "Name";
+     string32 s4;
+     s4 = "I";
+     s4 += "s";
+
+     string32 s5 = s1 + s2 + s3 + s4 + "Andrew";
+     string32 s6 = "!";
+     string32 s7 = s6 + "Exclamaition" + s6;
+    
     // INIT WINDOW
     uint32 windowWidth = 1024;
     uint32 windowHeight = 720;
