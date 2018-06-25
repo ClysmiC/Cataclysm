@@ -16,12 +16,12 @@ void ResourceManager::init()
     initDefaults();
 }
 
-std::string ResourceManager::toFullPath(const std::string &relativeResourcePath)
+FilenameString ResourceManager::toFullPath(FilenameString relativeResourcePath)
 {
     return resourceDirectory + relativeResourcePath;
 }
 
-RESOURCE_HANDLE ResourceManager::getHandle(std::string id)
+RESOURCE_HANDLE ResourceManager::getHandle(ResourceIdString id)
 {
     auto handle = idToHandle.find(id);
     if (handle == idToHandle.end())
@@ -38,71 +38,72 @@ void ResourceManager::initDefaults()
     initMaterial(Material::ERROR_MATERIAL_FILENAME, Material::ERROR_MATERIAL_NAME, true);
 }
 
-Texture* ResourceManager::getTexture(std::string id)
+Texture* ResourceManager::getTexture(ResourceIdString id)
 {
     return getResource(id, textures);
 }
 
-Mesh* ResourceManager::getMesh(std::string id)
+Mesh* ResourceManager::getMesh(ResourceIdString id)
 {
     return getResource(id, meshes);
 }
 
-Material* ResourceManager::getMaterial(std::string id)
+Material* ResourceManager::getMaterial(ResourceIdString id)
 {
     return getResource(id, materials);
 }
 
-Material* ResourceManager::getMaterial(std::string relFilename, std::string materialName)
+Material* ResourceManager::getMaterial(FilenameString relFilename, MaterialNameString materialName)
 {
-    return getResource(relFilename + Material::COMPOSITE_ID_DELIMITER + materialName, materials);
+    ResourceIdString id = relFilename + Material::COMPOSITE_ID_DELIMITER + materialName;
+    return getResource(id, materials);
 }
 
-Shader* ResourceManager::getShader(std::string id)
+Cubemap*
+ResourceManager::getCubemap(ResourceIdString id)
+{
+    return getResource(id, cubemaps);
+}
+
+Shader* ResourceManager::getShader(ResourceIdString id)
 {
     return getResource(id, shaders);
 }
 
-Shader* ResourceManager::getShader(std::string vertFilename, std::string fragFilename)
+Shader* ResourceManager::getShader(FilenameString vertFilename, FilenameString fragFilename)
 {
     return getShader(shaderIdFromFilenames(vertFilename, fragFilename));
 }
 
-Texture* ResourceManager::initTexture(std::string relFilename, bool gammaCorrect, bool loadNow)
+Texture* ResourceManager::initTexture(FilenameString relFilename, bool gammaCorrect, bool loadNow)
 {
     Texture t(relFilename, gammaCorrect);
     return initResource(t, textures, loadNow);
 }
 
-Material* ResourceManager::initMaterial(std::string relFilename, std::string materialName, bool loadNow)
+Material* ResourceManager::initMaterial(FilenameString relFilename, MaterialNameString materialName, bool loadNow)
 {
     Material material(relFilename, materialName);
     return initResource(material, materials, loadNow);
 }
 
-Shader* ResourceManager::initShader(std::string vertFilename, std::string fragFilename, bool loadNow)
+Shader* ResourceManager::initShader(FilenameString vertFilename, FilenameString fragFilename, bool loadNow)
 {
     Shader shader(vertFilename, fragFilename);
     return initResource(shader, shaders, loadNow);
 }
 
-Mesh* ResourceManager::initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow)
+Mesh* ResourceManager::initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow)
 {
     Mesh m(relFilename, useMaterialsRefrencedInObjFile);
     return initResource(m, meshes, loadNow);
 }
 
 Cubemap*
-ResourceManager::initCubemap(std::string directoryName, std::string extension, bool loadNow)
+ResourceManager::initCubemap(FilenameString directoryName, FileExtensionString extension, bool loadNow)
 {
     Cubemap c(directoryName, extension);
     return initResource(c, cubemaps, loadNow);
-}
-
-Cubemap*
-ResourceManager::getCubemap(std::string id)
-{
-    return getResource(id, cubemaps);
 }
 
 template<class T>
@@ -139,7 +140,7 @@ T* ResourceManager::initResource(T resourceArg, std::unordered_map<RESOURCE_HAND
 }
 
 template<class T>
-T* ResourceManager::getResource(std::string id, std::unordered_map<RESOURCE_HANDLE, T> &table)
+T* ResourceManager::getResource(ResourceIdString id, std::unordered_map<RESOURCE_HANDLE, T> &table)
 {
     auto it = idToHandle.find(id);
     if (it == idToHandle.end())
@@ -153,11 +154,11 @@ T* ResourceManager::getResource(std::string id, std::unordered_map<RESOURCE_HAND
     return &resource;
 }
 
-std::string truncateFilenameAfterDirectory(std::string filename)
+FilenameString truncateFilenameAfterDirectory(FilenameString filename)
 {
-    size_t index = filename.find_last_of('/');
+    int32 index = filename.lastIndexOf('/');
 
-    if (index == std::string::npos) return "";
+    if (index == -1) return "";
 
-    return filename.substr(0, index + 1);
+    return filename.substring(0, index + 1);
 }

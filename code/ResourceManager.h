@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Resource.h"
 #include "Material.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "Mesh.h"
 #include "Cubemap.h"
+
+#include "als_fixed_string_std_hash.h"
 
 #include <unordered_map>
 
@@ -14,34 +17,12 @@ struct ResourceManager
 {
     RESOURCE_HANDLE nextHandle;
     
-    static ResourceManager& instance();
-    void init();
+    //
+    // Members
+    //
+    FilenameString resourceDirectory;
 
-    std::string toFullPath(const std::string &relativeResourcePath);
-
-    RESOURCE_HANDLE getHandle(std::string id);
-
-
-    Texture* initTexture(std::string relFilename, bool gammaCorrect, bool loadNow);
-    Texture* getTexture(std::string relFilename);
-    
-    Mesh* initMesh(std::string relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
-    Mesh* getMesh(std::string relFilename);
-    
-    Material* initMaterial(std::string relFilename, std::string materialName, bool loadNow);
-    Material* getMaterial(std::string id);
-    Material* getMaterial(std::string relFilename, std::string materialName);
-    
-    Shader* initShader(std::string vertFilename, std::string fragFilename, bool loadNow);
-    Shader* getShader(std::string id);
-    Shader* getShader(std::string vertFilename, std::string fragFilename);
-    
-    Cubemap* initCubemap(std::string directoryName, std::string extension, bool loadNow);
-    Cubemap* getCubemap(std::string id);
-
-    std::string resourceDirectory;
-
-    std::unordered_map<std::string, RESOURCE_HANDLE> idToHandle;
+    std::unordered_map<ResourceIdString, RESOURCE_HANDLE> idToHandle;
 
     // Map per resource type
     // These maps are where all of the resources are allocated
@@ -51,6 +32,34 @@ struct ResourceManager
     std::unordered_map<RESOURCE_HANDLE, Shader> shaders;
     std::unordered_map<RESOURCE_HANDLE, Cubemap> cubemaps;
 
+
+    //
+    // Methods
+    //
+    void init();
+    static ResourceManager& instance();
+
+    FilenameString toFullPath(FilenameString relativeResourcePath);
+    RESOURCE_HANDLE getHandle(ResourceIdString id);
+
+    Texture* initTexture(FilenameString relFilename, bool gammaCorrect, bool loadNow);
+    Texture* getTexture(ResourceIdString relFilename);
+    
+    Mesh* initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
+    Mesh* getMesh(ResourceIdString relFilename);
+    
+    Material* initMaterial(FilenameString relFilename, MaterialNameString materialName, bool loadNow);
+    Material* getMaterial(ResourceIdString id);
+    Material* getMaterial(FilenameString relFilename, MaterialNameString materialName);
+    
+    Shader* initShader(FilenameString vertFilename, FilenameString fragFilename, bool loadNow);
+    Shader* getShader(ResourceIdString id);
+    Shader* getShader(FilenameString vertFilename, FilenameString fragFilename);
+    
+    Cubemap* initCubemap(FilenameString directoryName, FileExtensionString extension, bool loadNow);
+    Cubemap* getCubemap(ResourceIdString id);
+
+
 private:
     void initDefaults();
 
@@ -58,8 +67,8 @@ private:
     T* initResource(T resource, std::unordered_map<RESOURCE_HANDLE, T> &table, bool loadNow);
 
     template<class T>
-    T* getResource(std::string id, std::unordered_map<RESOURCE_HANDLE, T> &table);
+    T* getResource(ResourceIdString id, std::unordered_map<RESOURCE_HANDLE, T> &table);
 };
 
-std::string truncateFilenameAfterDirectory(std::string filename);
+FilenameString truncateFilenameAfterDirectory(FilenameString filename);
 

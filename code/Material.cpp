@@ -8,17 +8,22 @@
 #include <GL/glew.h>
 #include "als.h"
 
-const std::string Material::COMPOSITE_ID_DELIMITER = "|";
-const std::string Material::DEFAULT_MATERIAL_FILENAME = "default/default.mtl";
-const std::string Material::DEFAULT_MATERIAL_NAME = "default";
-const std::string Material::ERROR_MATERIAL_FILENAME = "default/error.mtl";
-const std::string Material::ERROR_MATERIAL_NAME = "error";
+const char Material::COMPOSITE_ID_DELIMITER = '|';
+const FilenameString Material::DEFAULT_MATERIAL_FILENAME = "default/default.mtl";
+const MaterialNameString Material::DEFAULT_MATERIAL_NAME = "default";
+const FilenameString Material::ERROR_MATERIAL_FILENAME = "default/error.mtl";
+const MaterialNameString Material::ERROR_MATERIAL_NAME = "error";
 
-Material::Material(std::string filename_, std::string materialName)
+Material::Material(FilenameString filename_, MaterialNameString materialName)
 {
     this->filename = filename_;
     this->name = materialName;
-    this->id = filename + COMPOSITE_ID_DELIMITER + materialName;
+
+    // Todo: grow fixed strings when RHS types and then only truncate once they are assigned to
+    // the lhs type?
+    this->id = filename;
+    this->id += COMPOSITE_ID_DELIMITER;
+    this->id += materialName;
     
     this->floatUniforms.emplace("material.specularExponent", 1);
     this->vec3Uniforms.emplace(
@@ -46,8 +51,8 @@ bool load(Material* material)
 {
     if (material->isLoaded) return true;
 
-    std::string fullFilename = ResourceManager::instance().toFullPath(material->filename);
-    if (fullFilename.substr(fullFilename.length() - 4) == ".mtl")
+    FilenameString fullFilename = ResourceManager::instance().toFullPath(material->filename);
+    if (fullFilename.substring(fullFilename.length - 4) == ".mtl")
     {
         material->isLoaded = loadFromMtlFile(material, fullFilename);
     }
@@ -144,7 +149,7 @@ bool bind(Material* material)
     return true;
 }
 
-bool loadFromMtlFile(Material* material, std::string fullFilename)
+bool loadFromMtlFile(Material* material, FilenameString fullFilename)
 {
     // for every material declared in the .mtl file
     // if not inited, skip it
@@ -158,14 +163,14 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
 
     struct
     {
-        bool operator() (Material* m, std::string texType, std::string texFilename)
+        bool operator() (Material* m, string32 texType, FilenameString texFilename)
         {
             using namespace std;
 
             // Note: texFilename is relative to this material's directory, not the resource directory
 
-            string relFileDirectory = truncateFilenameAfterDirectory(m->filename);
-            string texRelFilename = relFileDirectory + texFilename;
+            FilenameString relFileDirectory = truncateFilenameAfterDirectory(m->filename);
+            FilenameString texRelFilename = relFileDirectory + texFilename;
 
             bool gammaCorrect = texType == "material.diffuseTex";
             Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
@@ -181,7 +186,7 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
 
     bool foundSelfInMtlFile = false;
 
-    ifstream mtlFile(fullFilename);
+    ifstream mtlFile(fullFilename.cstr());
 
     Material *currentMaterial = nullptr;
     bool eofFlush = false;
@@ -225,7 +230,7 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
 
             if (!eofFlush)
             {
-                currentMaterial = ResourceManager::instance().getMaterial(material->filename, tokens[1]);
+                currentMaterial = ResourceManager::instance().getMaterial(material->filename, tokens[1].c_str());
 
                 if (currentMaterial == material) foundSelfInMtlFile = true;
             }
@@ -278,19 +283,19 @@ bool loadFromMtlFile(Material* material, std::string fullFilename)
         }
         else if (tokens[0] == "map_Bump")
         {
-            handleTexture(currentMaterial, "material.normalTex", tokens[1]);
+            handleTexture(currentMaterial, "material.normalTex", tokens[1].c_str());
         }
         else if (tokens[0] == "map_Ka")
         {
-            handleTexture(currentMaterial, "material.ambientTex", tokens[1]);
+            handleTexture(currentMaterial, "material.ambientTex", tokens[1].c_str());
         }
         else if (tokens[0] == "map_Kd")
         {
-            handleTexture(currentMaterial, "material.diffuseTex", tokens[1]);
+            handleTexture(currentMaterial, "material.diffuseTex", tokens[1].c_str());
         }
         else if (tokens[0] == "map_Ks")
         {
-            handleTexture(currentMaterial, "material.specularTex", tokens[1]);
+            handleTexture(currentMaterial, "material.specularTex", tokens[1].c_str());
         }
         else if (tokens[0] == "map_Ns")
         {

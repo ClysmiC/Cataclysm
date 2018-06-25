@@ -9,7 +9,7 @@
 #include "ResourceManager.h"
 #include <algorithm>
 
-Mesh::Mesh(std::string filename, bool useMaterialsReferencedInObjFile_)
+Mesh::Mesh(FilenameString filename, bool useMaterialsReferencedInObjFile_)
 {
     this->id = filename;
     this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile_;
@@ -21,20 +21,20 @@ bool load(Mesh* mesh)
 
     if (mesh->isLoaded) return true;
 
-    string filename = ResourceManager::instance().toFullPath(mesh->id);
-    assert(filename.substr(filename.length() - 4) == ".obj");
+    FilenameString filename = ResourceManager::instance().toFullPath(mesh->id);
+    assert(filename.substring(filename.length - 4) == ".obj");
 
-    ifstream objFile(filename);
+    ifstream objFile(filename.cstr());
 
     vector<Vec3> v;    // vertices
     vector<Vec2> vt;   // uvs
     vector<Vec3> vn;   // normals
 
-    string currentMaterialFilename = Material::DEFAULT_MATERIAL_FILENAME;
-    string currentMaterialName = Material::DEFAULT_MATERIAL_NAME;
+    FilenameString currentMaterialFilename = Material::DEFAULT_MATERIAL_FILENAME;
+    MaterialNameString currentMaterialName = Material::DEFAULT_MATERIAL_NAME;
     vector<Material*> materialsToLoad;
 
-    string relFileDirectory = truncateFilenameAfterDirectory(mesh->id);
+    FilenameString relFileDirectory = truncateFilenameAfterDirectory(mesh->id);
     
     string currentSubmeshName = "[unnamed]";
     vector<MeshVertex> currentSubmeshVertices;
@@ -76,7 +76,7 @@ bool load(Mesh* mesh)
             mesh->submeshes.push_back(
                 Submesh(
                     mesh->id,
-                    currentSubmeshName,
+                    currentSubmeshName.c_str(),
                     currentSubmeshVertices,
                     currentSubmeshIndices,
                     ResourceManager::instance().getMaterial(
@@ -102,7 +102,7 @@ bool load(Mesh* mesh)
         if (tokens[0] == "mtllib" && mesh->useMaterialsReferencedInObjFile)
         {
             // material file
-            currentMaterialFilename = relFileDirectory + tokens[1];
+            currentMaterialFilename = relFileDirectory + tokens[1].c_str();
             currentMaterialName = "";
         }
         else if (tokens[0] == "o")
@@ -136,7 +136,7 @@ bool load(Mesh* mesh)
         {
             // init material in resource manager if it doesnt already exist.
             // do NOT load on init.
-            currentMaterialName = tokens[1];
+            currentMaterialName = tokens[1].c_str();
 
             Material* m = ResourceManager::instance().initMaterial(currentMaterialFilename, currentMaterialName, false);
             assert(m != nullptr);

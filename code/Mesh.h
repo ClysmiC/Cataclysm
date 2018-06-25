@@ -9,14 +9,16 @@
 
 #include "als_math.h"
 
+#include "Resource.h"
+
 struct Mesh
 {
     Mesh() = default;
-    Mesh(std::string filename, bool useMaterialsReferencedInObjFile);
+    Mesh(FilenameString filename, bool useMaterialsReferencedInObjFile);
     
     bool useMaterialsReferencedInObjFile;
     bool isLoaded = false;
-    std::string id;
+    ResourceIdString id;
     std::vector<Submesh> submeshes;
 
     Aabb bounds;

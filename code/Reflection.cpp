@@ -243,7 +243,7 @@ bool UiReflector::startReflection(EntityNameString label)
 {
     bool shouldStayOpen = true;
     ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
-    ImGui::Begin(("Entity: " + label), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin(("Entity: " + label).cstr(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
 
     if (!shouldStayOpen)
     {
@@ -260,7 +260,7 @@ void UiReflector::endReflection()
 
 bool UiReflector::pushStruct(StructNameString name)
 {
-    bool result = ImGui::TreeNode(name);
+    bool result = ImGui::TreeNode(name.cstr());
     if (result)
     {
         this->indentationLevel++;
@@ -308,7 +308,7 @@ float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
     
     uint32 flags = Flags::ImGuiInputTextFlags_CharsDecimal | Flags::ImGuiInputTextFlags_AutoSelectAll | Flags::ImGuiInputTextFlags_EnterReturnsTrue;
         
-    if (ImGui::InputScalar(name, ImGuiDataType_Float, &valueCopy))
+    if (ImGui::InputScalar(name.cstr(), ImGuiDataType_Float, &valueCopy))
     {
         // This updates the actual value
         *valuePtr = valueCopy;
@@ -352,14 +352,14 @@ uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNa
     
     EnumValueNameString* selectedValueName = enumNames + value;
 
-    if (ImGui::TreeNode((name + ": " + *selectedValueName)))
+    if (ImGui::TreeNode((name + ": " + *selectedValueName).cstr()))
     {
         for (uint32 i = 0; i < enumValueCount; i++)
         {
             bool selected = (i == value);
             EnumValueNameString* valueName = enumNames + i;
             
-            if (ImGui::Selectable(*valueName, selected))
+            if (ImGui::Selectable(valueName->cstr(), selected))
             {
                 // Update actual value
                 *valuePtr = i;
@@ -386,9 +386,9 @@ bool testUiReflection(Entity e)
     UiReflector reflector;
 
     bool shouldStayOpen = true;
-    if (!reflector.startReflection(e.friendlyName.c_str()))
+    if (!reflector.startReflection(e.friendlyName))
     {
-        shouldStayOpen = false;;
+        shouldStayOpen = false;
     }
     
     TransformComponent* transform = getTransformComponent(e);

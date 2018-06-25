@@ -7,6 +7,8 @@
 #include <vector>
 #include "CameraComponent.h"
 
+#include "Resource.h"
+
 #include "Aabb.h"
 
 struct Mesh;
@@ -26,10 +28,10 @@ struct SubmeshOpenGlInfo
 struct Submesh
 {
     Submesh() = default;
-    Submesh(std::string filename, std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
+    Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
     
-    std::string meshFilename;
-    std::string submeshName;
+    FilenameString meshFilename;
+    string32 submeshName;
     std::vector<MeshVertex> vertices;
     std::vector<uint32> indices;
 

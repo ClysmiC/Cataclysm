@@ -2,14 +2,15 @@
 
 #include <string>
 #include "Types.h"
+#include "Resource.h"
 
 struct Texture
 {
     Texture() = default;
-    Texture(std::string filename, bool gammaCorrect = false);
+    Texture(FilenameString filename, bool gammaCorrect = false);
 
 
-    std::string id;
+    ResourceIdString id;
     bool isLoaded = false;
     bool gammaCorrect;
 

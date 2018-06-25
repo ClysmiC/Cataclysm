@@ -66,7 +66,7 @@ ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e);
 //
 // Entity functions
 //
-Entity makeEntity(Ecs* ecs, std::string friendlyName="");
+Entity makeEntity(Ecs* ecs, string16 friendlyName="");
 
 TransformComponent* addTransformComponent(Entity e);
 TransformComponent* getTransformComponent(Entity e);

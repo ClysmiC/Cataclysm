@@ -410,17 +410,19 @@ void makeCameraActive(Game* game, Entity camera)
 
 int main()
 {
-     string32 s1 = "Hello";
-     string32 s2("My");
-     string32 s3;
-     s3 = "Name";
-     string32 s4;
-     s4 = "I";
-     s4 += "s";
+    const string32 s1 = "hello";
+    const string32 s2 = "hello";
+    string64 s3 = "hello";
 
-     string32 s5 = s1 + s2 + s3 + s4 + "Andrew";
-     string32 s6 = "!";
-     string32 s7 = s6 + "Exclamaition" + s6;
+    string32 s4 = "sailor";
+    string64 s5 = "sailor";
+
+    //bool b1 = s1 == s2; // true
+    //bool b2 = s1 == s3; // true
+    //bool b3 = s1 == s4; // false
+    //bool b4 = s1 == s5; // false
+    //bool b5 = s3 == s5; // false
+    //bool b6 = s4 == s5; // true
     
     // INIT WINDOW
     uint32 windowWidth = 1024;

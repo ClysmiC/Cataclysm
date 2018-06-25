@@ -7,15 +7,16 @@
 #include <algorithm>
 
 
-Submesh::Submesh(const std::string filename, const std::string submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh)
+Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh)
     :
-    meshFilename(filename),
-    submeshName(submeshName),
     vertices(std::move(vertices)),
     indices(std::move(indices)),
     material(material),
     mesh(mesh)
 {
+    this->meshFilename = filename,
+    this->submeshName = submeshName,
+
     assert(vertices.size() > 0);
     assert(indices.size() % 3 == 0);
 

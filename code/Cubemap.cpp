@@ -9,7 +9,7 @@
 
 #include "GL/glew.h"
 
-Cubemap::Cubemap(std::string directory, std::string extension_)
+Cubemap::Cubemap(ResourceIdString directory, string8 extension_)
 {
     this->id = directory;
     this->extension = extension_;
@@ -102,17 +102,17 @@ bool load(Cubemap* cubemap)
     glGenTextures(1, &cubemap->openGlHandle);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->openGlHandle);
 
-    std::string filenames[] = { "right", "left", "top", "bottom", "front", "back" };
+    string8 filenames[] = { "right", "left", "top", "bottom", "front", "back" };
 
     stbi_set_flip_vertically_on_load(false);
     GLuint glTexTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
     
-    for (std::string filename : filenames)
+    for (string8 filename : filenames)
     {
-        std::string fullName = ResourceManager::instance().toFullPath(cubemap->id + "/" + filename) + cubemap->extension;
+        FilenameString fullName = ResourceManager::instance().toFullPath(cubemap->id + "/" + filename) + cubemap->extension;
         
         int w = 0, h = 0, channels = 0;
-        unsigned char *data = stbi_load(fullName.c_str(), &w, &h, &channels, 0);
+        unsigned char *data = stbi_load(fullName.cstr(), &w, &h, &channels, 0);
 
         assert(w > 0);
 

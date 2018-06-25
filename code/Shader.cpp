@@ -1,6 +1,5 @@
 #include "Shader.h"
 
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -8,12 +7,19 @@
 #include "assert.h"
 #include "ResourceManager.h"
 
+// std string used for shader bodies. after upload, they get reclaimed,
+// so it isn't a huge deal. TODO: look into custom resizeable string for shaders
+// or maybe just a gigantic fixed string... it's a one-time cost, nbd
+#include <string>
+
 #include "GL/glew.h"
 
-const std::string Shader::COMPOSITE_ID_DELIMITER = "|";
+const char Shader::COMPOSITE_ID_DELIMITER = '|';
 
-Shader::Shader(std::string vertFilename, std::string fragFilename)
+Shader::Shader(string128 vertFilename, string128 fragFilename)
 {
+    assert(!vertFilename.truncated && !fragFilename.truncated);
+    
     this->id = shaderIdFromFilenames(vertFilename, fragFilename);
     this->vertFilename = vertFilename;
     this->fragFilename = fragFilename;
@@ -29,70 +35,76 @@ bool bind(Shader* shader)
     return true;
 }
 
-std::string shaderIdFromFilenames(std::string vertFilename, std::string fragFilename)
+string256 shaderIdFromFilenames(string128 vertFilename, string128 fragFilename)
 {
-    return vertFilename + Shader::COMPOSITE_ID_DELIMITER + fragFilename;
+    string256 result = vertFilename;
+    result += Shader::COMPOSITE_ID_DELIMITER;
+    result += fragFilename;
+
+    assert(!result.truncated);
+    
+    return result;
 }
 
-void setBool(Shader* shader, std::string name, bool value)
+void setBool(Shader* shader, UniformNameString name, bool value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.c_str()), (int)value);
+    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.cstr()), (int)value);
 }
 
-void setInt(Shader* shader, std::string name, int value)
+void setInt(Shader* shader, UniformNameString name, int value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
+    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.cstr()), value);
 }
 
-void setFloat(Shader* shader, std::string name, float32 value)
+void setFloat(Shader* shader, UniformNameString name, float32 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform1f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value);
+    glUniform1f(glGetUniformLocation(shader->openGlHandle, name.cstr()), value);
 }
 
-void setVec2(Shader* shader, std::string name, Vec2 value)
+void setVec2(Shader* shader, UniformNameString name, Vec2 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y);
+    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.cstr()), value.x, value.y);
 }
 
-void setVec2(Shader* shader, std::string name, float32 x, float32 y)
+void setVec2(Shader* shader, UniformNameString name, float32 x, float32 y)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y);
+    glUniform2f(glGetUniformLocation(shader->openGlHandle, name.cstr()), x, y);
 }
 
-void setVec3(Shader* shader, std::string name, Vec3 value)
+void setVec3(Shader* shader, UniformNameString name, Vec3 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    auto loc = glGetUniformLocation(shader->openGlHandle, name.c_str());
+    auto loc = glGetUniformLocation(shader->openGlHandle, name.cstr());
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void setVec3(Shader* shader, std::string name, float32 x, float32 y, float32 z)
+void setVec3(Shader* shader, UniformNameString name, float32 x, float32 y, float32 z)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform3f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z);
+    glUniform3f(glGetUniformLocation(shader->openGlHandle, name.cstr()), x, y, z);
 }
 
-void setVec4(Shader* shader, std::string name, Vec4 value)
+void setVec4(Shader* shader, UniformNameString name, Vec4 value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), value.x, value.y, value.z, value.w);
+    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.cstr()), value.x, value.y, value.z, value.w);
 }
 
-void setVec4(Shader* shader, std::string name, float32 x, float32 y, float32 z, float32 w)
+void setVec4(Shader* shader, UniformNameString name, float32 x, float32 y, float32 z, float32 w)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.c_str()), x, y, z, w);
+    glUniform4f(glGetUniformLocation(shader->openGlHandle, name.cstr()), x, y, z, w);
 }
 
-void setMat4(Shader* shader, std::string name, Mat4 &value)
+void setMat4(Shader* shader, UniformNameString name, Mat4 &value)
 {
     // NOTE: Transpose matrix to make it column order
-    glUniformMatrix4fv(glGetUniformLocation(shader->openGlHandle, name.c_str()), 1, GL_TRUE, value.dataPointer());
+    glUniformMatrix4fv(glGetUniformLocation(shader->openGlHandle, name.cstr()), 1, GL_TRUE, value.dataPointer());
 }
 
 bool load(Shader* shader)
@@ -102,8 +114,8 @@ bool load(Shader* shader)
 
     std::string vertexCode;
     std::string fragmentCode;
-    std::ifstream vStream(ResourceManager::instance().toFullPath(shader->vertFilename));
-    std::ifstream fStream(ResourceManager::instance().toFullPath(shader->fragFilename));
+    std::ifstream vStream(ResourceManager::instance().toFullPath(shader->vertFilename).cstr());
+    std::ifstream fStream(ResourceManager::instance().toFullPath(shader->fragFilename).cstr());
 
     std::stringstream vShaderStream, fShaderStream;
     vShaderStream << vStream.rdbuf();

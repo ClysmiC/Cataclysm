@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include "Resource.h"
 #include "Types.h"
 
 #include "CameraComponent.h"
@@ -12,10 +12,10 @@ struct Shader;
 struct Cubemap
 {
     Cubemap() = default;
-    Cubemap(std::string directoryName, std::string extension_);
+    Cubemap(ResourceIdString directoryName, string8 extension_);
 
-    std::string id;
-    std::string extension;
+    ResourceIdString id;
+    string8 extension;
     uint32 openGlHandle;
     bool isLoaded = false;
 };

@@ -11,6 +11,7 @@
 #include "Transform.h"
 
 #include "Game.h"
+#include <string>
 
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
@@ -96,7 +97,7 @@ ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e)
     return it->second;
 }
 
-Entity makeEntity(Ecs* ecs, std::string friendlyName)
+Entity makeEntity(Ecs* ecs, string16 friendlyName)
 {
     Entity result;
     result.id = Ecs::nextEntityId;
@@ -393,8 +394,8 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
                 // in the shader? Is that robust when we change the shader?
                 DirectionalLightComponent* dlc = ecs->directionalLights.components + j;
 
-                std::string directionVarName = "directionalLights[" + std::to_string(j) + "].direction";
-                std::string intensityVarName = "directionalLights[" + std::to_string(j) + "].intensity";
+                string64 directionVarName = ("directionalLights[" + std::to_string(j) + "].direction").c_str();
+                string64 intensityVarName = ("directionalLights[" + std::to_string(j) + "].intensity").c_str();
                 
                 setVec3(shader, directionVarName, dlc->direction);
                 setVec3(shader, intensityVarName, dlc->intensity);

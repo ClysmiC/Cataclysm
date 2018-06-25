@@ -4,10 +4,11 @@
 #include "ResourceManager.h"
 #include <unordered_map>
 #include "stb/stb_image.h"
+#include "als_fixed_string_std_hash.h"
 
 #include "GL/glew.h"
 
-Texture::Texture(std::string filename, bool gammaCorrect_)
+Texture::Texture(FilenameString filename, bool gammaCorrect_)
 {
     this->id = filename;
     this->gammaCorrect = gammaCorrect_;
@@ -18,11 +19,11 @@ bool load(Texture* texture)
     if (texture->isLoaded) return true;
 
     // Load file into image
-    std::string filename = ResourceManager::instance().toFullPath(texture->id);
+    FilenameString filename = ResourceManager::instance().toFullPath(texture->id);
 
     int w, h, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(filename.c_str(), &w, &h, &channels, 0);
+    unsigned char *data = stbi_load(filename.cstr(), &w, &h, &channels, 0);
 
     GLenum internalFormat; // How to interpret data in the GPU
     GLenum dataFormat;     // How data is stored in-memory
@@ -78,7 +79,7 @@ bool unload(Texture* texture)
 Texture*
 Texture::white()
 {
-    std::string texFile = "default/white.png";
+    FilenameString texFile = "default/white.png";
     ResourceManager::instance().initTexture(texFile, true, true);
     Texture* tex = ResourceManager::instance().getTexture(texFile);
     assert(tex != nullptr);
@@ -88,7 +89,7 @@ Texture::white()
 Texture*
 Texture::gray()
 {
-    std::string texFile = "default/gray.png";
+    FilenameString texFile = "default/gray.png";
     ResourceManager::instance().initTexture(texFile, true, true);
     Texture* tex = ResourceManager::instance().getTexture(texFile);
     assert(tex != nullptr);
@@ -98,7 +99,7 @@ Texture::gray()
 Texture*
 Texture::black()
 {
-    std::string texFile = "default/black.png";
+    FilenameString texFile = "default/black.png";
     ResourceManager::instance().initTexture(texFile, true, true);
     Texture* tex = ResourceManager::instance().getTexture(texFile);
     assert(tex != nullptr);
@@ -108,7 +109,7 @@ Texture::black()
 Texture*
 Texture::defaultNormal()
 {
-    std::string texFile = "default/normal.png";
+    FilenameString texFile = "default/normal.png";
     ResourceManager::instance().initTexture(texFile, false, true);
     Texture* tex = ResourceManager::instance().getTexture(texFile);
     assert(tex != nullptr);
