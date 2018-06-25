@@ -228,7 +228,7 @@ constexpr uint16 _myUInt16Max(const uint16 lhs, const uint16 rhs)
 // String equality test (different sized fixed string)
 //
 template <uint16 LHS_SIZE, uint16 RHS_SIZE>
-bool operator == (const _als_fixed_string<RHS_SIZE>& lhs, const _als_fixed_string<RHS_SIZE>& rhs)
+bool operator == (const _als_fixed_string<LHS_SIZE>& lhs, const _als_fixed_string<RHS_SIZE>& rhs)
 {
     if (lhs.length != rhs.length) return false;
 

@@ -410,12 +410,18 @@ void makeCameraActive(Game* game, Entity camera)
 
 int main()
 {
-    const string32 s1 = "hello";
-    const string32 s2 = "hello";
+    string32 s1 = "hello";
+    string32 s2 = "hello";
     string64 s3 = "hello";
+
+    string64 ss = s1;
 
     string32 s4 = "sailor";
     string64 s5 = "sailor";
+
+    bool b1 = s1 == s2;
+    bool b2 = s1 == s3;
+    bool b3 = s3 == s1;
 
     //bool b1 = s1 == s2; // true
     //bool b2 = s1 == s3; // true
