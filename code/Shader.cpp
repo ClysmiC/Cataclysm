@@ -18,7 +18,7 @@ const char Shader::COMPOSITE_ID_DELIMITER = '|';
 
 Shader::Shader(string128 vertFilename, string128 fragFilename)
 {
-    assert(!vertFilename.truncated && !fragFilename.truncated);
+    assert(!vertFilename.isTruncated && !fragFilename.isTruncated);
     
     this->id = shaderIdFromFilenames(vertFilename, fragFilename);
     this->vertFilename = vertFilename;
@@ -41,7 +41,7 @@ string256 shaderIdFromFilenames(string128 vertFilename, string128 fragFilename)
     result += Shader::COMPOSITE_ID_DELIMITER;
     result += fragFilename;
 
-    assert(!result.truncated);
+    assert(!result.isTruncated);
     
     return result;
 }

@@ -12,7 +12,7 @@ template <uint16 SIZE> struct _als_fixed_string
     uint16 length;
     char data[SIZE];
     char _safety_byte; // always set to '\0' so that a pointer to a string of length SIZE will still have a null terminator
-    bool truncated;
+    bool isTruncated;
 
     // =========================
     //
@@ -28,7 +28,7 @@ template <uint16 SIZE> struct _als_fixed_string
         length = 0;
         data[0] = '\0';
         _safety_byte = '\0';
-        truncated = false;
+        isTruncated = false;
     }
 
     //
@@ -49,7 +49,7 @@ template <uint16 SIZE> struct _als_fixed_string
 
         if (length == SIZE && cstr[length] != '\0')
         {
-            truncated = true;
+            isTruncated = true;
         }
     }
     
@@ -65,7 +65,7 @@ template <uint16 SIZE> struct _als_fixed_string
         {
             if (i >= SIZE)
             {
-                this->truncated = true;
+                this->isTruncated = true;
                 break;
             }
             
@@ -158,7 +158,7 @@ template <uint16 SIZE> struct _als_fixed_string
         {
             if (i >= SIZE)
             {
-                result.truncated = true;
+                result.isTruncated = true;
                 break;
             }
             
@@ -288,7 +288,7 @@ _als_fixed_string<LHS_SIZE>& operator += (_als_fixed_string<LHS_SIZE> &lhs, cons
     {
         if (lhs.length >= LHS_SIZE)
         {
-            lhs.truncated = true;
+            lhs.isTruncated = true;
             break;
         }
         
@@ -322,7 +322,7 @@ _als_fixed_string<SIZE>& operator += (_als_fixed_string<SIZE> &lhs, const char* 
 
     if (lhs.length == SIZE && rhs[rhsIndex] != '\0')
     {
-        lhs.truncated = true;
+        lhs.isTruncated = true;
     }
 
     return lhs;
@@ -343,8 +343,10 @@ _als_fixed_string<SIZE>& operator += (_als_fixed_string<SIZE> &lhs, const char r
 //
 // TODO: these can truncate.... not sure how I feel about that. But since char* can be indefinite,
 // we can't guarantee at compile-time that we return a fixed-size big enough to handle it, like
-// we can with the case that we are adding two fixed-sized strings
+// we can with the case that we are adding two fixed-sized strings.
 //
+// Should it just double in size to make the likelyhood of a truncate much lower? It still wouldn't
+// be guaranteed though.
 
 //
 // Concatenate char* with fixed stirng
