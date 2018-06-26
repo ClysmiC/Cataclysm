@@ -8,7 +8,7 @@
 
 #include "TransformComponent.h"
 
-#define SPHERE_SUBDIVISIONS 5
+#define SPHERE_SUBDIVISIONS 3
 
 DebugDraw&
 DebugDraw::instance()
@@ -53,7 +53,6 @@ void DebugDraw::_init_cube()
 
     uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
     uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount;
-    
 
     glBindVertexArray(vao);
     {
@@ -176,9 +175,9 @@ void DebugDraw::_init_sphere()
 
     
     float32 vertexFloats[totalSphereTriangles * 9];
-    uint32 indices[totalSphereTriangles * 3]; // 0, 1, 2, 3, 4, 5....
+    //uint32 indices[totalSphereTriangles * 3]; // 0, 1, 2, 3, 4, 5....
     int32 floatIndex = 0;
-    int32 intIndex = 0;
+    //int32 intIndex = 0;
     for(int32 i = 0; i < totalSphereTriangles; i++)
 	{
 		Triangle *t = unitSphereTriangles + i;
@@ -190,20 +189,20 @@ void DebugDraw::_init_sphere()
         vertexFloats[floatIndex++] = t->a.x;
         vertexFloats[floatIndex++] = t->a.y;
         vertexFloats[floatIndex++] = t->a.z;
-        indices[intIndex] = intIndex;
-        intIndex++;
+        //indices[intIndex] = intIndex;
+        //intIndex++;
         
         vertexFloats[floatIndex++] = t->b.x;
         vertexFloats[floatIndex++] = t->b.y;
         vertexFloats[floatIndex++] = t->b.z;
-        indices[intIndex] = intIndex;
-        intIndex++;
+        //indices[intIndex] = intIndex;
+        //intIndex++;
         
         vertexFloats[floatIndex++] = t->c.x;
         vertexFloats[floatIndex++] = t->c.y;
         vertexFloats[floatIndex++] = t->c.z;
-        indices[intIndex] = intIndex;
-        intIndex++;
+        //indices[intIndex] = intIndex;
+        //intIndex++;
 	}
 
 	glBindVertexArray(this->vao);
@@ -211,8 +210,8 @@ void DebugDraw::_init_sphere()
         // Fill in
 
         // Note: unitSphereTriangles is an array of Triangles, not Vertices
-        glBufferSubData(GL_ARRAY_BUFFER, this->cubeVerticesCount * 3, sizeof(vertexFloats), vertexFloats);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indices), indices);
+        glBufferSubData(GL_ARRAY_BUFFER, this->cubeVerticesCount * 3 * sizeof(float32), sizeof(vertexFloats), vertexFloats);
+        // glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, this->cubeIndicesCount * sizeof(uint32), sizeof(indices), indices);
 	}
 	glBindVertexArray(0);
 }
@@ -225,11 +224,13 @@ DebugDraw::init()
     shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
     this->cubeVerticesCount = 8;
-    this->sphereVerticesCount = 8 * powi(4, SPHERE_SUBDIVISIONS); // TODO: this has many repeated vertices... we can combine them (the math is hard though!)
-    this->lineVerticesCount = 2;
-
     this->cubeIndicesCount = 24;
-    this->sphereIndicesCount = sphereVerticesCount; // TODO: combine shared vertices
+
+    uint32 sphereTrianglesCount = 8 * powi(4, SPHERE_SUBDIVISIONS);
+    this->sphereVerticesCount = 3 * sphereTrianglesCount; // TODO: combine shared vertices
+    this->sphereIndicesCount = 0; // NOTE: currently, sphere simply gets draw using drawArrays, not draw elements, so this is set to 0 for now. We can use drawElements if we optimize by combining shared vertices. 
+    
+    this->lineVerticesCount = 2;
     this->lineIndicesCount = 2;
 
     uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
@@ -260,8 +261,12 @@ DebugDraw::init()
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float32), (void*)0);
         glEnableVertexAttribArray(0);
 
+        auto v = glGetError();
+
         _init_cube();
         _init_sphere();
+
+        assert(v == GL_NO_ERROR);
     }
     glBindVertexArray(0);
 }
@@ -269,7 +274,31 @@ DebugDraw::init()
 void
 DebugDraw::drawSphere(Vec3 position, float radius, CameraComponent* camera, Transform* cameraXfm)
 {
+    // Note: since our VBO has radius 1, 'radius' is synonymous with scale
+    Mat4 transform;
+    transform.scaleInPlace(Vec3(radius));
+    transform.translateInPlace(position);
 
+    Mat4 view = worldToView(cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", camera->projectionMatrix);
+    setVec3(shader, "debugColor", color);
+
+    auto v = glGetError();
+
+    glBindVertexArray(this->vao);
+    v = glGetError();
+
+    void* offset = (void*)(sizeof(uint32) * cubeIndicesCount);
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glDrawArrays(GL_TRIANGLES, this->cubeVerticesCount, this->sphereVerticesCount);
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    v = glGetError();
+
+    glBindVertexArray(0);
 }
 
 void
@@ -290,7 +319,7 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, Camer
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
-    glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
@@ -311,7 +340,7 @@ DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Tr
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
-    glDrawElements(GL_LINES, 12 * 2, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

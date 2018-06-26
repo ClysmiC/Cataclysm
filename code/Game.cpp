@@ -569,6 +569,9 @@ int main()
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        DebugDraw::instance().drawSphere(Vec3(0, 0, -4), 1, cameraComponent, cameraXfm);
+        DebugDraw::instance().drawAARect3(Vec3(2, 0, -4), Vec3(1), cameraComponent, cameraXfm);
         
         glfwSwapBuffers(window.glfwWindow);
 
