@@ -10,6 +10,17 @@
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
+constexpr int64 powi(int64 base, int64 power)
+{
+	int64 result = 1;
+	for(int64 i = 0; i < power; i++)
+	{
+		result *= base;
+	}
+
+	return result;
+}
+
 enum class Axis3D : uint32
 {
     X,
