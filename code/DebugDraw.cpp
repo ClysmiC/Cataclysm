@@ -223,9 +223,9 @@ DebugDraw::_init_cylinder()
         float32 theta = 360.0f / CIRCLE_EDGES * i;
         
         // Top circle
-        cylinderVertexData[index++] = cos(theta);
+        cylinderVertexData[index++] = cos(TO_RAD(theta));
         cylinderVertexData[index++] = 0.5;
-        cylinderVertexData[index++] = sin(theta);
+        cylinderVertexData[index++] = sin(TO_RAD(theta));
     }
 
     for (uint32 i = CIRCLE_EDGES; i < CIRCLE_EDGES * 2; i++)
@@ -233,30 +233,32 @@ DebugDraw::_init_cylinder()
         float32 theta = 360.0f / CIRCLE_EDGES * i;
         
         // bottom circle
-        cylinderVertexData[index++] = cos(theta);
+        cylinderVertexData[index++] = cos(TO_RAD(theta));
         cylinderVertexData[index++] = -0.5;
-        cylinderVertexData[index++] = sin(theta);
+        cylinderVertexData[index++] = sin(TO_RAD(theta));
     }
 
     constexpr int circleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
     constexpr int cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
     uint32 vertexIndices[circleIndices + cylinderVerticalIndices];
 
+    uint32 baseIndex = this->cubeVerticesCount + this->sphereVerticesCount + this->lineVerticesCount;
+
     for (uint32 i = 0; i < circleIndices / 2; i++)
     {
         // Top circle
-        vertexIndices[i] = i;
+        vertexIndices[i] = baseIndex + i;
     }
 
     for (uint32 i = circleIndices / 2; i < circleIndices; i++)
     {
         // Bottom circle
-        vertexIndices[i] = i;
+        vertexIndices[i] = baseIndex + i;
     }
 
     for (uint32 i = circleIndices; i < circleIndices + cylinderVerticalIndices; i += 2)
     {
-        uint32 lineNumber = i - circleIndices;
+        uint32 lineNumber = baseIndex + i - circleIndices;
         
         // Vertical lines
         vertexIndices[i]     = lineNumber; // bottom
@@ -457,14 +459,14 @@ DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D ax
                       );
 
         // // Draw bottom circle
-        // glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
-        //                (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices / 2))
-        //               );
+        glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
+                        (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices / 2))
+                       );
 
         // // Draw vertical lines
-        // glDrawElements(GL_LINES, cylinderVerticalIndices / 2, GL_UNSIGNED_INT,
-        //                (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices))
-        //               );
+        glDrawElements(GL_LINES, cylinderVerticalIndices, GL_UNSIGNED_INT,
+                        (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices))
+                       );
     }
     glBindVertexArray(0);    
 }
