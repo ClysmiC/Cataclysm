@@ -9,6 +9,7 @@
 #include "TransformComponent.h"
 
 #define SPHERE_SUBDIVISIONS 3
+#define CIRCLE_EDGES       32
 
 DebugDraw&
 DebugDraw::instance()
@@ -174,10 +175,9 @@ void DebugDraw::_init_sphere()
 	}
 
     
-    float32 vertexFloats[totalSphereTriangles * 9];
-    //uint32 indices[totalSphereTriangles * 3]; // 0, 1, 2, 3, 4, 5....
-    int32 floatIndex = 0;
-    //int32 intIndex = 0;
+    float32 vertexData[totalSphereTriangles * 9];
+    int32 index = 0;
+    
     for(int32 i = 0; i < totalSphereTriangles; i++)
 	{
 		Triangle *t = unitSphereTriangles + i;
@@ -186,23 +186,17 @@ void DebugDraw::_init_sphere()
         t->b.normalizeInPlace();
         t->c.normalizeInPlace();
 
-        vertexFloats[floatIndex++] = t->a.x;
-        vertexFloats[floatIndex++] = t->a.y;
-        vertexFloats[floatIndex++] = t->a.z;
-        //indices[intIndex] = intIndex;
-        //intIndex++;
+        vertexData[index++] = t->a.x;
+        vertexData[index++] = t->a.y;
+        vertexData[index++] = t->a.z;
         
-        vertexFloats[floatIndex++] = t->b.x;
-        vertexFloats[floatIndex++] = t->b.y;
-        vertexFloats[floatIndex++] = t->b.z;
-        //indices[intIndex] = intIndex;
-        //intIndex++;
+        vertexData[index++] = t->b.x;
+        vertexData[index++] = t->b.y;
+        vertexData[index++] = t->b.z;
         
-        vertexFloats[floatIndex++] = t->c.x;
-        vertexFloats[floatIndex++] = t->c.y;
-        vertexFloats[floatIndex++] = t->c.z;
-        //indices[intIndex] = intIndex;
-        //intIndex++;
+        vertexData[index++] = t->c.x;
+        vertexData[index++] = t->c.y;
+        vertexData[index++] = t->c.z;
 	}
 
 	glBindVertexArray(this->vao);
@@ -210,10 +204,80 @@ void DebugDraw::_init_sphere()
         // Fill in
 
         // Note: unitSphereTriangles is an array of Triangles, not Vertices
-        glBufferSubData(GL_ARRAY_BUFFER, this->cubeVerticesCount * 3 * sizeof(float32), sizeof(vertexFloats), vertexFloats);
+        glBufferSubData(GL_ARRAY_BUFFER, this->cubeVerticesCount * 3 * sizeof(float32), sizeof(vertexData), vertexData);
         // glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, this->cubeIndicesCount * sizeof(uint32), sizeof(indices), indices);
 	}
 	glBindVertexArray(0);
+}
+
+void
+DebugDraw::_init_cylinder()
+{
+    constexpr int cylinderVertices = CIRCLE_EDGES * 2;
+    constexpr int floatsPerVertex = 3;
+    float32 cylinderVertexData[cylinderVertices * floatsPerVertex];
+    
+    uint32 index = 0;
+    for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+    {
+        float32 theta = 360.0f / CIRCLE_EDGES * i;
+        
+        // Top circle
+        cylinderVertexData[index++] = cos(theta);
+        cylinderVertexData[index++] = 0.5;
+        cylinderVertexData[index++] = sin(theta);
+    }
+
+    for (uint32 i = CIRCLE_EDGES; i < CIRCLE_EDGES * 2; i++)
+    {
+        float32 theta = 360.0f / CIRCLE_EDGES * i;
+        
+        // bottom circle
+        cylinderVertexData[index++] = cos(theta);
+        cylinderVertexData[index++] = -0.5;
+        cylinderVertexData[index++] = sin(theta);
+    }
+
+    constexpr int circleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
+    constexpr int cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
+    uint32 vertexIndices[circleIndices + cylinderVerticalIndices];
+
+    for (uint32 i = 0; i < circleIndices / 2; i++)
+    {
+        // Top circle
+        vertexIndices[i] = i;
+    }
+
+    for (uint32 i = circleIndices / 2; i < circleIndices; i++)
+    {
+        // Bottom circle
+        vertexIndices[i] = i;
+    }
+
+    for (uint32 i = circleIndices; i < circleIndices + cylinderVerticalIndices; i += 2)
+    {
+        uint32 lineNumber = i - circleIndices;
+        
+        // Vertical lines
+        vertexIndices[i]     = lineNumber; // bottom
+        vertexIndices[i + 1] = lineNumber + (circleIndices / 2); // top
+    }
+
+    uint32 vboOffset = (this->cubeVerticesCount + this->sphereVerticesCount + this->lineVerticesCount) * 3 * sizeof(float32);
+    uint32 eboOffset = (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount) * sizeof(uint32);
+
+    glBindVertexArray(vao);
+    {
+        // Fill in
+        glBufferSubData(GL_ARRAY_BUFFER, vboOffset, sizeof(cylinderVertexData), cylinderVertexData);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, eboOffset, sizeof(vertexIndices), vertexIndices);
+    }
+    glBindVertexArray(0);
+}
+
+void
+DebugDraw::_init_capsule()
+{
 }
 
 void
@@ -223,18 +287,31 @@ DebugDraw::init()
 
     shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
+    uint32 cubeLines = 12;
     this->cubeVerticesCount = 8;
-    this->cubeIndicesCount = 24;
+    this->cubeIndicesCount = cubeLines * 2;
 
+    // TODO: combine shared vertices and use drawElements instead of drawArrays for all
+    //       shapes (if possible.... the math might be too tricky)
+    
     uint32 sphereTrianglesCount = 8 * powi(4, SPHERE_SUBDIVISIONS);
-    this->sphereVerticesCount = 3 * sphereTrianglesCount; // TODO: combine shared vertices
-    this->sphereIndicesCount = 0; // NOTE: currently, sphere simply gets draw using drawArrays, not draw elements, so this is set to 0 for now. We can use drawElements if we optimize by combining shared vertices. 
+    this->sphereVerticesCount = 3 * sphereTrianglesCount;
+    this->sphereIndicesCount = 0; // (uses drawArrays)
     
     this->lineVerticesCount = 2;
-    this->lineIndicesCount = 2;
+    this->lineIndicesCount = 0;   // (uses drawArrays)
 
-    uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
-    uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount;
+    uint32 cylinderCircleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
+    uint32 cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
+    this->cylinderVerticesCount = CIRCLE_EDGES * 2;
+    this->cylinderIndicesCount = cylinderCircleIndices + cylinderVerticalIndices;
+
+    // TODO:
+    this->capsuleVerticesCount = 0;
+    this->capsuleIndicesCount = 0;
+
+    uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount + cylinderVerticesCount + capsuleVerticesCount;
+    uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount + cylinderIndicesCount + capsuleIndicesCount;
     
     glGenBuffers(1, &this->vbo);
     glGenBuffers(1, &this->ebo);
@@ -242,13 +319,14 @@ DebugDraw::init()
     
     glBindVertexArray(this->vao);
     {
+        uint32 bufferSize = sizeof(float32) * 3 * verticesCount + 16;
         // Allocate
         glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            sizeof(float32) * 3 * verticesCount,
+            bufferSize,
             0,
-            GL_STATIC_DRAW);
+            GL_STATIC_DRAW); // TODO: since the line segment vertices can be modified every frame, should they be in their own GL_DYNAMIC_DRAW buffer?
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo);
         glBufferData(
@@ -261,11 +339,12 @@ DebugDraw::init()
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float32), (void*)0);
         glEnableVertexAttribArray(0);
 
-        auto v = glGetError();
-
         _init_cube();
         _init_sphere();
+        _init_cylinder();
+        _init_capsule();
 
+        auto v = glGetError();
         assert(v == GL_NO_ERROR);
     }
     glBindVertexArray(0);
@@ -287,17 +366,20 @@ DebugDraw::drawSphere(Vec3 position, float radius, CameraComponent* camera, Tran
     setMat4(shader, "projection", camera->projectionMatrix);
     setVec3(shader, "debugColor", color);
 
-    auto v = glGetError();
-
     glBindVertexArray(this->vao);
-    v = glGetError();
+    {
 
-    void* offset = (void*)(sizeof(uint32) * cubeIndicesCount);
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    glDrawArrays(GL_TRIANGLES, this->cubeVerticesCount, this->sphereVerticesCount);
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    v = glGetError();
+        // TODO: construct sphere in way we can use GL_LINES and ebo instead of drawing triangles in wireframe mode.
+        // this would save us from having to toggle wireframe mode and face culling
 
+        glDisable(GL_CULL_FACE);
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // enable wireframe
+        {
+            glDrawArrays(GL_TRIANGLES, this->cubeVerticesCount, this->sphereVerticesCount);
+        }
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glEnable(GL_CULL_FACE);
+    }
     glBindVertexArray(0);
 }
 
@@ -324,11 +406,36 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, Camer
 }
 
 void
-DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawRect3Aa(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm)
 {
-    // Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
+    Quaternion identity;
+    drawRect3(center, dimensions, identity, camera, cameraXfm);
+    
+    // Mat4 transform;
+    // transform.scaleInPlace(dimensions);
+    // transform.translateInPlace(center);
+
+    // Mat4 view = worldToView(cameraXfm);
+    
+    // bind(shader);
+    // setMat4(shader, "model", transform);
+    // setMat4(shader, "view", view);
+    // setMat4(shader, "projection", camera->projectionMatrix);
+    // setVec3(shader, "debugColor", color);
+
+    // glBindVertexArray(this->vao);
+    // glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
+    // glBindVertexArray(0);
+}
+
+void
+DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+{
+    // TODO: rotate based on axis... default is Y
+
     Mat4 transform;
-    transform.scaleInPlace(dimensions);
+    transform.scaleInPlace(Vec3(radius, length, radius));
+    // transform.rotateInPlace(orientation);
     transform.translateInPlace(center);
 
     Mat4 view = worldToView(cameraXfm);
@@ -340,29 +447,55 @@ DebugDraw::drawAARect3(Vec3 center, Vec3 dimensions, CameraComponent* camera, Tr
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
-    glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    {
+        constexpr int circleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
+        constexpr int cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
+        
+        // Draw top circle
+        glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
+                       (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount))
+                      );
+
+        // // Draw bottom circle
+        // glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
+        //                (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices / 2))
+        //               );
+
+        // // Draw vertical lines
+        // glDrawElements(GL_LINES, cylinderVerticalIndices / 2, GL_UNSIGNED_INT,
+        //                (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices))
+        //               );
+    }
+    glBindVertexArray(0);    
 }
 
 void
 DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm)
 {
-    // TODO:
-    // set the two line slots in the VBO using world positions start and end
-    // use identity matrix as model
+    Mat4 transform;
+    Mat4 view = worldToView(cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", camera->projectionMatrix);
+    setVec3(shader, "debugColor", color);
+    
+    glBindVertexArray(this->vao);
+	{
+        glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 
-    // temporary hack: using existing rect3 debug drawing to draw a line
-    Vec3 rectCenter = (start + end) / 2;
-    float32 dist = distance(start, end);
+        // Fill in VBO
+        float32 vertexData[] = { start.x, start.y, start.z, end.x, end.y, end.z };
+        uint32 prevVerticesCount = this->cubeVerticesCount + this->sphereVerticesCount;
+        uint32 offset = prevVerticesCount * 3 * sizeof(float32);
+        
+        glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof(vertexData), vertexData);
 
-    Vec3 dimensions = Vec3(0.1, 0.1, dist);
-
-    Vec3 defaultForward = -Vec3(Axis3D::Z);
-    Vec3 rotationAxis = cross(defaultForward, end - start).normalizeInPlace();
-
-    Quaternion rotationNeeded = relativeRotation(defaultForward, end - start);
-
-    drawRect3(rectCenter, dimensions, rotationNeeded, camera, cameraXfm);
+        // Draw
+        glDrawArrays(GL_LINES, prevVerticesCount, 2);
+	}
+	glBindVertexArray(0);
 }
 
 void
@@ -391,6 +524,12 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
     }
 }
 
+void drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
+void drawCylinder  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+
+void drawCapsuleAa(Vec3 position, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
+void drawCapsule  (Vec3 position, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+
 void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)
 {
     TransformComponent* xfm = getTransformComponent(entity);
@@ -399,6 +538,6 @@ void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* came
     if (rc != nullptr && xfm != nullptr)
     {
         Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
-        drawAARect3(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
+        drawRect3Aa(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
     }
 }
