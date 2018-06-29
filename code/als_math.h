@@ -815,3 +815,11 @@ inline float32 clamp(float32 value, float32 min, float32 max)
     if (value > max) return max;
     return value;
 }
+
+inline float32 maxAbs(float32 value1, float32 value2)
+{
+    // Returns the (actual) value of the number with the greatest absolute value
+
+    if (fabs(value1) > fabs(value2)) return value1;
+    return value2;
+}

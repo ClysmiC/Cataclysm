@@ -572,9 +572,10 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         DebugDraw::instance().drawSphere(Vec3(0, 0, -4), 1, cameraComponent, cameraXfm);
-        DebugDraw::instance().drawRect3Aa(Vec3(3, -2, -4), Vec3(1), cameraComponent, cameraXfm);
+        DebugDraw::instance().drawRect3Aa(Vec3(-3, -2, -4), Vec3(1), cameraComponent, cameraXfm);
         DebugDraw::instance().drawLine(Vec3(-2, 0, -4), Vec3(-4, 2, -7), cameraComponent, cameraXfm);
         DebugDraw::instance().drawCylinderAa(Vec3(3, 0, -7), 1, 1, Axis3D::Y, cameraComponent, cameraXfm);
+        DebugDraw::instance().drawCapsuleAa(Vec3(3, 0, -4), 1, 1, Axis3D::Y, cameraComponent, cameraXfm);
         
         glfwSwapBuffers(window.glfwWindow);
 

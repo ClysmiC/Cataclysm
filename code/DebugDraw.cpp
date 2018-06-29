@@ -15,49 +15,9 @@ DebugDraw::instance()
     return *instance;
 }
 
-void DebugDraw::_init_cube()
-{
-    float32 cubeVertices[CubeVerticesCount * 3] = {
-        -.5, -.5,  .5,  // front-bot-left
-        .5, -.5,  .5,  // front-bot-right
-        .5,  .5,  .5,  // front-top-right
-        -.5,  .5,  .5,  // front-top-left
-        -.5, -.5, -.5,  // back-bot-left
-        .5, -.5, -.5,  // back-bot-right
-        .5,  .5, -.5,  // back-top-right
-        -.5,  .5, -.5,  // back-top-left
-    };
-
-    uint32 cubeIndices[CubeIndicesCount] = {
-        // Front square
-        0, 1,
-        1, 2,
-        2, 3,
-        3, 0,
-
-        // Back square
-        4, 5,
-        5, 6,
-        6, 7,
-        7, 4,
-
-        // Connecting lines
-        0, 4,
-        1, 5,
-        2, 6,
-        3, 7
-    };
-
-    glBindVertexArray(vao);
-    {
-        // Fill in
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(cubeVertices), cubeVertices);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(cubeIndices), cubeIndices);
-    }
-    glBindVertexArray(0);
-}
-
-void DebugDraw::_init_sphere()
+// @Slow to call this for both sphere and capsule init, but it is a one-time
+// cost and avoids heap allocation so I can live with it!
+void DebugDraw::_calculate_unit_sphere_vertices(float32* outputArray)
 {
     struct Triangle
     {
@@ -165,8 +125,6 @@ void DebugDraw::_init_sphere()
 		}
 	}
 
-    
-    float32 vertexData[SphereTrianglesCount * 9];
     int32 index = 0;
     
     for(int32 i = 0; i < SphereTrianglesCount; i++)
@@ -177,18 +135,66 @@ void DebugDraw::_init_sphere()
         t->b.normalizeInPlace();
         t->c.normalizeInPlace();
 
-        vertexData[index++] = t->a.x;
-        vertexData[index++] = t->a.y;
-        vertexData[index++] = t->a.z;
+        outputArray[index++] = t->a.x;
+        outputArray[index++] = t->a.y;
+        outputArray[index++] = t->a.z;
         
-        vertexData[index++] = t->b.x;
-        vertexData[index++] = t->b.y;
-        vertexData[index++] = t->b.z;
+        outputArray[index++] = t->b.x;
+        outputArray[index++] = t->b.y;
+        outputArray[index++] = t->b.z;
         
-        vertexData[index++] = t->c.x;
-        vertexData[index++] = t->c.y;
-        vertexData[index++] = t->c.z;
+        outputArray[index++] = t->c.x;
+        outputArray[index++] = t->c.y;
+        outputArray[index++] = t->c.z;
 	}
+}
+
+void DebugDraw::_init_cube()
+{
+    float32 cubeVertices[CubeVerticesCount * 3] = {
+        -.5, -.5,  .5,  // front-bot-left
+        .5, -.5,  .5,  // front-bot-right
+        .5,  .5,  .5,  // front-top-right
+        -.5,  .5,  .5,  // front-top-left
+        -.5, -.5, -.5,  // back-bot-left
+        .5, -.5, -.5,  // back-bot-right
+        .5,  .5, -.5,  // back-top-right
+        -.5,  .5, -.5,  // back-top-left
+    };
+
+    uint32 cubeIndices[CubeIndicesCount] = {
+        // Front square
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0,
+
+        // Back square
+        4, 5,
+        5, 6,
+        6, 7,
+        7, 4,
+
+        // Connecting lines
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7
+    };
+
+    glBindVertexArray(vao);
+    {
+        // Fill in
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(cubeVertices), cubeVertices);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(cubeIndices), cubeIndices);
+    }
+    glBindVertexArray(0);
+}
+
+void DebugDraw::_init_sphere()
+{
+    float32 vertexData[SphereVerticesCount * 3];
+    _calculate_unit_sphere_vertices(vertexData);
 
 	glBindVertexArray(this->vao);
 	{
@@ -267,6 +273,83 @@ DebugDraw::_init_cylinder()
 void
 DebugDraw::_init_capsule()
 {
+    float32 endcapVertexData[CapsuleEndcapTrianglesCount * 2 * 3 * 3];
+    float32 sphereVertexData[SphereVerticesCount * 3];
+
+    // We don't really know which sphere vertices are on the top or bottom hemisphere,
+    // so we test to see if they have y values above or below 0, and then put them in
+    // offset them positively or negatively to become capsule endcap triangles
+    _calculate_unit_sphere_vertices(sphereVertexData);
+
+    for (uint32 i = 0; i < SphereTrianglesCount; i++)
+    {
+        uint32 f = 9 * i;
+        
+        float32 ax = sphereVertexData[f];
+        float32 ay = sphereVertexData[f+1];
+        float32 az = sphereVertexData[f+2];
+
+        float32 bx = sphereVertexData[f+3];
+        float32 by = sphereVertexData[f+4];
+        float32 bz = sphereVertexData[f+5];
+
+        float32 cx = sphereVertexData[f+6];
+        float32 cy = sphereVertexData[f+7];
+        float32 cz = sphereVertexData[f+8];
+
+        float32 yOffset;
+        if (maxAbs(maxAbs(ay, by), cy) > 0)
+        {
+            yOffset = 0.5;
+        }
+        else
+        {
+            yOffset = -0.5;
+        }
+
+        endcapVertexData[f] = ax;
+        endcapVertexData[f+1] = ay + yOffset;
+        endcapVertexData[f+2] = az;
+
+        endcapVertexData[f+3] = bx;
+        endcapVertexData[f+4] = by + yOffset;
+        endcapVertexData[f+5] = bz;
+
+        endcapVertexData[f+6] = cx;
+        endcapVertexData[f+7] = cy + yOffset;
+        endcapVertexData[f+8] = cz;
+    }
+
+    float32 verticalVertexData[CIRCLE_EDGES * 2 * 3];
+
+    for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+    {
+        float32 theta = 360.0f / CIRCLE_EDGES * i;
+        
+        float32 x = cos(TO_RAD(theta));
+        float32 z = sin(TO_RAD(theta));
+
+        uint32 f = 6 * i;
+        
+        verticalVertexData[f] = x;
+        verticalVertexData[f+1] = -0.5;
+        verticalVertexData[f+2] = z;
+
+        verticalVertexData[f+3] = x;
+        verticalVertexData[f+4] = 0.5;
+        verticalVertexData[f+5] = z;
+    }
+
+    glBindVertexArray(this->vao);
+	{
+        // Fill in
+        uint32 byteOffset = vertexCountToBytes(CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount);
+        glBufferSubData(GL_ARRAY_BUFFER, byteOffset, sizeof(endcapVertexData), endcapVertexData);
+
+        byteOffset += sizeof(endcapVertexData);
+        glBufferSubData(GL_ARRAY_BUFFER, byteOffset, sizeof(verticalVertexData), verticalVertexData);
+	}
+	glBindVertexArray(0);
 }
 
 void
@@ -489,11 +572,51 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
     }
 }
 
-void drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
-void drawCylinder  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+{
+    // TODO: rotate based on axis... default is Y
 
-void drawCapsuleAa(Vec3 position, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
-void drawCapsule  (Vec3 position, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+    Mat4 transform;
+    transform.scaleInPlace(Vec3(radius, length, radius));
+    // transform.rotateInPlace(orientation);
+    transform.translateInPlace(center);
+
+    Mat4 view = worldToView(cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", camera->projectionMatrix);
+    setVec3(shader, "debugColor", color);
+
+    glBindVertexArray(this->vao);
+    {
+        glDisable(GL_CULL_FACE);
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // enable wireframe
+        {
+            // Draw endcaps
+            glDrawArrays(
+                GL_TRIANGLES,
+                CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount,
+                CapsuleEndcapVerticesCount * 2
+            );
+
+            // Draw vertical lines
+            glDrawArrays(
+                GL_LINES,
+                CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleEndcapVerticesCount * 2,
+                CIRCLE_EDGES * 2
+            );
+        }
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glEnable(GL_CULL_FACE);
+    }
+    glBindVertexArray(0);    
+}
+
+void DebugDraw::drawCapsule  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
+{
+}
 
 void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)
 {

@@ -59,6 +59,8 @@ private:
     void _init_capsule();
 
     DebugDraw() = default;
+
+    void _calculate_unit_sphere_vertices(float32* outputArray);
     
     //
     // Cube
@@ -91,11 +93,14 @@ private:
         CIRCLE_EDGES +      // Bottom circle, drawn with GL_LINE_LOOP
         CIRCLE_EDGES * 2;   // Vertical lines, drawn with GL_LINES
 
-    // TODO
     //
     // Capsule
     //
-    static constexpr uint32 CapsuleVerticesCount = 0;
-    static constexpr uint32 CapsuleIndicesCount = 0;
+    static constexpr uint32 CapsuleEndcapTrianglesCount = SphereTrianglesCount / 2;
+    static constexpr uint32 CapsuleEndcapVerticesCount = CapsuleEndcapTrianglesCount * 3;
+    static constexpr uint32 CapsuleVerticesCount =
+        3 * CapsuleEndcapTrianglesCount * 2 + // Half-sphere end-cap on each side
+        CIRCLE_EDGES * 2;                     // Lines going vertically. These do NOT connect to vertices on the half-sphere... they are their own vertices
+    static constexpr uint32 CapsuleIndicesCount = 0; // (uses drawArrays)
 };
 
