@@ -61,6 +61,7 @@ private:
     DebugDraw() = default;
 
     void _calculate_unit_sphere_vertices(float32* outputArray);
+    Quaternion rotateFromYAxisTo(Axis3D axis);
     
     //
     // Cube

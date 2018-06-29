@@ -311,13 +311,13 @@ void updateGame(Game* game)
 
     if (testXfm)
     {
-        float32 timeS = timeMs / 1000.0f;
+        // float32 timeS = timeMs / 1000.0f;
 
-        testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
-        testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
-        testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
+        // testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
+        // testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
+        // testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
 
-        testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
+        // testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
     }
 
     assert(game->activeScene != nullptr);
@@ -358,18 +358,21 @@ void updateGame(Game* game)
         {
             if (e.id == game->editor.selectedEntity.id)
             {
-                if(!testUiReflection(e))
+                if(testUiReflection(e))
                 {
-                    game->editor.selectedEntity.id = 0;
+                    // User didn't X out of window
+                    ColliderComponent *cc = getColliderComponent(e);
+                    if (cc != nullptr)
+                    {
+                        DebugDraw::instance().drawCollider(cc, camComponent, camXfm);
+                    }
                 }
                 else
                 {
-                    DebugDraw::instance().color = Vec3(1, 0, 0);
+                    // User X'd out of window
+                    game->editor.selectedEntity.id = 0;
                 }
             }
-
-            DebugDraw::instance().drawAabb(e, camComponent, camXfm);
-            DebugDraw::instance().color = Vec3(0, 1, 0);
         }
     }
     
@@ -409,30 +412,13 @@ void makeCameraActive(Game* game, Entity camera)
 }
 
 int main()
-{
-    string32 s1 = "hello";
-    string32 s2 = "hello";
-    string64 s3 = "hello";
-
-    string64 ss = s1;
-
-    string32 s4 = "sailor";
-    string64 s5 = "sailor";
-
-    bool b1 = s1 == s2;
-    bool b2 = s1 == s3;
-    bool b3 = s3 == s1;
-
-    //bool b1 = s1 == s2; // true
-    //bool b2 = s1 == s3; // true
-    //bool b3 = s1 == s4; // false
-    //bool b4 = s1 == s5; // false
-    //bool b5 = s3 == s5; // false
-    //bool b6 = s4 == s5; // true
-    
+{    
     // INIT WINDOW
     uint32 windowWidth = 1024;
     uint32 windowHeight = 720;
+
+    // uint32 windowWidth = 1920;
+    // uint32 windowHeight = 1080;
     
     Window window;
 
@@ -570,12 +556,6 @@ int main()
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        DebugDraw::instance().drawSphere(Vec3(0, 0, -4), 1, cameraComponent, cameraXfm);
-        DebugDraw::instance().drawRect3Aa(Vec3(-3, -2, -4), Vec3(1), cameraComponent, cameraXfm);
-        DebugDraw::instance().drawLine(Vec3(-2, 0, -4), Vec3(-4, 2, -7), cameraComponent, cameraXfm);
-        DebugDraw::instance().drawCylinderAa(Vec3(3, 0, -7), 1, 1, Axis3D::Y, cameraComponent, cameraXfm);
-        DebugDraw::instance().drawCapsuleAa(Vec3(3, 0, -4), 1, 1, Axis3D::Y, cameraComponent, cameraXfm);
         
         glfwSwapBuffers(window.glfwWindow);
 

@@ -15,6 +15,25 @@ DebugDraw::instance()
     return *instance;
 }
 
+Quaternion DebugDraw::rotateFromYAxisTo(Axis3D axis)
+{
+    Quaternion result;
+
+    if (axis == Axis3D::Y) return result;
+
+    else if (axis == Axis3D::X)
+    {
+        return axisAngle(Vec3(0, 0, -1), 90);
+    }
+    else if (axis == Axis3D::Z)
+    {
+        return axisAngle(Vec3(1, 0, 0), 90);
+    }
+
+    assert(false);
+    return result;
+}
+
 // @Slow to call this for both sphere and capsule init, but it is a one-time
 // cost and avoids heap allocation so I can live with it!
 void DebugDraw::_calculate_unit_sphere_vertices(float32* outputArray)
@@ -459,32 +478,16 @@ DebugDraw::drawRect3Aa(Vec3 center, Vec3 dimensions, CameraComponent* camera, Tr
 {
     Quaternion identity;
     drawRect3(center, dimensions, identity, camera, cameraXfm);
-    
-    // Mat4 transform;
-    // transform.scaleInPlace(dimensions);
-    // transform.translateInPlace(center);
-
-    // Mat4 view = worldToView(cameraXfm);
-    
-    // bind(shader);
-    // setMat4(shader, "model", transform);
-    // setMat4(shader, "view", view);
-    // setMat4(shader, "projection", camera->projectionMatrix);
-    // setVec3(shader, "debugColor", color);
-
-    // glBindVertexArray(this->vao);
-    // glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
-    // glBindVertexArray(0);
 }
 
 void
-DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
 {
-    // TODO: rotate based on axis... default is Y
-
+    Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
+    
     Mat4 transform;
     transform.scaleInPlace(Vec3(radius, length, radius));
-    // transform.rotateInPlace(orientation);
+    transform.rotateInPlace(rotationNeeded);
     transform.translateInPlace(center);
 
     Mat4 view = worldToView(cameraXfm);
@@ -507,15 +510,22 @@ DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D ax
 
         // Draw bottom circle
         glDrawElements(GL_LINE_LOOP, singleCircleIndices, GL_UNSIGNED_INT,
-                        (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices))
-                       );
+                       (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices))
+                      );
 
         // Draw vertical lines
         glDrawElements(GL_LINES, verticalIndices, GL_UNSIGNED_INT,
-                        (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices * 2))
-                       );
+                       (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices * 2))
+                      );
     }
-    glBindVertexArray(0);    
+    glBindVertexArray(0);
+}
+
+void
+DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+{
+    Quaternion identity;
+    drawCylinder(center, radius, length, axis, identity, camera, cameraXfm);
 }
 
 void
@@ -553,15 +563,53 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
     {
         case ColliderType::RECT3:
         {
-            drawRect3(colliderCenter(collider),
-                      Vec3(
-                          scaledXLength(collider),
-                          scaledYLength(collider),
-                          scaledZLength(collider)
-                      ),
-                      getTransformComponent(collider->entity)->orientation,
-                      cameraComponent,
-                      cameraXfm);
+            drawRect3(
+                colliderCenter(collider),
+                Vec3(
+                    scaledXLength(collider),
+                    scaledYLength(collider),
+                    scaledZLength(collider)
+                ),
+                getTransformComponent(collider->entity)->orientation,
+                cameraComponent,
+                cameraXfm
+            );
+        } break;
+
+        case ColliderType::SPHERE:
+        {
+            drawSphere(
+                colliderCenter(collider),
+                scaledRadius(collider),
+                cameraComponent,
+                cameraXfm
+            );
+        } break;
+
+        case ColliderType::CYLINDER:
+        {
+            drawCylinder(
+                colliderCenter(collider),
+                scaledRadius(collider),
+                scaledLength(collider),
+                collider->axis,
+                getTransformComponent(collider->entity)->orientation,
+                cameraComponent,
+                cameraXfm
+            );
+        } break;
+
+        case ColliderType::CAPSULE:
+        {
+            drawCapsule(
+                colliderCenter(collider),
+                scaledRadius(collider),
+                scaledLength(collider),
+                collider->axis,
+                getTransformComponent(collider->entity)->orientation,
+                cameraComponent,
+                cameraXfm
+            );
         } break;
 
         default:
@@ -572,13 +620,13 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
     }
 }
 
-void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
 {
-    // TODO: rotate based on axis... default is Y
-
+    Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
+    
     Mat4 transform;
     transform.scaleInPlace(Vec3(radius, length, radius));
-    // transform.rotateInPlace(orientation);
+    transform.rotateInPlace(rotationNeeded);
     transform.translateInPlace(center);
 
     Mat4 view = worldToView(cameraXfm);
@@ -614,8 +662,10 @@ void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3
     glBindVertexArray(0);    
 }
 
-void DebugDraw::drawCapsule  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
+void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
 {
+    Quaternion identity;
+    drawCapsule(center, radius, length, axis, identity, camera, cameraXfm);
 }
 
 void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)

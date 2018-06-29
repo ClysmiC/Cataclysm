@@ -85,7 +85,7 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
         {
             if (collider->type == ColliderType::SPHERE)
             {
-                collider->radius = fmax(fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y), origCc.rect3Lengths.z);
+                collider->radius = fmax(fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y), origCc.rect3Lengths.z) / 2.0;
             }
             else if (collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE)
             {
@@ -93,19 +93,19 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
                 {
                     collider->axis = Axis3D::X;
                     collider->length = origCc.rect3Lengths.x;
-                    collider->radius = fmax(origCc.rect3Lengths.y, origCc.rect3Lengths.z);
+                    collider->radius = fmax(origCc.rect3Lengths.y, origCc.rect3Lengths.z) / 2.0;
                 }
                 else if (origCc.rect3Lengths.y >= origCc.rect3Lengths.x && origCc.rect3Lengths.y >= origCc.rect3Lengths.z)
                 {
                     collider->axis = Axis3D::Y;
                     collider->length = origCc.rect3Lengths.y;
-                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.z);
+                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.z) / 2.0;
                 }
                 else
                 {
                     collider->axis = Axis3D::Z;
                     collider->length = origCc.rect3Lengths.z;
-                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y);
+                    collider->radius = fmax(origCc.rect3Lengths.x, origCc.rect3Lengths.y) / 2.0;
                 }
             }
             
@@ -115,9 +115,9 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
         //
         else if (origCc.type != ColliderType::RECT3 && collider->type == ColliderType::RECT3)
         {
-            collider->rect3Lengths.x = origCc.radius;
-            collider->rect3Lengths.y = origCc.radius;
-            collider->rect3Lengths.z = origCc.radius;
+            collider->rect3Lengths.x = origCc.radius * 2;
+            collider->rect3Lengths.y = origCc.radius * 2;
+            collider->rect3Lengths.z = origCc.radius * 2;
             
             if (origCc.type == ColliderType::CYLINDER || origCc.type == ColliderType::CAPSULE)
             {
@@ -143,6 +143,7 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
             if (collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE)
             {
                 collider->axis = Axis3D::Y;
+                collider->length = origCc.radius * 2;
             }
         }
     }
