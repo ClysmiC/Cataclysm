@@ -8,20 +8,16 @@
 
 #include "TransformComponent.h"
 
-#define SPHERE_SUBDIVISIONS 3
-#define CIRCLE_EDGES       32
-
 DebugDraw&
 DebugDraw::instance()
 {
     static DebugDraw *instance = new DebugDraw();
-
     return *instance;
 }
 
 void DebugDraw::_init_cube()
 {
-    float32 cubeVertices[] = {
+    float32 cubeVertices[CubeVerticesCount * 3] = {
         -.5, -.5,  .5,  // front-bot-left
         .5, -.5,  .5,  // front-bot-right
         .5,  .5,  .5,  // front-top-right
@@ -32,7 +28,7 @@ void DebugDraw::_init_cube()
         -.5,  .5, -.5,  // back-top-left
     };
 
-    uint32 cubeIndices[] = {
+    uint32 cubeIndices[CubeIndicesCount] = {
         // Front square
         0, 1,
         1, 2,
@@ -52,9 +48,6 @@ void DebugDraw::_init_cube()
         3, 7
     };
 
-    uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount;
-    uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount;
-
     glBindVertexArray(vao);
     {
         // Fill in
@@ -66,8 +59,6 @@ void DebugDraw::_init_cube()
 
 void DebugDraw::_init_sphere()
 {
-	constexpr int32 totalSphereTriangles = 8 * powi(4, SPHERE_SUBDIVISIONS);
-
     struct Triangle
     {
         Vec3 a, b, c;
@@ -75,7 +66,7 @@ void DebugDraw::_init_sphere()
         Triangle(Vec3 a, Vec3 b, Vec3 c) : a(a), b(b), c(c) {};
     };
 	
-	Triangle unitSphereTriangles[totalSphereTriangles];
+	Triangle unitSphereTriangles[SphereTrianglesCount];
 
 	// Step 1: construct octahedron (should be an equal number of '4's
 	// to the number of subdivisions). Could replace array with vector
@@ -175,10 +166,10 @@ void DebugDraw::_init_sphere()
 	}
 
     
-    float32 vertexData[totalSphereTriangles * 9];
+    float32 vertexData[SphereTrianglesCount * 9];
     int32 index = 0;
     
-    for(int32 i = 0; i < totalSphereTriangles; i++)
+    for(int32 i = 0; i < SphereTrianglesCount; i++)
 	{
 		Triangle *t = unitSphereTriangles + i;
 
@@ -202,10 +193,8 @@ void DebugDraw::_init_sphere()
 	glBindVertexArray(this->vao);
 	{
         // Fill in
-
-        // Note: unitSphereTriangles is an array of Triangles, not Vertices
-        glBufferSubData(GL_ARRAY_BUFFER, this->cubeVerticesCount * 3 * sizeof(float32), sizeof(vertexData), vertexData);
-        // glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, this->cubeIndicesCount * sizeof(uint32), sizeof(indices), indices);
+        uint32 byteOffset = vertexCountToBytes(CubeVerticesCount);
+        glBufferSubData(GL_ARRAY_BUFFER, byteOffset, sizeof(vertexData), vertexData);
 	}
 	glBindVertexArray(0);
 }
@@ -213,9 +202,7 @@ void DebugDraw::_init_sphere()
 void
 DebugDraw::_init_cylinder()
 {
-    constexpr int cylinderVertices = CIRCLE_EDGES * 2;
-    constexpr int floatsPerVertex = 3;
-    float32 cylinderVertexData[cylinderVertices * floatsPerVertex];
+    float32 cylinderVertexData[CylinderVerticesCount * 3];
     
     uint32 index = 0;
     for (uint32 i = 0; i < CIRCLE_EDGES; i++)
@@ -238,35 +225,35 @@ DebugDraw::_init_cylinder()
         cylinderVertexData[index++] = sin(TO_RAD(theta));
     }
 
-    constexpr int circleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
-    constexpr int cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
-    uint32 vertexIndices[circleIndices + cylinderVerticalIndices];
+    constexpr int singleCircleIndices = CIRCLE_EDGES; // drawn using line-loop
+    constexpr int verticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
+    uint32 vertexIndices[singleCircleIndices * 2 + verticalIndices];
 
-    uint32 baseIndex = this->cubeVerticesCount + this->sphereVerticesCount + this->lineVerticesCount;
+    uint32 baseIndex = CubeVerticesCount + SphereVerticesCount + LineVerticesCount;
 
-    for (uint32 i = 0; i < circleIndices / 2; i++)
+    for (uint32 i = 0; i < singleCircleIndices; i++)
     {
         // Top circle
         vertexIndices[i] = baseIndex + i;
     }
 
-    for (uint32 i = circleIndices / 2; i < circleIndices; i++)
+    for (uint32 i = singleCircleIndices; i < singleCircleIndices * 2; i++)
     {
         // Bottom circle
         vertexIndices[i] = baseIndex + i;
     }
 
-    for (uint32 i = circleIndices; i < circleIndices + cylinderVerticalIndices; i += 2)
+    uint32 lineNumber = 0;
+    for (uint32 i = singleCircleIndices * 2; i < singleCircleIndices * 2 + verticalIndices; i += 2)
     {
-        uint32 lineNumber = baseIndex + i - circleIndices;
-        
-        // Vertical lines
-        vertexIndices[i]     = lineNumber; // bottom
-        vertexIndices[i + 1] = lineNumber + (circleIndices / 2); // top
+        vertexIndices[i]     = baseIndex + lineNumber; // bottom
+        vertexIndices[i + 1] = baseIndex + lineNumber + singleCircleIndices; // top
+
+        lineNumber++;
     }
 
-    uint32 vboOffset = (this->cubeVerticesCount + this->sphereVerticesCount + this->lineVerticesCount) * 3 * sizeof(float32);
-    uint32 eboOffset = (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount) * sizeof(uint32);
+    uint32 vboOffset = vertexCountToBytes(CubeVerticesCount + SphereVerticesCount + LineVerticesCount);
+    uint32 eboOffset = (CubeIndicesCount + SphereIndicesCount + LineIndicesCount) * sizeof(uint32);
 
     glBindVertexArray(vao);
     {
@@ -289,31 +276,8 @@ DebugDraw::init()
 
     shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
-    uint32 cubeLines = 12;
-    this->cubeVerticesCount = 8;
-    this->cubeIndicesCount = cubeLines * 2;
-
-    // TODO: combine shared vertices and use drawElements instead of drawArrays for all
-    //       shapes (if possible.... the math might be too tricky)
-    
-    uint32 sphereTrianglesCount = 8 * powi(4, SPHERE_SUBDIVISIONS);
-    this->sphereVerticesCount = 3 * sphereTrianglesCount;
-    this->sphereIndicesCount = 0; // (uses drawArrays)
-    
-    this->lineVerticesCount = 2;
-    this->lineIndicesCount = 0;   // (uses drawArrays)
-
-    uint32 cylinderCircleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
-    uint32 cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
-    this->cylinderVerticesCount = CIRCLE_EDGES * 2;
-    this->cylinderIndicesCount = cylinderCircleIndices + cylinderVerticalIndices;
-
-    // TODO:
-    this->capsuleVerticesCount = 0;
-    this->capsuleIndicesCount = 0;
-
-    uint32 verticesCount = cubeVerticesCount + sphereVerticesCount + lineVerticesCount + cylinderVerticesCount + capsuleVerticesCount;
-    uint32 indicesCount = cubeIndicesCount + sphereIndicesCount + lineIndicesCount + cylinderIndicesCount + capsuleIndicesCount;
+    uint32 verticesCount = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount;
+    uint32 indicesCount = CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount;
     
     glGenBuffers(1, &this->vbo);
     glGenBuffers(1, &this->ebo);
@@ -377,7 +341,7 @@ DebugDraw::drawSphere(Vec3 position, float radius, CameraComponent* camera, Tran
         glDisable(GL_CULL_FACE);
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // enable wireframe
         {
-            glDrawArrays(GL_TRIANGLES, this->cubeVerticesCount, this->sphereVerticesCount);
+            glDrawArrays(GL_TRIANGLES, CubeVerticesCount, SphereVerticesCount);
         }
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glEnable(GL_CULL_FACE);
@@ -403,7 +367,7 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, Camer
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
-    glDrawElements(GL_LINES, this->cubeIndicesCount, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, CubeIndicesCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
@@ -450,22 +414,22 @@ DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D ax
 
     glBindVertexArray(this->vao);
     {
-        constexpr int circleIndices = CIRCLE_EDGES * 2;   // (both circles, drawn using line-loop)
-        constexpr int cylinderVerticalIndices = CIRCLE_EDGES * 2; // drawn using normal line
+        uint32 singleCircleIndices = CIRCLE_EDGES;   // drawn using line-loop
+        uint32 verticalIndices = CIRCLE_EDGES * 2;   // drawn using normal line
         
         // Draw top circle
-        glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
-                       (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount))
+        glDrawElements(GL_LINE_LOOP, singleCircleIndices, GL_UNSIGNED_INT,
+                       (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount))
                       );
 
-        // // Draw bottom circle
-        glDrawElements(GL_LINE_LOOP, circleIndices / 2, GL_UNSIGNED_INT,
-                        (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices / 2))
+        // Draw bottom circle
+        glDrawElements(GL_LINE_LOOP, singleCircleIndices, GL_UNSIGNED_INT,
+                        (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices))
                        );
 
-        // // Draw vertical lines
-        glDrawElements(GL_LINES, cylinderVerticalIndices, GL_UNSIGNED_INT,
-                        (void*)(sizeof(uint32) * (this->cubeIndicesCount + this->sphereIndicesCount + this->lineIndicesCount + circleIndices))
+        // Draw vertical lines
+        glDrawElements(GL_LINES, verticalIndices, GL_UNSIGNED_INT,
+                        (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + singleCircleIndices * 2))
                        );
     }
     glBindVertexArray(0);    
@@ -489,13 +453,12 @@ DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* ca
 
         // Fill in VBO
         float32 vertexData[] = { start.x, start.y, start.z, end.x, end.y, end.z };
-        uint32 prevVerticesCount = this->cubeVerticesCount + this->sphereVerticesCount;
-        uint32 offset = prevVerticesCount * 3 * sizeof(float32);
+        uint32 offset = vertexCountToBytes(CubeVerticesCount + SphereVerticesCount);
         
         glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof(vertexData), vertexData);
 
         // Draw
-        glDrawArrays(GL_LINES, prevVerticesCount, 2);
+        glDrawArrays(GL_LINES, CubeVerticesCount + SphereVerticesCount, 2);
 	}
 	glBindVertexArray(0);
 }

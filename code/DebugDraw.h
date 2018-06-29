@@ -5,6 +5,14 @@
 #include "Transform.h"
 #include "ColliderComponent.h"
 
+// not tweakable defines
+#define CUBE_VERTICES 8
+#define CUBE_LINES    12
+
+// tweakable defines
+#define SPHERE_SUBDIVISIONS 3
+#define CIRCLE_EDGES       32
+
 struct DebugDraw
 {
     static DebugDraw& instance();
@@ -42,18 +50,8 @@ private:
     // - line
     // - cylinder
     // - capsule
-    
-    uint32 cubeVerticesCount;
-    uint32 sphereVerticesCount;
-    uint32 lineVerticesCount;
-    uint32 cylinderVerticesCount;
-    uint32 capsuleVerticesCount;
 
-    uint32 cubeIndicesCount;
-    uint32 sphereIndicesCount;
-    uint32 lineIndicesCount;
-    uint32 cylinderIndicesCount;
-    uint32 capsuleIndicesCount;
+    inline uint32 vertexCountToBytes(uint32 vertexCount) { return sizeof(float32) * 3 * vertexCount; }
     
     void _init_cube();
     void _init_sphere();
@@ -61,5 +59,43 @@ private:
     void _init_capsule();
 
     DebugDraw() = default;
+    
+    //
+    // Cube
+    //
+    static constexpr uint32 CubeVerticesCount = CUBE_VERTICES;
+    static constexpr uint32 CubeIndicesCount = CUBE_LINES * 2;
+
+    //
+    // Sphere
+    //
+    static constexpr uint32 SphereTrianglesCount =
+        8 *                               // 8 triangles before subdividing (octahedron)
+        powi(4, SPHERE_SUBDIVISIONS);     // Each subdivision multiplies the existing # of triangles by 4
+
+    static constexpr uint32 SphereVerticesCount = 3 * SphereTrianglesCount;
+    static constexpr uint32 SphereIndicesCount = 0; // (uses drawArrays)
+
+    //
+    // Line
+    //
+    static constexpr uint32 LineVerticesCount = 2;
+    static constexpr uint32 LineIndicesCount = 0;   // (uses drawArrays)
+
+    //
+    // Cylinder
+    //
+    static constexpr uint32 CylinderVerticesCount = CIRCLE_EDGES * 2;
+    static constexpr uint32 CylinderIndicesCount =
+        CIRCLE_EDGES +      // Top circle, drawn with GL_LINE_LOOP
+        CIRCLE_EDGES +      // Bottom circle, drawn with GL_LINE_LOOP
+        CIRCLE_EDGES * 2;   // Vertical lines, drawn with GL_LINES
+
+    // TODO
+    //
+    // Capsule
+    //
+    static constexpr uint32 CapsuleVerticesCount = 0;
+    static constexpr uint32 CapsuleIndicesCount = 0;
 };
 
