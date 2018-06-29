@@ -347,7 +347,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         glStencilMask(0xFF);
         glClear(GL_STENCIL_BUFFER_BIT);
 
-        DebugDraw::instance().drawRect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), sourceSceneXfm->orientation, camera, cameraXfm);
+        DebugDraw::instance().drawRect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), sourceSceneXfm->orientation);
     }
 }
 

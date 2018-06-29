@@ -15,29 +15,42 @@
 
 struct DebugDraw
 {
+    //
+    // Members
+    //
+    Shader* shader;
+    Vec3 color;
+
+    CameraComponent* cameraComponent;
+    TransformComponent* cameraXfm;
+
+    //
+    // Singleton
+    //
     static DebugDraw& instance();
     
     void init();
     
-    Shader* shader;
-    Vec3 color;
 
-    void drawSphere(Vec3 position, float32 radius, CameraComponent* camera, Transform* cameraXfm);
+    //
+    // Drawing
+    //
+    void drawSphere(Vec3 position, float32 radius);
     
-    void drawRect3Aa(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm);
-    void drawRect3  (Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+    void drawRect3Aa(Vec3 center, Vec3 dimensions);
+    void drawRect3  (Vec3 center, Vec3 dimensions, Quaternion orientation);
 
-    void drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
-    void drawCylinder  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+    void drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis);
+    void drawCylinder  (Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation);
 
-    void drawCapsuleAa(Vec3 position, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm);
-    void drawCapsule  (Vec3 position, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm);
+    void drawCapsuleAa(Vec3 position, float32 radius, float32 length, Axis3D axis);
+    void drawCapsule  (Vec3 position, float32 radius, float32 length, Axis3D axis, Quaternion orientation);
     
-    void drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm);
+    void drawAabb(Entity entity);
 
-    void drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm);
+    void drawLine(Vec3 start, Vec3 end);
 
-    void drawCollider(ColliderComponent* collider, CameraComponent* camera, Transform* cameraXfm);
+    void drawCollider(ColliderComponent* collider);
 
 private:
     uint32 vbo;

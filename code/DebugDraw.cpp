@@ -419,19 +419,19 @@ DebugDraw::init()
 }
 
 void
-DebugDraw::drawSphere(Vec3 position, float radius, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawSphere(Vec3 position, float radius)
 {
     // Note: since our VBO has radius 1, 'radius' is synonymous with scale
     Mat4 transform;
     transform.scaleInPlace(Vec3(radius));
     transform.translateInPlace(position);
 
-    Mat4 view = worldToView(cameraXfm);
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
-    setMat4(shader, "projection", camera->projectionMatrix);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
@@ -452,7 +452,7 @@ DebugDraw::drawSphere(Vec3 position, float radius, CameraComponent* camera, Tran
 }
 
 void
-DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation)
 {
     // Note: since our VBO has dimensions 1x1x1, 'dimensions' is synonymous with scale
     Mat4 transform;
@@ -460,12 +460,12 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, Camer
     transform.rotateInPlace(orientation);
     transform.translateInPlace(center);
 
-    Mat4 view = worldToView(cameraXfm);
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
-    setMat4(shader, "projection", camera->projectionMatrix);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
@@ -474,14 +474,14 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation, Camer
 }
 
 void
-DebugDraw::drawRect3Aa(Vec3 center, Vec3 dimensions, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawRect3Aa(Vec3 center, Vec3 dimensions)
 {
     Quaternion identity;
-    drawRect3(center, dimensions, identity, camera, cameraXfm);
+    drawRect3(center, dimensions, identity);
 }
 
 void
-DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation)
 {
     Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
     
@@ -490,12 +490,12 @@ DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis
     transform.rotateInPlace(rotationNeeded);
     transform.translateInPlace(center);
 
-    Mat4 view = worldToView(cameraXfm);
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
-    setMat4(shader, "projection", camera->projectionMatrix);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
@@ -522,22 +522,22 @@ DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis
 }
 
 void
-DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawCylinderAa(Vec3 center, float32 radius, float32 length, Axis3D axis)
 {
     Quaternion identity;
-    drawCylinder(center, radius, length, axis, identity, camera, cameraXfm);
+    drawCylinder(center, radius, length, axis, identity);
 }
 
 void
-DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* cameraXfm)
+DebugDraw::drawLine(Vec3 start, Vec3 end)
 {
     Mat4 transform;
-    Mat4 view = worldToView(cameraXfm);
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
-    setMat4(shader, "projection", camera->projectionMatrix);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
     
     glBindVertexArray(this->vao);
@@ -557,7 +557,7 @@ DebugDraw::drawLine(Vec3 start, Vec3 end, CameraComponent* camera, Transform* ca
 }
 
 void
-DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComponent, Transform* cameraXfm)
+DebugDraw::drawCollider(ColliderComponent* collider)
 {
     switch(collider->type)
     {
@@ -570,9 +570,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
                     scaledYLength(collider),
                     scaledZLength(collider)
                 ),
-                getTransformComponent(collider->entity)->orientation,
-                cameraComponent,
-                cameraXfm
+                getTransformComponent(collider->entity)->orientation
             );
         } break;
 
@@ -580,9 +578,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
         {
             drawSphere(
                 colliderCenter(collider),
-                scaledRadius(collider),
-                cameraComponent,
-                cameraXfm
+                scaledRadius(collider)
             );
         } break;
 
@@ -593,9 +589,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->orientation,
-                cameraComponent,
-                cameraXfm
+                getTransformComponent(collider->entity)->orientation
             );
         } break;
 
@@ -606,9 +600,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->orientation,
-                cameraComponent,
-                cameraXfm
+                getTransformComponent(collider->entity)->orientation
             );
         } break;
 
@@ -620,7 +612,7 @@ DebugDraw::drawCollider(ColliderComponent* collider, CameraComponent* cameraComp
     }
 }
 
-void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation, CameraComponent* camera, Transform* cameraXfm)
+void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation)
 {
     Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
     
@@ -629,12 +621,12 @@ void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D 
     transform.rotateInPlace(rotationNeeded);
     transform.translateInPlace(center);
 
-    Mat4 view = worldToView(cameraXfm);
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
-    setMat4(shader, "projection", camera->projectionMatrix);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
 
     glBindVertexArray(this->vao);
@@ -662,13 +654,13 @@ void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D 
     glBindVertexArray(0);    
 }
 
-void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis, CameraComponent* camera, Transform* cameraXfm)
+void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis)
 {
     Quaternion identity;
-    drawCapsule(center, radius, length, axis, identity, camera, cameraXfm);
+    drawCapsule(center, radius, length, axis, identity);
 }
 
-void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* cameraXfm)
+void DebugDraw::drawAabb(Entity entity)
 {
     TransformComponent* xfm = getTransformComponent(entity);
     RenderComponent* rc = getRenderComponent(entity);
@@ -676,6 +668,6 @@ void DebugDraw::drawAabb(Entity entity, CameraComponent* camera, Transform* came
     if (rc != nullptr && xfm != nullptr)
     {
         Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
-        drawRect3Aa(bounds.center, bounds.halfDim * 2, camera, cameraXfm);
+        drawRect3Aa(bounds.center, bounds.halfDim * 2);
     }
 }

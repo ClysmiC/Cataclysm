@@ -38,7 +38,12 @@ struct Game
 
     int numScenes;
 
+    //
+    // Editor stuff
+    //
     bool isEditorMode;
+    bool drawAabb;
+    bool drawCollider;
 };
 
 Scene* makeScene(Game* game);

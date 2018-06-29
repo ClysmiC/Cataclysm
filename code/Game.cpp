@@ -358,14 +358,9 @@ void updateGame(Game* game)
         {
             if (e.id == game->editor.selectedEntity.id)
             {
-                if(testUiReflection(e))
+                if (testUiReflection(game, e))
                 {
                     // User didn't X out of window
-                    ColliderComponent *cc = getColliderComponent(e);
-                    if (cc != nullptr)
-                    {
-                        DebugDraw::instance().drawCollider(cc, camComponent, camXfm);
-                    }
                 }
                 else
                 {
@@ -477,6 +472,9 @@ int main()
     cameraComponent->near = 0.01f;
     cameraComponent->far = 1000.0f;
     recalculateProjectionMatrix(cameraComponent);
+
+    DebugDraw::instance().cameraComponent = cameraComponent;
+    DebugDraw::instance().cameraXfm = cameraXfm;
 
     ColliderComponent* debugCC;
     

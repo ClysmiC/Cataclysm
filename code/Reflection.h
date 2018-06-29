@@ -70,7 +70,8 @@ struct UiReflector : public IReflector
 };
 
 #include "Entity.h"
-bool testUiReflection(Entity e);
+struct Game;
+bool testUiReflection(Game* game, Entity e);
 
 void reflectVec2(IReflector* reflector, uint32 startingOffset);
 void reflectVec3(IReflector* reflector, uint32 startingOffset);

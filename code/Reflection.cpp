@@ -9,6 +9,8 @@
 #include "PortalComponent.h"
 #include "RenderComponent.h"
 
+#include "DebugDraw.h"
+
 #include <cmath>
 
 void reflectVec2(IReflector* reflector, uint32 startingOffset)
@@ -244,7 +246,7 @@ bool UiReflector::startReflection(EntityNameString label)
 {
     bool shouldStayOpen = true;
     ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
-    ImGui::Begin(("Entity: " + label).cstr(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin((label + "###e").cstr(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
 
     if (!shouldStayOpen)
     {
@@ -381,7 +383,8 @@ uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNa
 #include "PointLightComponent.h"
 #include "PortalComponent.h"
 #include "Ecs.h"
-bool testUiReflection(Entity e)
+#include "Game.h"
+bool testUiReflection(Game* game, Entity e)
 {
     // TODO: handle component groups
     UiReflector reflector;
@@ -391,69 +394,107 @@ bool testUiReflection(Entity e)
     {
         shouldStayOpen = false;
     }
-    
+
+    // Get components
     TransformComponent* transform = getTransformComponent(e);
-    if (transform)
-    {
-        if (ImGui::CollapsingHeader("Transform"))
-        {
-            reflector.reflectionTarget = transform;
-            reflectTransformComponent(&reflector, 0);
-        }
-    }
-    
     ColliderComponent* collider = getColliderComponent(e);
-    if (collider)
-    {
-        if (ImGui::CollapsingHeader("Collider"))
-        {
-            reflector.reflectionTarget = collider;
-            reflectColliderComponent(&reflector, collider, 0);
-        }
-    }
-    
     CameraComponent* camera = getCameraComponent(e);
-    if (camera)
-    {
-        if (ImGui::CollapsingHeader("Camera"))
-        {
-            reflector.reflectionTarget = camera;
-            reflectCameraComponent(&reflector, camera, 0);
-        }
-    }
-    
-    DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
-    if (directionalLight)
-    {
-        if (ImGui::CollapsingHeader("Directional Light"))
-        {
-            reflector.reflectionTarget = directionalLight;
-            reflectDirectionalLightComponent(&reflector, 0);
-        }
-    }
-    
-    PointLightComponent* pointLight = getPointLightComponent(e);
-    if (pointLight)
-    {
-        if (ImGui::CollapsingHeader("Point Light"))
-        {
-            reflector.reflectionTarget = pointLight;
-            reflectPointLightComponent(&reflector, 0);
-        }
-    }
-    
     PortalComponent* portal = getPortalComponent(e);
-    if (portal)
+    DirectionalLightComponent* directionalLights = getDirectionalLightComponent(e);
+    ComponentGroup<PointLightComponent> pointLights = getPointLightComponents(e);
+    ComponentGroup<RenderComponent> renderComponents = getRenderComponents(e);
+
+    //
+    // Docked buttons
+    //
     {
-        if (ImGui::CollapsingHeader("Portal"))
+        bool sameLine = false;
+        if (renderComponents.numComponents > 0 && transform != nullptr)
         {
-            reflector.reflectionTarget = portal;
-            reflectPortalComponent(&reflector, 0);
+            sameLine = true;
+            ImGui::Checkbox("aabb", &game->drawAabb);
+            
+            if (game->drawAabb)
+            {
+                DebugDraw::instance().drawAabb(e);
+            }
+        }
+
+        if (collider != nullptr)
+        {
+            if (sameLine) ImGui::SameLine();
+            
+            ImGui::Checkbox("coll", &game->drawCollider);
+            if (game->drawCollider)
+            {
+                DebugDraw::instance().drawCollider(collider);
+            }
         }
     }
+
+    //
+    // Component reflection
+    //
+    {
+        if (transform)
+        {
+            if (ImGui::CollapsingHeader("Transform"))
+            {
+                reflector.reflectionTarget = transform;
+                reflectTransformComponent(&reflector, 0);
+            }
+        }
     
-    // TODO
-    // RenderComponent* t = getRenderComponent(e);
+        if (collider)
+        {
+            if (ImGui::CollapsingHeader("Collider"))
+            {
+                reflector.reflectionTarget = collider;
+                reflectColliderComponent(&reflector, collider, 0);
+            }
+        }
+
+        // TODO
+    
+        // if (camera)
+        // {
+        //     if (ImGui::CollapsingHeader("Camera"))
+        //     {
+        //         reflector.reflectionTarget = camera;
+        //         reflectCameraComponent(&reflector, camera, 0);
+        //     }
+        // }
+    
+        // if (directionalLight)
+        // {
+        //     if (ImGui::CollapsingHeader("Directional Light"))
+        //     {
+        //         reflector.reflectionTarget = directionalLight;
+        //         reflectDirectionalLightComponent(&reflector, 0);
+        //     }
+        // }
+    
+        // if (pointLight)
+        // {
+        //     if (ImGui::CollapsingHeader("Point Light"))
+        //     {
+        //         reflector.reflectionTarget = pointLight;
+        //         reflectPointLightComponent(&reflector, 0);
+        //     }
+        // }
+    
+        if (portal)
+        {
+            if (ImGui::CollapsingHeader("Portal"))
+            {
+                reflector.reflectionTarget = portal;
+                reflectPortalComponent(&reflector, 0);
+            }
+        }
+    
+        // TODO
+        // RenderComponent* t = getRenderComponent(e);
+    }
     
 
     reflector.endReflection();
