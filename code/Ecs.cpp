@@ -129,6 +129,18 @@ CameraComponent* addCameraComponent(Entity e)
     return addComponent(&e.ecs->cameras, e);
 }
 
+TerrainComponent* addTerrainComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return addComponent(&e.ecs->terrains, e);
+}
+
+TerrainComponent* getTerrainComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->terrains, e);
+}
+
 CameraComponent* getCameraComponent(Entity e)
 {
     if (e.id == 0) return nullptr;

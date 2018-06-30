@@ -28,7 +28,7 @@ struct SubmeshOpenGlInfo
 struct Submesh
 {
     Submesh() = default;
-    Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
+    Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool recalculateTBN=false);
     
     FilenameString meshFilename;
     string32 submeshName;

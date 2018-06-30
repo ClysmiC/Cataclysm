@@ -11,6 +11,7 @@
 #include "DirectionalLightComponent.h"
 #include "RenderComponent.h"
 #include "ColliderComponent.h"
+#include "TerrainComponent.h"
 
 #include <unordered_map>
 #include <vector>
@@ -42,6 +43,7 @@ struct Ecs
     ComponentList<TransformComponent> transforms;
     ComponentList<CameraComponent> cameras;
     ComponentList<DirectionalLightComponent> directionalLights;
+    ComponentList<TerrainComponent> terrains;
     ComponentList<PointLightComponent> pointLights;
     ComponentList<RenderComponent> renderComponents;
     ComponentList<PortalComponent> portals;
@@ -79,6 +81,9 @@ PortalComponent* getPortalComponent(Entity e);
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e);
 DirectionalLightComponent* getDirectionalLightComponent(Entity e);
+
+TerrainComponent* addTerrainComponent(Entity e);
+TerrainComponent* getTerrainComponent(Entity e);
     
 RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);

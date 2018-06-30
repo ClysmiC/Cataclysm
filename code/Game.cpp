@@ -102,6 +102,26 @@ void buildTestScene1(Scene* scene)
             new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
         }
     }
+
+    //
+    // Set up terrain
+    //
+    {
+        Entity e = makeEntity(&scene->ecs, "terrain");
+
+        // TODO: rendering code expects entities with rendercomponents to also have transforms.
+        //       we could assume the origin at this case, or maybe set a flag on the entity that explicitly
+        //       says we don't store a transform so we can have the robustness of that check without the memory
+        //       overhead
+        TransformComponent *xfm = addTransformComponent(e);
+        xfm->position = Vec3(0, 0, 0);
+        
+        TerrainComponent* tc = addTerrainComponent(e);
+        new (tc) TerrainComponent("heightmap.bmp", Vec3(0, 0, 0), 64, 64, -4, 0);
+
+        RenderComponent* rc = addRenderComponent(e);
+        new (rc) RenderComponent(e, &tc->mesh.submeshes[0]);
+    }
 }
 
 void buildTestScene2(Scene* scene)

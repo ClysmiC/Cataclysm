@@ -16,12 +16,12 @@ void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm, Camer
 {
     Mat4 m2w = modelToWorld(xfm);;
     Mat4 w2v = worldToView(cameraXfm);
-    
+
     bind(renderComponent->material);
     setMat4(renderComponent->material->shader, "model", m2w);
     setMat4(renderComponent->material->shader, "view", w2v);
     setMat4(renderComponent->material->shader, "projection", camera->projectionMatrix);
-
+    
     glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
     glDrawElements(GL_TRIANGLES, renderComponent->submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

@@ -83,7 +83,8 @@ bool load(Mesh* mesh)
                         (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialFilename : Material::DEFAULT_MATERIAL_FILENAME,
                         (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
                     ),
-                    mesh
+                    mesh,
+                    true
                 )
             );
 
