@@ -2,9 +2,10 @@
 
 #include "als_math.h"
 
-class MeshVertex
+struct MeshVertex
 {
-public:
+    MeshVertex() = default;
+    
     Vec3 position;
     Vec3 normal;
     Vec2 texCoords;

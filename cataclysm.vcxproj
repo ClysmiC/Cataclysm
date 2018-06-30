@@ -156,6 +156,7 @@
     <ClCompile Include="code\Shader.cpp" />
     <ClCompile Include="code\stb_impl.cpp" />
     <ClCompile Include="code\Submesh.cpp" />
+    <ClCompile Include="code\TerrainComponent.cpp" />
     <ClCompile Include="code\Texture.cpp" />
     <ClCompile Include="code\Transform.cpp" />
     <ClCompile Include="code\TransformComponent.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="code\Scene.h" />
     <ClInclude Include="code\Shader.h" />
     <ClInclude Include="code\Submesh.h" />
+    <ClInclude Include="code\TerrainComponent.h" />
     <ClInclude Include="code\Texture.h" />
     <ClInclude Include="code\Transform.h" />
     <ClInclude Include="code\TransformComponent.h" />

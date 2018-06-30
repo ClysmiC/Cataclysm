@@ -42,8 +42,8 @@ struct Game
     // Editor stuff
     //
     bool isEditorMode;
-    bool drawAabb;
-    bool drawCollider;
+    bool drawAabb     = true;
+    bool drawCollider = true;
 };
 
 Scene* makeScene(Game* game);

@@ -217,6 +217,22 @@ template <uint16 SIZE> struct _als_fixed_string
 
         return -1;
     }
+
+    template<uint16 OTHER_STRING_SIZE>
+    bool startsWith(_als_fixed_string<OTHER_STRING_SIZE> other)
+    {
+        if (other.length > this->length) return false;
+        bool result = (this->substring(0, other->length) == other);
+        return result;
+    }
+
+    template<uint16 OTHER_STRING_SIZE>
+    bool endsWith(_als_fixed_string<OTHER_STRING_SIZE> other)
+    {
+        if (other.length > this->length) return false;
+        bool result = (this->substring(this->length - 1 - other->length) == other);
+        return result;
+    }
 };
 
 constexpr uint16 _myUInt16Max(const uint16 lhs, const uint16 rhs)
