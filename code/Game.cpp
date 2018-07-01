@@ -117,7 +117,7 @@ void buildTestScene1(Scene* scene)
         xfm->position = Vec3(0, 0, 0);
         
         TerrainComponent* tc = addTerrainComponent(e);
-        new (tc) TerrainComponent("heightmap.bmp", Vec3(0, 0, 0), 64, 64, -4, 0);
+        new (tc) TerrainComponent("heightmap.bmp", Vec3(-32, 0, -32), 64, 64, -12, 0);
 
         RenderComponent* rc = addRenderComponent(e);
         new (rc) RenderComponent(e, &tc->mesh.submeshes[0]);

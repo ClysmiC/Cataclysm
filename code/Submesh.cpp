@@ -7,7 +7,7 @@
 #include <algorithm>
 
 
-Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool recalculateTBN)
+Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh)
     :
     vertices(std::move(vertices)),
     indices(std::move(indices)),
@@ -23,7 +23,7 @@ Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vecto
     //
     // Recalculate tangents and bitangents
     //
-    if (recalculateTBN)
+    // if (recalculateTBN)
     {
         recalculateTangentsAndBitangents(this);
     }
