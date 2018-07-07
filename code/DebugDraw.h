@@ -54,7 +54,7 @@ struct DebugDraw
 
     void drawLine(Vec3 start, Vec3 end);
 
-    void drawCollider(ColliderComponent* collider);
+    void drawCollider(ColliderComponent* collider); // automatically grabs xfm from entity
 
 private:
     uint32 vbo;

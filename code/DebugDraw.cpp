@@ -745,7 +745,8 @@ DebugDraw::drawCollider(ColliderComponent* collider)
     }
 }
 
-void DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation)
+void
+DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis, Quaternion orientation)
 {
     Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
     
