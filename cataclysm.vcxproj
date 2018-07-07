@@ -142,6 +142,7 @@
     <ClCompile Include="code\DebugDraw.cpp" />
     <ClCompile Include="code\DebugGlobal.cpp" />
     <ClCompile Include="code\Ecs.cpp" />
+    <ClCompile Include="code\Editor.cpp" />
     <ClCompile Include="code\Entity.cpp" />
     <ClCompile Include="code\Game.cpp" />
     <ClCompile Include="code\Material.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="code\DebugGlobal.h" />
     <ClInclude Include="code\DirectionalLightComponent.h" />
     <ClInclude Include="code\Ecs.h" />
+    <ClInclude Include="code\Editor.h" />
     <ClInclude Include="code\Entity.h" />
     <ClInclude Include="code\Game.h" />
     <ClInclude Include="code\Material.h" />

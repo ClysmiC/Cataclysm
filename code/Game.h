@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include "Editor.h"
 
 extern float mouseX;
 extern float mouseY;
@@ -17,15 +18,8 @@ extern bool lastMouseButtons[8];
 
 struct Window;
 
-struct EditorState
-{
-    Entity selectedEntity;
-};
-
 struct Game
 {
-    Game() = default;
-
     // Any component confined to a scene in this array's ECS.
     // Only 1 (or maybe a few) of these scenes will be active at a time
     Scene scenes[MAX_SCENES];
@@ -37,13 +31,6 @@ struct Game
     Entity activeCamera;
 
     int numScenes;
-
-    //
-    // Editor stuff
-    //
-    bool isEditorMode;
-    bool drawAabb     = true;
-    bool drawCollider = true;
 };
 
 Scene* makeScene(Game* game);

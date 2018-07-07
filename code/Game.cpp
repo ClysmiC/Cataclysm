@@ -38,7 +38,6 @@ float32 timeMs;
 float32 deltaTMs;
 
 Ray lastCastRay;
-bool hasCastRayYet = false;
 
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
@@ -250,9 +249,9 @@ void updateCameraXfm(Game* game)
     assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
     assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
 
-    bool draggingCameraInEditMode = game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse;
+    bool draggingCameraInEditMode = game->editor.isEnabled && mouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse;
 
-    if (!game->isEditorMode || draggingCameraInEditMode)
+    if (!game->editor.isEnabled || draggingCameraInEditMode)
     {
         if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
         {
@@ -346,9 +345,9 @@ void updateGame(Game* game)
 
     if (keys[GLFW_KEY_GRAVE_ACCENT] && !lastKeys[GLFW_KEY_GRAVE_ACCENT])
     {
-        game->isEditorMode = !game->isEditorMode;
+        game->editor.isEnabled = !game->editor.isEnabled;
 
-        if (game->isEditorMode)
+        if (game->editor.isEnabled)
         {
             glfwSetInputMode(game->window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
@@ -357,43 +356,12 @@ void updateGame(Game* game)
             glfwSetInputMode(game->window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
-    
-    if (game->isEditorMode && mouseButtons[GLFW_MOUSE_BUTTON_1] && !lastMouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse)
-    {
-        lastCastRay = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
-        hasCastRayYet = true;
-
-        RaycastResult rayResult = castRay(&game->activeScene->ecs, lastCastRay);
-        if (rayResult.hit)
-        {
-            game->editor.selectedEntity = rayResult.hitEntity;
-        }
-    }
 
     renderScene(game->activeScene, camComponent, camXfm);
 
-    if (game->isEditorMode)
+    if (game->editor.isEnabled)
     {
-        for (Entity& e : game->activeScene->ecs.entities)
-        {
-            if (e.id == game->editor.selectedEntity.id)
-            {
-                if (testUiReflection(game, e))
-                {
-                    // User didn't X out of window
-                }
-                else
-                {
-                    // User X'd out of window
-                    game->editor.selectedEntity.id = 0;
-                }
-            }
-        }
-    }
-    
-    if (hasCastRayYet)
-    {
-        // DebugDraw::instance().drawLine(lastCastRay.position, lastCastRay.position + 10 * lastCastRay.direction, camComponent, camXfm);
+        showEditor(&game->editor);
     }
 }
 
@@ -462,7 +430,8 @@ int main()
     float32 lastTimeMs = 0;
 
     Game* game = new Game();
-    game->isEditorMode = false;
+    game->editor.game = game;
+    game->editor.isEnabled = false;
     game->window = &window;
     
     Scene* testScene1 = makeScene(game);
@@ -568,6 +537,8 @@ int main()
         }
         
         updateGame(game);
+
+        DebugDraw::instance().drawArrow(Vec3(-3, -1, -2), Vec3(2, 1, -6));
 
         // DebugDraw::instance().drawCollider(debugCC, cameraComponent, cameraXfm);
 

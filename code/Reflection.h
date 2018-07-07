@@ -2,7 +2,8 @@
 
 #include "als_math.h"
 #include "als_fixed_string.h"
-#include "ColliderComponent.h"
+
+#include "ColliderComponent.h" // needed for ColliderType enum
 
 struct CameraComponent;
 
@@ -69,7 +70,6 @@ struct UiReflector : public IReflector
     
 };
 
-#include "Entity.h"
 struct Game;
 bool testUiReflection(Game* game, Entity e);
 
