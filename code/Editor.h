@@ -10,14 +10,23 @@ struct EditorState
     EditorState();
     
     struct TranslatorTool
-    {        
-        int32 selectedHandle = -1;
+    {
+        bool isHandleSelected = false;
+        Axis3D selectedHandle = Axis3D::X;
 
         Entity pseudoEntity;
-        
-        ColliderComponent* xAxisHandle;
-        ColliderComponent* yAxisHandle;
-        ColliderComponent* zAxisHandle;
+
+        union
+        {
+            struct
+            {
+                ColliderComponent* xAxisHandle;
+                ColliderComponent* yAxisHandle;
+                ColliderComponent* zAxisHandle;
+            };
+
+            ColliderComponent* handles[3];
+        };
     };
     
     Game* game;

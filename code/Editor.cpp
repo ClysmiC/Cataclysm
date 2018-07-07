@@ -49,8 +49,31 @@ void showEditor(EditorState* editor)
     {
         int x = 0;
     }
-    
+
+    Ray prevRayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseXPrev, mouseYPrev));
     Ray rayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
+
+    //
+    // Draw aabb and collider
+    //
+    {
+        Entity e = editor->selectedEntity;
+
+        if (e.id != 0)
+        {
+            if (game->editor.drawAabb)
+            {
+                DebugDraw::instance().drawAabb(e);
+            }
+                
+            if (game->editor.drawCollider)
+            {
+                ColliderComponent* cc = getColliderComponent(e);
+
+                if (cc) DebugDraw::instance().drawCollider(cc);
+            }
+        }
+    }
 
     //
     // Scale and draw 3d translator handles
@@ -82,24 +105,12 @@ void showEditor(EditorState* editor)
             
             DebugDraw::instance().color = Vec3(1, 0, 0);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(1, 0, 0));
-            if (editor->translator.selectedHandle == 0)
-            {
-                DebugDraw::instance().drawCollider(editor->translator.xAxisHandle);
-            }
 
             DebugDraw::instance().color = Vec3(0, 1, 0);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 1, 0));
-            if (editor->translator.selectedHandle == 1)
-            {
-                DebugDraw::instance().drawCollider(editor->translator.yAxisHandle);
-            }
 
             DebugDraw::instance().color = Vec3(0, 0, 1);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 0, 1));
-            if (editor->translator.selectedHandle == 2)
-            {
-                DebugDraw::instance().drawCollider(editor->translator.zAxisHandle);
-            }
 
             DebugDraw::instance().color = oldColor;
 
@@ -108,43 +119,27 @@ void showEditor(EditorState* editor)
             //
             if (mousePressed && !clickHandled)
             {
+                editor->translator.isHandleSelected = false;
+                float32 minimumHit = FLT_MAX;
+                
                 for (uint32 i = 0; i < 3; i++)
                 {
                     // raycast against x, y, and z colliders
-                    
-                    Aabb xAabb = Aabb(toolXfm->position + Vec3(Axis3D::X) * arrowLength / 2, scale * editor->translator.xAxisHandle->rect3Lengths / 2);
-                    Aabb yAabb = Aabb(toolXfm->position + Vec3(Axis3D::Y) * arrowLength / 2, scale * editor->translator.yAxisHandle->rect3Lengths / 2);
-                    Aabb zAabb = Aabb(toolXfm->position + Vec3(Axis3D::Z) * arrowLength / 2, scale * editor->translator.zAxisHandle->rect3Lengths / 2);
 
-                    float32 minimumHit = FLT_MAX;
+                    Vec3 aabbCenter = tc->position + Vec3((Axis3D)i) * arrowLength / 2;
+                    Vec3 aabbDims = scale * editor->translator.handles[i]->rect3Lengths;
+                    
+                    Aabb aabb = Aabb(aabbCenter, aabbDims / 2);
 
-                    float32 t = rayAabbTest(rayThruScreen, xAabb);
+                    float32 t = rayAabbTest(rayThruScreen, aabb);
                     if (t >= 0)
                     {
                         if (t < minimumHit)
                         {
                             minimumHit = t;
-                            editor->translator.selectedHandle = 0;
-                        }
-                    }
-                    
-                    t = rayAabbTest(rayThruScreen, yAabb);
-                    if (t >= 0)
-                    {
-                        if (t < minimumHit)
-                        {
-                            minimumHit = t;
-                            editor->translator.selectedHandle = 1;
-                        }
-                    }
-                    
-                    t = rayAabbTest(rayThruScreen, zAabb);
-                    if (t >= 0)
-                    {
-                        if (t < minimumHit)
-                        {
-                            minimumHit = t;
-                            editor->translator.selectedHandle = 2;
+                            editor->translator.selectedHandle = (Axis3D)i;
+                            editor->translator.isHandleSelected = true;
+                            clickHandled = true;
                         }
                     }
                 }
@@ -153,23 +148,47 @@ void showEditor(EditorState* editor)
             //
             // Handle translator drag
             //
-            if (editor->translator.selectedHandle >= 0 && mouseHeld)
+            if (editor->translator.isHandleSelected && mouseHeld)
             {
-                // project last mouse x, y against a plane defined by the dragging vector (and some other point?)
-                // then project current mouse x, y on that plane
-                // amount to translate is related to the length of the distance between those two vectors
+                // TODO: case where drag axis is almost parallel to the camera,
+                //       you can accidentally drag the entity VERY far with a small
+                //       mouse movement. Consider setting a max limit to the drag
+                //       per frame (should depend on distance from camera)
+                
+                Vec3 planePoint1 = tc->position;
+                Vec3 planePoint2 = tc->position + Vec3(editor->translator.selectedHandle);
+
+                Vec3 dragAxis = (planePoint2 - planePoint1).normalizeInPlace();
+                Vec3 toCamera = cameraXfm->position - tc->position;
+
+                Vec3 planeNormal = cross(dragAxis, cross(toCamera, dragAxis)).normalizeInPlace();
+
+                Plane dragPlane = Plane(planePoint1, planeNormal);
+
+                float32 tPrev = rayPlaneTest(prevRayThruScreen, dragPlane);
+                float32 t = rayPlaneTest(rayThruScreen, dragPlane);
+
+                if (t >= 0 && tPrev >= 0)
+                {
+                    Vec3 prevIntersectionPoint = pointOnRay(prevRayThruScreen, tPrev);
+                    Vec3 intersectionPoint = pointOnRay(rayThruScreen, t);
+
+                    Vec3 prevProjection = project(prevIntersectionPoint - planePoint1, dragAxis);
+                    Vec3 projection = project(intersectionPoint - planePoint1, dragAxis);
+
+                    Vec3 delta = projection - prevProjection;
+
+                    tc->position += delta;
+                }
             }
         }
     }
-
-    
     
     //
     // Check if entity was selected
     //
     if (mousePressed && !clickHandled)
     {
-
         RaycastResult rayResult = castRay(&game->activeScene->ecs, rayThruScreen);
         if (rayResult.hit)
         {
@@ -213,11 +232,6 @@ void showEditor(EditorState* editor)
             {
                 sameLine = true;
                 ImGui::Checkbox("aabb", &game->editor.drawAabb);
-            
-                if (game->editor.drawAabb)
-                {
-                    DebugDraw::instance().drawAabb(e);
-                }
             }
 
             if (collider != nullptr)
@@ -225,10 +239,6 @@ void showEditor(EditorState* editor)
                 if (sameLine) ImGui::SameLine();
             
                 ImGui::Checkbox("coll", &game->editor.drawCollider);
-                if (game->editor.drawCollider)
-                {
-                    DebugDraw::instance().drawCollider(collider);
-                }
             }
         }
 

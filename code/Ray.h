@@ -25,3 +25,8 @@ struct Ray
 float32 rayPlaneTest(Ray ray, Plane plane);
 float32 rayColliderTest(Ray ray, ColliderComponent* collider);
 float32 rayAabbTest(Ray ray, Aabb aabb);
+
+inline Vec3 pointOnRay(Ray ray, float32 t)
+{
+    return ray.position + t * ray.direction;
+}

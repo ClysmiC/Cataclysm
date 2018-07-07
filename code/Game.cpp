@@ -249,7 +249,11 @@ void updateCameraXfm(Game* game)
     assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
     assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
 
-    bool draggingCameraInEditMode = game->editor.isEnabled && mouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse;
+    bool draggingCameraInEditMode =
+        game->editor.isEnabled &&
+        !game->editor.translator.isHandleSelected &&
+        mouseButtons[GLFW_MOUSE_BUTTON_1] &&
+        !ImGui::GetIO().WantCaptureMouse;
 
     if (!game->editor.isEnabled || draggingCameraInEditMode)
     {
