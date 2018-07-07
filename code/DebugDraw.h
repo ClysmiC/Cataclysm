@@ -45,6 +45,10 @@ struct DebugDraw
 
     void drawCapsuleAa(Vec3 position, float32 radius, float32 length, Axis3D axis);
     void drawCapsule  (Vec3 position, float32 radius, float32 length, Axis3D axis, Quaternion orientation);
+
+    void drawCone(Vec3 position, float32 radius, float32 height, Quaternion orientation);
+
+    void drawArrow(Vec3 start, Vec3 end);
     
     void drawAabb(Entity entity);
 
@@ -63,6 +67,7 @@ private:
     // - line
     // - cylinder
     // - capsule
+    // - cone
 
     inline uint32 vertexCountToBytes(uint32 vertexCount) { return sizeof(float32) * 3 * vertexCount; }
     
@@ -70,6 +75,7 @@ private:
     void _init_sphere();
     void _init_cylinder();
     void _init_capsule();
+    void _init_cone();
 
     DebugDraw() = default;
 
@@ -116,5 +122,13 @@ private:
         3 * CapsuleEndcapTrianglesCount * 2 + // Half-sphere end-cap on each side
         CIRCLE_EDGES * 2;                     // Lines going vertically. These do NOT connect to vertices on the half-sphere... they are their own vertices
     static constexpr uint32 CapsuleIndicesCount = 0; // (uses drawArrays)
+
+    //
+    // Cone
+    //
+    static constexpr uint32 ConeVerticesCount = CIRCLE_EDGES + 1; // points around the base + 1 point at the top
+    static constexpr uint32 ConeIndicesCount =
+        CIRCLE_EDGES +     // Base circle, drawn with GL_LINE_LOOP
+        CIRCLE_EDGES * 2;  // Line drawn from each of the base circle vertices to the point at the top (GL_LINE)
 };
 

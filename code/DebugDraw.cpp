@@ -372,14 +372,75 @@ DebugDraw::_init_capsule()
 }
 
 void
+DebugDraw::_init_cone()
+{
+    //
+    // Calculate vertices
+    //
+    float32 coneVertexData[ConeVerticesCount * 3];
+    
+    {
+        // Base circle
+        uint32 index = 0;
+        for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+        {
+            float32 theta = 360.0f / CIRCLE_EDGES * i;
+        
+            coneVertexData[index++] = cos(TO_RAD(theta));
+            coneVertexData[index++] = -0.5;
+            coneVertexData[index++] = sin(TO_RAD(theta));
+        }
+
+        // Top point
+        coneVertexData[index++] = 0;
+        coneVertexData[index++] = 0.5;
+        coneVertexData[index++] = 0;
+    }
+
+    //
+    // Calculate indices
+    //
+    uint32 vertexIndices[ConeIndicesCount];
+    uint32 baseIndex = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount;
+    uint32 topPointIndex = baseIndex + ConeVerticesCount - 1;
+
+    {
+        // Base circle
+        for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+        {
+            vertexIndices[i] = baseIndex + i;
+        }
+
+        // Lines from base circle vertices to top
+        for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+        {
+            vertexIndices[CIRCLE_EDGES + i * 2]     = baseIndex + i;
+            vertexIndices[CIRCLE_EDGES + i * 2 + 1] = topPointIndex;
+        }
+    }
+
+    uint32 vboOffset = vertexCountToBytes(CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount);
+    uint32 eboOffset = (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount) * sizeof(uint32);
+
+    glBindVertexArray(vao);
+    {
+        // Fill in
+        glBufferSubData(GL_ARRAY_BUFFER, vboOffset, sizeof(coneVertexData), coneVertexData);
+
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, eboOffset, sizeof(vertexIndices), vertexIndices);
+    }
+    glBindVertexArray(0);
+}
+
+void
 DebugDraw::init()
 {
     color = Vec3(0, 1, 0);
 
     shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
-    uint32 verticesCount = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount;
-    uint32 indicesCount = CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount;
+    uint32 verticesCount = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount + ConeVerticesCount;
+    uint32 indicesCount = CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount + ConeIndicesCount;
     
     glGenBuffers(1, &this->vbo);
     glGenBuffers(1, &this->ebo);
@@ -411,9 +472,12 @@ DebugDraw::init()
         _init_sphere();
         _init_cylinder();
         _init_capsule();
+        _init_cone();
 
-        auto v = glGetError();
-        assert(v == GL_NO_ERROR);
+        {
+            auto v = glGetError();
+            assert(v == GL_NO_ERROR);
+        }
     }
     glBindVertexArray(0);
 }
@@ -554,6 +618,75 @@ DebugDraw::drawLine(Vec3 start, Vec3 end)
         glDrawArrays(GL_LINES, CubeVerticesCount + SphereVerticesCount, 2);
 	}
 	glBindVertexArray(0);
+}
+
+void
+DebugDraw::drawCone(Vec3 position, float32 radius, float32 height, Quaternion orientation)
+{
+    Mat4 transform;
+    transform.scaleInPlace(Vec3(radius, height, radius));
+    transform.rotateInPlace(orientation);
+    transform.translateInPlace(position);
+
+    Mat4 view = worldToView(this->cameraXfm);
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
+    setVec3(shader, "debugColor", this->color);
+
+    glBindVertexArray(this->vao);
+    {
+        // Draw base circle
+        glDrawElements(GL_LINE_LOOP, CIRCLE_EDGES, GL_UNSIGNED_INT,
+                       (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount))
+                      );
+
+        // Draw vertical lines
+        glDrawElements(GL_LINES, CIRCLE_EDGES * 2, GL_UNSIGNED_INT,
+                       (void*)(sizeof(uint32) * (CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount + CIRCLE_EDGES))
+                      );
+    }
+    glBindVertexArray(0);
+}
+
+void
+DebugDraw::drawArrow(Vec3 start, Vec3 end)
+{
+    Vec3 startToEnd = end - start;
+    Vec3 startToEndNormalized = normalize(startToEnd);
+
+    // Can make this configurable if needed
+    float32 coneHeight = .1 * length(startToEnd);
+    float32 coneRadius = coneHeight / 2;
+
+    //
+    //  ===================|>
+    // ^                   ^ ^
+    // |                   | |
+    // start               | end
+    //             cylinder end
+    
+    Vec3 cylinderEnd = end - (coneHeight * startToEndNormalized);
+    float32 cylinderHeight = length(cylinderEnd - start);
+
+    Quaternion orientation = relativeRotation(Vec3(0, 1, 0), startToEndNormalized);
+
+    drawCylinder(
+        start + cylinderHeight / 2 * startToEndNormalized,
+        coneRadius / 2.5,
+        cylinderHeight,
+        Axis3D::Y,
+        orientation
+    );
+
+    drawCone(
+        (cylinderEnd + end) / 2,
+        coneRadius,
+        coneHeight,
+        orientation
+    );
 }
 
 void
