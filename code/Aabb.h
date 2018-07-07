@@ -5,6 +5,9 @@
 
 struct Aabb
 {
+    Aabb() = default;
+    Aabb(Vec3 center, Vec3 halfDim);
+    
     Vec3 center;
     Vec3 halfDim;
 };

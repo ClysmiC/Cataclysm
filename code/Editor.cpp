@@ -78,47 +78,91 @@ void showEditor(EditorState* editor)
             
             Vec3 oldColor = DebugDraw::instance().color;
 
+            glClear(GL_DEPTH_BUFFER_BIT);
+            
             DebugDraw::instance().color = Vec3(1, 0, 0);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(1, 0, 0));
-            DebugDraw::instance().drawCollider(editor->translator.xAxisHandle);
+            if (editor->translator.selectedHandle == 0)
+            {
+                DebugDraw::instance().drawCollider(editor->translator.xAxisHandle);
+            }
 
             DebugDraw::instance().color = Vec3(0, 1, 0);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 1, 0));
-            DebugDraw::instance().drawCollider(editor->translator.yAxisHandle);
+            if (editor->translator.selectedHandle == 1)
+            {
+                DebugDraw::instance().drawCollider(editor->translator.yAxisHandle);
+            }
 
             DebugDraw::instance().color = Vec3(0, 0, 1);
             DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 0, 1));
-            DebugDraw::instance().drawCollider(editor->translator.zAxisHandle);
+            if (editor->translator.selectedHandle == 2)
+            {
+                DebugDraw::instance().drawCollider(editor->translator.zAxisHandle);
+            }
 
             DebugDraw::instance().color = oldColor;
 
+            //
+            // Handle translator select 
+            //
+            if (mousePressed && !clickHandled)
+            {
+                for (uint32 i = 0; i < 3; i++)
+                {
+                    // raycast against x, y, and z colliders
+                    
+                    Aabb xAabb = Aabb(toolXfm->position + Vec3(Axis3D::X) * arrowLength / 2, scale * editor->translator.xAxisHandle->rect3Lengths / 2);
+                    Aabb yAabb = Aabb(toolXfm->position + Vec3(Axis3D::Y) * arrowLength / 2, scale * editor->translator.yAxisHandle->rect3Lengths / 2);
+                    Aabb zAabb = Aabb(toolXfm->position + Vec3(Axis3D::Z) * arrowLength / 2, scale * editor->translator.zAxisHandle->rect3Lengths / 2);
+
+                    float32 minimumHit = FLT_MAX;
+
+                    float32 t = rayAabbTest(rayThruScreen, xAabb);
+                    if (t >= 0)
+                    {
+                        if (t < minimumHit)
+                        {
+                            minimumHit = t;
+                            editor->translator.selectedHandle = 0;
+                        }
+                    }
+                    
+                    t = rayAabbTest(rayThruScreen, yAabb);
+                    if (t >= 0)
+                    {
+                        if (t < minimumHit)
+                        {
+                            minimumHit = t;
+                            editor->translator.selectedHandle = 1;
+                        }
+                    }
+                    
+                    t = rayAabbTest(rayThruScreen, zAabb);
+                    if (t >= 0)
+                    {
+                        if (t < minimumHit)
+                        {
+                            minimumHit = t;
+                            editor->translator.selectedHandle = 2;
+                        }
+                    }
+                }
+            }
+            
+            //
+            // Handle translator drag
+            //
+            if (editor->translator.selectedHandle >= 0 && mouseHeld)
+            {
+                // project last mouse x, y against a plane defined by the dragging vector (and some other point?)
+                // then project current mouse x, y on that plane
+                // amount to translate is related to the length of the distance between those two vectors
+            }
         }
     }
 
-    //
-    // Handle translator drag
-    //
-    {
-        if (editor->translator.selectedHandle >= 0 && mouseHeld)
-        {
-            // project last mouse x, y against a plane defined by the dragging vector (and some other point?)
-            // then project current mouse x, y on that plane
-            // amount to translate is related to the length of the distance between those two vectors
-        }
-    }
     
-    //
-    // Handle translator select 
-    //
-    if (mousePressed && !clickHandled)
-    {
-        for (uint32 i = 0; i < 3; i++)
-        {
-            // raycast against x, y, and z colliders
-
-            // if hit, set selectedHandle/
-        }
-    }
     
     //
     // Check if entity was selected

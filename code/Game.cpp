@@ -359,6 +359,9 @@ void updateGame(Game* game)
 
     renderScene(game->activeScene, camComponent, camXfm);
 
+    //
+    // Note: Editor should always be shown AFTER rendering
+    //
     if (game->editor.isEnabled)
     {
         showEditor(&game->editor);
@@ -537,10 +540,6 @@ int main()
         }
         
         updateGame(game);
-
-        DebugDraw::instance().drawArrow(Vec3(-3, -1, -2), Vec3(2, 1, -6));
-
-        // DebugDraw::instance().drawCollider(debugCC, cameraComponent, cameraXfm);
 
         // Rendering
         ImGui::Render();

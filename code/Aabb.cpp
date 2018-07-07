@@ -2,6 +2,12 @@
 #include "float.h"
 #include <algorithm>
 
+Aabb::Aabb(Vec3 center, Vec3 halfDim)
+{
+    this->center = center;
+    this->halfDim = halfDim;
+}
+
 Aabb transformedAabb(Aabb aabb, Transform* xfm)
 {
     //

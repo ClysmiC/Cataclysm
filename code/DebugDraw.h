@@ -49,7 +49,8 @@ struct DebugDraw
     void drawCone(Vec3 position, float32 radius, float32 height, Quaternion orientation);
 
     void drawArrow(Vec3 start, Vec3 end);
-    
+
+    void drawAabb(Aabb aabb);
     void drawAabb(Entity entity);
 
     void drawLine(Vec3 start, Vec3 end);

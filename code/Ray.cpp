@@ -34,6 +34,32 @@ float32 rayPlaneTest(Ray ray, Plane plane)
     }
 }
 
+float32 rayColliderTest(Ray ray, ColliderComponent* collider)
+{
+    // assert(isNormal(ray.direction));
+    // TransformComponent* xfm = getTransformComponent(collider->entity);
+    
+    // switch (collider->type)
+    // {
+    //     case ColliderType::RECT3:
+    //     {
+    //         // front face
+    //         Vec3 normal = xfm->orientation * Vec3(Axis3D::Z);
+    //         Vec3 center = colliderCenter(collider);
+            
+    //         Vec3 topFrontLeftCorner = 
+    //     } break;
+
+    //     default:
+    //     {
+    //         // Not yet implemented
+    //         assert(false);
+    //     }
+    // }
+
+    return -1; // todo
+}
+
 float32 rayAabbTest(Ray ray, Aabb aabb)
 {
     assert(isNormal(ray.direction));

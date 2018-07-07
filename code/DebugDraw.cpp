@@ -794,6 +794,11 @@ void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3
     drawCapsule(center, radius, length, axis, identity);
 }
 
+void DebugDraw::drawAabb(Aabb aabb)
+{
+    drawRect3Aa(aabb.center, aabb.halfDim * 2);
+}
+
 void DebugDraw::drawAabb(Entity entity)
 {
     TransformComponent* xfm = getTransformComponent(entity);

@@ -4,6 +4,7 @@
 #include "Entity.h"
 
 struct Aabb;
+struct ColliderComponent;
 
 struct RaycastResult
 {
@@ -22,4 +23,5 @@ struct Ray
 };
 
 float32 rayPlaneTest(Ray ray, Plane plane);
+float32 rayColliderTest(Ray ray, ColliderComponent* collider);
 float32 rayAabbTest(Ray ray, Aabb aabb);
