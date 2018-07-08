@@ -1,9 +1,0 @@
-Scene
-- ECS
-- Scene entity
-  - Optional skybox component
-  - Other "scene-wide" components
-
-Each entity has parent entity
-- By default, parent to its scene (what about entities that can move between scenes?)
-- Later down the road we can use this for local transforms to the parent transform, etc.

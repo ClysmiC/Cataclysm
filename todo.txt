@@ -1,5 +1,0 @@
--investigate why camera sometime develops a slight roll
--replace booleans with enums in resource manager and texture (gammaCorrect bool)
-
--optimized meshes
--faster build

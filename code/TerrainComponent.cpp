@@ -8,15 +8,27 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
 
     this->origin = origin;
 
-    int w, h, channels;
-    FilenameString heightMapFullFilename = ResourceManager::instance().toFullPath(heightMapFile);
-    unsigned char *data = stbi_load(heightMapFullFilename.cstr(), &w, &h, &channels, 1);
+    unsigned char *imgData;
+    uint32 imgWidth;
+    uint32 imgHeight;
 
-    assert(w > 1);
-    assert(h > 1);
+    //
+    // Read in image
+    //
+    {
+        int w, h, channels;
+        FilenameString heightMapFullFilename = ResourceManager::instance().toFullPath(heightMapFile);
+        imgData = stbi_load(heightMapFullFilename.cstr(), &w, &h, &channels, 1);
 
-    uint32 xChunksNeeded = (w + this->xVerticesPerChunk - 1) / this->xVerticesPerChunk;
-    uint32 zChunksNeeded = (h + this->zVerticesPerChunk - 1) / this->zVerticesPerChunk;
+        assert(w > 1);
+        assert(h > 1);
+
+        imgWidth = w;
+        imgHeight = h;
+    }
+
+    uint32 xChunksNeeded = (imgWidth + this->xVerticesPerChunk - 1) / this->xVerticesPerChunk;
+    uint32 zChunksNeeded = (imgHeight + this->zVerticesPerChunk - 1) / this->zVerticesPerChunk;
     
     this->xLengthPerChunk = xLength / (float32)xChunksNeeded;
     this->zLengthPerChunk = zLength / (float32)zChunksNeeded;
@@ -60,6 +72,8 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                 for (uint32 down = 0; down < this->zVerticesPerChunk; down++)
                 {
                     uint32 downPixel = this->zVerticesPerChunk * chunkDown + down;
+                    if (downPixel > imgHeight - 1) downPixel = imgHeight - 1;
+                    
                     float32 downNormalized = ((float32)down) / (this->zVerticesPerChunk - 1);
                     
                     float32 zPos = chunkOrigin.z + this->zLengthPerChunk * downNormalized;
@@ -67,11 +81,13 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                     for (uint32 across = 0; across < this->xVerticesPerChunk; across++)
                     {
                         uint32 acrossPixel = this->xVerticesPerChunk * chunkAcross + across;
+                        if (acrossPixel > imgWidth - 1) acrossPixel = imgWidth - 1;
+                        
                         float32 acrossNormalized = ((float32)across) / (this->xVerticesPerChunk - 1);
                         
                         float32 xPos = chunkOrigin.x + this->xLengthPerChunk * acrossNormalized;
             
-                        uint8 rawValue = (uint8)(data[downPixel * w + acrossPixel]);
+                        uint8 rawValue = (uint8)(imgData[downPixel * imgWidth + acrossPixel]);
                         float32 normalizedValue = rawValue / 255.0f;
 
                         float32 yPos = chunkOrigin.y + chunk->minHeight + (chunk->maxHeight - chunk->minHeight) * normalizedValue;
@@ -92,9 +108,9 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                 {
                     for (uint32 across = 0; across < this->xVerticesPerChunk - 1; across++)
                     {
-                        uint32 topLeftIndex = down * this->zVerticesPerChunk + across;
+                        uint32 topLeftIndex = down * this->xVerticesPerChunk + across;
                         uint32 topRightIndex = topLeftIndex + 1;
-                        uint32 botLeftIndex = (down + 1) * this->zVerticesPerChunk + across;
+                        uint32 botLeftIndex = (down + 1) * this->xVerticesPerChunk + across;
                         uint32 botRightIndex = botLeftIndex + 1;
 
                         //  |\   //
@@ -158,7 +174,7 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                 for (uint32 i = 0; i < vertices.size(); i++)
                 {
                     MeshVertex& mv = vertices[i];
-                    mv.normal = runningAverages[i].normal;
+                    mv.normal = normalize(runningAverages[i].normal);
                 }
             }
 
@@ -177,4 +193,6 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             chunk->mesh.isLoaded = true;
         }
     }
+
+    stbi_image_free(imgData);
 }

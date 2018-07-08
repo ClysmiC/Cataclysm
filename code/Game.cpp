@@ -126,7 +126,7 @@ void buildTestScene1(Scene* scene)
         {
             for (uint32 j = 0; j < tc->xChunkCount; j++)
             {
-                RenderComponent* rc = &rcList.components[i * tc->zChunkCount + j];
+                RenderComponent* rc = &rcList.components[i * tc->xChunkCount + j];
 
                 TerrainChunk* chunk = &tc->chunks[i][j];
                 new (rc) RenderComponent(e, &chunk->mesh.submeshes[0]);
