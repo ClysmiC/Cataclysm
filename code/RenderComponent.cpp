@@ -4,6 +4,8 @@
 #include "Aabb.h"
 #include "DebugDraw.h"
 
+#include "Shader.h"
+
 RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
     : Component(entity)
 {

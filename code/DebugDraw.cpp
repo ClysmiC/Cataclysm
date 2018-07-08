@@ -7,6 +7,8 @@
 #include "Ecs.h"
 
 #include "TransformComponent.h"
+#include "ColliderComponent.h"
+#include "Window.h"
 
 DebugDraw&
 DebugDraw::instance()
@@ -432,6 +434,34 @@ DebugDraw::_init_cone()
     glBindVertexArray(0);
 }
 
+void DebugDraw::_init_circle()
+{
+    //
+    // Calculate vertices
+    //
+    float32 circleVertexData[CircleVerticesCount * 3];
+    
+    // Base circle
+    uint32 index = 0;
+    for (uint32 i = 0; i < CIRCLE_EDGES; i++)
+    {
+        float32 theta = 360.0f / CIRCLE_EDGES * i;
+        
+        circleVertexData[index++] = cos(TO_RAD(theta));
+        circleVertexData[index++] = sin(TO_RAD(theta));
+        circleVertexData[index++] = -0.5f; // Near plane is at 0.1, so scoot this back a bit. Projection is ortho anyways so no harm
+    }
+
+    uint32 vboOffset = vertexCountToBytes(CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount + ConeVerticesCount);
+
+    glBindVertexArray(vao);
+    {
+        // Fill in
+        glBufferSubData(GL_ARRAY_BUFFER, vboOffset, sizeof(circleVertexData), circleVertexData);
+    }
+    glBindVertexArray(0);
+}
+
 void
 DebugDraw::init()
 {
@@ -439,8 +469,8 @@ DebugDraw::init()
 
     shader = ResourceManager::instance().initShader("shader/debugDraw.vert", "shader/debugDraw.frag", true);
 
-    uint32 verticesCount = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount + ConeVerticesCount;
-    uint32 indicesCount = CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount + ConeIndicesCount;
+    uint32 verticesCount = CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount + ConeVerticesCount + CircleVerticesCount;
+    uint32 indicesCount = CubeIndicesCount + SphereIndicesCount + LineIndicesCount + CylinderIndicesCount + CapsuleIndicesCount + ConeIndicesCount + CircleIndicesCount;
     
     glGenBuffers(1, &this->vbo);
     glGenBuffers(1, &this->ebo);
@@ -473,6 +503,7 @@ DebugDraw::init()
         _init_cylinder();
         _init_capsule();
         _init_cone();
+        _init_circle();
 
         {
             auto v = glGetError();
@@ -785,7 +816,7 @@ DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis,
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glEnable(GL_CULL_FACE);
     }
-    glBindVertexArray(0);    
+    glBindVertexArray(0);
 }
 
 void DebugDraw::drawCapsuleAa(Vec3 center, float32 radius, float32 length, Axis3D axis)
@@ -809,4 +840,53 @@ void DebugDraw::drawAabb(Entity entity)
         Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
         drawRect3Aa(bounds.center, bounds.halfDim * 2);
     }
+}
+
+//
+// Drawing 2D
+//
+void
+DebugDraw::drawCirclePixel(Vec2 position, float32 radius)
+{
+    Mat4 orthoProjection;
+
+    // TODO: don't hard code these
+    int w, h;
+    glfwGetFramebufferSize(window->glfwWindow, &w, &h);
+    float32 aspectRatio = w / (float32)h;
+    
+    orthoProjection.orthoInPlace(w, aspectRatio, 0.1f, 1.0f);
+
+    Vec2 positionInCameraSpace = position - (Vec2(w, h) / 2);
+    
+    Mat4 transform;
+    transform.scaleInPlace(Vec3(radius, radius, 1));
+    transform.translateInPlace(Vec3(positionInCameraSpace.x, positionInCameraSpace.y, 0));
+
+    Mat4 view;
+    
+    bind(shader);
+    setMat4(shader, "model", transform);
+    setMat4(shader, "view", view);
+    setMat4(shader, "projection", orthoProjection);
+    setVec3(shader, "debugColor", color);
+
+    glBindVertexArray(this->vao);
+    {
+        glDrawArrays(
+            GL_LINE_LOOP,
+            CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleVerticesCount + ConeVerticesCount,
+            CircleVerticesCount
+        );
+    }
+    glBindVertexArray(0);
+}
+
+void
+DebugDraw::drawCircleViewport(Vec2 position, float32 radius)
+{
+    Vec2 pixelCoords = viewportCoordinateToPixel(this->window, position);
+    float32 scaleFactor = pixelCoords.x;
+
+    drawCirclePixel(pixelCoords, radius * scaleFactor);
 }

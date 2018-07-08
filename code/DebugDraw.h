@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "Shader.h"
-#include "Transform.h"
-#include "ColliderComponent.h"
+#include "Aabb.h"
 
 // not tweakable defines
 #define CUBE_VERTICES 8
@@ -12,6 +10,11 @@
 // tweakable defines
 #define SPHERE_SUBDIVISIONS 3
 #define CIRCLE_EDGES       32
+
+struct TransformComponent;
+struct ColliderComponent;
+struct Window;
+struct Shader;
 
 struct DebugDraw
 {
@@ -24,6 +27,8 @@ struct DebugDraw
     CameraComponent* cameraComponent;
     TransformComponent* cameraXfm;
 
+    Window* window; // used for screen to pixel conversions
+
     //
     // Singleton
     //
@@ -33,7 +38,7 @@ struct DebugDraw
     
 
     //
-    // Drawing
+    // Drawing 3D
     //
     void drawSphere(Vec3 position, float32 radius);
     
@@ -57,26 +62,47 @@ struct DebugDraw
 
     void drawCollider(ColliderComponent* collider); // automatically grabs xfm from entity
 
+    //
+    // Drawing 2D
+    //
+    void drawCirclePixel(Vec2 position, float32 radius);
+    void drawCircleViewport(Vec2 position, float32 radius); // 1 radius = width
+
 private:
     uint32 vbo;
     uint32 ebo;
     uint32 vao;
 
     // VBO contains all the vertices for all the primitives, in the following order:
+    //
+    //  3D
+    //
     // - cube
     // - sphere
     // - line
     // - cylinder
     // - capsule
     // - cone
+    //
+    // 2D
+    //
+    // - circle
 
     inline uint32 vertexCountToBytes(uint32 vertexCount) { return sizeof(float32) * 3 * vertexCount; }
-    
+
+    //
+    // 3D
+    //
     void _init_cube();
     void _init_sphere();
     void _init_cylinder();
     void _init_capsule();
     void _init_cone();
+
+    //
+    // 2D
+    //
+    void _init_circle();
 
     DebugDraw() = default;
 
@@ -131,5 +157,11 @@ private:
     static constexpr uint32 ConeIndicesCount =
         CIRCLE_EDGES +     // Base circle, drawn with GL_LINE_LOOP
         CIRCLE_EDGES * 2;  // Line drawn from each of the base circle vertices to the point at the top (GL_LINE)
+
+    //
+    // Circle
+    //
+    static constexpr uint32 CircleVerticesCount = CIRCLE_EDGES;
+    static constexpr uint32 CircleIndicesCount = 0; // (uses drawArrays)
 };
 

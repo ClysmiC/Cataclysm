@@ -464,13 +464,14 @@ int main()
     cameraComponent->orthoWidth = 10.0f;
 #endif
     
-    cameraComponent->aspectRatio = 4.0f / 3.0f;
+    cameraComponent->aspectRatio = windowWidth / (float32)windowHeight;
     cameraComponent->near = 0.01f;
     cameraComponent->far = 1000.0f;
     recalculateProjectionMatrix(cameraComponent);
 
     DebugDraw::instance().cameraComponent = cameraComponent;
     DebugDraw::instance().cameraXfm = cameraXfm;
+    DebugDraw::instance().window = &window;
 
     ColliderComponent* debugCC;
     

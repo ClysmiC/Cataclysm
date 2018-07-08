@@ -396,6 +396,7 @@ Vec2 operator - (Vec2 vectorA, Vec2 vectorB)
     Vec2 result;
 
     result.x = vectorA.x - vectorB.x;
+    result.y = vectorA.y - vectorB.y;
     
     return result;
 }

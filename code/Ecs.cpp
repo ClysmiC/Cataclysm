@@ -8,6 +8,7 @@
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
 
+#include "Shader.h"
 #include "Transform.h"
 
 #include "Game.h"

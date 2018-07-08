@@ -118,9 +118,6 @@ bool initGlfwWindow(Window* window, uint32 width, uint32 height)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Not sure how to reasonably implement proper diffuse shading for 2-sided
-    // polygon... for now I will just cull back faces and if I need polygon to
-    // be 2-sided, I'll draw two polygons with different winding orders.
     glEnable(GL_CULL_FACE);
 
     return true;
