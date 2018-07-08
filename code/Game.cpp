@@ -118,8 +118,20 @@ void buildTestScene1(Scene* scene)
         TerrainComponent* tc = addTerrainComponent(e);
         new (tc) TerrainComponent("heightmap.bmp", Vec3(-32, 0, -32), 64, 64, -12, 0);
 
-        RenderComponent* rc = addRenderComponent(e);
-        new (rc) RenderComponent(e, &tc->mesh.submeshes[0]);
+        uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
+
+        ComponentGroup<RenderComponent> rcList = addRenderComponents(e, numChunks);
+
+        for (uint32 i = 0; i < tc->zChunkCount; i++)
+        {
+            for (uint32 j = 0; j < tc->xChunkCount; j++)
+            {
+                RenderComponent* rc = &rcList.components[i * tc->zChunkCount + j];
+
+                TerrainChunk* chunk = &tc->chunks[i][j];
+                new (rc) RenderComponent(e, &chunk->mesh.submeshes[0]);
+            }
+        }
     }
 }
 
