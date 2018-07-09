@@ -35,7 +35,12 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
     this->xChunkCount = xChunksNeeded;
     this->zChunkCount = zChunksNeeded;
 
+    float32 deltaXPerVertex = xLength / (xChunksNeeded * this->xVerticesPerChunk - 1);
+    float32 deltaZPerVertex = zLength / (xChunksNeeded * this->zVerticesPerChunk - 1);
+
     this->chunks.reserve(zChunksNeeded);
+
+    float32 maxXDebug = 0;
 
     for (uint32 chunkDown = 0; chunkDown < zChunksNeeded; chunkDown++)
     {
@@ -60,41 +65,44 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             std::vector<uint32> indices;
             indices.reserve((this->xVerticesPerChunk - 1) * (this->zVerticesPerChunk - 1) * 6);
 
-            Vec3 chunkOrigin =
-                this->origin +
-                this->xLengthPerChunk * chunkAcross * Vec3(Axis3D::X) +
-                this->zLengthPerChunk * chunkDown   * Vec3(Axis3D::Z);
-
             //
             // Fill out mesh vertices
             //
+
+            // Even though the chunk only owns a certain # of vertices,
+            // we may need to render 1 extra vertex to stitch it together
+            // to an adjacent chunk
+            uint32 xVerticesToRender = this->xVerticesPerChunk;
+            uint32 zVerticesToRender = this->zVerticesPerChunk;
+
+            if (chunkAcross < xChunksNeeded - 1) xVerticesToRender++;
+            if (chunkDown   < zChunksNeeded - 1) zVerticesToRender++;
+            
             {
-                for (uint32 down = 0; down < this->zVerticesPerChunk; down++)
+                for (uint32 down = 0; down < zVerticesToRender; down++)
                 {
                     uint32 downPixel = this->zVerticesPerChunk * chunkDown + down;
                     if (downPixel > imgHeight - 1) downPixel = imgHeight - 1;
                     
-                    float32 downNormalized = ((float32)down) / (this->zVerticesPerChunk - 1);
-                    
-                    float32 zPos = chunkOrigin.z + this->zLengthPerChunk * downNormalized;
+                    float32 zPos = this->origin.z + downPixel * deltaZPerVertex;
         
-                    for (uint32 across = 0; across < this->xVerticesPerChunk; across++)
+                    for (uint32 across = 0; across < xVerticesToRender; across++)
                     {
                         uint32 acrossPixel = this->xVerticesPerChunk * chunkAcross + across;
                         if (acrossPixel > imgWidth - 1) acrossPixel = imgWidth - 1;
                         
-                        float32 acrossNormalized = ((float32)across) / (this->xVerticesPerChunk - 1);
-                        
-                        float32 xPos = chunkOrigin.x + this->xLengthPerChunk * acrossNormalized;
+                        float32 xPos = this->origin.x + acrossPixel * deltaXPerVertex;
+
+                        maxXDebug = fmax(maxXDebug, xPos);
             
                         uint8 rawValue = (uint8)(imgData[downPixel * imgWidth + acrossPixel]);
                         float32 normalizedValue = rawValue / 255.0f;
 
-                        float32 yPos = chunkOrigin.y + chunk->minHeight + (chunk->maxHeight - chunk->minHeight) * normalizedValue;
+                        float32 yPos = this->origin.y + chunk->minHeight + (chunk->maxHeight - chunk->minHeight) * normalizedValue;
 
                         MeshVertex vertex;
                         vertex.position = Vec3(xPos, yPos, zPos);
-                        vertex.texCoords = Vec2(acrossNormalized, downNormalized);
+                        vertex.texCoords = Vec2(acrossPixel / ((float32)imgWidth - 1), downPixel / ((float32)imgHeight - 1));
                         vertices.push_back(vertex);
                     }
                 }
@@ -104,13 +112,13 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             // Fill out mesh indices
             //
             {
-                for (uint32 down = 0; down < this->zVerticesPerChunk - 1; down++)
+                for (uint32 down = 0; down < zVerticesToRender - 1; down++)
                 {
-                    for (uint32 across = 0; across < this->xVerticesPerChunk - 1; across++)
+                    for (uint32 across = 0; across < xVerticesToRender - 1; across++)
                     {
-                        uint32 topLeftIndex = down * this->xVerticesPerChunk + across;
+                        uint32 topLeftIndex = down * xVerticesToRender + across;
                         uint32 topRightIndex = topLeftIndex + 1;
-                        uint32 botLeftIndex = (down + 1) * this->xVerticesPerChunk + across;
+                        uint32 botLeftIndex = (down + 1) * xVerticesToRender + across;
                         uint32 botRightIndex = botLeftIndex + 1;
 
                         //  |\   //
@@ -165,7 +173,7 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                     Vec3 ac = c.position - a.position;
 
                     Vec3 n = cross(ab, ac).normalizeInPlace();
-
+                    
                     runningAverages[aIndex].update(n);
                     runningAverages[bIndex].update(n);
                     runningAverages[cIndex].update(n);

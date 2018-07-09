@@ -32,9 +32,6 @@ struct TerrainChunk
 {
     // We own this mesh, NOT the resource manager
     Mesh mesh;
-
-    // Visually stitch the edge of this mesh to adjacent terrain chunks in increasing X and Z
-    Mesh stitching; // TODO
     
     uint32 xIndex;
     uint32 zIndex;
