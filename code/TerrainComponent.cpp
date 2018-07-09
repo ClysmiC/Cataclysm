@@ -60,10 +60,7 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             chunk->mesh.id = "terrainMesh"; // This isn't unique, but since it isn't managed by resource manager it should be okay
             
             std::vector<MeshVertex> vertices;
-            vertices.reserve(this->xVerticesPerChunk * this->zVerticesPerChunk);
-
             std::vector<uint32> indices;
-            indices.reserve((this->xVerticesPerChunk - 1) * (this->zVerticesPerChunk - 1) * 6);
 
             //
             // Fill out mesh vertices
@@ -74,28 +71,42 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             // to an adjacent chunk
             uint32 xVerticesToRender = this->xVerticesPerChunk;
             uint32 zVerticesToRender = this->zVerticesPerChunk;
+            
+            vertices.reserve(xVerticesToRender * zVerticesToRender);
+            indices.reserve(xVerticesToRender * zVerticesToRender * 6);
 
-            if (chunkAcross < xChunksNeeded - 1) xVerticesToRender++;
-            if (chunkDown   < zChunksNeeded - 1) zVerticesToRender++;
+            if (chunkAcross < xChunksNeeded - 1)
+            {
+                chunk->hasExtraXVertex = true;
+                xVerticesToRender++;
+            }
+            
+            if (chunkDown   < zChunksNeeded - 1)
+            {
+                chunk->hasExtraZVertex = true;
+                zVerticesToRender++;
+            }
             
             {
                 for (uint32 down = 0; down < zVerticesToRender; down++)
                 {
                     uint32 downPixel = this->zVerticesPerChunk * chunkDown + down;
-                    if (downPixel > imgHeight - 1) downPixel = imgHeight - 1;
+                    uint32 downPixelClamped = downPixel;
+                    if (downPixelClamped > imgHeight - 1) downPixelClamped = imgHeight - 1;
                     
                     float32 zPos = this->origin.z + downPixel * deltaZPerVertex;
         
                     for (uint32 across = 0; across < xVerticesToRender; across++)
                     {
                         uint32 acrossPixel = this->xVerticesPerChunk * chunkAcross + across;
-                        if (acrossPixel > imgWidth - 1) acrossPixel = imgWidth - 1;
+                        uint32 acrossPixelClamped = acrossPixel;
+                        if (acrossPixelClamped > imgWidth - 1) acrossPixelClamped = imgWidth - 1;
                         
                         float32 xPos = this->origin.x + acrossPixel * deltaXPerVertex;
 
                         maxXDebug = fmax(maxXDebug, xPos);
             
-                        uint8 rawValue = (uint8)(imgData[downPixel * imgWidth + acrossPixel]);
+                        uint8 rawValue = (uint8)(imgData[downPixelClamped * imgWidth + acrossPixelClamped]);
                         float32 normalizedValue = rawValue / 255.0f;
 
                         float32 yPos = this->origin.y + chunk->minHeight + (chunk->maxHeight - chunk->minHeight) * normalizedValue;
@@ -173,6 +184,8 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                     Vec3 ac = c.position - a.position;
 
                     Vec3 n = cross(ab, ac).normalizeInPlace();
+
+                    assert(isNormal(n));
                     
                     runningAverages[aIndex].update(n);
                     runningAverages[bIndex].update(n);
@@ -202,5 +215,117 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
         }
     }
 
+    //
+    // Free image data
+    //
     stbi_image_free(imgData);
+
+    //
+    // Touch up the normals at the seams
+    //
+    for (uint32 chunkDown = 0; chunkDown < zChunksNeeded; chunkDown++)
+    {
+        for (uint32 chunkAcross = 0; chunkAcross < xChunksNeeded; chunkAcross++)
+        {
+            TerrainChunk* chunk = &this->chunks[chunkDown][chunkAcross];
+            
+            uint32 xVerticesInMesh = this->xVerticesPerChunk + (chunk->hasExtraXVertex ? 1 : 0);
+            uint32 zVerticesInMesh = this->zVerticesPerChunk + (chunk->hasExtraZVertex ? 1 : 0);
+
+            bool isTopmostChunk = chunkDown == 0;
+            bool isLeftmostChunk = chunkAcross == 0;
+
+            // Fix horizontal seam
+            if (chunkDown < zChunksNeeded - 1)
+            {
+                TerrainChunk* chunkBelow = &this->chunks[chunkDown + 1][chunkAcross];
+                for (uint32 i = 0; i < xVerticesInMesh - 1; i++)
+                {
+                    // The mesh to our left will handle this one as its corner fix-up
+                    if (i == 0 && !isLeftmostChunk) continue;
+                    
+                    MeshVertex& v1 = chunk->mesh.submeshes[0].vertices.at(
+                        xVerticesInMesh * (zVerticesInMesh - 1) + i
+                    );
+
+                    MeshVertex& v2 = chunkBelow->mesh.submeshes[0].vertices.at(
+                        i
+                    );
+
+                    Vec3 normal = normalize((v1.normal + v2.normal) / 2);
+
+                    v1.normal = normal;
+                    v2.normal = normal;
+                }
+            }
+
+            // Fix vertical seam
+            if (chunkAcross < xChunksNeeded - 1)
+            {
+               TerrainChunk* chunkToRight = &this->chunks[chunkDown][chunkAcross + 1];
+               
+               uint32 xVerticesInMeshToRight = this->xVerticesPerChunk + (chunkToRight->hasExtraXVertex ? 1 : 0);
+
+               for (uint32 i = 0; i < this->zVerticesPerChunk - 1; i++)
+               {
+                   // The mesh to our top will handle this one as its corner fix-up
+                   if (i == 0 && !isTopmostChunk) continue;
+                   
+                   MeshVertex& v1 = chunk->mesh.submeshes[0].vertices.at(
+                       xVerticesInMesh * i + xVerticesInMesh - 1
+                   );
+
+                   MeshVertex& v2 = chunkToRight->mesh.submeshes[0].vertices.at(
+                       xVerticesInMeshToRight * i
+                   );
+
+                   Vec3 normal = normalize((v1.normal + v2.normal) / 2);
+
+                   v1.normal = normal;
+                   v2.normal = normal;
+               }
+            }
+
+            // Corner fix-up
+            if (chunkDown < zChunksNeeded - 1 && chunkAcross < xChunksNeeded - 1)
+            {
+                TerrainChunk* chunkBelow = &this->chunks[chunkDown + 1][chunkAcross];
+                TerrainChunk* chunkToRight = &this->chunks[chunkDown][chunkAcross + 1];
+                TerrainChunk* chunkDiagonal = &this->chunks[chunkDown + 1][chunkAcross + 1];
+
+                uint32 xVerticesInMeshToRight = this->xVerticesPerChunk + (chunkToRight->hasExtraXVertex ? 1 : 0);
+
+                // Bot right point
+                MeshVertex& v1 = chunk->mesh.submeshes[0].vertices.at(
+                    xVerticesInMesh * zVerticesInMesh - 1
+                );
+
+                // Bot left point of chunk to right
+                MeshVertex& v2 = chunkToRight->mesh.submeshes[0].vertices.at(
+                    xVerticesInMeshToRight * (zVerticesInMesh - 1)
+                );
+
+                // Top right point of chunk below
+                MeshVertex& v3 = chunkBelow->mesh.submeshes[0].vertices.at(
+                    xVerticesInMesh - 1
+                );
+
+                // Top left point of chunk diagonal
+                MeshVertex& v4 = chunkDiagonal->mesh.submeshes[0].vertices.at(
+                    0
+                );
+
+                Vec3 normal = normalize((v1.normal + v2.normal + v3.normal + v4.normal) / 4);
+
+                v1.normal = normal;
+                v2.normal = normal;
+                v3.normal = normal;
+                v4.normal = normal;
+            }
+
+            // Don't need to re-upload the neighboring chunks that we modified, as they will
+            // upload themselves on their turn in the iteration loop
+            reuploadModifiedVerticesToGpu(&chunk->mesh.submeshes[0]);
+        }
+    }
 }

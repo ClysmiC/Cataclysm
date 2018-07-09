@@ -39,6 +39,11 @@ struct TerrainChunk
     float32 minHeight;
     float32 maxHeight;
 
+    // For stitching... the position of these vertices is "owned" by an adjacent chunk,
+    // but we need a copy of it for rendering
+    bool hasExtraXVertex = false;
+    bool hasExtraZVertex = false;
+
     TerrainComponent* terrainComponent;
 };
     
@@ -55,8 +60,8 @@ struct TerrainComponent : public Component
     uint32 xChunkCount;
     uint32 zChunkCount;
 
-    uint32 xVerticesPerChunk = 32;
-    uint32 zVerticesPerChunk = 32;
+    uint32 xVerticesPerChunk = 11;
+    uint32 zVerticesPerChunk = 11;
     
     std::vector<std::vector<TerrainChunk>> chunks;
 };

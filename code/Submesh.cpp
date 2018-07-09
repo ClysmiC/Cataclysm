@@ -123,6 +123,10 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         MeshVertex *v2 = &(submesh->vertices[submesh->indices[i + 1]]);
         MeshVertex *v3 = &(submesh->vertices[submesh->indices[i + 2]]);
 
+        assert(isNormal(v1->normal));
+        assert(isNormal(v2->normal));
+        assert(isNormal(v3->normal));
+
         Vec3 edge12 = v2->position - v1->position;
         Vec3 edge13 = v3->position - v1->position;
 
@@ -218,5 +222,18 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
         assert(length(vertex.tangent) > .99 && length(vertex.tangent) < 1.01);
         assert(length(vertex.normal) > .99 && length(vertex.normal) < 1.01);
     }
+}
+
+void reuploadModifiedVerticesToGpu(Submesh* submesh)
+{
+    assert(submesh->openGlInfo.indicesSize == submesh->indices.size());
+    
+    glBindVertexArray(submesh->openGlInfo.vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, submesh->openGlInfo.vbo);
+    glBufferData(GL_ARRAY_BUFFER, submesh->vertices.size() * sizeof(MeshVertex), submesh->vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, submesh->openGlInfo.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, submesh->indices.size() * sizeof(uint32), submesh->indices.data(), GL_STATIC_DRAW);
 }
 

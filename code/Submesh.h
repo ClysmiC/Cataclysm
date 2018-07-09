@@ -45,3 +45,7 @@ struct Submesh
 
 void recalculateTangentsAndBitangents(Submesh* submesh);
 
+// Note: only works after MODIFYING vertices... do NOT
+// add/remove vertices and then call this
+void reuploadModifiedVerticesToGpu(Submesh* submesh);
+
