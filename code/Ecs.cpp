@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "assert.h"
 
+#include "Game.h"
+
 #include "Quad.h"
 #include "DebugDraw.h"
 #include "DebugGlobal.h"
@@ -13,6 +15,9 @@
 
 #include "Game.h"
 #include <string>
+
+#include "GLFW/glfw3.h"
+#include "imgui/imgui.h" 
 
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
@@ -140,6 +145,18 @@ TerrainComponent* getTerrainComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->terrains, e);
+}
+
+WalkComponent* addWalkComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return addComponent(&e.ecs->walkComponents, e);
+}
+
+WalkComponent* getWalkComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->walkComponents, e);
 }
 
 CameraComponent* getCameraComponent(Entity e)
@@ -475,4 +492,114 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
     }
 
     return closest;
+}
+
+void walkAndCamera(Game* game)
+{
+    // @Hack, we are updating camera here too
+    TransformComponent* xfm = getTransformComponent(game->activeCamera);
+    Vec3 posBeforeMove = xfm->position;
+    
+    Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
+    
+    float32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
+    float32 cameraSpeed = 5;
+    float32 deltaTS = deltaTMs / 1000.0f;
+
+    if (keys[GLFW_KEY_LEFT_SHIFT])
+    {
+        cameraSpeed *= 2;
+    }
+
+    Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
+    Vec3 moveLeft    = normalize( -moveRight );
+    Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
+    Vec3 moveBack    = normalize( -moveForward );
+
+    // Uncomment this (and the asserts) to follow the pitch of the camera when
+    // moving forward or backward.
+    // moveForward = normalize(xfm->forward());
+
+    assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
+    assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
+    assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
+    assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
+
+    bool draggingCameraInEditMode =
+        game->editor.isEnabled &&
+        !game->editor.translator.isHandleSelected &&
+        mouseButtons[GLFW_MOUSE_BUTTON_1] &&
+        !ImGui::GetIO().WantCaptureMouse;
+
+    if (!game->editor.isEnabled || draggingCameraInEditMode)
+    {
+        if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
+        {
+            // Rotate
+            float32 deltaMouseX = mouseX - mouseXPrev;
+            float32 deltaMouseY = mouseY - mouseYPrev;
+
+            if (draggingCameraInEditMode)
+            {
+                // Drag gesture moves in opposite direction
+                deltaMouseX = -deltaMouseX;
+                deltaMouseY = -deltaMouseY;
+            }
+
+            Quaternion deltaYawAndPitch;
+            deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
+            deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+
+            xfm->orientation = deltaYawAndPitch * xfm->orientation;
+
+            float camRightY = xfm->right().y;
+            assert(FLOAT_EQ(camRightY, 0, EPSILON));
+        }
+
+        if (keys[GLFW_KEY_W])
+        {
+            xfm->position += moveForward * cameraSpeed * deltaTS;
+        }
+        else if (keys[GLFW_KEY_S])
+        {
+            xfm->position += moveBack * cameraSpeed * deltaTS;
+        }
+        
+        if (keys[GLFW_KEY_A])
+        {
+            xfm->position += moveLeft * cameraSpeed * deltaTS;
+        }
+        else if (keys[GLFW_KEY_D])
+        {
+            xfm->position += moveRight * cameraSpeed * deltaTS;
+        }
+    }
+
+    for (uint32 i = 0; i < game->activeScene->ecs.portals.size; i++)
+    {
+        PortalComponent* pc = &game->activeScene->ecs.portals.components[i];
+        ColliderComponent* cc = getColliderComponent(pc->entity);
+
+        if (pointInsideCollider(cc, xfm->position))
+        {
+            Vec3 portalPos = getTransformComponent(pc->entity)->position;
+            Vec3 portalToOldPos = posBeforeMove - portalPos;
+            Vec3 portalToPos = xfm->position - portalPos;
+            
+            if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
+            {
+                if(dot(portalToPos, intoPortalNormal(pc)) < 0)
+                {
+                    __debugbreak();
+                }
+
+                rebaseTransformInPlace(pc, xfm);
+                game->activeScene = pc->connectedPortal->entity.ecs->scene;
+            }
+        }
+    }
+    
+    // move x and z according to inputs
+
+    // if above a terrain component, set height to the terrain component height
 }

@@ -12,6 +12,7 @@
 #include "RenderComponent.h"
 #include "ColliderComponent.h"
 #include "TerrainComponent.h"
+#include "WalkComponent.h"
 
 #include <unordered_map>
 #include <vector>
@@ -22,6 +23,7 @@
 #define COMPONENT_ARRAY_SIZE 512
 
 struct Scene;
+struct Game;
 
 struct Ecs
 {
@@ -48,6 +50,7 @@ struct Ecs
     ComponentList<RenderComponent> renderComponents;
     ComponentList<PortalComponent> portals;
     ComponentList<ColliderComponent> colliders;
+    ComponentList<WalkComponent> walkComponents;
 };
 
 //
@@ -84,6 +87,9 @@ DirectionalLightComponent* getDirectionalLightComponent(Entity e);
 
 TerrainComponent* addTerrainComponent(Entity e);
 TerrainComponent* getTerrainComponent(Entity e);
+
+WalkComponent* addWalkComponent(Entity e);
+WalkComponent* getWalkComponent(Entity e);
     
 RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);
@@ -103,6 +109,8 @@ ComponentGroup<PointLightComponent> getPointLightComponents(Entity e);
 // TODO: do these belong in Ecs.h?
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal=false, Transform* destPortalXfm=nullptr);
 void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0);
+void walkAndCamera(Game* game);
+
 RaycastResult castRay(Ecs* ecs, Ray ray);
     
 PointLightComponent* closestPointLight(TransformComponent* xfm);

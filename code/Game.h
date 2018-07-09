@@ -8,6 +8,9 @@ extern float mouseY;
 extern float mouseXPrev;
 extern float mouseYPrev;
 
+extern float32 timeMs;
+extern float32 deltaTMs;
+
 extern bool keys[1024];
 extern bool lastKeys[1024];
 

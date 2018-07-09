@@ -202,6 +202,7 @@
     <ClInclude Include="code\Transform.h" />
     <ClInclude Include="code\TransformComponent.h" />
     <ClInclude Include="code\Types.h" />
+    <ClInclude Include="code\WalkComponent.h" />
     <ClInclude Include="code\Window.h" />
     <ClInclude Include="lib\glew\include\GL\eglew.h" />
     <ClInclude Include="lib\glew\include\GL\glew.h" />

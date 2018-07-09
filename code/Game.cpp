@@ -116,7 +116,7 @@ void buildTestScene1(Scene* scene)
         xfm->position = Vec3(0, 0, 0);
         
         TerrainComponent* tc = addTerrainComponent(e);
-        new (tc) TerrainComponent("heightmap.bmp", Vec3(-32, 0, -32), 64, 64, -12, 0);
+        new (tc) TerrainComponent("heightmap.bmp", Vec3(-400, 0, -400), 800, 800, -10, 4);
 
         uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 
@@ -231,134 +231,18 @@ void buildTestScene3(Scene* scene)
     }
 }
 
-void updateCameraXfm(Game* game)
-{
-    TransformComponent* xfm = getTransformComponent(game->activeCamera);
-    Vec3 posBeforeMove = xfm->position;
-    
-    Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
-    
-    float32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
-    float32 cameraSpeed = 5;
-    float32 deltaTS = deltaTMs / 1000.0f;
-
-    if (keys[GLFW_KEY_LEFT_SHIFT])
-    {
-        cameraSpeed *= 2;
-    }
-
-    Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
-    Vec3 moveLeft    = normalize( -moveRight );
-    Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
-    Vec3 moveBack    = normalize( -moveForward );
-
-    // Uncomment this (and the asserts) to follow the pitch of the camera when
-    // moving forward or backward.
-    // moveForward = normalize(xfm->forward());
-
-    assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
-
-    bool draggingCameraInEditMode =
-        game->editor.isEnabled &&
-        !game->editor.translator.isHandleSelected &&
-        mouseButtons[GLFW_MOUSE_BUTTON_1] &&
-        !ImGui::GetIO().WantCaptureMouse;
-
-    if (!game->editor.isEnabled || draggingCameraInEditMode)
-    {
-        if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
-        {
-            // Rotate
-            float32 deltaMouseX = mouseX - mouseXPrev;
-            float32 deltaMouseY = mouseY - mouseYPrev;
-
-            if (draggingCameraInEditMode)
-            {
-                // Drag gesture moves in opposite direction
-                deltaMouseX = -deltaMouseX;
-                deltaMouseY = -deltaMouseY;
-            }
-
-            Quaternion deltaYawAndPitch;
-            deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-            deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
-
-            xfm->orientation = deltaYawAndPitch * xfm->orientation;
-
-            float camRightY = xfm->right().y;
-            assert(FLOAT_EQ(camRightY, 0, EPSILON));
-        }
-
-        if (keys[GLFW_KEY_W])
-        {
-            xfm->position += moveForward * cameraSpeed * deltaTS;
-        }
-        else if (keys[GLFW_KEY_S])
-        {
-            xfm->position += moveBack * cameraSpeed * deltaTS;
-        }
-        
-        if (keys[GLFW_KEY_A])
-        {
-            xfm->position += moveLeft * cameraSpeed * deltaTS;
-        }
-        else if (keys[GLFW_KEY_D])
-        {
-            xfm->position += moveRight * cameraSpeed * deltaTS;
-        }
-    }
-
-    for (uint32 i = 0; i < game->activeScene->ecs.portals.size; i++)
-    {
-        PortalComponent* pc = &game->activeScene->ecs.portals.components[i];
-        ColliderComponent* cc = getColliderComponent(pc->entity);
-
-        if (pointInsideCollider(cc, xfm->position))
-        {
-            Vec3 portalPos = getTransformComponent(pc->entity)->position;
-            Vec3 portalToOldPos = posBeforeMove - portalPos;
-            Vec3 portalToPos = xfm->position - portalPos;
-            
-            if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
-            {
-                if(dot(portalToPos, intoPortalNormal(pc)) < 0)
-                {
-                    __debugbreak();
-                }
-
-                rebaseTransformInPlace(pc, xfm);
-                game->activeScene = pc->connectedPortal->entity.ecs->scene;
-            }
-        }
-    }
-}
-
 void updateGame(Game* game)
 {
-    updateCameraXfm(game);
+    assert(game->activeScene != nullptr);
+
+    //
+    // Update camera and position
+    //
+    walkAndCamera(game);
     
     //
-    // Rotate/scale test entity
-    TransformComponent* testXfm = getTransformComponent(game->editor.selectedEntity);
-
-    if (testXfm)
-    {
-        // float32 timeS = timeMs / 1000.0f;
-
-        // testXfm->scale.x = .5 + .25 * sinf(timeS / 2.0f);
-        // testXfm->scale.y = .5 + .25 * cosf(timeS / 6.0f);
-        // testXfm->scale.z = .5 + .25 * cosf(timeS / 10.0f);
-
-        // testXfm->orientation = axisAngle(Vec3(3, 1, 1), timeS * 6);
-    }
-
-    assert(game->activeScene != nullptr);
-    CameraComponent* camComponent = getCameraComponent(game->activeCamera);
-    TransformComponent* camXfm = getTransformComponent(game->activeCamera);
-
+    // Enable/disable editor
+    //
     if (keys[GLFW_KEY_GRAVE_ACCENT] && !lastKeys[GLFW_KEY_GRAVE_ACCENT])
     {
         game->editor.isEnabled = !game->editor.isEnabled;
@@ -373,9 +257,18 @@ void updateGame(Game* game)
         }
     }
 
-    renderScene(game->activeScene, camComponent, camXfm);
+    //
+    // Render
+    //
+    {
+        CameraComponent* camComponent = getCameraComponent(game->activeCamera);
+        TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+
+        renderScene(game->activeScene, camComponent, camXfm);
+    }
 
     //
+    // Editor mode
     // Note: Editor should always be shown AFTER rendering
     //
     if (game->editor.isEnabled)
@@ -463,10 +356,26 @@ int main()
     buildTestScene3(testScene3);
     
     // Set up camera
+    // @Hack: camera is owned by test scene 1. Make some entities (player, camera, etc.) independent of
+    // scene. Maybe the game has its own ECS outside of scenes or maybe make system to transfer ownership
+    // from one scene to another scene
     Entity camera = makeEntity(&testScene1->ecs, "camera");
     TransformComponent* cameraXfm = addTransformComponent(camera);
     CameraComponent* cameraComponent = addCameraComponent(camera);
     cameraComponent->window = &window;
+
+    // @Hack: same as camera hack
+    Entity player = makeEntity(&testScene1->ecs, "player");
+    {
+        TransformComponent* playerXfm = addTransformComponent(player);
+        ColliderComponent* playerCollider = addColliderComponent(player);
+        playerCollider->type = ColliderType::RECT3;
+
+        float32 playerHeight = 2;
+        float32 playerWidth = .5;
+        playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
+        playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
+    }
     
 #if 1
     cameraComponent->isOrthographic = false;

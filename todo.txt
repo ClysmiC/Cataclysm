@@ -1,0 +1,14 @@
+ARRAY_BUCKET data structure for components
+
+TRANSFER OWNERSHIP OF COMPONENTS BETWEEN SCENES
+  - This invalidates pointers... can we use a handle somehow?
+  - The pointers should stay valid until the end of frame (i.e., actual transition happens at known time at end of frame)
+  - Maybe overload assigning of the pointers to discourage saving them?
+
+REORGANIZE DIRECTORY
+  - Change Types.h to als_types
+  - Make subdir for als_ files... consider renaming them too
+  - Make subdir for components
+  - Make subdir for systems (i.e., behaviors that use components)
+  - Split between engine and game-specific stuff (like portal)
+  - Clean up #includes and aggressively forward-declare to lower compile times
