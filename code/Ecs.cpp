@@ -26,18 +26,17 @@ template<class T>
 T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
 {
     assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
-    assert(componentList->size < COMPONENT_ARRAY_SIZE);
 
-    T componentToAdd;
-    componentToAdd.entity = e;
+    // T componentToAdd;
+    // componentToAdd.entity = e;
     
-    componentList->components[componentList->size] = componentToAdd;
-    T* result = &(componentList->components[componentList->size]);
+    // componentList->components[componentList->size] = componentToAdd;
+    // T* result = &(componentList->components[componentList->size]);
 
-    componentList->size++;
+    BucketLocator result = componentList->components.occupyEmptySlot();
 
     ComponentGroup<T> cg;
-    cg.components = result;
+    cg.firstComponent = result;
     cg.numComponents = 1;
     componentList->lookup[e.id] = cg;
     
@@ -53,7 +52,7 @@ T* getComponent(Ecs::ComponentList<T>* componentList, Entity e)
         return nullptr;
     }
 
-    return it->second.components;
+    return componentList->addressOf(it->second.firstComponent);
 }
 
 template<class T>
@@ -61,27 +60,20 @@ ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, 
 {
     assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
     
-    T* firstComponent = nullptr;
+    BucketLocator firstComponent;
 
     for (uint32 i = 0; i < numComponents; i++)
     {
-        assert(componentList->size < COMPONENT_ARRAY_SIZE);
-        
-        T component;
-        component.entity = e;
-        
-        componentList->components[componentList->size] = component;
+        BucketLocator locator = componentList->components.occupyEmptySlot();
         if (i == 0)
         {
-            firstComponent = &(componentList->components[componentList->size]);
+            firstComponent = locator;
         }
-        
-        componentList->size++;
     }
 
     ComponentGroup<T> cg;
     cg.entity = e;
-    cg.components = firstComponent;
+    cg.firstComponent = firstComponent;
     cg.numComponents = numComponents;
     componentList->lookup[e.id] = cg;
 
@@ -91,16 +83,15 @@ ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, 
 template<class T>
 ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e)
 {
+    ComponentGroup<T> result;
+    
     auto it = componentList->lookup.find(e.id);
-    if (it == componentList->lookup.end())
+    if (it != componentList->lookup.end())
     {
-        ComponentGroup<T> result;
-        result.components = nullptr;
-        result.numComponents = 0;
-        return result;
+        result = it->second;
     }
 
-    return it->second;
+    return result;
 }
 
 Entity makeEntity(Ecs* ecs, string16 friendlyName)
@@ -269,13 +260,13 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         return;
     }
 
-    for (uint32 i = 0; i < scene->ecs.portals.size; i++)
+    FOR_BUCKET_ARRAY(scene->ecs.portals.components)
     {
         //
         // Calculate the position and orientation of the camera sitting in the dest scene and looking "through" the portal
         // into the dest scene.
         //
-        PortalComponent* pc = &scene->ecs.portals.components[i];
+        PortalComponent* pc = scene->ecs.portals.components.addressOf(it.locator);
 
         Transform* sourceSceneXfm = getTransformComponent(pc->entity);
         Transform* destSceneXfm = getConnectedSceneXfm(pc);
@@ -383,9 +374,9 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
 
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal, Transform* destPortalXfm)
 {
-    for (uint32 i = 0; i < ecs->renderComponents.size; i++)
+    FOR_BUCKET_ARRAY (ecs->renderComponents.components)
     {
-        RenderComponent &rc = ecs->renderComponents.components[i];
+        RenderComponent &rc = *it.ptr;
         TransformComponent* xfm = getTransformComponent(rc.entity);
 
         if (renderingViaPortal)
@@ -417,15 +408,15 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
                 setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
             }
 
-            for (uint32 j = 0; j < ecs->directionalLights.size; j++)
+            FOR_BUCKET_ARRAY (ecs->directionalLights.components)
             {
                 // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
                 // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
                 // in the shader? Is that robust when we change the shader?
-                DirectionalLightComponent* dlc = ecs->directionalLights.components + j;
+                DirectionalLightComponent* dlc = it.ptr;
 
-                string64 directionVarName = ("directionalLights[" + std::to_string(j) + "].direction").c_str();
-                string64 intensityVarName = ("directionalLights[" + std::to_string(j) + "].intensity").c_str();
+                string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
+                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
                 
                 setVec3(shader, directionVarName, dlc->direction);
                 setVec3(shader, intensityVarName, dlc->intensity);
@@ -474,9 +465,9 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
     PointLightComponent* closest = nullptr;
     float32 closestDistance = FLT_MAX;
 
-    for (uint32 i = 0; i < ecs->pointLights.size; i++)
+    FOR_BUCKET_ARRAY (ecs->pointLights.components)
     {
-        PointLightComponent* pl = &(ecs->pointLights.components[i]);
+        PointLightComponent* pl = it.ptr;
         TransformComponent* plXfm = getTransformComponent(pl->entity);
 
         assert(plXfm != nullptr);
@@ -575,9 +566,9 @@ void walkAndCamera(Game* game)
         }
     }
 
-    for (uint32 i = 0; i < game->activeScene->ecs.portals.size; i++)
+    FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
     {
-        PortalComponent* pc = &game->activeScene->ecs.portals.components[i];
+        PortalComponent* pc = it.ptr;
         ColliderComponent* cc = getColliderComponent(pc->entity);
 
         if (pointInsideCollider(cc, xfm->position))

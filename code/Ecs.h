@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "als_bucket_array.h"
 #include "Entity.h"
 #include "Ray.h"
 #include "ComponentGroup.h"
@@ -17,11 +18,6 @@
 #include <unordered_map>
 #include <vector>
 
-
-// TODO better solution for this.
-// maybe each component type gets its own constant
-#define COMPONENT_ARRAY_SIZE 512
-
 struct Scene;
 struct Game;
 
@@ -30,8 +26,7 @@ struct Ecs
     template<class T>
     struct ComponentList
     {
-        T components[COMPONENT_ARRAY_SIZE];
-        uint32 size = 0;
+        BucketArray<T> components;
         std::unordered_map<uint32, ComponentGroup<T>> lookup;
     };
     
