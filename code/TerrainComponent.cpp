@@ -40,8 +40,6 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
 
     this->chunks.reserve(zChunksNeeded);
 
-    float32 maxXDebug = 0;
-
     for (uint32 chunkDown = 0; chunkDown < zChunksNeeded; chunkDown++)
     {
         this->chunks.push_back(std::vector<TerrainChunk>());
@@ -103,8 +101,6 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
                         if (acrossPixelClamped > imgWidth - 1) acrossPixelClamped = imgWidth - 1;
                         
                         float32 xPos = this->origin.x + acrossPixel * deltaXPerVertex;
-
-                        maxXDebug = fmax(maxXDebug, xPos);
             
                         uint8 rawValue = (uint8)(imgData[downPixelClamped * imgWidth + acrossPixelClamped]);
                         float32 normalizedValue = rawValue / 255.0f;
