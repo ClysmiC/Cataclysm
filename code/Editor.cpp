@@ -13,7 +13,7 @@ EditorState::EditorState()
     addTransformComponent(this->translator.pseudoEntity);
     auto colliders = addColliderComponents(this->translator.pseudoEntity, 3);
 
-    this->translator.xAxisHandle = &colliders.firstComponent[0];
+    this->translator.xAxisHandle = &colliders.components[0];
     this->translator.yAxisHandle = &colliders.components[1];
     this->translator.zAxisHandle = &colliders.components[2];
 

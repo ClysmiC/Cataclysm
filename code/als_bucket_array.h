@@ -225,7 +225,7 @@ public:
             result.index = it.index++;
         }
 
-        if (!result.locator.isOccupied())
+        if (!this->isOccupied(result.locator))
         {
             result.flag = _BucketArrayIteratorFlag::END;
         }
