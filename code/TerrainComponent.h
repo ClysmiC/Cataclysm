@@ -60,8 +60,8 @@ struct TerrainComponent : public Component
     uint32 xChunkCount;
     uint32 zChunkCount;
 
-    uint32 xVerticesPerChunk = 11;
-    uint32 zVerticesPerChunk = 11;
+    uint32 xVerticesPerChunk = 32;
+    uint32 zVerticesPerChunk = 32;
     
     std::vector<std::vector<TerrainChunk>> chunks;
 };
