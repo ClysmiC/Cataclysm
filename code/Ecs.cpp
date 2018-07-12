@@ -27,14 +27,9 @@ T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
     assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
 
-    // T componentToAdd;
-    // componentToAdd.entity = e;
-    
-    // componentList->components[componentList->size] = componentToAdd;
-    // T* result = &(componentList->components[componentList->size]);
-
     BucketLocator location = componentList->components.occupyEmptySlot();
     T* result = componentList->components.addressOf(location);
+    result->entity = e;
 
     ComponentGroup<T, BUCKET_SIZE> cg;
     cg.firstComponent = location;
@@ -69,6 +64,9 @@ ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
     for (uint32 i = 0; i < numComponents; i++)
     {
         BucketLocator locator = componentList->components.occupyEmptySlot();
+        T* result = componentList->components.addressOf(locator);
+        result->entity = e;
+
         if (i == 0)
         {
             firstComponent = locator;

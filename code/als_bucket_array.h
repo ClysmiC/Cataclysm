@@ -115,13 +115,15 @@ public:
         int32 bucketIndex = locator.bucketIndex;
         int32 slotIndex = locator.slotIndex;
         
-        index -= min(index, BUCKET_SIZE - slotIndex);
+        uint32 advanceSlotIndexAmount = min(index, BUCKET_SIZE - slotIndex);
+        slotIndex += advanceSlotIndexAmount;
+
+        index -= advanceSlotIndexAmount;
         while (index > 0)
         {
             bucketIndex++;
             slotIndex = 0;
         }
-
         
         T* result = addressOf(BucketLocator(bucketIndex, slotIndex));
         return result;
@@ -138,7 +140,7 @@ public:
 
     bool isOccupied(BucketLocator locator)
     {
-        if (locator.bucketIndex < 0 || locator.slotIndex < 0) return false;
+        if (locator.bucketIndex < 0 || locator.slotIndex < 0 || this->buckets.empty()) return false;
         
         return this->buckets[locator.bucketIndex]->occupied[locator.slotIndex];
     }
@@ -193,6 +195,8 @@ public:
             {
                 slotIndex = 0;
                 bucketIndex++;
+
+                if (bucketIndex == this->buckets.size()) break;
             }
 
             if (this->buckets[bucketIndex]->occupied[slotIndex])
@@ -208,7 +212,7 @@ public:
     {
         BucketIterator result;
 
-        if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE || (it.index >= it.countToIterate && it.countToIterate >= 0))
+        if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE || (it.index >= it.countToIterate && it.countToIterate != (uint32)-1))
         {
             // Don't iterate past the count to iterate
             result.flag = _BucketArrayIteratorFlag::POST_ITERATE;
@@ -228,16 +232,21 @@ public:
             }
 
             result.flag = _BucketArrayIteratorFlag::ITERATING;
+            result.index = 0;
         }
         else
         {
             result.locator = this->next(it.locator);
+            result.index = it.index + 1;
         }
 
-        result.index = it.index++;
         result.countToIterate = it.countToIterate;
 
-        if (!this->isOccupied(result.locator))
+        if (this->isOccupied(result.locator))
+        {
+            result.ptr = this->addressOf(result.locator);
+        }
+        else
         {
             // Reached end of bucket array
             result.flag = _BucketArrayIteratorFlag::POST_ITERATE;

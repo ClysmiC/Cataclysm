@@ -57,6 +57,8 @@ void updateLastKeysAndMouseButtons()
 
 void buildTestScene1(Scene* scene)
 {
+    scene->name = "Test Scene 1 (hex)";
+
     ResourceManager& rm = ResourceManager::instance();
     
     Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, true);
@@ -137,6 +139,8 @@ void buildTestScene1(Scene* scene)
 
 void buildTestScene2(Scene* scene)
 {
+    scene->name = "Test Scene 2 (ico)";
+
     ResourceManager& rm = ResourceManager::instance();
     
     Mesh *icosahedronMesh = rm.initMesh("icosahedron/icosahedron.obj", true, true);
@@ -187,6 +191,8 @@ void buildTestScene2(Scene* scene)
 
 void buildTestScene3(Scene* scene)
 {
+    scene->name = "Test Scene 3 (shuttle)";
+
     ResourceManager& rm = ResourceManager::instance();
     
     Mesh *shuttleMesh = rm.initMesh("shuttle/shuttle.obj", true, true);
@@ -223,10 +229,10 @@ void buildTestScene3(Scene* scene)
         
         auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
 
-        for(uint32 j = 0; j < shuttleMesh->submeshes.size(); j++)
+        FOR_COMPONENT_GROUP(rcc)
         {
-            RenderComponent *rc = &rcc[j];
-            new (rc) RenderComponent(e, &(shuttleMesh->submeshes[j]));
+            RenderComponent *rc = it.ptr;
+            new (rc) RenderComponent(e, &(shuttleMesh->submeshes[it.index]));
         }
     }
 }
