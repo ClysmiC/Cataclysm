@@ -93,11 +93,11 @@ void buildTestScene1(Scene* scene)
         tc->position = hexPositions[i];
         tc->scale = Vec3(.25);
         
-        ComponentGroup<RenderComponent> rcc = addRenderComponents(e, hexMesh->submeshes.size());
+        auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
         for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
         {
-            RenderComponent *rc = rcc.components + j;
+            RenderComponent *rc = &rcc[j];
             new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
         }
     }
@@ -120,13 +120,13 @@ void buildTestScene1(Scene* scene)
 
         uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 
-        ComponentGroup<RenderComponent> rcList = addRenderComponents(e, numChunks);
+        auto rcList = addRenderComponents(e, numChunks);
 
         for (uint32 i = 0; i < tc->zChunkCount; i++)
         {
             for (uint32 j = 0; j < tc->xChunkCount; j++)
             {
-                RenderComponent* rc = &rcList.components[i * tc->xChunkCount + j];
+                RenderComponent* rc = &rcList[i * tc->xChunkCount + j];
 
                 TerrainChunk* chunk = &tc->chunks[i][j];
                 new (rc) RenderComponent(e, &chunk->mesh.submeshes[0]);
@@ -172,14 +172,14 @@ void buildTestScene2(Scene* scene)
         TransformComponent *tc = addTransformComponent(e);
         tc->position = icosahedronPositions[i];
 
-        ComponentGroup<RenderComponent> rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
+        auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
 
         ColliderComponent *cc = addColliderComponent(e);
         new (cc) ColliderComponent(icosahedronMesh->bounds);
                                    
         for(uint32 j = 0; j < icosahedronMesh->submeshes.size(); j++)
         {
-            RenderComponent *rc = rcc.components + j;
+            RenderComponent *rc = &rcc[j];
             new (rc) RenderComponent(e, &(icosahedronMesh->submeshes[j]));
         }
     }
@@ -221,11 +221,11 @@ void buildTestScene3(Scene* scene)
         tc->position = shuttlePositions[i];
         tc->scale = Vec3(.25);
         
-        ComponentGroup<RenderComponent> rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
+        auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
 
         for(uint32 j = 0; j < shuttleMesh->submeshes.size(); j++)
         {
-            RenderComponent *rc = rcc.components + j;
+            RenderComponent *rc = &rcc[j];
             new (rc) RenderComponent(e, &(shuttleMesh->submeshes[j]));
         }
     }

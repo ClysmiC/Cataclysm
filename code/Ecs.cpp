@@ -22,8 +22,8 @@
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 
-template<class T>
-T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
+template<class T, uint32 BUCKET_SIZE>
+T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
     assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
 
@@ -33,18 +33,22 @@ T* addComponent(Ecs::ComponentList<T>* componentList, Entity e)
     // componentList->components[componentList->size] = componentToAdd;
     // T* result = &(componentList->components[componentList->size]);
 
-    BucketLocator result = componentList->components.occupyEmptySlot();
+    BucketLocator location = componentList->components.occupyEmptySlot();
+    T* result = componentList->components.addressOf(location);
 
-    ComponentGroup<T> cg;
-    cg.firstComponent = result;
+    ComponentGroup<T, BUCKET_SIZE> cg;
+    cg.firstComponent = location;
     cg.numComponents = 1;
+    cg.entity = e;
+    cg.bucketArray = &componentList->components;
+
     componentList->lookup[e.id] = cg;
     
     return result;    
 }
 
-template<class T>
-T* getComponent(Ecs::ComponentList<T>* componentList, Entity e)
+template<class T, uint32 BUCKET_SIZE>
+T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
     auto it = componentList->lookup.find(e.id);
     if (it == componentList->lookup.end())
@@ -52,15 +56,15 @@ T* getComponent(Ecs::ComponentList<T>* componentList, Entity e)
         return nullptr;
     }
 
-    return componentList->addressOf(it->second.firstComponent);
+    return componentList->components.addressOf(it->second.firstComponent);
 }
 
-template<class T>
-ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, uint32 numComponents)
+template<class T, uint32 BUCKET_SIZE>
+ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents)
 {
     assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
     
-    BucketLocator firstComponent;
+    BucketLocator firstComponent = BucketLocator();
 
     for (uint32 i = 0; i < numComponents; i++)
     {
@@ -71,19 +75,21 @@ ComponentGroup<T> addComponents(Ecs::ComponentList<T>* componentList, Entity e, 
         }
     }
 
-    ComponentGroup<T> cg;
-    cg.entity = e;
+    ComponentGroup<T, BUCKET_SIZE> cg;
     cg.firstComponent = firstComponent;
     cg.numComponents = numComponents;
+    cg.entity = e;
+    cg.bucketArray = &componentList->components;
+
     componentList->lookup[e.id] = cg;
 
     return cg;
 }
 
-template<class T>
-ComponentGroup<T> getComponents(Ecs::ComponentList<T>* componentList, Entity e)
+template<class T, uint32 BUCKET_SIZE>
+ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
-    ComponentGroup<T> result;
+    ComponentGroup<T, BUCKET_SIZE> result;
     
     auto it = componentList->lookup.find(e.id);
     if (it != componentList->lookup.end())
@@ -192,15 +198,15 @@ PointLightComponent* getPointLightComponent(Entity e)
     return getComponent(&e.ecs->pointLights, e);
 }
 
-ComponentGroup<PointLightComponent> addPointLightComponents(Entity e, uint32 numComponents)
+ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightComponents(Entity e, uint32 numComponents)
 {
-    if (e.id == 0) return ComponentGroup<PointLightComponent>();
+    if (e.id == 0) return ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE>();
     return addComponents(&e.ecs->pointLights, e, numComponents);
 }
 
-ComponentGroup<PointLightComponent> getPointLightComponents(Entity e)
+ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightComponents(Entity e)
 {
-    if (e.id == 0) return ComponentGroup<PointLightComponent>();
+    if (e.id == 0) return ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE>();
     return getComponents(&e.ecs->pointLights, e);
 }
 
@@ -216,15 +222,15 @@ RenderComponent* getRenderComponent(Entity e)
     return getComponent(&e.ecs->renderComponents, e);
 }
 
-ComponentGroup<RenderComponent> addRenderComponents(Entity e, uint32 numComponents)
+ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> addRenderComponents(Entity e, uint32 numComponents)
 {
-    if (e.id == 0) return ComponentGroup<RenderComponent>();
+    if (e.id == 0) return ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE>();
     return addComponents(&e.ecs->renderComponents, e, numComponents);
 }
 
-ComponentGroup<RenderComponent> getRenderComponents(Entity e)
+ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> getRenderComponents(Entity e)
 {
-    if (e.id == 0) return ComponentGroup<RenderComponent>();
+    if (e.id == 0) return ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE>();
     return getComponents(&e.ecs->renderComponents, e);
 }
 
@@ -240,15 +246,15 @@ ColliderComponent* getColliderComponent(Entity e)
     return getComponent(&e.ecs->colliders, e);
 }
 
-ComponentGroup<ColliderComponent> addColliderComponents(Entity e, uint32 numComponents)
+ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addColliderComponents(Entity e, uint32 numComponents)
 {
-    if (e.id == 0) return ComponentGroup<ColliderComponent>();
+    if (e.id == 0) return ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE>();
     return addComponents(&e.ecs->colliders, e, numComponents);
 }
 
-ComponentGroup<ColliderComponent> getColliderComponents(Entity e)
+ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponents(Entity e)
 {
-    if (e.id == 0) return ComponentGroup<ColliderComponent>();
+    if (e.id == 0) return ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE>();
     return getComponents(&e.ecs->colliders, e);
 }
 

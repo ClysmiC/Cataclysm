@@ -2,6 +2,8 @@
 
 #include "Types.h"
 #include <vector>
+#include <assert.h>
+#include "als_util.h"
 
 //
 // Implementation guided by the following video:
@@ -10,9 +12,9 @@
 //
 
 #define FOR_BUCKET_ARRAY(bucketArray) \
-    for ( auto it = (bucketArray)._iteratorStart(); (it = (bucketArray).iterate(it)).flag != _BucketArrayIteratorFlag::END ; )
+    for ( auto it = (bucketArray)._initIterator(); (it = (bucketArray).iterate(it)).flag != _BucketArrayIteratorFlag::POST_ITERATE ; )
 
-enum class _BucketArrayIteratorFlag { VALID, START, END };
+enum class _BucketArrayIteratorFlag { ITERATING, PRE_ITERATE, POST_ITERATE };
 
 struct BucketLocator
 {
@@ -32,7 +34,7 @@ struct BucketArray
 {
     struct Bucket
     {
-        // uint32 index;
+        uint32 index;
         uint32 count = 0;
         bool occupied[BUCKET_SIZE] = { 0 };
         T data[BUCKET_SIZE];
@@ -41,9 +43,10 @@ struct BucketArray
     struct BucketIterator
     {
         uint32 index = 0;
+        uint32 countToIterate = 0;
         BucketLocator locator = BucketLocator(0, 0);
         T* ptr;
-        _BucketArrayIteratorFlag flag = BAIF_VALID;
+        _BucketArrayIteratorFlag flag = _BucketArrayIteratorFlag::ITERATING;
     };
 
 
@@ -59,10 +62,10 @@ private:
         assert(unfullBuckets.size() == 0);
         
         Bucket* bucket = new Bucket();
-        // bucket->index = buckets.size();
+        bucket->index = buckets.size();
         
         this->buckets.push_back(bucket);
-        this->unfullBuckets.push_back(unfullBuckets);
+        this->unfullBuckets.push_back(bucket);
 
         return bucket;
     }
@@ -71,12 +74,13 @@ private:
 public:
     BucketLocator occupyEmptySlot()
     {
-        T* result = nullptr;
+        BucketLocator result;
         
         if (this->unfullBuckets.size() == 0) addBucket();
         assert(this->unfullBuckets.size() > 0);
 
         Bucket* bucket = this->unfullBuckets[0];
+        result.bucketIndex = bucket->index;
 
         for (uint32 i = 0; i < BUCKET_SIZE; i++)
         {
@@ -85,8 +89,8 @@ public:
                 bucket->occupied[i] = true;
                 bucket->count++;
                 this->count++;
+                result.slotIndex = i;
 
-                result = &bucket->data[i];
                 break;
             }
         }
@@ -101,14 +105,14 @@ public:
 
     T* addressOf(BucketLocator locator)
     {
-        return &(this->buckets[locator.bucketIndex].data[locator.slotIndex]);
+        return &(this->buckets[locator.bucketIndex]->data[locator.slotIndex]);
     }
 
     T* addressOf(BucketLocator locator, uint32 index)
     {
         const uint32 indexCopyForLookingAtInDebugger = index;
         
-        int32 bucketIndex = locator.index;
+        int32 bucketIndex = locator.bucketIndex;
         int32 slotIndex = locator.slotIndex;
         
         index -= min(index, BUCKET_SIZE - slotIndex);
@@ -136,30 +140,20 @@ public:
     {
         if (locator.bucketIndex < 0 || locator.slotIndex < 0) return false;
         
-        return this->buckets[locator.bucketIndex].occupied[locator.slotIndex];
+        return this->buckets[locator.bucketIndex]->occupied[locator.slotIndex];
     }
 
     bool isEmpty()
     {
         return this->count == 0;
     }
-    
-    BucketLocator _firstLocation()
-    {
-        if (this->count == 0) return BucketLocator(-1, -1);
-        
-        BucketLocator locator(0, 0);
 
-        if (this->isOccupied(locator)) return locator;
-
-        locator = this->next(locator);
-        return locator;
-    }
-
-    BucketIterator _iteratorStart()
+    BucketIterator _initIterator(BucketLocator startingLocator = BucketLocator(0, 0), uint32 countToIterate = -1)
     {
         BucketIterator result;
-        result.flag = _BucketArrayIteratorFlag::START;
+        result.flag = _BucketArrayIteratorFlag::PRE_ITERATE;
+        result.locator = startingLocator;
+        result.countToIterate = countToIterate;
         return result;
     }
 
@@ -180,7 +174,7 @@ public:
                 bucketIndex++;
             }
 
-            if (this->buckets[bucketIndex].occupied[slotIndex]) return true;
+            if (this->buckets[bucketIndex]->occupied[slotIndex]) return true;
         }
 
         return false;
@@ -188,8 +182,8 @@ public:
 
     BucketLocator next(BucketLocator locator)
     {
-        int32 bucketIndex = locator.bucketIndex;
-        int32 slotIndex = locator.slotIndex;
+        uint32 bucketIndex = locator.bucketIndex;
+        uint32 slotIndex = locator.slotIndex;
 
         while(bucketIndex < this->buckets.size())
         {
@@ -201,7 +195,7 @@ public:
                 bucketIndex++;
             }
 
-            if (this->buckets[bucketIndex].occupied[slotIndex])
+            if (this->buckets[bucketIndex]->occupied[slotIndex])
             {
                 return BucketLocator(bucketIndex, slotIndex);
             }
@@ -214,20 +208,39 @@ public:
     {
         BucketIterator result;
 
-        if (it.flag == _BucketArrayIteratorFlag::START)
+        if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE || (it.index >= it.countToIterate && it.countToIterate >= 0))
         {
-            result.locator = this->_firstLocation();
-            result.index = 0;
+            // Don't iterate past the count to iterate
+            result.flag = _BucketArrayIteratorFlag::POST_ITERATE;
+            return result;
+        }
+
+
+        if (it.flag == _BucketArrayIteratorFlag::PRE_ITERATE)
+        {
+            if (this->isOccupied(it.locator))
+            {
+                result.locator = it.locator;
+            }
+            else
+            {
+                result.locator = this->next(it.locator);
+            }
+
+            result.flag = _BucketArrayIteratorFlag::ITERATING;
         }
         else
         {
             result.locator = this->next(it.locator);
-            result.index = it.index++;
         }
+
+        result.index = it.index++;
+        result.countToIterate = it.countToIterate;
 
         if (!this->isOccupied(result.locator))
         {
-            result.flag = _BucketArrayIteratorFlag::END;
+            // Reached end of bucket array
+            result.flag = _BucketArrayIteratorFlag::POST_ITERATE;
         }
 
         return result;

@@ -171,7 +171,9 @@
   <ItemGroup>
     <ClInclude Include="code\Aabb.h" />
     <ClInclude Include="code\als.h" />
+    <ClInclude Include="code\als_bucket_array.h" />
     <ClInclude Include="code\als_math.h" />
+    <ClInclude Include="code\als_util.h" />
     <ClInclude Include="code\CameraComponent.h" />
     <ClInclude Include="code\ColliderComponent.h" />
     <ClInclude Include="code\Component.h" />

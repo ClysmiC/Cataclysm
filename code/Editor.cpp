@@ -13,9 +13,9 @@ EditorState::EditorState()
     addTransformComponent(this->translator.pseudoEntity);
     auto colliders = addColliderComponents(this->translator.pseudoEntity, 3);
 
-    this->translator.xAxisHandle = &colliders.components[0];
-    this->translator.yAxisHandle = &colliders.components[1];
-    this->translator.zAxisHandle = &colliders.components[2];
+    this->translator.xAxisHandle = &colliders[0];
+    this->translator.yAxisHandle = &colliders[1];
+    this->translator.zAxisHandle = &colliders[2];
 
     float32 longDim = 2;
     float32 shortDim = 0.25;
@@ -220,8 +220,8 @@ void showEditor(EditorState* editor)
         CameraComponent* camera = getCameraComponent(e);
         PortalComponent* portal = getPortalComponent(e);
         DirectionalLightComponent* directionalLights = getDirectionalLightComponent(e);
-        ComponentGroup<PointLightComponent> pointLights = getPointLightComponents(e);
-        ComponentGroup<RenderComponent> renderComponents = getRenderComponents(e);
+        auto pointLights = getPointLightComponents(e);
+        auto renderComponents = getRenderComponents(e);
 
         //
         // Docked buttons
