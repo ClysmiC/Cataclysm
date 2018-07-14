@@ -386,6 +386,9 @@ float32 getTerrainHeight(TerrainComponent* terrain, float32 xWorld, float32 zWor
     uint32 zFloor = (uint32)std::floor(zIndex);
     uint32 zCeil  = (uint32)std::ceil(zIndex);
 
+    if (xCeil == xFloor) xCeil++;
+    if (zCeil == zFloor) zCeil++;
+
     Vec3 a, b, c;
 
     if (xIndexFractionalPart > zIndexFractionalPart)
