@@ -830,7 +830,7 @@ inline float32 maxAbs(float32 value1, float32 value2)
 
 inline Vec3 barycentricCoordinate(Vec2 a, Vec2 b, Vec2 c, Vec2 point)
 {
-    // Implementation from Real-Time Collision Detection textbook
+    // Implementation using Cramer's Rule from Real-Time Collision Detection textbook
     Vec2 v0 = b - a;
     Vec2 v1 = c - a;
     Vec2 v2 = point - a;
@@ -844,9 +844,9 @@ inline Vec3 barycentricCoordinate(Vec2 a, Vec2 b, Vec2 c, Vec2 point)
 
     Vec3 result;
 
-    result.x = (d11 * d20 - d01 * d21) / denom;
-    result.y = (d00 * d21 - d01 * d20) / denom;
-    result.z = 1.0f - result.x - result.y;
+    result.y = (d11 * d20 - d01 * d21) / denom;
+    result.z = (d00 * d21 - d01 * d20) / denom;
+    result.x = 1.0f - result.y - result.z;
 
     return result;
 }

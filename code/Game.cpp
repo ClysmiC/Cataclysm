@@ -118,7 +118,7 @@ void buildTestScene1(Scene* scene)
         xfm->position = Vec3(0, 0, 0);
         
         TerrainComponent* tc = addTerrainComponent(e);
-        new (tc) TerrainComponent("heightmap.bmp", Vec3(-400, 0, -400), 800, 800, -10, 4);
+        new (tc) TerrainComponent("heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
 
         uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 

@@ -356,8 +356,8 @@ MeshVertex* getTerrainVertex(TerrainComponent* terrain, uint32 xIndex, uint32 zI
 
 float32 getTerrainHeight(TerrainComponent* terrain, float32 xWorld, float32 zWorld)
 {
-    float32 xLengthPerVertex = terrain->xLengthPerChunk / terrain->xVerticesPerChunk;
-    float32 zLengthPerVertex = terrain->zLengthPerChunk / terrain->zVerticesPerChunk;
+    float32 xLengthPerSegment = terrain->xLengthPerChunk * terrain->xChunkCount / (terrain->xVerticesPerChunk * terrain->xChunkCount - 1);
+    float32 zLengthPerSegment = terrain->zLengthPerChunk * terrain->zChunkCount / (terrain->zVerticesPerChunk * terrain->zChunkCount - 1);
     
     float32 xOffset = xWorld - terrain->origin.x;
     float32 zOffset = zWorld - terrain->origin.z;
@@ -369,29 +369,23 @@ float32 getTerrainHeight(TerrainComponent* terrain, float32 xWorld, float32 zWor
         return 0;
     }
 
-    uint32 xChunkIndex = xOffset / terrain->xLengthPerChunk;
-    uint32 zChunkIndex = zOffset / terrain->zLengthPerChunk;
+    float32 xSegment = xOffset / xLengthPerSegment;
+    float32 zSegment = zOffset / zLengthPerSegment;
 
-    float32 xOffsetInChunk = xOffset - xChunkIndex * terrain->xLengthPerChunk;
-    float32 zOffsetInChunk = zOffset - zChunkIndex * terrain->zLengthPerChunk;
+    float32 xFractionalPart = xSegment - (uint32)xSegment;
+    float32 zFractionalPart = zSegment - (uint32)zSegment;
 
-    float32 xIndex = xChunkIndex * terrain->xVerticesPerChunk + xOffsetInChunk / xLengthPerVertex;
-    float32 zIndex = zChunkIndex * terrain->zVerticesPerChunk + zOffsetInChunk / zLengthPerVertex;
-
-    float32 xIndexFractionalPart = xIndex - (uint32)xIndex;
-    float32 zIndexFractionalPart = zIndex - (uint32)zIndex;
-
-    uint32 xFloor = (uint32)std::floor(xIndex);
-    uint32 xCeil  = (uint32)std::ceil(xIndex);
-    uint32 zFloor = (uint32)std::floor(zIndex);
-    uint32 zCeil  = (uint32)std::ceil(zIndex);
+    uint32 xFloor = (uint32)std::floor(xSegment);
+    uint32 xCeil  = (uint32)std::ceil(xSegment);
+    uint32 zFloor = (uint32)std::floor(zSegment);
+    uint32 zCeil  = (uint32)std::ceil(zSegment);
 
     if (xCeil == xFloor) xCeil++;
     if (zCeil == zFloor) zCeil++;
 
     Vec3 a, b, c;
 
-    if (xIndexFractionalPart > zIndexFractionalPart)
+    if (xFractionalPart > zFractionalPart)
     {
         a = getTerrainVertex(terrain, xFloor, zFloor)->position;
         b = getTerrainVertex(terrain, xCeil, zCeil)->position;
