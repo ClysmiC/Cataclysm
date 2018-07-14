@@ -66,6 +66,10 @@ union Vec3
 
     Vec3& normalizeOrXAxisInPlace();
     Vec3& normalizeInPlace();
+
+    inline Vec2 xy() { return Vec2(x, y); }
+    inline Vec2 xz() { return Vec2(x, z); }
+    inline Vec2 yz() { return Vec2(y, z); }
 };
 
 union Vec4
@@ -822,4 +826,27 @@ inline float32 maxAbs(float32 value1, float32 value2)
 
     if (fabs(value1) > fabs(value2)) return value1;
     return value2;
+}
+
+inline Vec3 barycentricCoordinate(Vec2 a, Vec2 b, Vec2 c, Vec2 point)
+{
+    // Implementation from Real-Time Collision Detection textbook
+    Vec2 v0 = b - a;
+    Vec2 v1 = c - a;
+    Vec2 v2 = point - a;
+    
+    float32 d00 = dot(v0, v0);
+    float32 d01 = dot(v0, v1);
+    float32 d11 = dot(v1, v1);
+    float32 d20 = dot(v2, v0);
+    float32 d21 = dot(v2, v1);
+    float32 denom = d00 * d11 - d01 * d01;
+
+    Vec3 result;
+
+    result.x = (d11 * d20 - d01 * d21) / denom;
+    result.y = (d00 * d21 - d01 * d20) / denom;
+    result.z = 1.0f - result.x - result.y;
+
+    return result;
 }

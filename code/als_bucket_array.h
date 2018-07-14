@@ -255,6 +255,27 @@ public:
         return result;
     }
 
+    T* at(uint32 index)
+    {
+        if (index >= this->count) return nullptr;
+
+        BucketIterator it = _initIterator();
+
+        for (uint32 i = 0; i <= index; i++)
+        {
+            it = iterate(it);
+
+            if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE)
+            {
+                // This should get caught at the initial check this function makes
+                assert(false);
+                return nullptr;
+            }
+        }
+
+        return it.ptr;
+    }
+
     ~BucketArray()
     {
         for (auto it : buckets)

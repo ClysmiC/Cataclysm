@@ -492,7 +492,12 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
 void walkAndCamera(Game* game)
 {
     // @Hack, we are updating camera here too
-    TransformComponent* xfm = getTransformComponent(game->activeCamera);
+    TransformComponent* xfm = getTransformComponent(game->player);
+    WalkComponent* walk = getWalkComponent(game->player);
+    ColliderComponent* collider = getColliderComponent(game->player);
+    
+    TerrainComponent *terrain = getTerrainComponent(walk->terrain);
+    
     Vec3 posBeforeMove = xfm->position;
     
     Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -570,6 +575,14 @@ void walkAndCamera(Game* game)
         }
     }
 
+    if (terrain)
+    {
+        xfm->position.y = getTerrainHeight(terrain, xfm->position.x, xfm->position.z);
+    }
+
+    //
+    // Go thru portal
+    //
     FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
     {
         PortalComponent* pc = it.ptr;
@@ -583,18 +596,20 @@ void walkAndCamera(Game* game)
             
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
-                if(dot(portalToPos, intoPortalNormal(pc)) < 0)
-                {
-                    __debugbreak();
-                }
-
                 rebaseTransformInPlace(pc, xfm);
                 game->activeScene = pc->connectedPortal->entity.ecs->scene;
             }
         }
     }
-    
-    // move x and z according to inputs
 
-    // if above a terrain component, set height to the terrain component height
+    //
+    // Update camera
+    //
+    TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
+    cameraXfm->position = xfm->position;
+    cameraXfm->orientation = xfm->orientation;
+
+    // @Hack: since transforms can't be parented to other transforms,
+    //        we just nudge the camera up by the player "height"
+    cameraXfm->position += xfm->up() * scaledYLength(collider);
 }

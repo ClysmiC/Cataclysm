@@ -5,4 +5,6 @@
 struct WalkComponent : public Component
 {
     bool isGrounded = false;
+    
+    Entity terrain; 
 };

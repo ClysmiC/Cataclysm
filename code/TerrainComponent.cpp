@@ -2,6 +2,8 @@
 #include "ResourceManager.h"
 #include "stb/stb_image.h"
 
+#include <cmath>
+
 TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, float32 xLength, float32 zLength, float32 minHeight, float32 maxHeight)
 {
     assert(minHeight <= maxHeight);
@@ -324,4 +326,95 @@ TerrainComponent::TerrainComponent(FilenameString heightMapFile, Vec3 origin, fl
             reuploadModifiedVerticesToGpu(&chunk->mesh.submeshes[0]);
         }
     }
+}
+
+uint32 xVerticesInChunk(TerrainChunk* chunk)
+{
+    uint32 result = chunk->terrainComponent->xVerticesPerChunk + (chunk->hasExtraXVertex ? 1 : 0);
+    return result;
+}
+
+uint32 zVerticesInChunk(TerrainChunk* chunk)
+{
+    uint32 result = chunk->terrainComponent->zVerticesPerChunk + (chunk->hasExtraZVertex ? 1 : 0);
+    return result;
+}
+
+MeshVertex* getTerrainVertex(TerrainComponent* terrain, uint32 xIndex, uint32 zIndex)
+{
+    uint32 xChunkIndex = xIndex / terrain->xVerticesPerChunk;
+    uint32 zChunkIndex = zIndex / terrain->zVerticesPerChunk;
+
+    uint32 xIndexInChunk = xIndex % terrain->xVerticesPerChunk;
+    uint32 zIndexInChunk = zIndex % terrain->zVerticesPerChunk;
+
+    TerrainChunk& chunk = terrain->chunks[zChunkIndex][xChunkIndex];
+    uint32 xVertsInChunk = xVerticesInChunk(&chunk);
+    
+    return &(chunk.mesh.submeshes[0].vertices[zIndexInChunk * xVertsInChunk + xIndexInChunk]);
+}
+
+float32 getTerrainHeight(TerrainComponent* terrain, float32 xWorld, float32 zWorld)
+{
+    float32 xLengthPerVertex = terrain->xLengthPerChunk / terrain->xVerticesPerChunk;
+    float32 zLengthPerVertex = terrain->zLengthPerChunk / terrain->zVerticesPerChunk;
+    
+    float32 xOffset = xWorld - terrain->origin.x;
+    float32 zOffset = zWorld - terrain->origin.z;
+
+    if (xOffset < 0 || xOffset > terrain->xLengthPerChunk * terrain->xChunkCount ||
+        zOffset < 0 || zOffset > terrain->zLengthPerChunk * terrain->zChunkCount)
+    {
+        // TODO: better way to handle this
+        return 0;
+    }
+
+    uint32 xChunkIndex = xOffset / terrain->xLengthPerChunk;
+    uint32 zChunkIndex = zOffset / terrain->zLengthPerChunk;
+
+    float32 xOffsetInChunk = xOffset - xChunkIndex * terrain->xLengthPerChunk;
+    float32 zOffsetInChunk = zOffset - zChunkIndex * terrain->zLengthPerChunk;
+
+    float32 xIndex = xChunkIndex * terrain->xVerticesPerChunk + xOffsetInChunk / xLengthPerVertex;
+    float32 zIndex = zChunkIndex * terrain->zVerticesPerChunk + zOffsetInChunk / zLengthPerVertex;
+
+    float32 xIndexFractionalPart = xIndex - (uint32)xIndex;
+    float32 zIndexFractionalPart = zIndex - (uint32)zIndex;
+
+    uint32 xFloor = (uint32)std::floor(xIndex);
+    uint32 xCeil  = (uint32)std::ceil(xIndex);
+    uint32 zFloor = (uint32)std::floor(zIndex);
+    uint32 zCeil  = (uint32)std::ceil(zIndex);
+
+    Vec3 a, b, c;
+
+    if (xIndexFractionalPart > zIndexFractionalPart)
+    {
+        a = getTerrainVertex(terrain, xFloor, zFloor)->position;
+        b = getTerrainVertex(terrain, xCeil, zCeil)->position;
+        c = getTerrainVertex(terrain, xCeil, zFloor)->position;
+    }
+    else
+    {
+        a = getTerrainVertex(terrain, xFloor, zFloor)->position;
+        b = getTerrainVertex(terrain, xFloor, zCeil)->position;
+        c = getTerrainVertex(terrain, xCeil, zCeil)->position;
+    }
+    
+    Vec2 a_xz, b_xz, c_xz;
+    float32 aHeight, bHeight, cHeight;
+    
+    a_xz = a.xz();
+    b_xz = b.xz();
+    c_xz = c.xz();
+
+    aHeight = a.y;
+    bHeight = b.y;
+    cHeight = c.y;
+
+    Vec3 bary = barycentricCoordinate(a_xz, b_xz, c_xz, Vec2(xWorld, zWorld));
+
+    float32 result = bary.x * aHeight + bary.y * bHeight + bary.z * cHeight;
+
+    return result;
 }

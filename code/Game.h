@@ -33,6 +33,8 @@ struct Game
     Window* window;
     Entity activeCamera;
 
+    Entity player;
+
     int numScenes;
 };
 

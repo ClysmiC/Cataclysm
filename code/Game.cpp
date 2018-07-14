@@ -370,17 +370,24 @@ int main()
     CameraComponent* cameraComponent = addCameraComponent(camera);
     cameraComponent->window = &window;
 
+    // Set up player
     // @Hack: same as camera hack
     Entity player = makeEntity(&testScene1->ecs, "player");
+    game->player = player;
     {
         TransformComponent* playerXfm = addTransformComponent(player);
+        
         ColliderComponent* playerCollider = addColliderComponent(player);
         playerCollider->type = ColliderType::RECT3;
-
         float32 playerHeight = 2;
         float32 playerWidth = .5;
         playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
         playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
+        
+        WalkComponent* playerWalk = addWalkComponent(player);
+        playerWalk->isGrounded = true;
+        assert(testScene1->ecs.walkComponents.count() > 0);
+        playerWalk->terrain = testScene1->ecs.terrains[0].entity;
     }
     
 #if 1

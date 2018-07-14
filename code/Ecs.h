@@ -28,6 +28,13 @@ struct Ecs
     {
         BucketArray<T, BUCKET_SIZE> components;
         std::unordered_map<uint32, ComponentGroup<T, BUCKET_SIZE>> lookup;
+
+        uint32 count() { return components.count; }
+
+        T& operator [] (uint32 index)
+        {
+            return *(components.at(index));
+        }
     };
     
     static uint32 nextEntityId;
@@ -37,7 +44,7 @@ struct Ecs
     std::vector<Entity> entities;
 
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
-    static constexpr uint32 CAMERA_BUCKET_SIZE = 8;
+    static constexpr uint32 CAMERA_BUCKET_SIZE = 4;
     static constexpr uint32 DIRECTIONAL_LIGHT_BUCKET_SIZE = 16;
     static constexpr uint32 TERRAIN_BUCKET_SIZE = 8;
     static constexpr uint32 POINT_LIGHT_BUCKET_SIZE = 32;

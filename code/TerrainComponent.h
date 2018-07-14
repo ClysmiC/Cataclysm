@@ -5,8 +5,6 @@
 #include "Mesh.h"
 #include "Resource.h"
 
-#include <vector>
-
 struct MeshVertex;
     
 // Terrain is defined by grid of chunks, each which has a mesh of a grid of x, z coordinates with variable y values.
@@ -66,6 +64,8 @@ struct TerrainComponent : public Component
     std::vector<std::vector<TerrainChunk>> chunks;
 };
 
+uint32 xVerticesInChunk(TerrainChunk* chunk);
+uint32 zVerticesInChunk(TerrainChunk* chunk);
 MeshVertex* getTerrainVertex(TerrainComponent* terrain, uint32 xIndex, uint32 zIndex);
 float32 getTerrainHeight(TerrainComponent* terrain, float32 xWorld, float32 zWorld);
 
