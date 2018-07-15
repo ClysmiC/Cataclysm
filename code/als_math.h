@@ -269,6 +269,11 @@ inline Vec2 hadamard(Vec2 v1, Vec2 v2)
     Vec2 result = Vec2(v1.x * v2.x, v1.y * v2.y);
     return result;
 }
+inline Vec2 hadamardDivide(Vec2 v1, Vec2 v2)
+{
+    Vec2 result = Vec2(v1.x / v2.x, v1.y / v2.y);
+    return result;
+}
 inline float32 lengthSquared(Vec2 v)
 {
     float32 result = v.x * v.x + v.y * v.y;
@@ -318,6 +323,11 @@ inline Vec3 hadamard(Vec3 v1, Vec3 v2)
     Vec3 result = Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
     return result;
 }
+inline Vec3 hadamardDivide(Vec3 v1, Vec3 v2)
+{
+    Vec3 result = Vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+    return result;
+}
 inline float32 lengthSquared(Vec3 v)
 {
     float32 result = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -356,6 +366,11 @@ inline float32 dot(Vec4 vectorA, Vec4 vectorB)
 inline Vec4 hadamard(Vec4 v1, Vec4 v2)
 {
     Vec4 result = Vec4(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w);
+    return result;
+}
+inline Vec4 hadamardDivide(Vec4 v1, Vec4 v2)
+{
+    Vec4 result = Vec4(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w);
     return result;
 }
 inline float32 lengthSquared(Vec4 v)

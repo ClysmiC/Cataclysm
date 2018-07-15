@@ -606,10 +606,6 @@ void walkAndCamera(Game* game)
     // Update camera
     //
     TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
-    cameraXfm->position = xfm->position;
-    cameraXfm->orientation = xfm->orientation;
-
-    // @Hack: since transforms can't be parented to other transforms,
-    //        we just nudge the camera up by the player "height"
-    cameraXfm->position += xfm->up() * scaledYLength(collider);
+    cameraXfm->resetLocal();
+    cameraXfm->setLocalPosition(xfm->up() * scaledYLength(collider));
 }

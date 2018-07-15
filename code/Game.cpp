@@ -389,6 +389,8 @@ int main()
         assert(testScene1->ecs.walkComponents.count() > 0);
         playerWalk->terrain = testScene1->ecs.terrains[0].entity;
     }
+
+    cameraXfm->parent = player;
     
 #if 1
     cameraComponent->isOrthographic = false;
