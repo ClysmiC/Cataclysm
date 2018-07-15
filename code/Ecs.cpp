@@ -17,7 +17,9 @@
 #include <string>
 
 #include "GLFW/glfw3.h"
-#include "imgui/imgui.h" 
+#include "imgui/imgui.h"
+
+#include "als_util.h"
 
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
@@ -438,13 +440,37 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
     result.t = -1;
 
     for (Entity& e : ecs->entities)
-    {
+    {        
         TransformComponent* xfm = getTransformComponent(e);
-        RenderComponent* rc = getRenderComponent(e);
-    
-        if (rc != nullptr && xfm != nullptr)
+        
+        auto rcs = getRenderComponents(e);
+        auto colliders = getColliderComponents(e);
+
+        // @Slow: maybe cache this on the entity somehow?
+        if (rcs.numComponents > 0 || colliders.numComponents > 0)
         {
-            Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
+            Aabb bounds = aabbFromMinMax(Vec3(FLT_MAX), Vec3(-FLT_MAX));
+
+            if (rcs.numComponents > 0)
+            {
+                Aabb renderAabb = aabbFromRenderComponents(rcs);
+
+                Vec3 minPoint = componentwiseMin(renderAabb.minPoint(), bounds.minPoint());
+                Vec3 maxPoint = componentwiseMax(renderAabb.maxPoint(), bounds.maxPoint());
+
+                bounds = aabbFromMinMax(minPoint, maxPoint);
+            }
+
+            if (colliders.numComponents > 0)
+            {
+                Aabb colliderAabb = aabbFromColliders(colliders);
+
+                Vec3 minPoint = componentwiseMin(colliderAabb.minPoint(), bounds.minPoint());
+                Vec3 maxPoint = componentwiseMax(colliderAabb.maxPoint(), bounds.maxPoint());
+
+                bounds = aabbFromMinMax(minPoint, maxPoint);
+            }
+    
             float32 t = rayAabbTest(ray, bounds);
 
             if (t >= 0)

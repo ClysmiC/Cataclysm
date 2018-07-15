@@ -212,13 +212,11 @@ public:
     {
         BucketIterator result;
 
-        if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE || (it.index >= it.countToIterate && it.countToIterate != (uint32)-1))
+        if (it.flag == _BucketArrayIteratorFlag::POST_ITERATE)
         {
-            // Don't iterate past the count to iterate
             result.flag = _BucketArrayIteratorFlag::POST_ITERATE;
             return result;
         }
-
 
         if (it.flag == _BucketArrayIteratorFlag::PRE_ITERATE)
         {
@@ -242,7 +240,7 @@ public:
 
         result.countToIterate = it.countToIterate;
 
-        if (this->isOccupied(result.locator))
+        if (this->isOccupied(result.locator) && (result.index < result.countToIterate || result.countToIterate == (uint32)-1))
         {
             result.ptr = this->addressOf(result.locator);
         }

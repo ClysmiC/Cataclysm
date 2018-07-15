@@ -1,6 +1,7 @@
 #include "Aabb.h"
 #include "float.h"
 #include <algorithm>
+#include "Ecs.h"
 
 Aabb::Aabb(Vec3 center, Vec3 halfDim)
 {
@@ -64,6 +65,36 @@ Aabb transformedAabb(Aabb aabb, Transform* xfm)
     //
     result.center += xfm->position;
 
+    return result;
+}
+
+Aabb aabbFromMinMax(Vec3 min, Vec3 max)
+{
+    Aabb result((max + min) / 2, (max - min) / 2);
+    return result;
+}
+
+Aabb aabbFromRenderComponent(RenderComponent* rc)
+{
+    TransformComponent* xfm = getTransformComponent(rc->entity);
+    assert(xfm);
+    
+    return transformedAabb(rc->submesh->mesh->bounds, xfm);
+}
+
+Aabb aabbFromCollider(ColliderComponent* collider)
+{
+    // TransformComponent* xfm = getTransformComponent(rc->entity);
+
+    // TODO:
+    
+    // return transformedAabb(rc->submesh->mesh->bounds, xfm);
+
+    
+    Vec3 minPoint = Vec3(FLT_MAX);
+    Vec3 maxPoint = Vec3(-FLT_MAX);
+
+    Aabb result = aabbFromMinMax(minPoint, maxPoint);
     return result;
 }
 

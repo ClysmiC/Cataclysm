@@ -37,8 +37,6 @@ float mouseYPrev;
 float32 timeMs;
 float32 deltaTMs;
 
-Ray lastCastRay;
-
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
 

@@ -296,6 +296,16 @@ inline bool equals(Vec2 vectorA, Vec2 vectorB)
 
     return deltaX < EPSILON && deltaY < EPSILON;
 }
+inline Vec2 componentwiseMin(Vec2 v1, Vec2 v2)
+{
+    Vec2 result = Vec2(fmin(v1.x, v2.x), fmin(v1.y, v2.y));
+    return result;
+}
+inline Vec2 componentwiseMax(Vec2 v1, Vec2 v2)
+{
+    Vec2 result = Vec2(fmax(v1.x, v2.x), fmax(v1.y, v2.y));
+    return result;
+}
 
 
 // Vec3
@@ -351,6 +361,16 @@ inline bool equals(Vec3 vectorA, Vec3 vectorB)
 
     return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON;
 }
+inline Vec3 componentwiseMin(Vec3 v1, Vec3 v2)
+{
+    Vec3 result = Vec3(fmin(v1.x, v2.x), fmin(v1.y, v2.y), fmin(v1.z, v2.z));
+    return result;
+}
+inline Vec3 componentwiseMax(Vec3 v1, Vec3 v2)
+{
+    Vec3 result = Vec3(fmax(v1.x, v2.x), fmax(v1.y, v2.y), fmax(v1.z, v2.z));
+    return result;
+}
 
 // Vec4
 inline float32 dot(Vec4 vectorA, Vec4 vectorB)
@@ -396,6 +416,16 @@ inline bool equals(Vec4 vectorA, Vec4 vectorB)
     float32 deltaW = fabs(vectorA.w - vectorB.w);
 
     return deltaX < EPSILON && deltaY < EPSILON && deltaZ < EPSILON && deltaW < EPSILON;
+}
+inline Vec4 componentwiseMin(Vec4 v1, Vec4 v2)
+{
+    Vec4 result = Vec4(fmin(v1.x, v2.x), fmin(v1.y, v2.y), fmin(v1.z, v2.z), fmin(v1.w, v2.w));
+    return result;
+}
+inline Vec4 componentwiseMax(Vec4 v1, Vec4 v2)
+{
+    Vec4 result = Vec4(fmax(v1.x, v2.x), fmax(v1.y, v2.y), fmax(v1.z, v2.z), fmax(v1.w, v2.w));
+    return result;
 }
 
 // Quat
