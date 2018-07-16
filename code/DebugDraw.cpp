@@ -294,7 +294,7 @@ DebugDraw::_init_cylinder()
 void
 DebugDraw::_init_capsule()
 {
-    float32 endcapVertexData[CapsuleEndcapTrianglesCount * 2 * 3 * 3];
+    float32 endcapVertexData[CapsuleEndcapTrianglesCount * 3 * 3];
     float32 sphereVertexData[SphereVerticesCount * 3];
 
     // We don't really know which sphere vertices are on the top or bottom hemisphere,
@@ -302,10 +302,12 @@ DebugDraw::_init_capsule()
     // offset them positively or negatively to become capsule endcap triangles
     _calculate_unit_sphere_vertices(sphereVertexData);
 
+    uint32 numEncapVerticesPlaced = 0;
+    
     for (uint32 i = 0; i < SphereTrianglesCount; i++)
     {
         uint32 f = 9 * i;
-        
+
         float32 ax = sphereVertexData[f];
         float32 ay = sphereVertexData[f+1];
         float32 az = sphereVertexData[f+2];
@@ -318,27 +320,22 @@ DebugDraw::_init_capsule()
         float32 cy = sphereVertexData[f+7];
         float32 cz = sphereVertexData[f+8];
 
-        float32 yOffset;
         if (maxAbs(maxAbs(ay, by), cy) > 0)
         {
-            yOffset = 0.5;
+            uint32 index = 9 * numEncapVerticesPlaced++;
+
+            endcapVertexData[index] = ax;
+            endcapVertexData[index+1] = ay;
+            endcapVertexData[index+2] = az;
+
+            endcapVertexData[index+3] = bx;
+            endcapVertexData[index+4] = by;
+            endcapVertexData[index+5] = bz;
+
+            endcapVertexData[index+6] = cx;
+            endcapVertexData[index+7] = cy;
+            endcapVertexData[index+8] = cz;
         }
-        else
-        {
-            yOffset = -0.5;
-        }
-
-        endcapVertexData[f] = ax;
-        endcapVertexData[f+1] = ay + yOffset;
-        endcapVertexData[f+2] = az;
-
-        endcapVertexData[f+3] = bx;
-        endcapVertexData[f+4] = by + yOffset;
-        endcapVertexData[f+5] = bz;
-
-        endcapVertexData[f+6] = cx;
-        endcapVertexData[f+7] = cy + yOffset;
-        endcapVertexData[f+8] = cz;
     }
 
     float32 verticalVertexData[CIRCLE_EDGES * 2 * 3];
@@ -781,15 +778,27 @@ DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis,
 {
     Quaternion rotationNeeded = orientation * rotateFromYAxisTo(axis);
     
-    Mat4 transform;
-    transform.scaleInPlace(Vec3(radius, length, radius));
-    transform.rotateInPlace(rotationNeeded);
-    transform.translateInPlace(center);
+    Mat4 cylinderXfm;
+    cylinderXfm.scaleInPlace(Vec3(radius, length, radius));
+    cylinderXfm.rotateInPlace(rotationNeeded);
+    cylinderXfm.translateInPlace(center);
+
+    Mat4 topEndcapXfm;
+    topEndcapXfm.scaleInPlace(Vec3(radius, radius, radius));
+    topEndcapXfm.translateInPlace(0.5 * length * Vec3(Axis3D::Y));
+    topEndcapXfm.rotateInPlace(rotationNeeded);
+    topEndcapXfm.translateInPlace(center);
+
+    Mat4 botEndcapXfm;
+    botEndcapXfm.scaleInPlace(Vec3(radius, radius, radius));
+    botEndcapXfm.rotateInPlace(axisAngle(Vec3(Axis3D::X), 180));
+    botEndcapXfm.translateInPlace(-0.5 * length * Vec3(Axis3D::Y));
+    botEndcapXfm.rotateInPlace(rotationNeeded);
+    botEndcapXfm.translateInPlace(center);
 
     Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
-    setMat4(shader, "model", transform);
     setMat4(shader, "view", view);
     setMat4(shader, "projection", this->cameraComponent->projectionMatrix);
     setVec3(shader, "debugColor", color);
@@ -799,17 +808,27 @@ DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis,
         glDisable(GL_CULL_FACE);
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // enable wireframe
         {
+            
             // Draw endcaps
+            setMat4(shader, "model", topEndcapXfm);
             glDrawArrays(
                 GL_TRIANGLES,
                 CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount,
-                CapsuleEndcapVerticesCount * 2
+                CapsuleEndcapVerticesCount
+            );
+            
+            setMat4(shader, "model", botEndcapXfm);
+            glDrawArrays(
+                GL_TRIANGLES,
+                CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount,
+                CapsuleEndcapVerticesCount
             );
 
+            setMat4(shader, "model", cylinderXfm);
             // Draw vertical lines
             glDrawArrays(
                 GL_LINES,
-                CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleEndcapVerticesCount * 2,
+                CubeVerticesCount + SphereVerticesCount + LineVerticesCount + CylinderVerticesCount + CapsuleEndcapVerticesCount,
                 CIRCLE_EDGES * 2
             );
         }

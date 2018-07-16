@@ -90,6 +90,7 @@ void buildTestScene1(Scene* scene)
         Entity e = makeEntity(&scene->ecs, "hex");
         
         TransformComponent *tc = addTransformComponent(e);
+        ColliderComponent* cc = addColliderComponent(e);
         tc->position = hexPositions[i];
         tc->scale = Vec3(.25);
         

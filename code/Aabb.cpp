@@ -84,17 +84,93 @@ Aabb aabbFromRenderComponent(RenderComponent* rc)
 
 Aabb aabbFromCollider(ColliderComponent* collider)
 {
-    // TransformComponent* xfm = getTransformComponent(rc->entity);
+    TransformComponent* xfm = getTransformComponent(collider->entity);
+    assert(xfm);
 
-    // TODO:
+    switch (collider->type)
+    {
+        case ColliderType::RECT3:
+        {
+            Aabb unXfmedBounds(collider->xfmOffset, scaledRect3Lengths(collider) / 2);
+            return transformedAabb(unXfmedBounds, xfm);
+        } break;
+
+        case ColliderType::SPHERE:
+        {
+            Aabb unXfmedBounds(collider->xfmOffset, Vec3(scaledRadius(collider)));
+            return transformedAabb(unXfmedBounds, xfm);
+        } break;
+
+        case ColliderType::CYLINDER:
+        {
+            float32 xLen = 0, yLen = 0, zLen = 0;
+            
+            switch (collider->axis)
+            {
+                case Axis3D::X:
+                {
+                    xLen = scaledLength(collider);
+                    yLen = zLen = scaledRadius(collider) * 2;
+                } break;
+
+                case Axis3D::Y:
+                {
+                    yLen = scaledLength(collider);
+                    xLen = zLen = scaledRadius(collider) * 2;
+                } break;
+
+                case Axis3D::Z:
+                {
+                    zLen = scaledLength(collider);
+                    xLen = yLen = scaledRadius(collider) * 2;
+                } break;
+
+                default: { assert(false); }
+            }
+            
+            Aabb unXfmedBounds(collider->xfmOffset, Vec3(xLen, yLen, zLen) / 2);
+            return transformedAabb(unXfmedBounds, xfm);
+        } break;
+
+        case ColliderType::CAPSULE:
+        {
+            float32 xLen = 0, yLen = 0, zLen = 0;
+            
+            switch (collider->axis)
+            {
+                case Axis3D::X:
+                {
+                    xLen = scaledLength(collider) + scaledRadius(collider);
+                    yLen = zLen = scaledRadius(collider) * 2;
+                } break;
+
+                case Axis3D::Y:
+                {
+                    yLen = scaledLength(collider) + scaledRadius(collider);
+                    xLen = zLen = scaledRadius(collider) * 2;
+                } break;
+
+                case Axis3D::Z:
+                {
+                    zLen = scaledLength(collider) + scaledRadius(collider);
+                    xLen = yLen = scaledRadius(collider) * 2;
+                } break;
+
+                default: { assert(false); }
+            }
+            
+            Aabb unXfmedBounds(collider->xfmOffset, Vec3(xLen, yLen, zLen) / 2);
+            return transformedAabb(unXfmedBounds, xfm);
+        } break;
+
+        default:
+        {
+            assert(false);
+        }
+    }
     
-    // return transformedAabb(rc->submesh->mesh->bounds, xfm);
 
-    
-    Vec3 minPoint = Vec3(FLT_MAX);
-    Vec3 maxPoint = Vec3(-FLT_MAX);
-
-    Aabb result = aabbFromMinMax(minPoint, maxPoint);
+    Aabb result = aabbFromMinMax(Vec3(0), Vec3(0));
     return result;
 }
 

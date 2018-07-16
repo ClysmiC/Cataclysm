@@ -56,6 +56,18 @@ float32 scaledRadius(ColliderComponent* collider)
     return scaleValue * collider->radius;
 }
 
+Vec3 scaledRect3Lengths(ColliderComponent* collider)
+{
+    assert(collider->type == ColliderType::RECT3);
+    
+    TransformComponent *xfm = getTransformComponent(collider->entity);
+    return Vec3(
+        xfm->scale.x * collider->rect3Lengths.x,
+        xfm->scale.y * collider->rect3Lengths.y,
+        xfm->scale.z * collider->rect3Lengths.z
+    );
+}
+
 float32 scaledXLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);

@@ -146,7 +146,7 @@ private:
     static constexpr uint32 CapsuleEndcapTrianglesCount = SphereTrianglesCount / 2;
     static constexpr uint32 CapsuleEndcapVerticesCount = CapsuleEndcapTrianglesCount * 3;
     static constexpr uint32 CapsuleVerticesCount =
-        3 * CapsuleEndcapTrianglesCount * 2 + // Half-sphere end-cap on each side
+        3 * CapsuleEndcapTrianglesCount +     // Half-sphere end-cap on each side, but they use the same geometry
         CIRCLE_EDGES * 2;                     // Lines going vertically. These do NOT connect to vertices on the half-sphere... they are their own vertices
     static constexpr uint32 CapsuleIndicesCount = 0; // (uses drawArrays)
 

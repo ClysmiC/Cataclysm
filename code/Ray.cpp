@@ -1,5 +1,6 @@
 #include "Ray.h"
 #include "Aabb.h"
+#include "Ecs.h"
 
 Ray::Ray(Vec3 position, Vec3 direction)
     : position(position)
@@ -34,43 +35,19 @@ float32 rayPlaneTest(Ray ray, Plane plane)
     }
 }
 
-float32 rayColliderTest(Ray ray, ColliderComponent* collider)
+float32 rayRect3Test(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim)
 {
-    // assert(isNormal(ray.direction));
-    // TransformComponent* xfm = getTransformComponent(collider->entity);
+    Vec3 localX = orientation * Vec3(Axis3D::X);
+    Vec3 localY = orientation * Vec3(Axis3D::Y);
+    Vec3 localZ = orientation * Vec3(Axis3D::Z);
+
+    Vec3 minPoint = center - halfDim;
+    Vec3 maxPoint = center + halfDim;
     
-    // switch (collider->type)
-    // {
-    //     case ColliderType::RECT3:
-    //     {
-    //         // front face
-    //         Vec3 normal = xfm->orientation * Vec3(Axis3D::Z);
-    //         Vec3 center = colliderCenter(collider);
-            
-    //         Vec3 topFrontLeftCorner = 
-    //     } break;
-
-    //     default:
-    //     {
-    //         // Not yet implemented
-    //         assert(false);
-    //     }
-    // }
-
-    return -1; // todo
-}
-
-float32 rayAabbTest(Ray ray, Aabb aabb)
-{
-    assert(isNormal(ray.direction));
-
-    Vec3 minPoint = aabb.center - aabb.halfDim;
-    Vec3 maxPoint = aabb.center + aabb.halfDim;
-    
-    if (ray.direction.x > 0)
+    if (dot(ray.direction.x, localX) > 0)
     {
         // test left face
-        Plane leftFace = Plane(aabb.center - aabb.halfDim.x * Vec3(Axis3D::X), -Vec3(Axis3D::X));
+        Plane leftFace = Plane(center - halfDim.x * localX, -localX);
         float32 leftFaceResult = rayPlaneTest(ray, leftFace);
         if (leftFaceResult >= 0)
         {
@@ -85,7 +62,7 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
     else
     {
         // test right face
-        Plane rightFace = Plane(aabb.center + aabb.halfDim.x * Vec3(Axis3D::X), Vec3(Axis3D::X));
+        Plane rightFace = Plane(center + halfDim.x * localX, localX);
         float32 rightFaceResult = rayPlaneTest(ray, rightFace);
         if (rightFaceResult >= 0)
         {
@@ -98,10 +75,10 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
         }
     }
 
-    if (ray.direction.y > 0)
+    if (dot(ray.direction.y, localY) > 0)
     {
         // test bottom face
-        Plane bottomFace = Plane(aabb.center - aabb.halfDim.y * Vec3(Axis3D::Y), -Vec3(Axis3D::Y));
+        Plane bottomFace = Plane(center - halfDim.y * localY, -localY);
         float32 bottomFaceResult = rayPlaneTest(ray, bottomFace);
         if (bottomFaceResult >= 0)
         {
@@ -116,7 +93,7 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
     else
     {
         // test top face
-        Plane topFace = Plane(aabb.center + aabb.halfDim.y * Vec3(Axis3D::Y), Vec3(Axis3D::Y));
+        Plane topFace = Plane(center + halfDim.y * localY, localY);
         float32 topFaceResult = rayPlaneTest(ray, topFace);
         if (topFaceResult >= 0)
         {
@@ -129,10 +106,10 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
         }
     }
 
-    if (ray.direction.z > 0)
+    if (dot(ray.direction.z, localZ) > 0)
     {
         // test back face
-        Plane backFace = Plane(aabb.center - aabb.halfDim.z * Vec3(Axis3D::Z), -Vec3(Axis3D::Z));
+        Plane backFace = Plane(center - halfDim.z * localZ, -localZ);
         float32 backFaceResult = rayPlaneTest(ray, backFace);
         if (backFaceResult >= 0)
         {
@@ -147,7 +124,7 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
     else
     {
         // test front face
-        Plane frontFace = Plane(aabb.center + aabb.halfDim.z * Vec3(Axis3D::Z), Vec3(Axis3D::Z));
+        Plane frontFace = Plane(center + halfDim.z * localZ, localZ);
         float32 frontFaceResult = rayPlaneTest(ray, frontFace);
         if (frontFaceResult >= 0)
         {
@@ -160,5 +137,60 @@ float32 rayAabbTest(Ray ray, Aabb aabb)
         }
     }
 
-    return -1;
+    return -1; // todo
+}
+
+float32 rayColliderTest(Ray ray, ColliderComponent* collider)
+{
+    assert(isNormal(ray.direction));
+    TransformComponent* xfm = getTransformComponent(collider->entity);
+    assert (xfm != nullptr);
+    
+    Vec3 localX = xfm->right();
+    Vec3 localY = xfm->up();
+    Vec3 localZ = xfm->back();
+    Vec3 center = colliderCenter(collider);
+
+    float32 result = -1;
+    
+    switch (collider->type)
+    {
+        case ColliderType::RECT3:
+        {
+            float32 result = rayRect3Test(
+                ray,
+                colliderCenter(collider), xfm->orientation,
+                Vec3(scaledXLength(collider), scaledYLength(collider), scaledZLength(collider) / 2.0f)
+            );
+        } break;
+
+        case ColliderType::SPHERE:
+        {
+            // TODO
+        } break;
+
+        case ColliderType::CYLINDER:
+        {
+            // TODO
+        } break;
+
+        case ColliderType::CAPSULE:
+        {
+            // TODO
+        } break;
+
+        default:
+        {
+            // Not yet implemented
+            assert(false);
+        }
+    }
+
+    return result;
+}
+
+float32 rayAabbTest(Ray ray, Aabb aabb)
+{
+    float32 result = rayRect3Test(ray, aabb.center, Quaternion(), aabb.halfDim);
+    return result;
 }

@@ -46,6 +46,7 @@ Vec3 scaledXfmOffset(ColliderComponent* collider);
 float32 scaledLength(ColliderComponent* collider);
 float32 scaledRadius(ColliderComponent* collider);
 
+Vec3 scaledRect3Lengths(ColliderComponent* collider);
 float32 scaledXLength(ColliderComponent* collider);
 float32 scaledYLength(ColliderComponent* collider);
 float32 scaledZLength(ColliderComponent* collider);

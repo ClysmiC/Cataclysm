@@ -13,6 +13,8 @@ struct ComponentGroup
     ComponentGroup()
     {
         entity.id = 0;
+        numComponents = 0;
+        bucketArray = nullptr;
     }
 
     // @Slow: linearly searches forward from firstComponent. To quickly loop, use FOR_COMPONENT_GROUP macro

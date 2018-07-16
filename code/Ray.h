@@ -23,6 +23,8 @@ struct Ray
 };
 
 float32 rayPlaneTest(Ray ray, Plane plane);
+
+float32 rayRect3Test(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim);
 float32 rayColliderTest(Ray ray, ColliderComponent* collider);
 float32 rayAabbTest(Ray ray, Aabb aabb);
 
