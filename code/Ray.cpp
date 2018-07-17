@@ -8,16 +8,17 @@ Ray::Ray(Vec3 position, Vec3 direction)
 {
 }
 
-float32 rayPlaneTest(Ray ray, Plane plane)
+float32 rayVsPlaneOneSided(Ray ray, Plane plane)
 {
     assert(isNormal(ray.direction));
-    
-    // Todo: this doesn't collide with back faces. Should it? Should it be a boolean option?
+
+    // Only intersect "front" face
     if (dot(ray.direction, plane.normal) > 0)
     {
         return -1;
     }
 
+    // If plane is behind ray, no intersect
     if (dot(plane.point - ray.position, ray.direction) < 0)
     {
         return -1;
@@ -35,112 +36,105 @@ float32 rayPlaneTest(Ray ray, Plane plane)
     }
 }
 
-float32 rayRect3Test(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim)
+float32 rayVsPlaneTwoSided(Ray ray, Plane plane)
 {
+    assert(isNormal(ray.direction));
+
+    // If plane is behind ray, no intersect
+    if (dot(plane.point - ray.position, ray.direction) < 0)
+    {
+        return -1;
+    }
+
+    float32 rayDotNormal = dot(ray.direction, plane.normal);
+
+    if (FLOAT_EQ(rayDotNormal, 0, EPSILON))
+    {
+        return -1;
+    }
+    else
+    {
+        return dot(plane.point - ray.position, plane.normal) / rayDotNormal;
+    }
+}
+
+float32 rayVsRect3(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim)
+{    
     Vec3 localX = orientation * Vec3(Axis3D::X);
     Vec3 localY = orientation * Vec3(Axis3D::Y);
     Vec3 localZ = orientation * Vec3(Axis3D::Z);
 
-    Vec3 minPoint = center - halfDim;
-    Vec3 maxPoint = center + halfDim;
+    // Note: uses 2-sided plane tests, so the sign of the normal doesn't matter
+    Plane rightPlane(Vec3(center + localX * halfDim.x),  localX);
+    Plane leftPlane (Vec3(center - localX * halfDim.x), -localX);
     
-    if (dot(ray.direction.x, localX) > 0)
-    {
-        // test left face
-        Plane leftFace = Plane(center - halfDim.x * localX, -localX);
-        float32 leftFaceResult = rayPlaneTest(ray, leftFace);
-        if (leftFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * leftFaceResult;
-            if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
-                hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
-            {
-                return leftFaceResult;
-            }
-        }
-    }
-    else
-    {
-        // test right face
-        Plane rightFace = Plane(center + halfDim.x * localX, localX);
-        float32 rightFaceResult = rayPlaneTest(ray, rightFace);
-        if (rightFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * rightFaceResult;
-            if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
-                hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
-            {
-                return rightFaceResult;
-            }
-        }
-    }
+    Plane frontPlane(Vec3(center + localZ * halfDim.z),  localZ);
+    Plane backPlane (Vec3(center - localZ * halfDim.z), -localZ);
 
-    if (dot(ray.direction.y, localY) > 0)
-    {
-        // test bottom face
-        Plane bottomFace = Plane(center - halfDim.y * localY, -localY);
-        float32 bottomFaceResult = rayPlaneTest(ray, bottomFace);
-        if (bottomFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * bottomFaceResult;
-            if (hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x &&
-                hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
-            {
-                return bottomFaceResult;
-            }
-        }
-    }
-    else
-    {
-        // test top face
-        Plane topFace = Plane(center + halfDim.y * localY, localY);
-        float32 topFaceResult = rayPlaneTest(ray, topFace);
-        if (topFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * topFaceResult;
-            if (hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x &&
-                hitPoint.z >= minPoint.z && hitPoint.z <= maxPoint.z)
-            {
-                return topFaceResult;
-            }
-        }
-    }
+    Plane topPlane(Vec3(center + localY * halfDim.y),  localY);
+    Plane botPlane(Vec3(center - localY * halfDim.y), -localY);
 
-    if (dot(ray.direction.z, localZ) > 0)
-    {
-        // test back face
-        Plane backFace = Plane(center - halfDim.z * localZ, -localZ);
-        float32 backFaceResult = rayPlaneTest(ray, backFace);
-        if (backFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * backFaceResult;
-            if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
-                hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x)
-            {
-                return backFaceResult;
-            }
-        }
-    }
-    else
-    {
-        // test front face
-        Plane frontFace = Plane(center + halfDim.z * localZ, localZ);
-        float32 frontFaceResult = rayPlaneTest(ray, frontFace);
-        if (frontFaceResult >= 0)
-        {
-            Vec3 hitPoint = ray.position + ray.direction * frontFaceResult;
-            if (hitPoint.y >= minPoint.y && hitPoint.y <= maxPoint.y &&
-                hitPoint.x >= minPoint.x && hitPoint.x <= maxPoint.x)
-            {
-                return frontFaceResult;
-            }
-        }
-    }
+    float32 largestNearT = -1;
+    float32 smallestFarT = FLT_MAX;
 
-    return -1; // todo
+    struct {
+        bool operator() (Ray ray, Plane p1, Plane p2, float32* nearT, float32* farT)
+        {
+            float32 t1 = rayVsPlaneTwoSided(ray, p1);
+            float32 t2 = rayVsPlaneTwoSided(ray, p2);
+
+            if (t1 >= 0 && t2 >= 0)
+            {
+                // Both intersect
+                *nearT = min(t1, t2);
+                *farT = max(t1, t2);
+            }
+            else if (t1 >= 0 || t2 >= 0)
+            {
+                // Only one intersects
+                *nearT = -1;
+                *farT = max(t1, t2);
+            }
+            else
+            {
+                if (dot(ray.direction, p1.normal) > 0 || dot(ray.direction, p2.normal) > 0)
+                {
+                    // Non parallel and non-intersecting.
+                    // Returning false indicates that the entire rayVsRect3 test fails
+                    return false;
+                }
+                
+                *nearT = -1;
+                *farT = -1;
+            }
+
+            return true;
+        }
+    } getNearAndFarT;
+
+    float32 nearT, farT;
+
+    uint32 debug_numHits = 0;
+
+    // @Slow: so many if's... can probably cut down on this
+    if (!getNearAndFarT(ray, rightPlane, leftPlane, &nearT, &farT)) return -1;
+    if (nearT >= 0) largestNearT = max(nearT, largestNearT);
+    if (farT >= 0)  smallestFarT = min(farT, smallestFarT);
+
+    if (!getNearAndFarT(ray, topPlane, botPlane, &nearT, &farT)) return -1;
+    if (nearT >= 0) largestNearT = max(nearT, largestNearT);
+    if (farT >= 0)  smallestFarT = min(farT, smallestFarT);
+
+    if (!getNearAndFarT(ray, frontPlane, backPlane, &nearT, &farT)) return -1;
+    if (nearT >= 0) largestNearT = max(nearT, largestNearT);
+    if (farT >= 0)  smallestFarT = min(farT, smallestFarT);
+
+    if (largestNearT <= smallestFarT) return largestNearT;
+    
+    return -1;
 }
 
-float32 rayColliderTest(Ray ray, ColliderComponent* collider)
+float32 rayVsCollider(Ray ray, ColliderComponent* collider)
 {
     assert(isNormal(ray.direction));
     TransformComponent* xfm = getTransformComponent(collider->entity);
@@ -157,10 +151,11 @@ float32 rayColliderTest(Ray ray, ColliderComponent* collider)
     {
         case ColliderType::RECT3:
         {
-            float32 result = rayRect3Test(
+            result = rayVsRect3(
                 ray,
-                colliderCenter(collider), xfm->orientation,
-                Vec3(scaledXLength(collider), scaledYLength(collider), scaledZLength(collider) / 2.0f)
+                center,
+                xfm->orientation,
+                Vec3(scaledXLength(collider), scaledYLength(collider), scaledZLength(collider)) / 2.0f
             );
         } break;
 
@@ -189,8 +184,10 @@ float32 rayColliderTest(Ray ray, ColliderComponent* collider)
     return result;
 }
 
-float32 rayAabbTest(Ray ray, Aabb aabb)
+float32 rayVsAabb(Ray ray, Aabb aabb)
 {
-    float32 result = rayRect3Test(ray, aabb.center, Quaternion(), aabb.halfDim);
+    // @Slow: this uses the general rayVsRect3 test. It could be substantially sped up
+    //        since we KNOW we have an AABB, and not any arbitrary rect3
+    float32 result = rayVsRect3(ray, aabb.center, Quaternion(), aabb.halfDim);
     return result;
 }

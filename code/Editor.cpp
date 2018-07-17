@@ -85,8 +85,12 @@ void showEditor(EditorState* editor)
         {
             TransformComponent* toolXfm = getTransformComponent(editor->translator.pseudoEntity);
             toolXfm->position = tc->position;
+
+            if (editor->translator.isLocalXyz)
+            {
+                toolXfm->orientation = tc->orientation;
+            }
             
-            // TODO: scale based on distance from camera
             TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
 
             const float32 SCALE_FACTOR = 0.1;
@@ -104,13 +108,13 @@ void showEditor(EditorState* editor)
             glClear(GL_DEPTH_BUFFER_BIT);
             
             DebugDraw::instance().color = Vec3(1, 0, 0);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(1, 0, 0));
+            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->right());
 
             DebugDraw::instance().color = Vec3(0, 1, 0);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 1, 0));
+            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->up());
 
             DebugDraw::instance().color = Vec3(0, 0, 1);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * Vec3(0, 0, 1));
+            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->back());
 
             DebugDraw::instance().color = oldColor;
 
@@ -122,16 +126,11 @@ void showEditor(EditorState* editor)
                 editor->translator.isHandleSelected = false;
                 float32 minimumHit = FLT_MAX;
                 
+                // raycast against x, y, and z colliders
                 for (uint32 i = 0; i < 3; i++)
                 {
-                    // raycast against x, y, and z colliders
-
-                    Vec3 aabbCenter = tc->position + Vec3((Axis3D)i) * arrowLength / 2;
-                    Vec3 aabbDims = scale * editor->translator.handles[i]->rect3Lengths;
-                    
-                    Aabb aabb = Aabb(aabbCenter, aabbDims / 2);
-
-                    float32 t = rayAabbTest(rayThruScreen, aabb);
+                    DebugDraw::instance().drawCollider(editor->translator.handles[i]);
+                    float32 t = rayVsCollider(rayThruScreen, editor->translator.handles[i]);
                     if (t >= 0)
                     {
                         if (t < minimumHit)
@@ -156,7 +155,7 @@ void showEditor(EditorState* editor)
                 //       per frame (should depend on distance from camera)
                 
                 Vec3 planePoint1 = tc->position;
-                Vec3 planePoint2 = tc->position + Vec3(editor->translator.selectedHandle);
+                Vec3 planePoint2 = tc->position + toolXfm->orientation * Vec3(editor->translator.selectedHandle);
 
                 Vec3 dragAxis = (planePoint2 - planePoint1).normalizeInPlace();
                 Vec3 toCamera = cameraXfm->position - tc->position;
@@ -165,8 +164,8 @@ void showEditor(EditorState* editor)
 
                 Plane dragPlane = Plane(planePoint1, planeNormal);
 
-                float32 tPrev = rayPlaneTest(prevRayThruScreen, dragPlane);
-                float32 t = rayPlaneTest(rayThruScreen, dragPlane);
+                float32 tPrev = rayVsPlaneOneSided(prevRayThruScreen, dragPlane);
+                float32 t = rayVsPlaneOneSided(rayThruScreen, dragPlane);
 
                 if (t >= 0 && tPrev >= 0)
                 {

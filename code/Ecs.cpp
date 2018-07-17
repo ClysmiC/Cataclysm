@@ -471,7 +471,7 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
                 bounds = aabbFromMinMax(minPoint, maxPoint);
             }
     
-            float32 t = rayAabbTest(ray, bounds);
+            float32 t = rayVsAabb(ray, bounds);
 
             if (t >= 0)
             {

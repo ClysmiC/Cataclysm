@@ -22,11 +22,11 @@ struct Ray
 	Vec3 direction;
 };
 
-float32 rayPlaneTest(Ray ray, Plane plane);
-
-float32 rayRect3Test(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim);
-float32 rayColliderTest(Ray ray, ColliderComponent* collider);
-float32 rayAabbTest(Ray ray, Aabb aabb);
+float32 rayVsPlaneOneSided(Ray ray, Plane plane);
+float32 rayVsPlaneTwoSided(Ray ray, Plane plane);
+float32 rayVsRect3(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim);
+float32 rayVsCollider(Ray ray, ColliderComponent* collider);
+float32 rayVsAabb(Ray ray, Aabb aabb);
 
 inline Vec3 pointOnRay(Ray ray, float32 t)
 {

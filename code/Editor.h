@@ -11,6 +11,7 @@ struct EditorState
     
     struct TranslatorTool
     {
+        bool isLocalXyz = true;
         bool isHandleSelected = false;
         Axis3D selectedHandle = Axis3D::X;
 
