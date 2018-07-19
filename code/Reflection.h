@@ -4,10 +4,11 @@
 #include "als_fixed_string.h"
 
 #include "ColliderComponent.h" // needed for ColliderType enum
+#include <stack>
 
 struct CameraComponent;
 
-enum ReflectionPurpose
+enum class ReflectionPurpose
 {
     OTHER,
     UI,
@@ -24,8 +25,38 @@ struct IReflector
     IReflector() = default;
     IReflector(ReflectionPurpose purpose);
     
-    void* reflectionTarget;
-    ReflectionPurpose purpose = OTHER;
+    ReflectionPurpose purpose = ReflectionPurpose::OTHER;
+    bool useLocalXfm;
+    bool useEulerAngles;
+
+    virtual void* reflectionTarget()
+    {
+        return reflectionTargets.top();
+    }
+
+    //
+    // Sometimes you have to reflect "pseudo"-properties, such as the local xfm
+    // in a TransformComponent (despite it being stored in memory world space).
+    //
+    // To reflect into any auxiliary data such as this, you can push a reflection
+    // target (and then pop it when done) to not lose context of the primary thing
+    // that you are reflecting.
+    //
+    virtual void setPrimaryReflectionTarget(void* target)
+    {
+        while(!reflectionTargets.empty()) reflectionTargets.pop();
+        reflectionTargets.push(target);
+    }
+    
+    virtual void pushReflectionTarget(void* target)
+    {
+        reflectionTargets.push(target);
+    }
+
+    virtual void popReflectionTarget()
+    {
+        return reflectionTargets.pop();
+    }
     
     virtual bool pushStruct(StructNameString name) = 0;
     virtual void popStruct() = 0;
@@ -33,9 +64,9 @@ struct IReflector
     virtual bool startReflection(EntityNameString label) = 0;
     virtual void endReflection() = 0;
 
-    // Reflectors may modify the existing value, so the return value
-    // will be the old existing value if unchanged, or the new value if
-    // it is modified.
+    //
+    // "Consume" is "end of the line" for reflection. It operates on primitives.
+    //
     virtual int32   consumeInt32(FieldNameString name, uint32 offset) = 0;
     virtual uint32  consumeUInt32(FieldNameString name, uint32 offset) = 0;
     virtual float32 consumeFloat32(FieldNameString name, uint32 offset) = 0;
@@ -47,6 +78,8 @@ struct IReflector
     // that for now)
     virtual uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount) = 0;
     
+private:
+    std::stack<void*> reflectionTargets;
 };
 
 struct UiReflector : public IReflector
@@ -67,7 +100,6 @@ struct UiReflector : public IReflector
     float64 consumeFloat64(FieldNameString name, uint32 offset) override;
     bool    consumeBool(FieldNameString name, uint32 offset) override;
     uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount) override;
-    
 };
 
 struct Game;
@@ -85,7 +117,6 @@ void reflectDirectionalLightComponent(IReflector* reflector, uint32 startingOffs
 void reflectPointLightComponent(IReflector* reflector, uint32 startingOffset);
 void reflectPortalComponent(IReflector* reflector, uint32 startingOffset);
 void reflectRenderComponent(IReflector* reflector, uint32 startingOffset);
-
 
 //
 // Enums whose names are exposed via reflection

@@ -20,13 +20,16 @@ Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
 {
 }
 
-Mat4 modelToWorld(Transform* objectXfm)
+Transform multiplyTransforms(Transform t1, Transform t2)
 {
-    Mat4 result;
-    result.scaleInPlace(objectXfm->scale);
-    result.rotateInPlace(objectXfm->orientation);
-    result.translateInPlace(objectXfm->position);
-    
+    Transform result;
+
+    result.setOrientation(t2.orientation() * t1.orientation());
+    result.setScale(t2.scale() * t1.scale());
+    result.setPosition(
+        t2.orientation() * (hadamard(t2.scale(), t1.position())) + t2.position()
+    );
+
     return result;
 }
 
@@ -55,7 +58,7 @@ Mat4 worldToView(Transform* cameraXfm)
     result[3][3] = 1;
     
     // Translate
-    Mat4 translation = translationMatrix(-cameraXfm->position);
+    Mat4 translation = translationMatrix(-cameraXfm->position());
     result = result * translation;
 
     return result;

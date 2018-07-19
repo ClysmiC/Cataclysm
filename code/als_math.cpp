@@ -32,43 +32,43 @@ Quaternion::Quaternion(Vec3 vector, float32 scalar) { x = vector.x; y = vector.y
 Quaternion::Quaternion(Vec4 xyzw)                  { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
 Quaternion::Quaternion(float32 x_, float32 y_, float32 z_, float32 w_) { x = x_; y = y_; z = z_; w = w_; }
 
-// Mat3::Mat3(Mat4 mat4)
-// {
-//     _e[0][0] = mat4[0][0];
-//     _e[0][1] = mat4[0][1];
-//     _e[0][2] = mat4[0][2];
+Mat3::Mat3(Mat4 mat4)
+{
+    _e[0][0] = mat4[0][0];
+    _e[0][1] = mat4[0][1];
+    _e[0][2] = mat4[0][2];
 
-//     _e[1][0] = mat4[1][0];
-//     _e[1][1] = mat4[1][1];
-//     _e[1][2] = mat4[1][2];
+    _e[1][0] = mat4[1][0];
+    _e[1][1] = mat4[1][1];
+    _e[1][2] = mat4[1][2];
 
-//     _e[2][0] = mat4[2][0];
-//     _e[2][1] = mat4[2][1];
-//     _e[2][2] = mat4[2][2];
-// }
+    _e[2][0] = mat4[2][0];
+    _e[2][1] = mat4[2][1];
+    _e[2][2] = mat4[2][2];
+}
 
-// Mat4::Mat4(Mat3 mat3)
-// {
-//     _e[0][0] = mat3[0][0];
-//     _e[0][1] = mat3[0][1];
-//     _e[0][2] = mat3[0][2];
-//     _e[0][3] = 0;
+Mat4::Mat4(Mat3 mat3)
+{
+    _e[0][0] = mat3[0][0];
+    _e[0][1] = mat3[0][1];
+    _e[0][2] = mat3[0][2];
+    _e[0][3] = 0;
 
-//     _e[1][0] = mat3[1][0];
-//     _e[1][1] = mat3[1][1];
-//     _e[1][2] = mat3[1][2];
-//     _e[1][3] = 0;
+    _e[1][0] = mat3[1][0];
+    _e[1][1] = mat3[1][1];
+    _e[1][2] = mat3[1][2];
+    _e[1][3] = 0;
 
-//     _e[2][0] = mat3[2][0];
-//     _e[2][1] = mat3[2][1];
-//     _e[2][2] = mat3[2][2];
-//     _e[2][3] = 0;
+    _e[2][0] = mat3[2][0];
+    _e[2][1] = mat3[2][1];
+    _e[2][2] = mat3[2][2];
+    _e[2][3] = 0;
 
-//     _e[3][0] = 0;
-//     _e[3][1] = 0;
-//     _e[3][2] = 0;
-//     _e[3][3] = 1;
-// }
+    _e[3][0] = 0;
+    _e[3][1] = 0;
+    _e[3][2] = 0;
+    _e[3][3] = 1;
+}
 
 Plane::Plane(Vec3 point, Vec3 normal)
     : point(point)
@@ -1018,6 +1018,228 @@ Quaternion relativeRotation(Vec3 start, Vec3 end)
     result.w = std::sqrt(lengthSquared(start) * lengthSquared(end)) + startDotEnd;
 
     result.normalizeInPlace();
+
+    return result;
+}
+
+Vec3 toEuler(Mat4 m)
+{
+    // See https://github.com/mrdoob/three.js/blob/dev/src/math/Euler.js
+    // Note: assumes pure (unscaled) rotation matrix
+    
+    Vec3 result;
+    
+    result.y = TO_DEG(asin(clamp(m[0][2], -1, 1)));
+
+    if (fabs(m[0][2]) < 0.99999)
+    {
+        result.x = TO_DEG(atan2(-m[1][2], m[2][2]));
+        result.z = TO_DEG(atan2(-m[0][1], m[0][0]));
+    }
+    else
+    {
+        result.x = TO_DEG(atan2(m[2][1], m[1][1]));
+        result.z = 0;
+    }
+
+    return result;
+}
+
+Vec3 toEuler(Quaternion q)
+{
+    // See https://github.com/mrdoob/three.js/blob/dev/src/math/Euler.js
+
+    Mat4 m;
+    m.rotateInPlace(q);
+
+    Vec3 result = toEuler(m);
+
+    return result;
+}
+
+Quaternion fromEuler(Vec3 euler)
+{
+    // See https://github.com/mrdoob/three.js/blob/dev/src/math/Quaternion.js
+
+    float32 xRad = TO_RAD(euler.x);
+    float32 yRad = TO_RAD(euler.y);
+    float32 zRad = TO_RAD(euler.z);
+    
+    float32 halfCosX   = cos(xRad * 0.5);
+    float32 halfCosY   = cos(yRad * 0.5);
+    float32 halfCosZ   = cos(zRad * 0.5);
+    float32 halfSinX   = sin(xRad * 0.5);
+    float32 halfSinY   = sin(yRad * 0.5);
+    float32 halfSinZ   = sin(zRad * 0.5);
+    
+    Quaternion q;
+    q.w = (halfCosX * halfCosY * halfCosZ) - (halfSinX * halfSinY * halfSinZ);
+    q.x = (halfSinX * halfCosY * halfCosZ) + (halfCosX * halfSinY * halfSinZ);
+    q.y = (halfCosX * halfSinY * halfCosZ) - (halfSinX * halfCosY * halfSinZ);
+    q.z = (halfCosX * halfCosY * halfSinZ) + (halfSinX * halfSinY * halfCosZ);
+    
+    return q;
+}
+
+Mat3 inverse(Mat3 m)
+{
+    // Optimized formula from FGED Vol 1, 2nd edition, formula (1.95) and Listing 1.10
+    Vec3 a = Vec3(m[0][0], m[1][0], m[2][0]);
+    Vec3 b = Vec3(m[0][0], m[1][0], m[2][0]);
+    Vec3 c = Vec3(m[0][0], m[1][0], m[2][0]);
+
+    Vec3 aCrossB = cross(a, b);
+    Vec3 bCrossC = cross(b, c);
+    Vec3 cCrossA = cross(c, a);
+
+    // Note: determinant of 3x3 matrix equals its triple product ((a x b) . c)
+    float32 invDet = 1.0 / dot(aCrossB, c);
+
+    Mat3 result;
+    result[0][0] = bCrossC.x * invDet;
+    result[0][1] = bCrossC.y * invDet;
+    result[0][2] = bCrossC.z * invDet;
+
+    result[1][0] = cCrossA.x * invDet;
+    result[1][1] = cCrossA.y * invDet;
+    result[1][2] = cCrossA.z * invDet;
+
+    result[2][0] = aCrossB.x * invDet;
+    result[2][1] = aCrossB.y * invDet;
+    result[2][2] = aCrossB.z * invDet;
+
+    return result;
+}
+
+Mat4 inverse(Mat4 m)
+{
+    // Optimized formula from FGED Vol 1, 2nd edition, formula (1.99) and Listing 1.11
+    Vec3 a = Vec3(m[0][0], m[1][0], m[2][0]);
+    Vec3 b = Vec3(m[0][1], m[1][1], m[2][1]);
+    Vec3 c = Vec3(m[0][2], m[1][2], m[2][2]);
+    Vec3 d = Vec3(m[0][3], m[1][3], m[2][3]);
+    float32 x = m[3][0];
+    float32 y = m[3][1];
+    float32 z = m[3][2];
+    float32 w = m[3][3];
+
+    Vec3 s = cross(a, b);
+    Vec3 t = cross(c, d);
+    Vec3 u = y * a - x * b;
+    Vec3 v = w * c - z * d;
+
+    float32 invDet = 1.0 / (dot(s, v) + dot(t, u));
+
+    // Note: formula (1.99) doesn't do this multiplication, but this is the code's way of
+    // distributing the invDet across each entry in the matrix (since each entry gets multiplied)
+    // by either s, t, u, or v at some point
+    s *= invDet;
+    t *= invDet;
+    u *= invDet;
+    v *= invDet;
+
+    Vec3 r0 = cross(b, v) + t * y;
+    Vec3 r1 = cross(v, a) - t * x;
+    Vec3 r2 = cross(d, u) + s * w;
+    Vec3 r3 = cross(u, c) - s * z;
+
+    Mat4 result;
+    result[0][0] = r0.x;
+    result[0][1] = r0.y;
+    result[0][2] = r0.z;
+    result[0][3] = -dot(b, t);
+
+    result[1][0] = r1.x;
+    result[1][1] = r1.y;
+    result[1][2] = r1.z;
+    result[1][3] = dot(a, t);
+
+    result[2][0] = r2.x;
+    result[2][1] = r2.y;
+    result[2][2] = r2.z;
+    result[2][3] = -dot(d, s);
+
+    result[3][0] = r3.x;
+    result[3][1] = r3.y;
+    result[3][2] = r3.z;
+    result[3][3] = dot(c, s);
+
+    return result;
+}
+
+float32 determinant(Mat3 m)
+{
+    float32 result =
+        m[0][0] * m[1][1] * m[2][2] +
+        m[0][1] * m[1][2] * m[2][0] +
+        m[0][2] * m[1][0] * m[2][1]
+        -
+        m[0][0] * m[1][2] * m[2][1] -
+        m[0][1] * m[1][0] * m[2][2] -
+        m[0][2] * m[1][1] * m[2][0];
+
+    return result;
+}
+
+float32 determinant(Mat4 m)
+{
+    float32 result;
+
+    // Transformation matrices have [0 0 0 1] as row 4, which lets us
+    // optimize this case
+    if (m[3][0] == 0 && m[3][1] == 0 && m[3][2] == 0 && m[3][3] == 1)
+    {
+        // @Optimize: can copy/paste content of the determinant(Mat3) function to avoid constructing a new Mat3
+        result = determinant(Mat3(m));
+    }
+    else
+    {
+        // Optimized formula from FGED Vol 1, 2nd edition, formula (1.98)
+        Vec3 a = Vec3(m[0][0], m[1][0], m[2][0]);
+        Vec3 b = Vec3(m[0][1], m[1][1], m[2][1]);
+        Vec3 c = Vec3(m[0][2], m[1][2], m[2][2]);
+        Vec3 d = Vec3(m[0][3], m[1][3], m[2][3]);
+        float32 x = m[3][0];
+        float32 y = m[3][1];
+        float32 z = m[3][2];
+        float32 w = m[3][3];
+
+        Vec3 s = cross(a, b);
+        Vec3 t = cross(c, d);
+        Vec3 u = y * a - x * b;
+        Vec3 v = w * c - z * d;
+
+        result = dot(s, v) + dot(t, u);
+
+
+        // Slow version (untested)
+        // result =
+        //     m[0][0] * m[1][1] * m[2][2] * m[3][3] +
+        //     m[0][0] * m[1][2] * m[2][3] * m[3][1] +
+        //     m[0][0] * m[1][3] * m[2][1] * m[3][2] +
+        //     m[0][1] * m[1][0] * m[2][3] * m[3][2] +
+        //     m[0][1] * m[1][2] * m[2][0] * m[3][3] +
+        //     m[0][1] * m[1][3] * m[2][2] * m[3][0] +
+        //     m[0][2] * m[1][0] * m[2][1] * m[3][3] +
+        //     m[0][2] * m[1][1] * m[2][3] * m[3][0] +
+        //     m[0][2] * m[1][3] * m[2][0] * m[3][1] +
+        //     m[0][3] * m[1][0] * m[2][2] * m[3][1] +
+        //     m[0][3] * m[1][1] * m[2][0] * m[3][2] +
+        //     m[0][3] * m[1][2] * m[2][1] * m[3][0]
+        //     -
+        //     m[0][0] * m[1][1] * m[2][3] * m[3][2] -
+        //     m[0][0] * m[1][2] * m[2][1] * m[3][3] -
+        //     m[0][0] * m[1][3] * m[2][2] * m[3][1] -
+        //     m[0][1] * m[1][0] * m[2][2] * m[3][3] -
+        //     m[0][1] * m[1][2] * m[2][3] * m[3][0] -
+        //     m[0][1] * m[1][3] * m[2][0] * m[3][2] -
+        //     m[0][2] * m[1][0] * m[2][3] * m[3][1] -
+        //     m[0][2] * m[1][1] * m[2][0] * m[3][3] -
+        //     m[0][2] * m[1][3] * m[2][1] * m[3][0] -
+        //     m[0][3] * m[1][0] * m[2][1] * m[3][2] -
+        //     m[0][3] * m[1][1] * m[2][2] * m[3][0] -
+        //     m[0][3] * m[1][2] * m[2][0] * m[3][1];
+    }
 
     return result;
 }

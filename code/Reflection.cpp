@@ -43,30 +43,114 @@ void reflectVec4(IReflector* reflector, uint32 startingOffset)
 
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset)
 {
-    reflector->consumeFloat32("X", startingOffset + offsetof(Quaternion, x));
-    reflector->consumeFloat32("Y", startingOffset + offsetof(Quaternion, y));
-    reflector->consumeFloat32("Z", startingOffset + offsetof(Quaternion, z));
-    reflector->consumeFloat32("W", startingOffset + offsetof(Quaternion, w));
+    if (reflector->useEulerAngles)
+    {
+        Quaternion* q = (Quaternion*)((char*)reflector->reflectionTarget() + startingOffset);
+        Vec3 eulerBeforeReflect = toEuler(*q);
+        Vec3 euler = eulerBeforeReflect;
+
+        reflector->pushReflectionTarget(&euler);
+        {
+            reflectVec3(reflector, 0);
+
+            if (!equals(eulerBeforeReflect, euler))
+            {
+                *q = fromEuler(euler);
+            }
+        }
+        reflector->popReflectionTarget();
+    }
+    else
+    {
+        reflector->consumeFloat32("X", startingOffset + offsetof(Quaternion, x));
+        reflector->consumeFloat32("Y", startingOffset + offsetof(Quaternion, y));
+        reflector->consumeFloat32("Z", startingOffset + offsetof(Quaternion, z));
+        reflector->consumeFloat32("W", startingOffset + offsetof(Quaternion, w));
+    }
 }
 
 void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
 {
-    if (reflector->pushStruct("Position"))
+    if (reflector->useLocalXfm)
     {
-        reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
-        reflector->popStruct();
-    }
+        TransformComponent* xfm = (TransformComponent*)((char*)reflector->reflectionTarget() + startingOffset);
+        
+        if (reflector->pushStruct("Position"))
+        {
+            Vec3 localPositionBeforeReflect = xfm->localPosition();
+            Vec3 localPosition = localPositionBeforeReflect;
+            
+            reflector->pushReflectionTarget(&localPosition);
+            {
+                reflectVec3(reflector, 0);
 
-    if (reflector->pushStruct("Orientation"))
-    {
-        reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
-        reflector->popStruct();
-    }
+                if (!equals(localPosition, localPositionBeforeReflect))
+                {
+                    xfm->setLocalPosition(localPosition);
+                }
+            }
+            reflector->popReflectionTarget();
+            
+            reflector->popStruct();
+        }
 
-    if (reflector->pushStruct("Scale"))
+        if (reflector->pushStruct("Orientation"))
+        {
+            Quaternion localOrientationBeforeReflect = xfm->localOrientation();
+            Quaternion localOrientation = localOrientationBeforeReflect;
+            
+            reflector->pushReflectionTarget(&localOrientation);
+            {
+                reflectQuaternion(reflector, 0);
+
+                if (!equals(localOrientation, localOrientationBeforeReflect))
+                {
+                    xfm->setLocalOrientation(localOrientation);
+                }
+            }
+            reflector->popReflectionTarget();
+            
+            reflector->popStruct();
+        }
+
+        if (reflector->pushStruct("Scale"))
+        {
+            Vec3 localScaleBeforeReflect = xfm->localScale();
+            Vec3 localScale = localScaleBeforeReflect;
+            
+            reflector->pushReflectionTarget(&localScale);
+            {
+                reflectVec3(reflector, 0);
+
+                if (!equals(localScale, localScaleBeforeReflect))
+                {
+                    xfm->setLocalScale(localScale);
+                }
+            }
+            reflector->popReflectionTarget();
+            
+            reflector->popStruct();
+        }
+    }
+    else
     {
-        reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
-        reflector->popStruct();
+        if (reflector->pushStruct("Position"))
+        {
+            reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
+            reflector->popStruct();
+        }
+
+        if (reflector->pushStruct("Orientation"))
+        {
+            reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
+            reflector->popStruct();
+        }
+
+        if (reflector->pushStruct("Scale"))
+        {
+            reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
+            reflector->popStruct();
+        }
     }
 }
 
@@ -240,6 +324,7 @@ IReflector::IReflector(ReflectionPurpose purpose)
 UiReflector::UiReflector()
     : IReflector(ReflectionPurpose::UI)
 {
+    this->useEulerAngles = true;
 }
 
 bool UiReflector::startReflection(EntityNameString label)
@@ -280,7 +365,7 @@ void UiReflector::popStruct()
 
 int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset)
 {
-    int32* valuePtr = (int32*)((char*)reflectionTarget + offset);
+    int32* valuePtr = (int32*)((char*)reflectionTarget() + offset);
     int32 value = *valuePtr;
 
     // std::string text = name + ": " + std::to_string(value);
@@ -292,7 +377,7 @@ int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset)
 
 uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset)
 {
-    uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
+    uint32* valuePtr = (uint32*)((char*)reflectionTarget() + offset);
     uint32 value = *valuePtr;
 
     // std::string text = name + ": " + std::to_string(value);
@@ -304,7 +389,7 @@ uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset)
 
 float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
 {
-    float32* valuePtr = (float32*)((char*)reflectionTarget + offset);
+    float32* valuePtr = (float32*)((char*)reflectionTarget() + offset);
     float32 valueCopy = *valuePtr;
 
     typedef ImGuiInputTextFlags_ Flags;
@@ -322,7 +407,7 @@ float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
 
 float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset)
 {
-    float64* valuePtr = (float64*)((char*)reflectionTarget + offset);
+    float64* valuePtr = (float64*)((char*)reflectionTarget() + offset);
     float64 value = *valuePtr;
 
     // std::string text = name + ": " + std::to_string(value);
@@ -334,7 +419,7 @@ float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset)
 
 bool UiReflector::consumeBool(FieldNameString name, uint32 offset)
 {
-    bool* valuePtr = (bool*)((char*)reflectionTarget + offset);
+    bool* valuePtr = (bool*)((char*)reflectionTarget() + offset);
     bool value = *valuePtr;
 
     // std::string text = name + ": " + std::to_string(value);
@@ -348,7 +433,7 @@ uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNa
 {
     // TODO: not sure how this should work...
     
-    uint32* valuePtr = (uint32*)((char*)reflectionTarget + offset);
+    uint32* valuePtr = (uint32*)((char*)reflectionTarget() + offset);
     uint32 value = *valuePtr;
 
     assert(value < enumValueCount);

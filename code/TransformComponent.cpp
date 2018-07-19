@@ -21,97 +21,143 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Ve
 {
 }
 
-Vec3 TransformComponent::localPosition()
+void
+TransformComponent::setLocalPosition(Vec3 position)
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
-
-    if (parentXfm)
-    {
-        Vec3 result = this->position - parentXfm->position;
-        return result;
-    }
-
-    return this->position;
+    localTransform.setPosition(position);
+    markSelfAndChildrenDirty();
+}
+    
+Vec3
+TransformComponent::localPosition()
+{
+    return localTransform.position();
 }
 
-Quaternion TransformComponent::localOrientation()
+void
+TransformComponent::setLocalOrientation(Quaternion orientation)
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
-
-    if (parentXfm)
-    {
-        Quaternion result = relativeRotation(parentXfm->orientation, this->orientation);
-        return result;
-    }
-
-    return this->orientation;
+    localTransform.setOrientation(orientation);
+    markSelfAndChildrenDirty();
+}
+    
+Quaternion
+TransformComponent::localOrientation()
+{
+    return localTransform.orientation();
 }
 
-Vec3 TransformComponent::localScale()
+void
+TransformComponent::setLocalScale(Vec3 scale)
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
-
-    if (parentXfm)
-    {
-        Vec3 result = hadamardDivide(this->scale, parentXfm->scale);
-        return result;
-    }
-
-    return this->scale;
+    localTransform.setScale(scale);
+    markSelfAndChildrenDirty();
+}
+    
+Vec3
+TransformComponent::localScale()
+{
+    return localTransform.scale();
 }
 
-void TransformComponent::setLocalPosition(Vec3 localPosition)
+void
+TransformComponent::setWorldPosition(Vec3 position)
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
-
-    if (parentXfm)
+    TransformComponent* p = getTransformComponent(parent);
+    if (p)
     {
-        this->position = parentXfm->position + localPosition;
+        Mat4 worldToParent = inverse(p->worldTransform().matrix());
+        Vec4 newLocal = worldToParent * Vec4(position, 1.0);
+        this->setLocalPosition(newLocal.xyz());
     }
     else
     {
-        this->position = localPosition;
+        this->setLocalPosition(position);
     }
 }
 
-void TransformComponent::setLocalOrientation(Quaternion localOrientation)
+Vec3
+TransformComponent::worldPosition()
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
+    if (cachedWorldDirty) recalculateWorld();
+    return cachedWorldTransform.position();
+}
 
-    if (parentXfm)
+void
+TransformComponent::setWorldOrientation(Quaternion orientation)
+{
+    TransformComponent* p = getTransformComponent(parent);
+    if (p)
     {
-        this->orientation = localOrientation * parentXfm->orientation;
+        Quaternion rotationNeeded = relativeRotation(p->worldOrientation(), orientation);
+        this->setLocalOrientation(rotationNeeded);
     }
     else
     {
-        this->orientation = localOrientation;
+        this->setLocalOrientation(orientation);
     }
 }
 
-void TransformComponent::setLocalScale(Vec3 localScale)
+Quaternion
+TransformComponent::worldOrientation()
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
+    if (cachedWorldDirty) recalculateWorld();
+    return cachedWorldTransform.orientation();
+}
 
-    if (parentXfm)
+void
+TransformComponent::setWorldScale(Vec3 scale)
+{
+    TransformComponent* p = getTransformComponent(parent);
+    if (p)
     {
-        this->scale = hadamard(localScale, parentXfm->scale);
+        this->setLocalScale(hadamardDivide(scale, p->worldScale()));
     }
     else
     {
-        this->scale = localScale;
+        this->setLocalScale(scale);
     }
 }
 
-void TransformComponent::resetLocal()
+Vec3
+TransformComponent::worldScale()
 {
-    // @Slow: could inline these and combine the "if" checks in eeach
-    this->setLocalPosition(Vec3(0));
-    this->setLocalOrientation(Quaternion());
-    this->setLocalScale(Vec3(1));
+    if (cachedWorldDirty) recalculateWorld();
+    return cachedWorldTransform.scale();
 }
 
-bool TransformComponent::hasParentTransform()
+Transform
+TransformComponent::worldTransform()
 {
-    TransformComponent* parentXfm = getTransformComponent(this->parent);
-    return parentXfm != nullptr;
+    if (cachedWorldDirty) recalculateWorld();
+    return cachedWorldTransform;
+}
+
+void
+TransformComponent::recalculateWorld()
+{
+    TransformComponent* p = getTransformComponent(parent);
+
+    if (p)
+    {
+        Transform parentWorldXfm = p->worldTransform();
+        cachedWorldTransform = multiplyTransforms(localTransform, parentWorldXfm);
+    }
+    else
+    {
+        cachedWorldTransform = localTransform;
+    }
+
+    // TODO: implement multiply
+    cachedWorldDirty = false;
+}
+
+void
+TransformComponent::markSelfAndChildrenDirty()
+{
+    cachedWorldDirty = true;
+    for (auto t : children)
+    {
+        t->markSelfAndChildrenDirty();
+    }
 }

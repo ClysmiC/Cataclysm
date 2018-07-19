@@ -86,7 +86,7 @@ void showEditor(EditorState* editor)
             TransformComponent* toolXfm = getTransformComponent(editor->translator.pseudoEntity);
             toolXfm->position = tc->position;
 
-            if (editor->translator.isLocalXyz)
+            if (editor->isLocalXfm)
             {
                 toolXfm->orientation = tc->orientation;
             }
@@ -207,6 +207,7 @@ void showEditor(EditorState* editor)
         
         // TODO: handle component groups
         UiReflector reflector;
+        reflector.useLocalXfm = editor->isLocalXfm;
 
         if (!reflector.startReflection(e.friendlyName))
         {
@@ -249,7 +250,7 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Transform"))
                 {
-                    reflector.reflectionTarget = transform;
+                    reflector.setPrimaryReflectionTarget(transform);
                     reflectTransformComponent(&reflector, 0);
                 }
             }
@@ -258,7 +259,7 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Collider"))
                 {
-                    reflector.reflectionTarget = collider;
+                    reflector.setPrimaryReflectionTarget(collider);
                     reflectColliderComponent(&reflector, collider, 0);
                 }
             }
@@ -296,7 +297,7 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Portal"))
                 {
-                    reflector.reflectionTarget = portal;
+                    reflector.setPrimaryReflectionTarget(portal);
                     reflectPortalComponent(&reflector, 0);
                 }
             }

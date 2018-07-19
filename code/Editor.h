@@ -9,9 +9,10 @@ struct EditorState
 {
     EditorState();
     
+    bool isLocalXfm = true;
+    
     struct TranslatorTool
     {
-        bool isLocalXyz = true;
         bool isHandleSelected = false;
         Axis3D selectedHandle = Axis3D::X;
 

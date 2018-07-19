@@ -10,7 +10,7 @@
 #define TO_RAD(x) ((x)* PI / 180.0f)
 #define TO_DEG(x) ((x)* 180.0f/ PI)
 
-constexpr int64 powi(int64 base, int64 power)
+constexpr int64 powi(int64 base, uint64 power)
 {
 	int64 result = 1;
 	for(int64 i = 0; i < power; i++)
@@ -92,6 +92,8 @@ union Vec4
     float32 element[4];
 
     Vec4& normalizeInPlace();
+
+    inline Vec3 xyz() { return Vec3(x, y, z); }
 };
 
 union Quaternion
@@ -114,7 +116,7 @@ union Quaternion
 struct Mat4;
 struct Mat3
 {
-    // Mat3(Mat4 mat4);
+    Mat3(Mat4 mat4);
     
     float32 _e[3][3] = {
         { 1, 0, 0},
@@ -132,7 +134,7 @@ struct Mat3
 
 struct Mat4
 {
-    // Mat4(Mat3 mat3);
+    Mat4(Mat3 mat3);
     
     float32 _e[4][4] = {
         { 1, 0, 0, 0},
@@ -149,7 +151,8 @@ struct Mat4
     Mat4& scaleInPlace(Vec3 scale);
     Mat4& rotateInPlace(Quaternion rotation);
     Mat4& translateInPlace(Vec3 translation);
-    
+
+    Mat4& identityInPlace();
     Mat4& transposeInPlace();
     Mat4& mat3ifyInPlace();
     Mat4& perspectiveInPlace(float32 fov, float32 aspectRatio, float32 near, float32 far);
@@ -245,18 +248,16 @@ Quaternion operator / (Quaternion quat, float32 scalar);
 Quaternion& operator /= (Quaternion& quat, float32 scalar);
 
 Quaternion operator * (Quaternion a, Quaternion b);
-Quaternion lookRotation(Vec3 forward, Vec3 up);
 
 // Mat
 Mat3 operator * (Mat3 left, Mat3 right);
 Mat4 operator * (Mat4 left, Mat4 right);
 
+float32 determinant(Mat3 m);
+Mat3 inverse(Mat3 m);
 
-
-
-//
-// FUNCTIONS
-//
+float32 determinant(Mat4 m);
+Mat4 inverse(Mat4 m);
 
 // Vec2
 inline float32 dot(Vec2 vectorA, Vec2 vectorB)
@@ -458,7 +459,16 @@ inline Quaternion relativeRotation(Quaternion start, Quaternion end)
 
     return result;
 }
+
+///////////////////////////////////////////
+//             X-Y-Z Tait-Bryan          //
+Vec3 toEuler(Mat4 m);                    //
+Vec3 toEuler(Quaternion q);              //
+Quaternion fromEuler(Vec3 euler);        //
+///////////////////////////////////////////
+
 Quaternion relativeRotation(Vec3 start, Vec3 end);
+Quaternion lookRotation(Vec3 forward, Vec3 up);
 
 
 inline Vec3 someNonParallelAxis(Vec3 vector)
@@ -766,8 +776,6 @@ inline Quaternion rotateVector(Vec3 initial, Vec3 target)
     return result;
 }
 
-
-
 inline Mat3 transposeOf(Mat3 m)
 {
     Mat3 result;
@@ -846,7 +854,6 @@ inline float32 getValue(Vec3 vector, Axis3D axis)
 {
     return vector.element[(uint32)axis];
 }
-
 
 //
 // Random utilities
