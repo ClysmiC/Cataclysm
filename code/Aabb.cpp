@@ -79,7 +79,7 @@ Aabb aabbFromRenderComponent(RenderComponent* rc)
     TransformComponent* xfm = getTransformComponent(rc->entity);
     assert(xfm);
     
-    return transformedAabb(rc->submesh->mesh->bounds, xfm->worldTransform());
+    return transformedAabb(rc->submesh->mesh->bounds, xfm);
 }
 
 Aabb aabbFromCollider(ColliderComponent* collider)
@@ -92,13 +92,13 @@ Aabb aabbFromCollider(ColliderComponent* collider)
         case ColliderType::RECT3:
         {
             Aabb unXfmedBounds(collider->xfmOffset, scaledRect3Lengths(collider) / 2);
-            return transformedAabb(unXfmedBounds, xfm->worldTransform());
+            return transformedAabb(unXfmedBounds, xfm);
         } break;
 
         case ColliderType::SPHERE:
         {
             Aabb unXfmedBounds(collider->xfmOffset, Vec3(scaledRadius(collider)));
-            return transformedAabb(unXfmedBounds, xfm->worldTransform());
+            return transformedAabb(unXfmedBounds, xfm);
         } break;
 
         case ColliderType::CYLINDER:
@@ -129,7 +129,7 @@ Aabb aabbFromCollider(ColliderComponent* collider)
             }
             
             Aabb unXfmedBounds(collider->xfmOffset, Vec3(xLen, yLen, zLen) / 2);
-            return transformedAabb(unXfmedBounds, xfm->worldTransform());
+            return transformedAabb(unXfmedBounds, xfm);
         } break;
 
         case ColliderType::CAPSULE:
@@ -160,7 +160,7 @@ Aabb aabbFromCollider(ColliderComponent* collider)
             }
             
             Aabb unXfmedBounds(collider->xfmOffset, Vec3(xLen, yLen, zLen) / 2);
-            return transformedAabb(unXfmedBounds, xfm->worldTransform());
+            return transformedAabb(unXfmedBounds, xfm);
         } break;
 
         default:

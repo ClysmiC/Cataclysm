@@ -91,8 +91,8 @@ void buildTestScene1(Scene* scene)
         
         TransformComponent *tc = addTransformComponent(e);
         ColliderComponent* cc = addColliderComponent(e);
-        tc->setWorldPosition(hexPositions[i]);
-        tc->setWorldScale(Vec3(.25));
+        tc->setPosition(hexPositions[i]);
+        tc->setScale(Vec3(.25));
         
         auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
@@ -114,7 +114,7 @@ void buildTestScene1(Scene* scene)
         //       says we don't store a transform so we can have the robustness of that check without the memory
         //       overhead
         TransformComponent *xfm = addTransformComponent(e);
-        xfm->setWorldPosition(Vec3(0, 0, 0));
+        xfm->setPosition(Vec3(0, 0, 0));
         
         TerrainComponent* tc = addTerrainComponent(e);
         new (tc) TerrainComponent("heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
@@ -173,7 +173,7 @@ void buildTestScene2(Scene* scene)
     {
         Entity e = makeEntity(&scene->ecs, "icosahedron");
         TransformComponent *tc = addTransformComponent(e);
-        tc->setWorldPosition(icosahedronPositions[i]);
+        tc->setPosition(icosahedronPositions[i]);
 
         auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
 
@@ -223,8 +223,8 @@ void buildTestScene3(Scene* scene)
     {
         Entity e = makeEntity(&scene->ecs, "shuttle");
         TransformComponent *tc = addTransformComponent(e);
-        tc->setWorldPosition(shuttlePositions[i]);
-        tc->setWorldScale(Vec3(.25));
+        tc->setPosition(shuttlePositions[i]);
+        tc->setScale(Vec3(.25));
         
         auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
 

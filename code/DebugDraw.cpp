@@ -518,7 +518,7 @@ DebugDraw::drawSphere(Vec3 position, float radius)
     transform.scaleInPlace(Vec3(radius));
     transform.translateInPlace(position);
 
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
@@ -552,7 +552,7 @@ DebugDraw::drawRect3(Vec3 center, Vec3 dimensions, Quaternion orientation)
     transform.rotateInPlace(orientation);
     transform.translateInPlace(center);
 
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
@@ -582,7 +582,7 @@ DebugDraw::drawCylinder(Vec3 center, float32 radius, float32 length, Axis3D axis
     transform.rotateInPlace(rotationNeeded);
     transform.translateInPlace(center);
 
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
@@ -624,7 +624,7 @@ void
 DebugDraw::drawLine(Vec3 start, Vec3 end)
 {
     Mat4 transform;
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
@@ -656,7 +656,7 @@ DebugDraw::drawCone(Vec3 position, float32 radius, float32 height, Quaternion or
     transform.rotateInPlace(orientation);
     transform.translateInPlace(position);
 
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "model", transform);
@@ -731,7 +731,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                     scaledYLength(collider),
                     scaledZLength(collider)
                 ),
-                getTransformComponent(collider->entity)->worldOrientation()
+                getTransformComponent(collider->entity)->orientation()
             );
         } break;
 
@@ -750,7 +750,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->worldOrientation()
+                getTransformComponent(collider->entity)->orientation()
             );
         } break;
 
@@ -761,7 +761,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->worldOrientation()
+                getTransformComponent(collider->entity)->orientation()
             );
         } break;
 
@@ -796,7 +796,7 @@ DebugDraw::drawCapsule(Vec3 center, float32 radius, float32 length, Axis3D axis,
     botEndcapXfm.rotateInPlace(rotationNeeded);
     botEndcapXfm.translateInPlace(center);
 
-    Mat4 view = worldToView(this->cameraXfm->worldTransform());
+    Mat4 view = worldToView(this->cameraXfm);
     
     bind(shader);
     setMat4(shader, "view", view);
@@ -856,7 +856,7 @@ void DebugDraw::drawAabb(Entity entity)
     
     if (rc != nullptr && xfm != nullptr)
     {
-        Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, this->cameraXfm->worldTransform());
+        Aabb bounds = transformedAabb(rc->submesh->mesh->bounds, xfm);
         drawRect3Aa(bounds.center, bounds.halfDim * 2);
     }
 }

@@ -300,18 +300,18 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
                 uint32 portalVao = quadVao();
 
                 Transform perturbedPortalXfm;
-                perturbedPortalXfm.setPosition(sourceSceneXfm->worldPosition());
-                perturbedPortalXfm.setOrientation(sourceSceneXfm->worldOrientation());
-                perturbedPortalXfm.setScale(sourceSceneXfm->worldScale());
+                perturbedPortalXfm.setPosition(sourceSceneXfm->position());
+                perturbedPortalXfm.setOrientation(sourceSceneXfm->orientation());
+                perturbedPortalXfm.setScale(sourceSceneXfm->scale());
 
-                Plane portalPlane = Plane(sourceSceneXfm->worldPosition(), outOfPortalNormal(pc));
+                Plane portalPlane = Plane(sourceSceneXfm->position(), outOfPortalNormal(pc));
                 bool closeEnoughToClipThroughNearPlane = distanceSquared(cameraXfm->position(), portalPlane) < .11 * .11;
                 if (closeEnoughToClipThroughNearPlane)
                 {
                     perturbedPortalXfm.setPosition(perturbedPortalXfm.position() + (intoPortalNormal(pc) * .1));
                 }
 
-                Mat4 model = sourceSceneXfm->worldTransform()->matrix();
+                Mat4 model = sourceSceneXfm->matrix();
                 Mat4 view = worldToView(cameraXfm);
                 Mat4 projection = camera->projectionMatrix;
 
@@ -354,7 +354,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
             Shader* shader = portalShader();
             uint32 portalVao = quadVao();
 
-            Mat4 model = sourceSceneXfm->worldTransform()->matrix();
+            Mat4 model = sourceSceneXfm->matrix();
             Mat4 view = worldToView(cameraXfm);
             Mat4 projection = camera->projectionMatrix;
 
@@ -374,7 +374,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         glStencilMask(0xFF);
         glClear(GL_STENCIL_BUFFER_BIT);
 
-        DebugDraw::instance().drawRect3(sourceSceneXfm->worldPosition(), Vec3(getDimensions(pc), 0.2), sourceSceneXfm->worldOrientation());
+        DebugDraw::instance().drawRect3(sourceSceneXfm->position(), Vec3(getDimensions(pc), 0.2), sourceSceneXfm->orientation());
     }
 }
 
@@ -387,7 +387,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
 
         if (renderingViaPortal)
         {
-            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->worldPosition()) > 0;
+            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
             if (behindDestPortal) continue;
         }
 
@@ -407,7 +407,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
             {
                 TransformComponent* plXfm = getTransformComponent(pl->entity);
             
-                setVec3(shader, "pointLights[0].posWorld", plXfm->worldPosition());
+                setVec3(shader, "pointLights[0].posWorld", plXfm->position());
                 setVec3(shader, "pointLights[0].intensity", pl->intensity);
                 setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
                 setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
@@ -503,7 +503,7 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
         assert(plXfm != nullptr);
         if (plXfm == nullptr) continue;
         
-        float32 dist = distance(xfm->worldPosition(), plXfm->worldPosition());
+        float32 dist = distance(xfm->position(), plXfm->position());
 
         if (dist < closestDistance)
         {
@@ -524,7 +524,7 @@ void walkAndCamera(Game* game)
     
     TerrainComponent *terrain = getTerrainComponent(walk->terrain);
     
-    Vec3 posBeforeMove = xfm->worldPosition();
+    Vec3 posBeforeMove = xfm->position();
     
     Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
     
@@ -537,9 +537,9 @@ void walkAndCamera(Game* game)
         cameraSpeed *= 2;
     }
 
-    Vec3 moveRight   = normalize( project(xfm->worldTransform()->right(), movementPlane) );
+    Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
     Vec3 moveLeft    = normalize( -moveRight );
-    Vec3 moveForward = normalize( project(xfm->worldTransform()->forward(), movementPlane) );
+    Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
     Vec3 moveBack    = normalize( -moveForward );
 
     // Uncomment this (and the asserts) to follow the pitch of the camera when
@@ -578,7 +578,7 @@ void walkAndCamera(Game* game)
 
             xfm->setLocalOrientation(deltaYawAndPitch * xfm->localOrientation());
 
-            float camRightY = xfm->worldTransform()->right().y;
+            float camRightY = xfm->right().y;
             assert(FLOAT_EQ(camRightY, 0, EPSILON)); // no "roll"
         }
 
@@ -603,13 +603,13 @@ void walkAndCamera(Game* game)
 
     if (terrain)
     {
-        float32 height = getTerrainHeight(terrain, xfm->worldPosition().x, xfm->worldPosition().z);
+        float32 height = getTerrainHeight(terrain, xfm->position().x, xfm->position().z);
 
-        xfm->setWorldPosition(
+        xfm->setPosition(
             Vec3(
-                xfm->worldPosition().x,
+                xfm->position().x,
                 height,
-                xfm->worldPosition().z
+                xfm->position().z
              )
         );
     }
@@ -622,11 +622,11 @@ void walkAndCamera(Game* game)
         PortalComponent* pc = it.ptr;
         ColliderComponent* cc = getColliderComponent(pc->entity);
 
-        if (pointInsideCollider(cc, xfm->worldPosition()))
+        if (pointInsideCollider(cc, xfm->position()))
         {
-            Vec3 portalPos = getTransformComponent(pc->entity)->worldPosition();
+            Vec3 portalPos = getTransformComponent(pc->entity)->position();
             Vec3 portalToOldPos = posBeforeMove - portalPos;
-            Vec3 portalToPos = xfm->worldPosition() - portalPos;
+            Vec3 portalToPos = xfm->position() - portalPos;
             
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
@@ -646,5 +646,5 @@ void walkAndCamera(Game* game)
     // Update camera
     //
     TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
-    cameraXfm->setLocalPosition(xfm->worldTransform()->up() * scaledYLength(collider));
+    cameraXfm->setLocalPosition(xfm->up() * scaledYLength(collider));
 }

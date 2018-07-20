@@ -31,11 +31,11 @@ Ray rayThroughViewportCoordinate(CameraComponent* camera, Vec2 viewportCoordinat
     
     TransformComponent* camXfm = getTransformComponent(camera->entity);
 
-    Vec3 cameraForward = camXfm->worldTransform()->forward();
-    Vec3 cameraRight = camXfm->worldTransform()->right();
-    Vec3 cameraUp = camXfm->worldTransform()->up();
+    Vec3 cameraForward = camXfm->forward();
+    Vec3 cameraRight = camXfm->right();
+    Vec3 cameraUp = camXfm->up();
         
-    Vec3 nearPlaneCenter = camXfm->worldPosition() + cameraForward * camera->near;
+    Vec3 nearPlaneCenter = camXfm->position() + cameraForward * camera->near;
     
     if (camera->isOrthographic)
     {
@@ -74,7 +74,7 @@ Ray rayThroughViewportCoordinate(CameraComponent* camera, Vec2 viewportCoordinat
             viewportCoordinate.x * nearPlaneWorldSpaceWidth * cameraRight +
             viewportCoordinate.y * nearPlaneWorldSpaceHeight * cameraUp;
 
-        result.direction = (result.position - camXfm->worldPosition()).normalizeInPlace();
+        result.direction = (result.position - camXfm->position()).normalizeInPlace();
     }
 
     return result;
