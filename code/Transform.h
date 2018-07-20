@@ -83,7 +83,7 @@ struct Transform
     {
         if (xfmDirty)
         {
-            new (&this->xfm) Mat4; // reset to identity
+            this->xfm.identityInPlace(); // reset to identity
             
             this->xfm.scaleInPlace(this->_scale);
             this->xfm.rotateInPlace(this->_orientation);

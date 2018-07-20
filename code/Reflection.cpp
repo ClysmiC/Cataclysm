@@ -134,23 +134,24 @@ void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
     }
     else
     {
-        if (reflector->pushStruct("Position"))
-        {
-            reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
-            reflector->popStruct();
-        }
+        // @TODO
+        //if (reflector->pushStruct("Position"))
+        //{
+        //    reflectVec3(reflector, startingOffset + offsetof(TransformComponent, position));
+        //    reflector->popStruct();
+        //}
 
-        if (reflector->pushStruct("Orientation"))
-        {
-            reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
-            reflector->popStruct();
-        }
+        //if (reflector->pushStruct("Orientation"))
+        //{
+        //    reflectQuaternion(reflector, startingOffset + offsetof(TransformComponent, orientation));
+        //    reflector->popStruct();
+        //}
 
-        if (reflector->pushStruct("Scale"))
-        {
-            reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
-            reflector->popStruct();
-        }
+        //if (reflector->pushStruct("Scale"))
+        //{
+        //    reflectVec3(reflector, startingOffset + offsetof(TransformComponent, scale));
+        //    reflector->popStruct();
+        //}
     }
 }
 

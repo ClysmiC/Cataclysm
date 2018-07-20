@@ -16,7 +16,7 @@ RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
 
 void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm, CameraComponent* camera, Transform *cameraXfm)
 {
-    Mat4 m2w = modelToWorld(xfm);;
+    Mat4 m2w = xfm->matrix();;
     Mat4 w2v = worldToView(cameraXfm);
 
     bind(renderComponent->material);

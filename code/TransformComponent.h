@@ -3,13 +3,14 @@
 #include "als_math.h"
 #include "Component.h"
 #include "Transform.h"
+#include <vector>
 
-struct TransformComponent : public Component, public Transform
+struct TransformComponent : public Component
 {
     Entity parent;
     std::vector<TransformComponent*> children;
 private:
-    Transform localTransform;
+    Transform _localTransform;
 
     bool cachedWorldDirty;
     Transform cachedWorldTransform;
@@ -20,6 +21,7 @@ public:
     TransformComponent(Vec3 position, Quaternion orientation);
     TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
 
+    
     void setLocalPosition(Vec3 position);
     Vec3 localPosition();
     
@@ -37,11 +39,17 @@ public:
     
     void setWorldScale(Vec3);
     Vec3 worldScale();
-    
-    Transform worldTransform();
-    
+
     void recalculateWorld();
     
     void markSelfAndChildrenDirty();
+    
+    void setLocalTransform(Transform transform);
+    void setWorldTransform(Transform transform);
+    
+    // You can access these directly, but DON'T MODIFY them
+    // directly or the cache will go out of sync.
+    Transform* localTransform();
+    Transform* worldTransform();
 };
 

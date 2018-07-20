@@ -20,7 +20,7 @@ void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToCon
 Vec2 getDimensions(PortalComponent* portal);
 
 Scene* getConnectedScene(PortalComponent* portal);
-Transform* getConnectedSceneXfm(PortalComponent* portal);
+TransformComponent* getConnectedSceneXfm(PortalComponent* portal);
 
 Vec3 intoPortalNormal(PortalComponent* portal);
 Vec3 outOfPortalNormal(PortalComponent* portal);

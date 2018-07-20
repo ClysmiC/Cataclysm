@@ -16,7 +16,7 @@ Transform::Transform(Vec3 position, Quaternion orientation)
 }
 
 Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
-    : position(position), orientation(orientation), scale(scale)
+    : _position(position), _orientation(orientation), _scale(scale)
 {
 }
 
@@ -25,7 +25,7 @@ Transform multiplyTransforms(Transform t1, Transform t2)
     Transform result;
 
     result.setOrientation(t2.orientation() * t1.orientation());
-    result.setScale(t2.scale() * t1.scale());
+    result.setScale(hadamard(t2.scale(), t1.scale()));
     result.setPosition(
         t2.orientation() * (hadamard(t2.scale(), t1.position())) + t2.position()
     );

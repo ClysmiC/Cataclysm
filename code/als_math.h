@@ -12,13 +12,13 @@
 
 constexpr int64 powi(int64 base, uint64 power)
 {
-	int64 result = 1;
-	for(int64 i = 0; i < power; i++)
-	{
-		result *= base;
-	}
+    int64 result = 1;
+    for(uint64 i = 0; i < power; i++)
+    {
+        result *= base;
+    }
 
-	return result;
+    return result;
 }
 
 enum class Axis3D : uint32
@@ -130,6 +130,7 @@ struct Mat3
     float32* operator [] (int32 i);
     float32* dataPointer();
 
+    Mat3& identityInPlace();
     Mat3& transposeInPlace();
 };
 

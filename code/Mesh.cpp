@@ -201,8 +201,6 @@ bool load(Mesh* mesh)
                         assert(vertexTuples.size() >= 3);
                         MeshVertex vertex;
 
-                        bool computedFaceNormalSet = false;
-                        Vec3 computedFaceNormal;
 
                         // 0-based indices
                         int pIndex, uvIndex, nIndex;
@@ -221,22 +219,18 @@ bool load(Mesh* mesh)
                         }
                         else
                         {
-                            if (!computedFaceNormalSet)
-                            {
-                                int v0pIndex = get<0>(vertexTuples[0]);
-                                Vec3 v0 = objVertices[v0pIndex];
-                                int v1pIndex = get<0>(vertexTuples[1]);
-                                Vec3 v1 = objVertices[v1pIndex];
-                                int v2pIndex = get<0>(vertexTuples[2]);
-                                Vec3 v2 = objVertices[v2pIndex];
+                            int v0pIndex = get<0>(vertexTuples[0]);
+                            Vec3 v0 = objVertices[v0pIndex];
+                            int v1pIndex = get<0>(vertexTuples[1]);
+                            Vec3 v1 = objVertices[v1pIndex];
+                            int v2pIndex = get<0>(vertexTuples[2]);
+                            Vec3 v2 = objVertices[v2pIndex];
 
-                                Vec3 v01 = v1 - v0;
-                                Vec3 v02 = v2 - v0;
+                            Vec3 v01 = v1 - v0;
+                            Vec3 v02 = v2 - v0;
 
-                                computedFaceNormal = cross(v01, v02).normalizeOrXAxisInPlace();
-                                assert(length(computedFaceNormal) > .99);
-                                computedFaceNormalSet = true;
-                            }
+                            Vec3 computedFaceNormal = cross(v01, v02).normalizeOrXAxisInPlace();
+                            assert(length(computedFaceNormal) > .99);
                             
                             vertex.normal = computedFaceNormal;
                         }

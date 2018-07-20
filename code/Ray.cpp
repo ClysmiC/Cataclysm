@@ -140,9 +140,9 @@ float32 rayVsCollider(Ray ray, ColliderComponent* collider)
     TransformComponent* xfm = getTransformComponent(collider->entity);
     assert (xfm != nullptr);
     
-    Vec3 localX = xfm->right();
-    Vec3 localY = xfm->up();
-    Vec3 localZ = xfm->back();
+    Vec3 localX = xfm->worldTransform()->right();
+    Vec3 localY = xfm->worldTransform()->up();
+    Vec3 localZ = xfm->worldTransform()->back();
     Vec3 center = colliderCenter(collider);
 
     float32 result = -1;
@@ -154,7 +154,7 @@ float32 rayVsCollider(Ray ray, ColliderComponent* collider)
             result = rayVsRect3(
                 ray,
                 center,
-                xfm->orientation,
+                xfm->worldOrientation(),
                 Vec3(scaledXLength(collider), scaledYLength(collider), scaledZLength(collider)) / 2.0f
             );
         } break;

@@ -91,8 +91,8 @@ void buildTestScene1(Scene* scene)
         
         TransformComponent *tc = addTransformComponent(e);
         ColliderComponent* cc = addColliderComponent(e);
-        tc->position = hexPositions[i];
-        tc->scale = Vec3(.25);
+        tc->setWorldPosition(hexPositions[i]);
+        tc->setWorldScale(Vec3(.25));
         
         auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
@@ -114,7 +114,7 @@ void buildTestScene1(Scene* scene)
         //       says we don't store a transform so we can have the robustness of that check without the memory
         //       overhead
         TransformComponent *xfm = addTransformComponent(e);
-        xfm->position = Vec3(0, 0, 0);
+        xfm->setWorldPosition(Vec3(0, 0, 0));
         
         TerrainComponent* tc = addTerrainComponent(e);
         new (tc) TerrainComponent("heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
@@ -173,7 +173,7 @@ void buildTestScene2(Scene* scene)
     {
         Entity e = makeEntity(&scene->ecs, "icosahedron");
         TransformComponent *tc = addTransformComponent(e);
-        tc->position = icosahedronPositions[i];
+        tc->setWorldPosition(icosahedronPositions[i]);
 
         auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
 
@@ -223,8 +223,8 @@ void buildTestScene3(Scene* scene)
     {
         Entity e = makeEntity(&scene->ecs, "shuttle");
         TransformComponent *tc = addTransformComponent(e);
-        tc->position = shuttlePositions[i];
-        tc->scale = Vec3(.25);
+        tc->setWorldPosition(shuttlePositions[i]);
+        tc->setWorldScale(Vec3(.25));
         
         auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
 
@@ -269,7 +269,7 @@ void updateGame(Game* game)
         CameraComponent* camComponent = getCameraComponent(game->activeCamera);
         TransformComponent* camXfm = getTransformComponent(game->activeCamera);
 
-        renderScene(game->activeScene, camComponent, camXfm);
+        renderScene(game->activeScene, camComponent, camXfm->worldTransform());
     }
 
     //
@@ -418,12 +418,12 @@ int main()
         Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
 
         Transform portal1Xfm;
-        portal1Xfm.position = Vec3(0, 0, -10);
-        portal1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 180);
+        portal1Xfm.setPosition(Vec3(0, 0, -10));
+        portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
         
         Transform portal2Xfm;
-        portal2Xfm.position = Vec3(1, 2, 3);
-        portal2Xfm.orientation = axisAngle(Vec3(0, 1, 0), 45);
+        portal2Xfm.setPosition(Vec3(1, 2, 3));
+        portal2Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 45));
 
         Vec2 dimensions(2, 3);
         
@@ -440,12 +440,12 @@ int main()
         Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
 
         Transform portal1Xfm;
-        portal1Xfm.position = Vec3(0, 0, -10);
-        portal1Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+        portal1Xfm.setPosition(Vec3(0, 0, -10));
+        portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
         
         Transform portal3Xfm;
-        portal3Xfm.position = Vec3(0, 0, 0);
-        portal3Xfm.orientation = axisAngle(Vec3(0, 1, 0), 0);
+        portal3Xfm.setPosition(Vec3(0, 0, 0));
+        portal3Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
 
         Vec2 dimensions(2, 3);
         

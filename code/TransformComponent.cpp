@@ -17,47 +17,53 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
 }
 
 TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale)
-    : Transform(position, orientation, scale)
 {
+    // @Think: should thisk be local or world?
+    //         If they can't set a parent at construction, then they
+    //         are equivalent. But if I allow them to, I need to think
+    //         about this.
+    this->setLocalPosition(position);
+    this->setLocalOrientation(orientation);
+    this->setLocalScale(scale);
 }
 
 void
 TransformComponent::setLocalPosition(Vec3 position)
 {
-    localTransform.setPosition(position);
+    _localTransform.setPosition(position);
     markSelfAndChildrenDirty();
 }
     
 Vec3
 TransformComponent::localPosition()
 {
-    return localTransform.position();
+    return _localTransform.position();
 }
 
 void
 TransformComponent::setLocalOrientation(Quaternion orientation)
 {
-    localTransform.setOrientation(orientation);
+    _localTransform.setOrientation(orientation);
     markSelfAndChildrenDirty();
 }
     
 Quaternion
 TransformComponent::localOrientation()
 {
-    return localTransform.orientation();
+    return _localTransform.orientation();
 }
 
 void
 TransformComponent::setLocalScale(Vec3 scale)
 {
-    localTransform.setScale(scale);
+    _localTransform.setScale(scale);
     markSelfAndChildrenDirty();
 }
     
 Vec3
 TransformComponent::localScale()
 {
-    return localTransform.scale();
+    return _localTransform.scale();
 }
 
 void
@@ -66,7 +72,7 @@ TransformComponent::setWorldPosition(Vec3 position)
     TransformComponent* p = getTransformComponent(parent);
     if (p)
     {
-        Mat4 worldToParent = inverse(p->worldTransform().matrix());
+        Mat4 worldToParent = inverse(p->worldTransform()->matrix());
         Vec4 newLocal = worldToParent * Vec4(position, 1.0);
         this->setLocalPosition(newLocal.xyz());
     }
@@ -126,11 +132,17 @@ TransformComponent::worldScale()
     return cachedWorldTransform.scale();
 }
 
-Transform
+Transform*
 TransformComponent::worldTransform()
 {
     if (cachedWorldDirty) recalculateWorld();
-    return cachedWorldTransform;
+    return &cachedWorldTransform;
+}
+
+Transform*
+TransformComponent::localTransform()
+{
+    return &_localTransform;
 }
 
 void
@@ -140,12 +152,12 @@ TransformComponent::recalculateWorld()
 
     if (p)
     {
-        Transform parentWorldXfm = p->worldTransform();
-        cachedWorldTransform = multiplyTransforms(localTransform, parentWorldXfm);
+        Transform* parentWorldXfm = p->worldTransform();
+        cachedWorldTransform = multiplyTransforms(_localTransform, *parentWorldXfm);
     }
     else
     {
-        cachedWorldTransform = localTransform;
+        cachedWorldTransform = _localTransform;
     }
 
     // TODO: implement multiply
@@ -160,4 +172,20 @@ TransformComponent::markSelfAndChildrenDirty()
     {
         t->markSelfAndChildrenDirty();
     }
+}
+
+void
+TransformComponent::setLocalTransform(Transform transform)
+{
+    setLocalPosition(transform.position());
+    setLocalOrientation(transform.orientation());
+    setLocalScale(transform.scale());
+}
+
+void
+TransformComponent::setWorldTransform(Transform transform)
+{
+    setWorldPosition(transform.position());
+    setWorldOrientation(transform.orientation());
+    setWorldScale(transform.scale());
 }

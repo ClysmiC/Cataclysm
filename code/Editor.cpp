@@ -84,21 +84,21 @@ void showEditor(EditorState* editor)
         if (tc)
         {
             TransformComponent* toolXfm = getTransformComponent(editor->translator.pseudoEntity);
-            toolXfm->position = tc->position;
+            toolXfm->setWorldPosition(tc->worldPosition());
 
             if (editor->isLocalXfm)
             {
-                toolXfm->orientation = tc->orientation;
+                toolXfm->setWorldOrientation(tc->worldOrientation());
             }
             
             TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
 
             const float32 SCALE_FACTOR = 0.1;
 
-            float32 lengthFromCamera = length(tc->position - cameraXfm->position);
+            float32 lengthFromCamera = length(tc->worldPosition() - cameraXfm->worldPosition());
             float32 scale = lengthFromCamera * SCALE_FACTOR;
 
-            toolXfm->scale = Vec3(scale);
+            toolXfm->setWorldScale(Vec3(scale));
 
             float32 arrowLength = editor->translator.xAxisHandle->rect3Lengths.x;
             arrowLength *= scale;
@@ -108,13 +108,13 @@ void showEditor(EditorState* editor)
             glClear(GL_DEPTH_BUFFER_BIT);
             
             DebugDraw::instance().color = Vec3(1, 0, 0);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->right());
+            DebugDraw::instance().drawArrow(tc->worldPosition(), tc->worldPosition() + arrowLength * toolXfm->worldTransform()->right());
 
             DebugDraw::instance().color = Vec3(0, 1, 0);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->up());
+            DebugDraw::instance().drawArrow(tc->worldPosition(), tc->worldPosition() + arrowLength * toolXfm->worldTransform()->up());
 
             DebugDraw::instance().color = Vec3(0, 0, 1);
-            DebugDraw::instance().drawArrow(tc->position, tc->position + arrowLength * toolXfm->back());
+            DebugDraw::instance().drawArrow(tc->worldPosition(), tc->worldPosition() + arrowLength * toolXfm->worldTransform()->back());
 
             DebugDraw::instance().color = oldColor;
 
@@ -129,7 +129,6 @@ void showEditor(EditorState* editor)
                 // raycast against x, y, and z colliders
                 for (uint32 i = 0; i < 3; i++)
                 {
-                    DebugDraw::instance().drawCollider(editor->translator.handles[i]);
                     float32 t = rayVsCollider(rayThruScreen, editor->translator.handles[i]);
                     if (t >= 0)
                     {
@@ -154,11 +153,11 @@ void showEditor(EditorState* editor)
                 //       mouse movement. Consider setting a max limit to the drag
                 //       per frame (should depend on distance from camera)
                 
-                Vec3 planePoint1 = tc->position;
-                Vec3 planePoint2 = tc->position + toolXfm->orientation * Vec3(editor->translator.selectedHandle);
+                Vec3 planePoint1 = tc->worldPosition();
+                Vec3 planePoint2 = tc->worldPosition() + toolXfm->worldOrientation() * Vec3(editor->translator.selectedHandle);
 
                 Vec3 dragAxis = (planePoint2 - planePoint1).normalizeInPlace();
-                Vec3 toCamera = cameraXfm->position - tc->position;
+                Vec3 toCamera = cameraXfm->worldPosition() - tc->worldPosition();
 
                 Vec3 planeNormal = cross(dragAxis, cross(toCamera, dragAxis)).normalizeInPlace();
 
@@ -177,7 +176,7 @@ void showEditor(EditorState* editor)
 
                     Vec3 delta = projection - prevProjection;
 
-                    tc->position += delta;
+                    tc->setWorldPosition(tc->worldPosition() + delta);
                 }
             }
         }

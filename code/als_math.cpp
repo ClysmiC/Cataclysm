@@ -177,6 +177,41 @@ float32* Mat3::dataPointer()
     return result;
 }
 
+Mat3& Mat3::identityInPlace()
+{
+    (*this)[0][0] = 1;
+    (*this)[0][1] = 0;
+    (*this)[0][2] = 0;
+
+    (*this)[1][0] = 0;
+    (*this)[1][1] = 1;
+    (*this)[1][2] = 0;
+
+    (*this)[2][0] = 0;
+    (*this)[2][1] = 0;
+    (*this)[2][2] = 1;
+
+    return *this;
+}
+
+Mat3& Mat3::transposeInPlace()
+{
+    float32 temp;
+
+    temp = (*this)[0][1];
+    (*this)[0][1] = (*this)[1][0];
+    (*this)[1][0] = temp;
+
+    temp = (*this)[0][2];
+    (*this)[0][2] = (*this)[2][0];
+    (*this)[2][0] = temp;
+
+    temp = (*this)[1][2];
+    (*this)[1][2] = (*this)[2][1];
+    (*this)[2][1] = temp;
+
+    return *this;
+}
 
 float32* Mat4::operator [] (int32 i)
 {
@@ -212,21 +247,27 @@ Mat4& Mat4::translateInPlace(Vec3 translation)
     return *this;
 }
 
-Mat3& Mat3::transposeInPlace()
+Mat4& Mat4::identityInPlace()
 {
-    float32 temp;
+    (*this)[0][0] = 1;
+    (*this)[0][1] = 0;
+    (*this)[0][2] = 0;
+    (*this)[0][3] = 0;
 
-    temp = (*this)[0][1];
-    (*this)[0][1] = (*this)[1][0];
-    (*this)[1][0] = temp;
+    (*this)[1][0] = 0;
+    (*this)[1][1] = 1;
+    (*this)[1][2] = 0;
+    (*this)[1][3] = 0;
 
-    temp = (*this)[0][2];
-    (*this)[0][2] = (*this)[2][0];
-    (*this)[2][0] = temp;
+    (*this)[2][0] = 0;
+    (*this)[2][1] = 0;
+    (*this)[2][2] = 1;
+    (*this)[2][3] = 0;
 
-    temp = (*this)[1][2];
-    (*this)[1][2] = (*this)[2][1];
-    (*this)[2][1] = temp;
+    (*this)[3][0] = 0;
+    (*this)[3][1] = 0;
+    (*this)[3][2] = 0;
+    (*this)[3][3] = 1;
 
     return *this;
 }
@@ -1122,7 +1163,10 @@ Mat3 inverse(Mat3 m)
     Vec3 cCrossA = cross(c, a);
 
     // Note: determinant of 3x3 matrix equals its triple product ((a x b) . c)
-    float32 invDet = 1.0 / dot(aCrossB, c);
+    float32 det = dot(aCrossB, c);
+    assert(det != 0);
+    
+    float32 invDet = 1.0 / det;
 
     Mat3 result;
     result[0][0] = bCrossC.x * invDet;
@@ -1157,7 +1201,10 @@ Mat4 inverse(Mat4 m)
     Vec3 u = y * a - x * b;
     Vec3 v = w * c - z * d;
 
-    float32 invDet = 1.0 / (dot(s, v) + dot(t, u));
+    float32 det = (dot(s, v) + dot(t, u));
+    assert(det != 0);
+        
+    float32 invDet = 1.0 / det;
 
     // Note: formula (1.99) doesn't do this multiplication, but this is the code's way of
     // distributing the invDet across each entry in the matrix (since each entry gets multiplied)

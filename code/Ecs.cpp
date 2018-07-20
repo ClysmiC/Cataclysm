@@ -274,10 +274,10 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         //
         PortalComponent* pc = scene->ecs.portals.components.addressOf(it.locator);
 
-        Transform* sourceSceneXfm = getTransformComponent(pc->entity);
-        Transform* destSceneXfm = getConnectedSceneXfm(pc);
+        TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
+        TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
 
-        Transform portalViewpointXfm(cameraXfm->position, cameraXfm->orientation);
+        Transform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());
         rebaseTransformInPlace(pc, &portalViewpointXfm);
 
         glEnable(GL_STENCIL_TEST);
@@ -300,18 +300,18 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
                 uint32 portalVao = quadVao();
 
                 Transform perturbedPortalXfm;
-                perturbedPortalXfm.position = sourceSceneXfm->position;
-                perturbedPortalXfm.orientation = sourceSceneXfm->orientation;
-                perturbedPortalXfm.scale = sourceSceneXfm->scale;
+                perturbedPortalXfm.setPosition(sourceSceneXfm->worldPosition());
+                perturbedPortalXfm.setOrientation(sourceSceneXfm->worldOrientation());
+                perturbedPortalXfm.setScale(sourceSceneXfm->worldScale());
 
-                Plane portalPlane = Plane(sourceSceneXfm->position, outOfPortalNormal(pc));
-                bool closeEnoughToClipThroughNearPlane = distanceSquared(cameraXfm->position, portalPlane) < .11 * .11;
+                Plane portalPlane = Plane(sourceSceneXfm->worldPosition(), outOfPortalNormal(pc));
+                bool closeEnoughToClipThroughNearPlane = distanceSquared(cameraXfm->position(), portalPlane) < .11 * .11;
                 if (closeEnoughToClipThroughNearPlane)
                 {
-                    perturbedPortalXfm.position += (intoPortalNormal(pc) * .1);
+                    perturbedPortalXfm.setPosition(perturbedPortalXfm.position() + (intoPortalNormal(pc) * .1));
                 }
 
-                Mat4 model = modelToWorld(sourceSceneXfm);
+                Mat4 model = sourceSceneXfm->worldTransform()->matrix();
                 Mat4 view = worldToView(cameraXfm);
                 Mat4 projection = camera->projectionMatrix;
 
@@ -338,7 +338,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         
                 if (!debug_hidePortalContents)
                 {
-                    renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
+                    renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm->worldTransform());
                 }
             }
         }
@@ -354,7 +354,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
             Shader* shader = portalShader();
             uint32 portalVao = quadVao();
 
-            Mat4 model = modelToWorld(sourceSceneXfm);
+            Mat4 model = sourceSceneXfm->worldTransform()->matrix();
             Mat4 view = worldToView(cameraXfm);
             Mat4 projection = camera->projectionMatrix;
 
@@ -374,7 +374,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         glStencilMask(0xFF);
         glClear(GL_STENCIL_BUFFER_BIT);
 
-        DebugDraw::instance().drawRect3(sourceSceneXfm->position, Vec3(getDimensions(pc), 0.2), sourceSceneXfm->orientation);
+        DebugDraw::instance().drawRect3(sourceSceneXfm->worldPosition(), Vec3(getDimensions(pc), 0.2), sourceSceneXfm->worldOrientation());
     }
 }
 
@@ -387,7 +387,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
 
         if (renderingViaPortal)
         {
-            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position - xfm->position) > 0;
+            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->worldPosition()) > 0;
             if (behindDestPortal) continue;
         }
 
@@ -407,7 +407,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
             {
                 TransformComponent* plXfm = getTransformComponent(pl->entity);
             
-                setVec3(shader, "pointLights[0].posWorld", plXfm->position);
+                setVec3(shader, "pointLights[0].posWorld", plXfm->worldPosition());
                 setVec3(shader, "pointLights[0].intensity", pl->intensity);
                 setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
                 setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
@@ -429,7 +429,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
             }
         }
 
-        drawRenderComponent(&rc, xfm, camera, cameraXfm);
+        drawRenderComponent(&rc, xfm->worldTransform(), camera, cameraXfm);
     }
 }
 
@@ -503,7 +503,7 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
         assert(plXfm != nullptr);
         if (plXfm == nullptr) continue;
         
-        float32 dist = distance(xfm->position, plXfm->position);
+        float32 dist = distance(xfm->worldPosition(), plXfm->worldPosition());
 
         if (dist < closestDistance)
         {
@@ -524,7 +524,7 @@ void walkAndCamera(Game* game)
     
     TerrainComponent *terrain = getTerrainComponent(walk->terrain);
     
-    Vec3 posBeforeMove = xfm->position;
+    Vec3 posBeforeMove = xfm->worldPosition();
     
     Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
     
@@ -537,9 +537,9 @@ void walkAndCamera(Game* game)
         cameraSpeed *= 2;
     }
 
-    Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
+    Vec3 moveRight   = normalize( project(xfm->worldTransform()->right(), movementPlane) );
     Vec3 moveLeft    = normalize( -moveRight );
-    Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
+    Vec3 moveForward = normalize( project(xfm->worldTransform()->forward(), movementPlane) );
     Vec3 moveBack    = normalize( -moveForward );
 
     // Uncomment this (and the asserts) to follow the pitch of the camera when
@@ -576,34 +576,42 @@ void walkAndCamera(Game* game)
             deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
             deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
 
-            xfm->orientation = deltaYawAndPitch * xfm->orientation;
+            xfm->setLocalOrientation(deltaYawAndPitch * xfm->localOrientation());
 
-            float camRightY = xfm->right().y;
-            assert(FLOAT_EQ(camRightY, 0, EPSILON));
+            float camRightY = xfm->worldTransform()->right().y;
+            assert(FLOAT_EQ(camRightY, 0, EPSILON)); // no "roll"
         }
 
         if (keys[GLFW_KEY_W])
         {
-            xfm->position += moveForward * cameraSpeed * deltaTS;
+            xfm->setLocalPosition(xfm->localPosition() + moveForward * cameraSpeed * deltaTS);
         }
         else if (keys[GLFW_KEY_S])
         {
-            xfm->position += moveBack * cameraSpeed * deltaTS;
+            xfm->setLocalPosition(xfm->localPosition() + moveBack * cameraSpeed * deltaTS);
         }
         
         if (keys[GLFW_KEY_A])
         {
-            xfm->position += moveLeft * cameraSpeed * deltaTS;
+            xfm->setLocalPosition(xfm->localPosition() + moveLeft * cameraSpeed * deltaTS);
         }
         else if (keys[GLFW_KEY_D])
         {
-            xfm->position += moveRight * cameraSpeed * deltaTS;
+            xfm->setLocalPosition(xfm->localPosition() + moveRight * cameraSpeed * deltaTS);
         }
     }
 
     if (terrain)
     {
-        xfm->position.y = getTerrainHeight(terrain, xfm->position.x, xfm->position.z);
+        float32 height = getTerrainHeight(terrain, xfm->worldPosition().x, xfm->worldPosition().z);
+
+        xfm->setWorldPosition(
+            Vec3(
+                xfm->worldPosition().x,
+                height,
+                xfm->worldPosition().z
+             )
+        );
     }
 
     //
@@ -614,15 +622,21 @@ void walkAndCamera(Game* game)
         PortalComponent* pc = it.ptr;
         ColliderComponent* cc = getColliderComponent(pc->entity);
 
-        if (pointInsideCollider(cc, xfm->position))
+        if (pointInsideCollider(cc, xfm->worldPosition()))
         {
-            Vec3 portalPos = getTransformComponent(pc->entity)->position;
+            Vec3 portalPos = getTransformComponent(pc->entity)->worldPosition();
             Vec3 portalToOldPos = posBeforeMove - portalPos;
-            Vec3 portalToPos = xfm->position - portalPos;
+            Vec3 portalToPos = xfm->worldPosition() - portalPos;
             
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
-                rebaseTransformInPlace(pc, xfm);
+                // @Hack: don't feel like refactoring this to not be in place
+                //        can't pass the pointer to be rebased directly, because
+                //        the dirty flag needs to be updated by a setWorldTransform call
+                Transform newXfm = *xfm->worldTransform();
+                rebaseTransformInPlace(pc, &newXfm);
+                xfm->setWorldTransform(newXfm);
+
                 game->activeScene = pc->connectedPortal->entity.ecs->scene;
             }
         }
@@ -632,6 +646,5 @@ void walkAndCamera(Game* game)
     // Update camera
     //
     TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
-    cameraXfm->resetLocal();
-    cameraXfm->setLocalPosition(xfm->up() * scaledYLength(collider));
+    cameraXfm->setLocalPosition(xfm->worldTransform()->up() * scaledYLength(collider));
 }
