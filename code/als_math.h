@@ -32,7 +32,7 @@ enum class Axis3D : uint32
 
 union Vec2
 {
-    Vec2();
+    Vec2() = default;
     Vec2(float32 value);
     Vec2(float32 x, float32 y);
     
@@ -48,7 +48,7 @@ union Vec2
 
 union Vec3
 {
-    Vec3();
+    Vec3() = default;
     Vec3(Axis3D unitAxis);
     Vec3(float32 value);
     Vec3(Vec2 xy, float32 z);
@@ -74,7 +74,7 @@ union Vec3
 
 union Vec4
 {
-    Vec4();
+    Vec4() = default;
     Vec4(float32 value);
     Vec4(Vec2 xy, float32 z, float32 w);
     Vec4(Vec2 xy, Vec2 zw);
@@ -116,6 +116,7 @@ union Quaternion
 struct Mat4;
 struct Mat3
 {
+    Mat3() = default;
     Mat3(Mat4 mat4);
     
     float32 _e[3][3] = {
@@ -134,6 +135,7 @@ struct Mat3
 
 struct Mat4
 {
+    Mat4() = default;
     Mat4(Mat3 mat3);
     
     float32 _e[4][4] = {
@@ -251,7 +253,12 @@ Quaternion operator * (Quaternion a, Quaternion b);
 
 // Mat
 Mat3 operator * (Mat3 left, Mat3 right);
+Mat3 operator * (Mat3 left, float32 right);
+Mat3 operator * (float32 left, Mat3 right);
+
 Mat4 operator * (Mat4 left, Mat4 right);
+Mat4 operator * (Mat4 left, float32 right);
+Mat4 operator * (float32 left, Mat4 right);
 
 float32 determinant(Mat3 m);
 Mat3 inverse(Mat3 m);

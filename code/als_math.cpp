@@ -1,11 +1,9 @@
 #include "als_math.h"
 #include <cmath>
 
-Vec2::Vec2() {}
 Vec2::Vec2(float32 value) { this->x = value; this->y = value; }
 Vec2::Vec2(float32 x, float32 y) { this->x = x; this->y = y; }
 
-Vec3::Vec3() {}
 Vec3::Vec3(Axis3D unitAxis)
 {
     switch (unitAxis) {
@@ -20,7 +18,6 @@ Vec3::Vec3(float32 value) { this->x = value; this->y = value; this->z = value; }
 Vec3::Vec3(Vec2 xy, float32 z) { this->x = xy.x; this->y = xy.y; this->z = z; }
 Vec3::Vec3(float32 x, float32 y, float32 z) { this->x = x; this->y = y; this->z = z; }
 
-Vec4::Vec4() {}
 Vec4::Vec4(float32 value) { this->x = value; this->y = value; this->z = value; }
 Vec4::Vec4(Vec2 xy, float32 z, float32 w) { this->x = xy.x; this->y = xy.y; this->z = z; this->w = w; }
 Vec4::Vec4(Vec2 xy, Vec2 zw) { this->x = xy.x; this->y = xy.y; this->z = zw.x; this->w = zw.y; }
@@ -325,11 +322,6 @@ Mat4& Mat4::orthoInPlace(float32 width, float32 aspectRatio, float32 near, float
 
     float32 right = width / 2.0f;
     float32 top = right / (aspectRatio);
-
-    // TEMP: interpret fov as vertical fov (the way Qt does)
-    // float32 halfVFov = fov / 2;
-    // float32 top = near * tan(TO_RAD(halfVFov));
-    // float32 right = top * aspectRatio;
 
     (*this)[0][0] = 1 / right;
     (*this)[0][1] = 0;
@@ -831,8 +823,6 @@ Quaternion& operator /= (Quaternion& quat, float32 scalar)
     return quat;
 }
 
-
-
 Mat3 operator * (Mat3 left, Mat3 right)
 {
     Mat3 result;
@@ -857,6 +847,26 @@ Mat3 operator * (Mat3 left, Mat3 right)
     return result;
 }
 
+Mat3 operator * (Mat3 left, float32 right)
+{
+    Mat3 result;
+    
+    for (uint32 down = 0; down < 3; down++)
+    {
+        for (uint32 across = 0; across < 3; across++)
+        {
+            result[down][across] = left[down][across] * right;
+        }
+    }
+
+    return result;
+}
+
+Mat3 operator * (float32 left, Mat3 right)
+{
+    return right * left;
+}
+
 Mat4 operator * (Mat4 left, Mat4 right)
 {
     Mat4 result;
@@ -879,6 +889,26 @@ Mat4 operator * (Mat4 left, Mat4 right)
     }
     
     return result;
+}
+
+Mat4 operator * (Mat4 left, float32 right)
+{
+    Mat4 result;
+    
+    for (uint32 down = 0; down < 4; down++)
+    {
+        for (uint32 across = 0; across < 4; across++)
+        {
+            result[down][across] = left[down][across] * right;
+        }
+    }
+
+    return result;
+}
+
+Mat4 operator * (float32 left, Mat4 right)
+{
+    return right * left;
 }
 
 Vec3 operator * (Mat3 m, Vec3 v)
@@ -928,7 +958,6 @@ Vec3 operator * (Quaternion quaternion, Vec3 vector)
 // Don't really understand how it works......
 Quaternion lookRotation(Vec3 forward, Vec3 up)
 {
-    // ALS_ILLEGAL;
     assert(isOrthogonal(forward, up));
                
     forward = normalize(forward);
@@ -1085,8 +1114,8 @@ Mat3 inverse(Mat3 m)
 {
     // Optimized formula from FGED Vol 1, 2nd edition, formula (1.95) and Listing 1.10
     Vec3 a = Vec3(m[0][0], m[1][0], m[2][0]);
-    Vec3 b = Vec3(m[0][0], m[1][0], m[2][0]);
-    Vec3 c = Vec3(m[0][0], m[1][0], m[2][0]);
+    Vec3 b = Vec3(m[0][1], m[1][1], m[2][1]);
+    Vec3 c = Vec3(m[0][2], m[1][2], m[2][2]);
 
     Vec3 aCrossB = cross(a, b);
     Vec3 bCrossC = cross(b, c);
@@ -1212,7 +1241,7 @@ float32 determinant(Mat4 m)
         result = dot(s, v) + dot(t, u);
 
 
-        // Slow version (untested)
+        // Slow version
         // result =
         //     m[0][0] * m[1][1] * m[2][2] * m[3][3] +
         //     m[0][0] * m[1][2] * m[2][3] * m[3][1] +
