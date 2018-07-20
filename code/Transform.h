@@ -4,15 +4,25 @@
 #include <vector>
 
 struct Transform;
-struct LiteTransform
+struct LiteTransform : public LiteTransform
 {
-    Vec3 position;
-    Quaternion orientation;
-    Vec3 scale;
-
-    LiteTransform() = default;
+    LiteTransform();
+    LiteTransform(Vec3 position);
+    LiteTransform(Vec3 position, Quaternion orientation);
     LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale);
-    LiteTransform(const Transform& transform);
+    LiteTransform(Transform& transform);
+
+    virtual inline Vec3 position() { return this->_position; }
+    virtual inline Quaternion orientation() { return this->_orientation; }
+    virtual inline Vec3 scale() { return this->_scale; }
+    virtual inline void setPosition(Vec3 position) { this->_position = position; }
+    virtual inline void setOrientation(Quaternion orientation) { this->_orientation = orientation; }
+    virtual inline void setScale(Vec3 scale) { this->_scale = scale; }
+
+private:
+    Vec3 _position;
+    Quaternion _orientation;
+    Vec3 _scale;
 };
 
 struct Transform
@@ -23,22 +33,22 @@ struct Transform
     Transform(Vec3 position, Quaternion orientation, Vec3 scale);
     Transform(const LiteTransform& transform);
 
-    virtual Transform* getParent();
-    virtual std::vector<Transform*> getChildren();
+    virtual Transform* getParent() = 0;
+    virtual std::vector<Transform*> getChildren() = 0;
     
-    inline Vec3 position()
+    inline Vec3 position() override
     {
         if (dirty) recalculateWorld();
         return worldPosition;
     }
 
-    inline Quaternion orientation()
+    inline Quaternion orientation() override
     {
         if (dirty) recalculateWorld();
         return worldOrientation;
     }
 
-    inline Vec3 scale()
+    inline Vec3 scale() override
     {
         if (dirty) recalculateWorld();
         return worldScale;
@@ -100,9 +110,9 @@ struct Transform
     void setLocalPosition(Vec3 position);
     void setLocalOrientation(Quaternion orientation);
     void setLocalScale(Vec3 scale);
-    void setPosition(Vec3 position);
-    void setOrientation(Quaternion orientation);
-    void setScale(Vec3 scale);
+    void setPosition(Vec3 position) override;
+    void setOrientation(Quaternion orientation) override;
+    void setScale(Vec3 scale) override;
 
     void markSelfAndChildrenDirty();
     void recalculateWorld();

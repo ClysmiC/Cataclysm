@@ -43,9 +43,9 @@ std::vector<Transform*> TransformComponent::getChildren()
 {
     std::vector<Transform*> result;
 
-    for (auto entity : this->children)
+    for (auto e : this->children)
     {
-        TransformComponent* xfm = getTransformComponent(entity);
+        TransformComponent* xfm = getTransformComponent(e);
 
         if (xfm)
         {

@@ -277,7 +277,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
         TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
 
-        Transform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());
+        LiteTransform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());
         rebaseTransformInPlace(pc, &portalViewpointXfm);
 
         glEnable(GL_STENCIL_TEST);
@@ -299,7 +299,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
                 Shader* shader = portalShader();
                 uint32 portalVao = quadVao();
 
-                Transform perturbedPortalXfm;
+                LiteTransform perturbedPortalXfm;
                 perturbedPortalXfm.setPosition(sourceSceneXfm->position());
                 perturbedPortalXfm.setOrientation(sourceSceneXfm->orientation());
                 perturbedPortalXfm.setScale(sourceSceneXfm->scale());
@@ -338,7 +338,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
         
                 if (!debug_hidePortalContents)
                 {
-                    renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm->worldTransform());
+                    renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
                 }
             }
         }
@@ -429,7 +429,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cam
             }
         }
 
-        drawRenderComponent(&rc, xfm->worldTransform(), camera, cameraXfm);
+        drawRenderComponent(&rc, xfm, camera, cameraXfm);
     }
 }
 
@@ -630,13 +630,7 @@ void walkAndCamera(Game* game)
             
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
-                // @Hack: don't feel like refactoring this to not be in place
-                //        can't pass the pointer to be rebased directly, because
-                //        the dirty flag needs to be updated by a setWorldTransform call
-                Transform newXfm = *xfm->worldTransform();
-                rebaseTransformInPlace(pc, &newXfm);
-                xfm->setWorldTransform(newXfm);
-
+                rebaseTransformInPlace(pc, xfm);
                 game->activeScene = pc->connectedPortal->entity.ecs->scene;
             }
         }

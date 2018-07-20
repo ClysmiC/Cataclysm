@@ -269,7 +269,7 @@ void updateGame(Game* game)
         CameraComponent* camComponent = getCameraComponent(game->activeCamera);
         TransformComponent* camXfm = getTransformComponent(game->activeCamera);
 
-        renderScene(game->activeScene, camComponent, camXfm->worldTransform());
+        renderScene(game->activeScene, camComponent, camXfm);
     }
 
     //

@@ -96,7 +96,7 @@ Vec3 outOfConnectedPortalNormal(PortalComponent* portal)
     return result;
 }
 
-void rebaseTransformInPlace(PortalComponent* portal, Transform* transform)
+void rebaseTransformInPlace(PortalComponent* portal, LiteTransform* transform)
 {
     TransformComponent* sourceSceneXfm = getTransformComponent(portal->entity);;
     TransformComponent* connectedSceneXfm = getConnectedSceneXfm(portal);

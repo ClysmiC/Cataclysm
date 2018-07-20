@@ -128,7 +128,7 @@ Transform::recalculateWorld()
         multiplyTransforms(
             this->_localPosition, this->_localOrientation, this->_localScale,
             p->position(), p->orientation(), p->scale(),
-            &this->position(), &this->orientation(), &this->scale()
+            &this->worldPosition, &this->worldOrientation, &this->worldScale
         );
     }
     else
@@ -141,18 +141,29 @@ Transform::recalculateWorld()
     dirty = false;
 }
 
-LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
+LiteTransform::LiteTransform()
+    : LiteTransform(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
 {
-    this->position = position;
-    this->orientation = orientation;
-    this->scale = scale;
 }
 
-LiteTransform::LiteTransform(const Transform& transform)
+LiteTransform::LiteTransform(Vec3 position)
+    : LiteTransform(position, Quaternion(), Vec3(1, 1, 1))
 {
-    this->position = transform.position;
-    this->orientation = transform.orientation;
-    this->scale = transform.scale;
+}
+
+LiteTransform::LiteTransform(Vec3 position, Quaternion orientation)
+    : LiteTransform(position, orientation, Vec3(1, 1, 1))
+{
+}
+
+LiteTransform::LiteTransform(Transform& transform)
+    : LiteTransform(transform.position(), transform.orientation(), transform.scale())
+{
+}
+
+LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
+    : position(position), orientation(orientation), scale(scale)
+{
 }
 
 void multiplyTransforms(
