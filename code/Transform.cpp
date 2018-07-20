@@ -15,22 +15,155 @@ Transform::Transform(Vec3 position, Quaternion orientation)
 {
 }
 
-Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
-    : _position(position), _orientation(orientation), _scale(scale)
+Transform::Transform(const LiteTransform& transform)
+    : Transform(transform.position, transform.orientation, transform.scale)
 {
 }
 
-Transform multiplyTransforms(Transform t1, Transform t2)
+Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
+    : _localPosition(position), _localOrientation(orientation), _localScale(scale)
 {
-    Transform result;
+}
 
-    result.setOrientation(t2.orientation() * t1.orientation());
-    result.setScale(hadamard(t2.scale(), t1.scale()));
-    result.setPosition(
-        t2.orientation() * (hadamard(t2.scale(), t1.position())) + t2.position()
-    );
+Mat4
+Transform::matrix()
+{
+    if (dirty)
+    {
+        recalculateWorld();
+        
+        this->toWorld.identityInPlace(); // reset to identity
+        
+        this->toWorld.scaleInPlace(this->worldScale);
+        this->toWorld.rotateInPlace(this->worldOrientation);
+        this->toWorld.translateInPlace(this->worldPosition);
+    }
+    
+    return this->toWorld;
+}
 
-    return result;
+void
+Transform::setLocalPosition(Vec3 position)
+{
+    _localPosition = position;
+    markSelfAndChildrenDirty();
+}
+
+void
+Transform::setLocalOrientation(Quaternion orientation)
+{
+    _localOrientation = orientation;
+    markSelfAndChildrenDirty();
+}
+void
+Transform::setLocalScale(Vec3 scale)
+{
+    _localScale = scale;
+    markSelfAndChildrenDirty();
+}
+void
+Transform::setPosition(Vec3 position)
+{
+    Transform* p = this->getParent();
+    if (p)
+    {
+        Mat4 worldToParent = inverse(p->matrix());
+        Vec4 newLocal = worldToParent * Vec4(position, 1.0);
+        this->setLocalPosition(newLocal.xyz());
+    }
+    else
+    {
+        this->setLocalPosition(position);
+    }
+}
+
+void
+Transform::setOrientation(Quaternion orientation)
+{
+    Transform* p = this->getParent();
+    if (p)
+    {
+        Quaternion rotationNeeded = relativeRotation(p->orientation(), orientation);
+        this->setLocalOrientation(rotationNeeded);
+    }
+    else
+    {
+        this->setLocalOrientation(orientation);
+    }
+}
+
+void
+Transform::setScale(Vec3 scale)
+{
+    Transform* p = this->getParent();
+    if (p)
+    {
+        this->setLocalScale(hadamardDivide(scale, p->scale()));
+    }
+    else
+    {
+        this->setLocalScale(scale);
+    }
+}
+
+void
+Transform::markSelfAndChildrenDirty()
+{
+    dirty = true;
+    
+    auto children = this->children();
+    for (auto t : children)
+    {
+        t->markSelfAndChildrenDirty();
+    }
+}
+
+void
+Transform::recalculateWorld()
+{
+    Transform* p = this->getParent();
+
+    if (p)
+    {
+        Transform newTransform = multiplyTransforms(
+            this->_localPosition, this->_localOrientation, this->_localScale,
+            p->position(), p->orientation(), p->scale(),
+            &this->worldPosition, &this->worldOrientation, &this->worldScale
+        );
+    }
+    else
+    {
+        this->worldPosition = this->_localPosition;
+        this->worldOrientation = this->_localOrientation;
+        this->worldScale = this->_localScale;
+    }
+
+    dirty = false;
+}
+
+LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
+{
+    this->position = position;
+    this->orientation = orientation;
+    this->scale = scale;
+}
+
+LiteTransform::LiteTransform(const Transform& transform)
+{
+    this->position = transform.position();
+    this->orientation = transform.orientation();
+    this->scale = transform.scale();
+}
+
+void multiplyTransforms(
+    Vec3 aToBPos, Quaternion aToBOrientation, Vec3 aToBScale,
+    Vec3 bToCPos, Quaternion bToCOrientation, Vec3 bToCScale,
+    Vec3* outPos, Quaternion* outOrientation, Vec3* outScale
+)
+{
+    *outOrientation = bToCOrientation * aToBOrientation;
+    *outScale = hadamard(bToCScale, aToBScale);
+    *outPosition = bToCOrientation * hadamard(bToCScale, aToBPos) + bToCPos;
 }
 
 Mat4 worldToView(Transform* cameraXfm)
@@ -63,3 +196,5 @@ Mat4 worldToView(Transform* cameraXfm)
 
     return result;
 }
+
+

@@ -5,51 +5,18 @@
 #include "Transform.h"
 #include <vector>
 
-struct TransformComponent : public Component
+struct TransformComponent : public Component, public Transform
 {
     Entity parent;
-    std::vector<TransformComponent*> children;
-private:
-    Transform _localTransform;
-
-    bool cachedWorldDirty;
-    Transform cachedWorldTransform;
-
-public:
+    std::vector<Entity> children;
+    
     TransformComponent();
     TransformComponent(Vec3 position);
     TransformComponent(Vec3 position, Quaternion orientation);
     TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
+    TransformComponent(const LiteTransform& transform);
 
-    
-    void setLocalPosition(Vec3 position);
-    Vec3 localPosition();
-    
-    void setLocalOrientation(Quaternion orientation);
-    Quaternion localOrientation();
-    
-    void setLocalScale(Vec3 scale);
-    Vec3 localScale();
-    
-    void setWorldPosition(Vec3);
-    Vec3 worldPosition();
-    
-    void setWorldOrientation(Quaternion);
-    Quaternion worldOrientation();
-    
-    void setWorldScale(Vec3);
-    Vec3 worldScale();
-
-    void recalculateWorld();
-    
-    void markSelfAndChildrenDirty();
-    
-    void setLocalTransform(Transform transform);
-    void setWorldTransform(Transform transform);
-    
-    // You can access these directly, but DON'T MODIFY them
-    // directly or the cache will go out of sync.
-    Transform* localTransform();
-    Transform* worldTransform();
+    virtual Transform* getParent() override;
+    virtual std::vector<Transform*> getChildren() override;
 };
 
