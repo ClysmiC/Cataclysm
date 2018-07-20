@@ -130,9 +130,13 @@ protected:
 
 
 //
-// Returns tha transform aToC
+// Returns the transform aToC in the out parameters
 //
-void multiplyTransforms(Transform* aToB, Transform* bToC, Vec3* outPos, Quaternion* outOrientation, Vec3* outScale);
+void multiplyTransforms(
+    Vec3 aToBPos, Quaternion aToBOrientation, Vec3 aToBScale,
+    Vec3 bToCPos, Quaternion bToCOrientation, Vec3 bToCScale,
+    Vec3* outPosition, Quaternion* outOrientation, Vec3* outScale
+);
 
 // TODO: put this in camera component code?
 Mat4 worldToView(Transform* cameraXfm);

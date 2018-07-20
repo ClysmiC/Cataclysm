@@ -16,8 +16,8 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
 {
 }
 
-TransformComponent::TransformComponent(LiteTransform transform)
-    : TransformComponent(transform.position, transform.orientation, transform,scale)
+TransformComponent::TransformComponent(const LiteTransform& transform)
+    : TransformComponent(transform.position, transform.orientation, transform.scale)
 {
 }
 
@@ -33,13 +33,13 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Ve
     this->setLocalScale(scale);
 }
 
-Transform* getParent()
+Transform* TransformComponent::getParent()
 {
-    TransformComponent* result = getTransformComponent(parent);
+    TransformComponent* result = getTransformComponent(this->parent);
     return result;
 }
      
-std::vector<Transform*> getChildren()
+std::vector<Transform*> TransformComponent::getChildren()
 {
     std::vector<Transform*> result;
 

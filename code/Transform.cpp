@@ -34,9 +34,9 @@ Transform::matrix()
         
         this->toWorld.identityInPlace(); // reset to identity
         
-        this->toWorld.scaleInPlace(this->worldScale);
-        this->toWorld.rotateInPlace(this->worldOrientation);
-        this->toWorld.translateInPlace(this->worldPosition);
+        this->toWorld.scaleInPlace(this->scale());
+        this->toWorld.rotateInPlace(this->orientation());
+        this->toWorld.translateInPlace(this->position());
     }
     
     return this->toWorld;
@@ -111,7 +111,7 @@ Transform::markSelfAndChildrenDirty()
 {
     dirty = true;
     
-    auto children = this->children();
+    auto children = this->getChildren();
     for (auto t : children)
     {
         t->markSelfAndChildrenDirty();
@@ -125,17 +125,17 @@ Transform::recalculateWorld()
 
     if (p)
     {
-        Transform newTransform = multiplyTransforms(
+        multiplyTransforms(
             this->_localPosition, this->_localOrientation, this->_localScale,
             p->position(), p->orientation(), p->scale(),
-            &this->worldPosition, &this->worldOrientation, &this->worldScale
+            &this->position(), &this->orientation(), &this->scale()
         );
     }
     else
     {
-        this->worldPosition = this->_localPosition;
-        this->worldOrientation = this->_localOrientation;
-        this->worldScale = this->_localScale;
+        this->position() = this->_localPosition;
+        this->orientation() = this->_localOrientation;
+        this->scale() = this->_localScale;
     }
 
     dirty = false;
@@ -150,15 +150,15 @@ LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
 
 LiteTransform::LiteTransform(const Transform& transform)
 {
-    this->position = transform.position();
-    this->orientation = transform.orientation();
-    this->scale = transform.scale();
+    this->position = transform.position;
+    this->orientation = transform.orientation;
+    this->scale = transform.scale;
 }
 
 void multiplyTransforms(
     Vec3 aToBPos, Quaternion aToBOrientation, Vec3 aToBScale,
     Vec3 bToCPos, Quaternion bToCOrientation, Vec3 bToCScale,
-    Vec3* outPos, Quaternion* outOrientation, Vec3* outScale
+    Vec3* outPosition, Quaternion* outOrientation, Vec3* outScale
 )
 {
     *outOrientation = bToCOrientation * aToBOrientation;
