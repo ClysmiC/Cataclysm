@@ -15,8 +15,8 @@ Transform::Transform(Vec3 position, Quaternion orientation)
 {
 }
 
-Transform::Transform(const LiteTransform& transform)
-    : Transform(transform.position, transform.orientation, transform.scale)
+Transform::Transform(LiteTransform& transform)
+    : Transform(transform.position(), transform.orientation(), transform.scale())
 {
 }
 
@@ -133,9 +133,9 @@ Transform::recalculateWorld()
     }
     else
     {
-        this->position() = this->_localPosition;
-        this->orientation() = this->_localOrientation;
-        this->scale() = this->_localScale;
+        this->worldPosition = this->_localPosition;
+        this->worldOrientation = this->_localOrientation;
+        this->worldScale = this->_localScale;
     }
 
     dirty = false;
@@ -162,7 +162,7 @@ LiteTransform::LiteTransform(Transform& transform)
 }
 
 LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
-    : position(position), orientation(orientation), scale(scale)
+    : _position(position), _orientation(orientation), _scale(scale)
 {
 }
 
@@ -177,7 +177,7 @@ void multiplyTransforms(
     *outPosition = bToCOrientation * hadamard(bToCScale, aToBPos) + bToCPos;
 }
 
-Mat4 worldToView(Transform* cameraXfm)
+Mat4 worldToView(LiteTransform* cameraXfm)
 {
     Vec3 up = cameraXfm->up();
     Vec3 right = cameraXfm->right();

@@ -258,7 +258,7 @@ ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponen
     return getComponents(&e.ecs->colliders, e);
 }
 
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel)
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTransform* cameraXfm, uint32 recursionLevel)
 {
     if (recursionLevel > 0)
     {
@@ -378,7 +378,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform
     }
 }
 
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal, Transform* destPortalXfm)
+void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, LiteTransform* cameraXfm, bool renderingViaPortal, LiteTransform* destPortalXfm)
 {
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
     {

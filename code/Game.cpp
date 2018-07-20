@@ -417,11 +417,11 @@ int main()
         Entity portal1 = makeEntity(&testScene1->ecs, "portalA1");
         Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
 
-        Transform portal1Xfm;
+        LiteTransform portal1Xfm;
         portal1Xfm.setPosition(Vec3(0, 0, -10));
         portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
         
-        Transform portal2Xfm;
+        LiteTransform portal2Xfm;
         portal2Xfm.setPosition(Vec3(1, 2, 3));
         portal2Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 45));
 
@@ -439,11 +439,11 @@ int main()
         Entity portal1 = makeEntity(&testScene1->ecs, "portalB1");
         Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
 
-        Transform portal1Xfm;
+        LiteTransform portal1Xfm;
         portal1Xfm.setPosition(Vec3(0, 0, -10));
         portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
         
-        Transform portal3Xfm;
+        LiteTransform portal3Xfm;
         portal3Xfm.setPosition(Vec3(0, 0, 0));
         portal3Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
 

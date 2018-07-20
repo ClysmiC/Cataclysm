@@ -16,8 +16,8 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
 {
 }
 
-TransformComponent::TransformComponent(const LiteTransform& transform)
-    : TransformComponent(transform.position, transform.orientation, transform.scale)
+TransformComponent::TransformComponent(LiteTransform& transform)
+    : TransformComponent(transform.position(), transform.orientation(), transform.scale())
 {
 }
 

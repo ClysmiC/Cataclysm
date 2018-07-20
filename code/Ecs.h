@@ -118,8 +118,8 @@ ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightC
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightComponents(Entity e);
 
 // TODO: do these belong in Ecs.h?
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, Transform* cameraXfm, bool renderingViaPortal=false, Transform* destPortalXfm=nullptr);
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, Transform* cameraXfm, uint32 recursionLevel=0);
+void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, LiteTransform* cameraXfm, bool renderingViaPortal=false, LiteTransform* destPortalXfm=nullptr);
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTransform* cameraXfm, uint32 recursionLevel=0);
 void walkAndCamera(Game* game);
 
 RaycastResult castRay(Ecs* ecs, Ray ray);

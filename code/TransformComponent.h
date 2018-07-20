@@ -14,7 +14,7 @@ struct TransformComponent : public Component, public Transform
     TransformComponent(Vec3 position);
     TransformComponent(Vec3 position, Quaternion orientation);
     TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
-    TransformComponent(const LiteTransform& transform);
+    TransformComponent(LiteTransform& transform);
 
     virtual Transform* getParent() override;
     virtual std::vector<Transform*> getChildren() override;

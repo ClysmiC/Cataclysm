@@ -16,4 +16,4 @@ struct RenderComponent : public Component
     SubmeshOpenGlInfo submeshOpenGlInfo;
 };
 
-void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm,  CameraComponent* camera, Transform *cameraXfm);
+void drawRenderComponent(RenderComponent* renderComponent, Transform *xfm,  CameraComponent* camera, LiteTransform *cameraXfm);
