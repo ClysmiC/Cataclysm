@@ -13,8 +13,8 @@ struct LiteTransform
     LiteTransform() = default;
     LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale);
     LiteTransform(const Transform& transform);
-}
-    
+};
+
 struct Transform
 {
     Transform();

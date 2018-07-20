@@ -28,5 +28,5 @@ Vec3 intoConnectedPortalNormal(PortalComponent* portal);
 Vec3 outOfConnectedPortalNormal(PortalComponent* portal);
 void rebaseTransformInPlace(PortalComponent* portal, Transform* transform);
 
-void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform portal1Xfm, Transform portal2Xfm, Vec2 dimensions);
+void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, LiteTransform portal1Xfm, LiteTransform portal2Xfm, Vec2 dimensions);
 

@@ -115,7 +115,7 @@ void rebaseTransformInPlace(PortalComponent* portal, Transform* transform)
     transform->setOrientation(rotationNeeded * transform->orientation());
 }
 
-void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform portal1Xfm, Transform portal2Xfm, Vec2 dimensions)
+void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, LiteTransform portal1Xfm, LiteTransform portal2Xfm, Vec2 dimensions)
 {
     PortalComponent* portal1Component = addPortalComponent(portal1);
     PortalComponent* portal2Component = addPortalComponent(portal2);
@@ -123,14 +123,14 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, Transform 
     portal2Component->connectedPortal = portal1Component;
     
     TransformComponent* portal1XfmComponent = addTransformComponent(portal1);
-    portal1XfmComponent->setWorldPosition(portal1Xfm.position());
-    portal1XfmComponent->setWorldOrientation(portal1Xfm.orientation());
-    portal1XfmComponent->setWorldScale(portal1Xfm.scale());
+    portal1XfmComponent->setWorldPosition(portal1Xfm.position);
+    portal1XfmComponent->setWorldOrientation(portal1Xfm.orientation);
+    portal1XfmComponent->setWorldScale(portal1Xfm.scale);
 
     TransformComponent* portal2XfmComponent = addTransformComponent(portal2);
-    portal2XfmComponent->setWorldPosition(portal2Xfm.position());
-    portal2XfmComponent->setWorldOrientation(portal2Xfm.orientation());
-    portal2XfmComponent->setWorldScale(portal2Xfm.scale());
+    portal2XfmComponent->setWorldPosition(portal2Xfm.position);
+    portal2XfmComponent->setWorldOrientation(portal2Xfm.orientation);
+    portal2XfmComponent->setWorldScale(portal2Xfm.scale);
 
     // The collider is a box "behind" the portal (think of the loading zone behind a painting in sm64, where the painting is the portal)
     float32 colliderDepth = 1.0f;
