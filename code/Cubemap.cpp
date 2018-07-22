@@ -145,7 +145,7 @@ bool unload(Cubemap* cubemap)
     return true;
 }
 
-void renderCubemap(Cubemap* cubemap, CameraComponent* camera, LiteTransform* cameraXfm)
+void renderCubemap(Cubemap* cubemap, CameraComponent* camera, ITransform* cameraXfm)
 {
     Mat4 w2v = worldToView(cameraXfm);
     Mat4 viewProjectionSansTranslation = camera->projectionMatrix * w2v.mat3ifyInPlace();

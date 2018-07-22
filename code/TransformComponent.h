@@ -5,7 +5,7 @@
 #include "Transform.h"
 #include <vector>
 
-struct TransformComponent : public Component, public Transform
+struct TransformComponent : public Component, public ITransform
 {
     Entity parent;
     std::vector<Entity> children;
@@ -14,9 +14,9 @@ struct TransformComponent : public Component, public Transform
     TransformComponent(Vec3 position);
     TransformComponent(Vec3 position, Quaternion orientation);
     TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
-    TransformComponent(LiteTransform& transform);
+    TransformComponent(ITransform& transform);
 
-    virtual Transform* getParent() override;
-    virtual std::vector<Transform*> getChildren() override;
+    virtual ITransform* getParent() override;
+    virtual std::vector<ITransform*> getChildren() override;
 };
 

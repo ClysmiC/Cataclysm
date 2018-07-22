@@ -16,32 +16,26 @@ TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
 {
 }
 
-TransformComponent::TransformComponent(LiteTransform& transform)
+TransformComponent::TransformComponent(ITransform& transform)
     : TransformComponent(transform.position(), transform.orientation(), transform.scale())
 {
 }
 
 TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale)
+    : ITransform(position, orientation, scale)
 {
-    // @Think: should thisk be local or world?
-    //         If they can't set a parent at construction, then they
-    //         are equivalent. But if I allow them to, I need to think
-    //         about this.
     this->parent.id = 0;
-    this->setLocalPosition(position);
-    this->setLocalOrientation(orientation);
-    this->setLocalScale(scale);
 }
 
-Transform* TransformComponent::getParent()
+ITransform* TransformComponent::getParent()
 {
     TransformComponent* result = getTransformComponent(this->parent);
     return result;
 }
      
-std::vector<Transform*> TransformComponent::getChildren()
+std::vector<ITransform*> TransformComponent::getChildren()
 {
-    std::vector<Transform*> result;
+    std::vector<ITransform*> result;
 
     for (auto e : this->children)
     {

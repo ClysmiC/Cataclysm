@@ -258,7 +258,7 @@ ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponen
     return getComponents(&e.ecs->colliders, e);
 }
 
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTransform* cameraXfm, uint32 recursionLevel)
+void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
 {
     if (recursionLevel > 0)
     {
@@ -277,7 +277,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTrans
         TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
         TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
 
-        LiteTransform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());
+        Transform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());
         rebaseTransformInPlace(pc, &portalViewpointXfm);
 
         glEnable(GL_STENCIL_TEST);
@@ -299,7 +299,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTrans
                 Shader* shader = portalShader();
                 uint32 portalVao = quadVao();
 
-                LiteTransform perturbedPortalXfm;
+                Transform perturbedPortalXfm;
                 perturbedPortalXfm.setPosition(sourceSceneXfm->position());
                 perturbedPortalXfm.setOrientation(sourceSceneXfm->orientation());
                 perturbedPortalXfm.setScale(sourceSceneXfm->scale());
@@ -378,7 +378,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, LiteTrans
     }
 }
 
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, LiteTransform* cameraXfm, bool renderingViaPortal, LiteTransform* destPortalXfm)
+void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
     {

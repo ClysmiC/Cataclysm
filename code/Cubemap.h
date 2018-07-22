@@ -5,7 +5,7 @@
 
 #include "CameraComponent.h"
 
-struct LiteTransform;
+struct ITransform;
 struct CameraComponent;
 struct Shader;
 
@@ -24,6 +24,6 @@ Shader* cubemapShader();
 
 bool load(Cubemap* cubemap);
 bool unload(Cubemap* cubemap);
-void renderCubemap(Cubemap* cubemap, CameraComponent* camera, LiteTransform* cameraXfm);
+void renderCubemap(Cubemap* cubemap, CameraComponent* camera, ITransform* cameraXfm);
 
 uint32 cubemapVao();

@@ -20,7 +20,7 @@ struct Aabb
 };
 
 
-Aabb transformedAabb(Aabb aabb, Transform* xfm);
+Aabb transformedAabb(Aabb aabb, ITransform* xfm);
 Aabb aabbFromMinMax(Vec3 min, Vec3 max);
 Aabb aabbFromRenderComponent(RenderComponent* rc);
 Aabb aabbFromCollider(ColliderComponent* collider);

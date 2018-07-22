@@ -9,7 +9,7 @@ Aabb::Aabb(Vec3 center, Vec3 halfDim)
     this->halfDim = halfDim;
 }
 
-Aabb transformedAabb(Aabb aabb, Transform* xfm)
+Aabb transformedAabb(Aabb aabb, ITransform* xfm)
 {
     //
     // Scale

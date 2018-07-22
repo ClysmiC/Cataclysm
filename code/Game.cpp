@@ -417,17 +417,17 @@ int main()
         Entity portal1 = makeEntity(&testScene1->ecs, "portalA1");
         Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
 
-        LiteTransform portal1Xfm;
+        Transform portal1Xfm;
         portal1Xfm.setPosition(Vec3(0, 0, -10));
         portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
         
-        LiteTransform portal2Xfm;
+        Transform portal2Xfm;
         portal2Xfm.setPosition(Vec3(1, 2, 3));
         portal2Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 45));
 
         Vec2 dimensions(2, 3);
         
-        createPortalFromTwoBlankEntities(portal1, portal2, portal1Xfm, portal2Xfm, dimensions);
+        createPortalFromTwoBlankEntities(portal1, portal2, &portal1Xfm, &portal2Xfm, dimensions);
 
         debugCC = getColliderComponent(portal1);
     }
@@ -439,17 +439,17 @@ int main()
         Entity portal1 = makeEntity(&testScene1->ecs, "portalB1");
         Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
 
-        LiteTransform portal1Xfm;
+        Transform portal1Xfm;
         portal1Xfm.setPosition(Vec3(0, 0, -10));
         portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
         
-        LiteTransform portal3Xfm;
+        Transform portal3Xfm;
         portal3Xfm.setPosition(Vec3(0, 0, 0));
         portal3Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
 
         Vec2 dimensions(2, 3);
         
-        createPortalFromTwoBlankEntities(portal1, portal3, portal1Xfm, portal3Xfm, dimensions);
+        createPortalFromTwoBlankEntities(portal1, portal3, &portal1Xfm, &portal3Xfm, dimensions);
     }
 
     makeSceneActive(game, testScene1);

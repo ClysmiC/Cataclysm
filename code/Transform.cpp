@@ -1,32 +1,108 @@
 #include "Transform.h"
 
-Transform::Transform()
-    : Transform(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
+ITransform::ITransform()
+    : ITransform(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-Transform::Transform(Vec3 position)
-    : Transform(position, Quaternion(), Vec3(1, 1, 1))
+ITransform::ITransform(Vec3 position)
+    : ITransform(position, Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-Transform::Transform(Vec3 position, Quaternion orientation)
-    : Transform(position, orientation, Vec3(1, 1, 1))
+ITransform::ITransform(Vec3 position, Quaternion orientation)
+    : ITransform(position, orientation, Vec3(1, 1, 1))
 {
 }
 
-Transform::Transform(LiteTransform& transform)
-    : Transform(transform.position(), transform.orientation(), transform.scale())
-{
-}
-
-Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
+ITransform::ITransform(Vec3 position, Quaternion orientation, Vec3 scale)
     : _localPosition(position), _localOrientation(orientation), _localScale(scale)
 {
 }
 
+Vec3
+ITransform::position()
+{
+    if (dirty) recalculateWorld();
+    return worldPosition;
+}
+
+Quaternion
+ITransform::orientation()
+{
+    if (dirty) recalculateWorld();
+    return worldOrientation;
+}
+
+Vec3
+ITransform::scale()
+{
+    if (dirty) recalculateWorld();
+    return worldScale;
+}
+
+Vec3
+ITransform::localPosition()
+{
+    return _localPosition;
+}
+
+Quaternion
+ITransform::localOrientation()
+{
+    return _localOrientation;
+}
+
+Vec3
+ITransform::localScale()
+{
+    return _localScale;
+}
+
+Vec3
+ITransform::left()
+{
+    Vec3 result = this->orientation() * Vec3(-1, 0, 0);
+    return result;
+}
+
+Vec3
+ITransform::right()
+{
+    Vec3 result = this->orientation() * Vec3(1, 0, 0);
+    return result;
+}
+
+Vec3
+ITransform::up()
+{
+    Vec3 result = this->orientation() * Vec3(0, 1, 0);
+    return result;
+}
+
+Vec3
+ITransform::down()
+{
+    Vec3 result = this->orientation() * Vec3(0, -1, 0);
+    return result;
+}
+
+Vec3
+ITransform::forward()
+{
+    Vec3 result = this->orientation() * Vec3(0, 0, -1);
+    return result;
+}
+
+Vec3
+ITransform::back()
+{
+    Vec3 result = this->orientation() * Vec3(0, 0, 1);
+    return result;
+}
+
 Mat4
-Transform::matrix()
+ITransform::matrix()
 {
     if (dirty)
     {
@@ -43,28 +119,28 @@ Transform::matrix()
 }
 
 void
-Transform::setLocalPosition(Vec3 position)
+ITransform::setLocalPosition(Vec3 position)
 {
     _localPosition = position;
     markSelfAndChildrenDirty();
 }
 
 void
-Transform::setLocalOrientation(Quaternion orientation)
+ITransform::setLocalOrientation(Quaternion orientation)
 {
     _localOrientation = orientation;
     markSelfAndChildrenDirty();
 }
 void
-Transform::setLocalScale(Vec3 scale)
+ITransform::setLocalScale(Vec3 scale)
 {
     _localScale = scale;
     markSelfAndChildrenDirty();
 }
 void
-Transform::setPosition(Vec3 position)
+ITransform::setPosition(Vec3 position)
 {
-    Transform* p = this->getParent();
+    ITransform* p = this->getParent();
     if (p)
     {
         Mat4 worldToParent = inverse(p->matrix());
@@ -78,9 +154,9 @@ Transform::setPosition(Vec3 position)
 }
 
 void
-Transform::setOrientation(Quaternion orientation)
+ITransform::setOrientation(Quaternion orientation)
 {
-    Transform* p = this->getParent();
+    ITransform* p = this->getParent();
     if (p)
     {
         Quaternion rotationNeeded = relativeRotation(p->orientation(), orientation);
@@ -93,9 +169,9 @@ Transform::setOrientation(Quaternion orientation)
 }
 
 void
-Transform::setScale(Vec3 scale)
+ITransform::setScale(Vec3 scale)
 {
-    Transform* p = this->getParent();
+    ITransform* p = this->getParent();
     if (p)
     {
         this->setLocalScale(hadamardDivide(scale, p->scale()));
@@ -107,7 +183,7 @@ Transform::setScale(Vec3 scale)
 }
 
 void
-Transform::markSelfAndChildrenDirty()
+ITransform::markSelfAndChildrenDirty()
 {
     dirty = true;
     
@@ -119,9 +195,9 @@ Transform::markSelfAndChildrenDirty()
 }
 
 void
-Transform::recalculateWorld()
+ITransform::recalculateWorld()
 {
-    Transform* p = this->getParent();
+    ITransform* p = this->getParent();
 
     if (p)
     {
@@ -141,29 +217,37 @@ Transform::recalculateWorld()
     dirty = false;
 }
 
-LiteTransform::LiteTransform()
-    : LiteTransform(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
+Transform::Transform()
+    : Transform(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-LiteTransform::LiteTransform(Vec3 position)
-    : LiteTransform(position, Quaternion(), Vec3(1, 1, 1))
+Transform::Transform(Vec3 position)
+    : Transform(position, Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-LiteTransform::LiteTransform(Vec3 position, Quaternion orientation)
-    : LiteTransform(position, orientation, Vec3(1, 1, 1))
+Transform::Transform(Vec3 position, Quaternion orientation)
+    : Transform(position, orientation, Vec3(1, 1, 1))
 {
 }
 
-LiteTransform::LiteTransform(Transform& transform)
-    : LiteTransform(transform.position(), transform.orientation(), transform.scale())
+Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
+    : ITransform(position, orientation, scale)
 {
 }
 
-LiteTransform::LiteTransform(Vec3 position, Quaternion orientation, Vec3 scale)
-    : _position(position), _orientation(orientation), _scale(scale)
+ITransform*
+Transform::getParent()
 {
+    return nullptr;
+}
+
+std::vector<ITransform*>
+Transform::getChildren()
+{
+    std::vector<ITransform*> result;
+    return result;
 }
 
 void multiplyTransforms(
@@ -177,7 +261,7 @@ void multiplyTransforms(
     *outPosition = bToCOrientation * hadamard(bToCScale, aToBPos) + bToCPos;
 }
 
-Mat4 worldToView(LiteTransform* cameraXfm)
+Mat4 worldToView(ITransform* cameraXfm)
 {
     Vec3 up = cameraXfm->up();
     Vec3 right = cameraXfm->right();
