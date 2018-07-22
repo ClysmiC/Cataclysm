@@ -23,21 +23,21 @@ ITransform::ITransform(Vec3 position, Quaternion orientation, Vec3 scale)
 Vec3
 ITransform::position()
 {
-    if (dirty) recalculateWorld();
+    if (worldDirty) recalculateWorld();
     return worldPosition;
 }
 
 Quaternion
 ITransform::orientation()
 {
-    if (dirty) recalculateWorld();
+    if (worldDirty) recalculateWorld();
     return worldOrientation;
 }
 
 Vec3
 ITransform::scale()
 {
-    if (dirty) recalculateWorld();
+    if (worldDirty) recalculateWorld();
     return worldScale;
 }
 
@@ -104,7 +104,7 @@ ITransform::back()
 Mat4
 ITransform::matrix()
 {
-    if (dirty)
+    if (worldMatrixDirty)
     {
         recalculateWorld();
         
@@ -113,7 +113,9 @@ ITransform::matrix()
         this->toWorld.scaleInPlace(this->scale());
         this->toWorld.rotateInPlace(this->orientation());
         this->toWorld.translateInPlace(this->position());
+        worldMatrixDirty = false;
     }
+
     
     return this->toWorld;
 }
@@ -185,7 +187,8 @@ ITransform::setScale(Vec3 scale)
 void
 ITransform::markSelfAndChildrenDirty()
 {
-    dirty = true;
+    worldDirty = true;
+    worldMatrixDirty = true;
     
     auto children = this->getChildren();
     for (auto t : children)
@@ -214,7 +217,7 @@ ITransform::recalculateWorld()
         this->worldScale = this->_localScale;
     }
 
-    dirty = false;
+    worldDirty = false;
 }
 
 Transform::Transform()

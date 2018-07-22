@@ -56,11 +56,12 @@ protected:
     //
     // Cached
     //
-    bool dirty = true;
+    bool worldDirty = true;
     Vec3 worldPosition;
     Quaternion worldOrientation;
     Vec3 worldScale;
 
+    bool worldMatrixDirty = true;
     Mat4 toWorld;
 };
 
