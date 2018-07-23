@@ -350,18 +350,12 @@ void UiReflector::endReflection()
 bool UiReflector::pushStruct(StructNameString name)
 {
     bool result = ImGui::TreeNode(name.cstr());
-    if (result)
-    {
-        this->indentationLevel++;
-    }
-
     return result;
 }
 
 void UiReflector::popStruct()
 {
     ImGui::TreePop();
-    this->indentationLevel--;
 }
 
 int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset)

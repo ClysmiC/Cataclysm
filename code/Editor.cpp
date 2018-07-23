@@ -310,4 +310,69 @@ void showEditor(EditorState* editor)
 
         if (componentUiClosed) editor->selectedEntity.id = 0;
     }
+
+    //
+    // Show the entity list
+    //
+    {
+        struct
+        {
+            void operator () (Entity e)
+            {
+                TransformComponent* xfm = getTransformComponent(e);
+                if (!xfm || xfm->children.size() == 0)
+                {
+                    if (ImGui::Button(e.friendlyName.cstr()))
+                    {
+                        // TODO: select entity
+                    }
+
+                    if (ImGui::IsItemActive())
+                    {
+                        // Being dragged
+                        int x = 0;
+                    }
+                }
+                else
+                {
+                    bool open = ImGui::TreeNodeEx(e.friendlyName.cstr(), ImGuiTreeNodeFlags_Framed);
+                    if (ImGui::IsItemActive())
+                    {
+                        // Being dragged
+                        int x = 0;
+                    }
+
+                    if (open)
+                    {
+                        // TODO: Select entity
+                        for (Entity child : xfm->children)
+                        {
+                            (*this)(child); // recursively draw children
+                        }
+
+                        ImGui::TreePop();
+                    }
+                }
+            }
+        } drawEntityAndChildren;
+        
+        bool shouldStayOpen = true;
+        ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
+        ImGui::Begin("Entities", &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
+
+        for (Entity e : game->activeScene->ecs.entities)
+        {
+            // Skip entity if it has a parent
+            TransformComponent* xfm = getTransformComponent(e);
+            if (xfm && xfm->parent.id != 0) continue;
+
+            drawEntityAndChildren(e);
+
+
+            // TODO: detect lift mouse on other entity in list
+            // if dragging, set parent
+        }
+
+        ImGui::End();
+    }
 }

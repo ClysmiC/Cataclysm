@@ -86,8 +86,6 @@ struct UiReflector : public IReflector
 {
     UiReflector();
     
-    uint32 indentationLevel = 0;
-    
     bool pushStruct(StructNameString name) override;
     void popStruct() override;
 
