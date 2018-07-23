@@ -18,5 +18,7 @@ struct TransformComponent : public Component, public ITransform
 
     virtual ITransform* getParent() override;
     virtual std::vector<ITransform*> getChildren() override;
+
 };
 
+void setParent(TransformComponent* xfm, Entity e);

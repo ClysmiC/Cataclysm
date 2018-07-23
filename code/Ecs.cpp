@@ -517,8 +517,8 @@ PointLightComponent* closestPointLight(TransformComponent* xfm)
 
 void walkAndCamera(Game* game)
 {
-    // @Hack, we are updating camera here too
     TransformComponent* xfm = getTransformComponent(game->player);
+    TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
     WalkComponent* walk = getWalkComponent(game->player);
     ColliderComponent* collider = getColliderComponent(game->player);
     
@@ -572,14 +572,16 @@ void walkAndCamera(Game* game)
                 deltaMouseY = -deltaMouseY;
             }
 
-            Quaternion deltaYawAndPitch;
-            deltaYawAndPitch = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-            deltaYawAndPitch = deltaYawAndPitch * axisAngle(moveRight, cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+            Quaternion deltaYaw;
+            Quaternion deltaPitch;
+            deltaYaw = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
+            deltaPitch = axisAngle(Vec3(1, 0, 0), cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
 
-            xfm->setLocalOrientation(deltaYawAndPitch * xfm->localOrientation());
+            // "Player" just yaws.
+            // Camera yaws and pitches
+            xfm->setOrientation(deltaYaw * xfm->orientation());
 
-            float camRightY = xfm->right().y;
-            assert(FLOAT_EQ(camRightY, 0, EPSILON)); // no "roll"
+            cameraXfm->setLocalOrientation(deltaPitch * cameraXfm->localOrientation());
         }
 
         if (keys[GLFW_KEY_W])
@@ -635,10 +637,4 @@ void walkAndCamera(Game* game)
             }
         }
     }
-
-    //
-    // Update camera
-    //
-    TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
-    cameraXfm->setLocalPosition(xfm->up() * scaledYLength(collider));
 }

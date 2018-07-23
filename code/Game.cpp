@@ -389,7 +389,11 @@ int main()
         playerWalk->terrain = testScene1->ecs.terrains[0].entity;
     }
 
-    cameraXfm->parent = player;
+    //
+    // Parent player to camera
+    //
+    setParent(cameraXfm, player);
+    cameraXfm->setLocalPosition(Vec3(0, 2, 0));
     
 #if 1
     cameraComponent->isOrthographic = false;
