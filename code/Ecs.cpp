@@ -104,14 +104,24 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
 {
     Entity result;
     result.id = Ecs::nextEntityId;
-    result.flags = 0;
     result.ecs = ecs;
-    result.friendlyName = friendlyName;
 
-    ecs->entities.push_back(result);
+    ecs->entityList.push_back(result);
+
+    EntityDetails* details = addComponent(&ecs->entityDetails, result);
+    details->entity.id = result.id;
+    details->entity.ecs = result.ecs;
+    details->flags = 0;
+    details->friendlyName = friendlyName;
     
     Ecs::nextEntityId++;
     return result;
+}
+
+EntityDetails* getEntityDetails(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->entityDetails, e);
 }
 
 TransformComponent* addTransformComponent(Entity e)
@@ -439,8 +449,8 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
     result.hit = false;
     result.t = -1;
 
-    for (Entity& e : ecs->entities)
-    {        
+    for (Entity& e : ecs->entityList)
+    {       
         TransformComponent* xfm = getTransformComponent(e);
         
         auto rcs = getRenderComponents(e);

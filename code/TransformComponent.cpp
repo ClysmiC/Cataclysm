@@ -25,12 +25,12 @@ TransformComponent::TransformComponent(ITransform& transform)
 TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale)
     : ITransform(position, orientation, scale)
 {
-    this->parent.id = 0;
 }
 
 ITransform* TransformComponent::getParent()
 {
-    TransformComponent* result = getTransformComponent(this->parent);
+    Entity parent = ::getParent(this->entity);
+    TransformComponent* result = getTransformComponent(parent);
     return result;
 }
      
@@ -38,7 +38,8 @@ std::vector<ITransform*> TransformComponent::getChildren()
 {
     std::vector<ITransform*> result;
 
-    for (auto e : this->children)
+    
+    for (auto e : *::getChildren(this->entity))
     {
         TransformComponent* xfm = getTransformComponent(e);
 
@@ -49,28 +50,4 @@ std::vector<ITransform*> TransformComponent::getChildren()
     }
     
     return result;
-}
-
-void setParent(TransformComponent* xfm, Entity e)
-{
-    if (xfm->parent.id != 0)
-    {
-        TransformComponent* oldParent = getTransformComponent(xfm->parent);
-
-        // @Untested. Dumb C++ idioms...
-        auto found = std::find_if(oldParent->children.begin(), oldParent->children.end(), [xfm](Entity e) { return xfm->entity.id == e.id; });
-        if (found != oldParent->children.end())
-        {
-            oldParent->children.erase(found);
-        }
-    }
-    
-    xfm->parent = e;
-
-    TransformComponent* parentXfm = getTransformComponent(xfm->parent);
-
-    if (parentXfm)
-    {
-        parentXfm->children.push_back(xfm->entity);
-    }
 }

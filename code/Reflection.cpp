@@ -330,21 +330,11 @@ UiReflector::UiReflector()
 
 bool UiReflector::startReflection(EntityNameString label)
 {
-    bool shouldStayOpen = true;
-    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
-    ImGui::Begin((label + "###e").cstr(), &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
-
-    if (!shouldStayOpen)
-    {
-        return false;
-    }
-
-    return true;
+    return true; // todo: revisit if we need this api
 }
 
 void UiReflector::endReflection()
 {
-    ImGui::End();
 }
 
 bool UiReflector::pushStruct(StructNameString name)

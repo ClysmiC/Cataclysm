@@ -30,6 +30,11 @@ struct EditorState
             ColliderComponent* handles[3];
         };
     };
+
+    struct EntityList
+    {
+        Entity dragging;    // Entity we clicked and started dragging
+    };
     
     Game* game;
     bool isEnabled = false;
@@ -38,6 +43,7 @@ struct EditorState
     Ecs pseudoEcs;
     
     TranslatorTool translator;
+    EntityList entityList;
     
     bool drawAabb = true;
     bool drawCollider = true;

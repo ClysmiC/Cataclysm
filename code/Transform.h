@@ -16,6 +16,8 @@ struct ITransform
     //
     virtual ITransform* getParent() = 0;
     virtual std::vector<ITransform*> getChildren() = 0;
+
+    // @Think: do we need setParent in this interface?
     
     Vec3 position();
     Quaternion orientation();

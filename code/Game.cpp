@@ -314,11 +314,8 @@ void makeCameraActive(Game* game, Entity camera)
 int main()
 {    
     // INIT WINDOW
-    uint32 windowWidth = 1024;
-    uint32 windowHeight = 720;
-
-    // uint32 windowWidth = 1920;
-    // uint32 windowHeight = 1080;
+    uint32 windowWidth = 1600;
+    uint32 windowHeight = 900;
     
     Window window;
 
@@ -336,6 +333,10 @@ int main()
     ImGui_ImplOpenGL3_Init();
     
     ImGui::StyleColorsDark();
+
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(.26, .59, .98, .31));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(.26, .59, .98, .8));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(.26, .59, .98, 1));
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -392,7 +393,7 @@ int main()
     //
     // Parent player to camera
     //
-    setParent(cameraXfm, player);
+    setParent(camera, player);
     cameraXfm->setLocalPosition(Vec3(0, 2, 0));
     
 #if 1
@@ -466,7 +467,7 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-#if 0
+#if 1
         ImGui::ShowDemoWindow();
 #endif
         

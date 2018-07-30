@@ -10,8 +10,6 @@ struct Ecs;
 struct Entity
 {
     uint32 id;
-    uint64 flags;
     Ecs* ecs;
-    string16 friendlyName;
 };
 

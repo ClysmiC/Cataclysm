@@ -144,6 +144,7 @@
     <ClCompile Include="code\Ecs.cpp" />
     <ClCompile Include="code\Editor.cpp" />
     <ClCompile Include="code\Entity.cpp" />
+    <ClCompile Include="code\EntityDetails.cpp" />
     <ClCompile Include="code\Game.cpp" />
     <ClCompile Include="code\Material.cpp" />
     <ClCompile Include="code\Mesh.cpp" />
@@ -172,6 +173,8 @@
     <ClInclude Include="code\Aabb.h" />
     <ClInclude Include="code\als.h" />
     <ClInclude Include="code\als_bucket_array.h" />
+    <ClInclude Include="code\als_fixed_string.h" />
+    <ClInclude Include="code\als_fixed_string_std_hash.h" />
     <ClInclude Include="code\als_math.h" />
     <ClInclude Include="code\als_util.h" />
     <ClInclude Include="code\CameraComponent.h" />
@@ -185,6 +188,7 @@
     <ClInclude Include="code\Ecs.h" />
     <ClInclude Include="code\Editor.h" />
     <ClInclude Include="code\Entity.h" />
+    <ClInclude Include="code\EntityDetails.h" />
     <ClInclude Include="code\Game.h" />
     <ClInclude Include="code\Material.h" />
     <ClInclude Include="code\Mesh.h" />
@@ -195,6 +199,7 @@
     <ClInclude Include="code\Ray.h" />
     <ClInclude Include="code\Reflection.h" />
     <ClInclude Include="code\RenderComponent.h" />
+    <ClInclude Include="code\Resource.h" />
     <ClInclude Include="code\ResourceManager.h" />
     <ClInclude Include="code\Scene.h" />
     <ClInclude Include="code\Shader.h" />

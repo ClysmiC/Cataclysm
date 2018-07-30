@@ -3,6 +3,7 @@
 
 #include "als_bucket_array.h"
 #include "Entity.h"
+#include "EntityDetails.h"
 #include "Ray.h"
 #include "ComponentGroup.h"
 #include "TransformComponent.h"
@@ -41,8 +42,7 @@ struct Ecs
     
     Scene* scene;
 
-    std::vector<Entity> entities;
-
+    static constexpr uint32 ENTITY_DETAILS_BUCKET_SIZE = 512;
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
     static constexpr uint32 CAMERA_BUCKET_SIZE = 4;
     static constexpr uint32 DIRECTIONAL_LIGHT_BUCKET_SIZE = 16;
@@ -52,6 +52,9 @@ struct Ecs
     static constexpr uint32 PORTAL_BUCKET_SIZE = 16;
     static constexpr uint32 COLLIDER_BUCKET_SIZE = 512;
     static constexpr uint32 WALK_COMPONENT_BUCKET_SIZE = 8;
+
+    std::vector<Entity> entityList; // TODO: rename to entities
+    ComponentList<EntityDetails,             ENTITY_DETAILS_BUCKET_SIZE>      entityDetails;
 
     ComponentList<TransformComponent,        TRANSFORM_BUCKET_SIZE>           transforms;
     ComponentList<CameraComponent,           CAMERA_BUCKET_SIZE>              cameras;
@@ -83,6 +86,7 @@ ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
 // Entity functions
 //
 Entity makeEntity(Ecs* ecs, string16 friendlyName="");
+EntityDetails* getEntityDetails(Entity entity);
 
 TransformComponent* addTransformComponent(Entity e);
 TransformComponent* getTransformComponent(Entity e);

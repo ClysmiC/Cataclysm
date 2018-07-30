@@ -1,6 +1,7 @@
 #include "Editor.h"
 #include "Game.h"
 #include "Reflection.h"
+#include "Window.h"
 
 #include "imgui/imgui.h"
 #include "GLFW/glfw3.h"
@@ -31,6 +32,8 @@ EditorState::EditorState()
     this->translator.zAxisHandle->type = ColliderType::RECT3;
     this->translator.zAxisHandle->xfmOffset = Vec3(0, 0, longDim / 2);
     this->translator.zAxisHandle->rect3Lengths = Vec3(shortDim, shortDim, longDim);
+
+    this->entityList.dragging.id = 0;
 }
 
 void showEditor(EditorState* editor)
@@ -201,17 +204,15 @@ void showEditor(EditorState* editor)
     {
         Entity e = editor->selectedEntity;
         
-        // If the user clicks the X, it will deselect the entity. Look into changing this behavior
-        bool componentUiClosed = false;
-        
         // TODO: handle component groups
         UiReflector reflector;
         reflector.useLocalXfm = editor->isLocalXfm;
 
-        if (!reflector.startReflection(e.friendlyName))
-        {
-            componentUiClosed = true;
-        }
+        reflector.startReflection(*getFriendlyName(e));
+    
+        ImGui::SetNextWindowSize(ImVec2(300, 500));
+        ImGui::SetNextWindowPos(ImVec2(0, game->window->height - 500));
+        ImGui::Begin((*getFriendlyName(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
         // Get components
         TransformComponent* transform = getTransformComponent(e);
@@ -307,8 +308,7 @@ void showEditor(EditorState* editor)
     
 
         reflector.endReflection();
-
-        if (componentUiClosed) editor->selectedEntity.id = 0;
+        ImGui::End();
     }
 
     //
@@ -317,62 +317,88 @@ void showEditor(EditorState* editor)
     {
         struct
         {
-            void operator () (Entity e)
+            void operator () (Entity e, EditorState* editor)
             {
                 TransformComponent* xfm = getTransformComponent(e);
-                if (!xfm || xfm->children.size() == 0)
+                if (!xfm || getChildren(e)->size() == 0)
                 {
-                    if (ImGui::Button(e.friendlyName.cstr()))
+                    ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Button);
+                    ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
                     {
-                        // TODO: select entity
-                    }
+                        if (ImGui::Button((*getFriendlyName(e) + "##" + e.id).cstr(), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetTextLineHeightWithSpacing())))
+                        {
+                            editor->selectedEntity = e;
+                        }
 
-                    if (ImGui::IsItemActive())
-                    {
-                        // Being dragged
-                        int x = 0;
+                        if (ImGui::BeginDragDropSource())
+                        {
+                            editor->entityList.dragging = e;
+                            ImGui::SetDragDropPayload("entity", &editor->entityList.dragging, sizeof(Entity));
+                            ImGui::EndDragDropSource();
+                        }
+
+                        if (ImGui::BeginDragDropTarget())
+                        {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("entity"))
+                            {
+                                Entity dragged = *(Entity*)payload->Data;
+
+                                if (dragged.id != e.id)
+                                {
+                                    setParent(dragged, e);
+                                }
+                            }
+                        }
                     }
+                    ImGui::PopStyleColor();
                 }
                 else
                 {
-                    bool open = ImGui::TreeNodeEx(e.friendlyName.cstr(), ImGuiTreeNodeFlags_Framed);
+                    ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
+                    ImGui::PushStyleColor(ImGuiCol_Header, buttonColor);
+
+                    bool open = ImGui::TreeNodeEx((*getFriendlyName(e) + "##" + e.id).cstr(), ImGuiTreeNodeFlags_Framed);
                     if (ImGui::IsItemActive())
                     {
-                        // Being dragged
-                        int x = 0;
+                        editor->entityList.dragging = e;
                     }
 
                     if (open)
                     {
-                        // TODO: Select entity
-                        for (Entity child : xfm->children)
+                        // @Untested: does dereferencing the pointer copy the list? (it shouldn't)
+                        for (Entity child : *getChildren(e))
                         {
-                            (*this)(child); // recursively draw children
+                            (*this)(child, editor); // recursively draw children
                         }
 
                         ImGui::TreePop();
                     }
+
+                    ImGui::PopStyleColor();
                 }
             }
         } drawEntityAndChildren;
-        
-        bool shouldStayOpen = true;
-        ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
-        ImGui::Begin("Entities", &shouldStayOpen, ImGuiWindowFlags_NoCollapse);
 
-        for (Entity e : game->activeScene->ecs.entities)
-        {
-            // Skip entity if it has a parent
-            TransformComponent* xfm = getTransformComponent(e);
-            if (xfm && xfm->parent.id != 0) continue;
+        ImGui::SetNextWindowSize(ImVec2(300, 500));
+        ImGui::SetNextWindowPos(ImVec2(game->window->width - 300, game->window->height - 500));
+        ImGui::Begin("Entities", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-            drawEntityAndChildren(e);
+        ImGui::PushItemWidth(-1);
+        {   
+            for (Entity e : game->activeScene->ecs.entityList)
+            {
+                // Skip entity if it has a parent
+                TransformComponent* xfm = getTransformComponent(e);
+                if (xfm && getParent(e).id != 0) continue;
 
+                drawEntityAndChildren(e, editor);
 
-            // TODO: detect lift mouse on other entity in list
-            // if dragging, set parent
+                // TODO: detect lift mouse on other entity in list
+                // if dragging, set parent
+            }
         }
-
+        ImGui::PopItemWidth();
+                
         ImGui::End();
     }
 }
