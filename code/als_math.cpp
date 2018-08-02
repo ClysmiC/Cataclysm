@@ -1,6 +1,7 @@
 #include "als_math.h"
 #include <cmath>
 
+Vec2::Vec2() { this->x = 0; this->y = 0; }
 Vec2::Vec2(float32 value) { this->x = value; this->y = value; }
 Vec2::Vec2(float32 x, float32 y) { this->x = x; this->y = y; }
 
@@ -14,19 +15,21 @@ Vec3::Vec3(Axis3D unitAxis)
     }
 }
 
+Vec3::Vec3() { this->x = 0; this->y = 0; this->z = 0; }
 Vec3::Vec3(float32 value) { this->x = value; this->y = value; this->z = value; }
 Vec3::Vec3(Vec2 xy, float32 z) { this->x = xy.x; this->y = xy.y; this->z = z; }
 Vec3::Vec3(float32 x, float32 y, float32 z) { this->x = x; this->y = y; this->z = z; }
 
+Vec4::Vec4() { this->x = 0; this->y = 0; this->z = 0; this->w = 0; }
 Vec4::Vec4(float32 value) { this->x = value; this->y = value; this->z = value; }
 Vec4::Vec4(Vec2 xy, float32 z, float32 w) { this->x = xy.x; this->y = xy.y; this->z = z; this->w = w; }
 Vec4::Vec4(Vec2 xy, Vec2 zw) { this->x = xy.x; this->y = xy.y; this->z = zw.x; this->w = zw.y; }
 Vec4::Vec4(Vec3 xyz, float32 w) { this->x = xyz.x; this->y = xyz.y; this->z = xyz.z; this->w = w; }
 Vec4::Vec4(float32 x, float32 y, float32 z, float32 w) { this->x = x; this->y = y; this->z = z; this->w = w; }
 
-Quaternion::Quaternion()                           { x = 0; y = 0; z = 0; w = 1;}
+Quaternion::Quaternion()                            { x = 0; y = 0; z = 0; w = 1;}
 Quaternion::Quaternion(Vec3 vector, float32 scalar) { x = vector.x; y = vector.y; z = vector.z; w = scalar; }
-Quaternion::Quaternion(Vec4 xyzw)                  { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
+Quaternion::Quaternion(Vec4 xyzw)                   { x = xyzw.x; y = xyzw.y; z = xyzw.z; w = xyzw.w;}
 Quaternion::Quaternion(float32 x_, float32 y_, float32 z_, float32 w_) { x = x_; y = y_; z = z_; w = w_; }
 
 Mat3::Mat3(Mat4 mat4)

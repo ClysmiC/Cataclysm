@@ -9,7 +9,6 @@ struct EditorState
 {
     EditorState();
     
-    bool isLocalXfm = true;
     
     struct TranslatorTool
     {
@@ -31,20 +30,43 @@ struct EditorState
         };
     };
 
-    struct EntityList
+    struct EntityListUi
     {
         Entity dragging;    // Entity we clicked and started dragging
     };
-    
+
+    struct ComponentListUi
+    {
+        // Note: these only get set for IDs that we care about tracking,
+        //       so they might not always be accurate
+        uint32 lastFrameActiveId;
+        uint32 thisFrameActiveId;
+        
+        // User may edit in "non-canonical" Tait-Bryan angles such that the conversion
+        // to them from quaternion will give a different (but identical) rotation.
+        // Store the user-entered rotation until focus leaves the "hot" field and then
+        Vec3 hotXfmEuler;
+    };
+
+    //
+    // Book-keeping
+    //
     Game* game;
     bool isEnabled = false;
     Entity selectedEntity;
-
     Ecs pseudoEcs;
-    
-    TranslatorTool translator;
-    EntityList entityList;
-    
+
+    //
+    // Editor components
+    //
+    TranslatorTool  translator;
+    EntityListUi    entityList;
+    ComponentListUi componentList;
+
+    //
+    // Flags (more book-keeping)
+    //
+    bool isLocalXfm = true;
     bool drawAabb = true;
     bool drawCollider = true;
 };

@@ -8,6 +8,7 @@
 #include "PointLightComponent.h"
 #include "PortalComponent.h"
 #include "RenderComponent.h"
+#include "Editor.h"
 
 #include "DebugDraw.h"
 
@@ -33,6 +34,13 @@ void reflectVec3Rgb(IReflector* reflector, uint32 startingOffset)
     reflector->consumeFloat32("B", startingOffset + offsetof(Vec3, z));
 }
 
+void reflectVec3Euler(IReflector* reflector, uint32 startingOffset)
+{
+    reflector->consumeFloat32Euler("X", startingOffset + offsetof(Vec3, x));
+    reflector->consumeFloat32Euler("Y", startingOffset + offsetof(Vec3, y));
+    reflector->consumeFloat32Euler("Z", startingOffset + offsetof(Vec3, z));
+}
+
 void reflectVec4(IReflector* reflector, uint32 startingOffset)
 {
     reflector->consumeFloat32("X", startingOffset + offsetof(Vec4, x));
@@ -51,9 +59,9 @@ void reflectQuaternion(IReflector* reflector, uint32 startingOffset)
 
         reflector->pushReflectionTarget(&euler);
         {
-            reflectVec3(reflector, 0);
+            reflectVec3Euler(reflector, 0);
 
-            if (!equals(eulerBeforeReflect, euler))
+            if (!equals(eulerBeforeReflect, euler)) // && reflector->recanonicalizeEuler)
             {
                 *q = fromEuler(euler);
             }
@@ -378,14 +386,14 @@ float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
     float32 valueCopy = *valuePtr;
 
     typedef ImGuiInputTextFlags_ Flags;
-    
-    uint32 flags = Flags::ImGuiInputTextFlags_CharsDecimal | Flags::ImGuiInputTextFlags_AutoSelectAll | Flags::ImGuiInputTextFlags_EnterReturnsTrue;
         
     if (ImGui::InputScalar(name.cstr(), ImGuiDataType_Float, &valueCopy))
     {
         // This updates the actual value
         *valuePtr = valueCopy;
     }
+
+    valueCopy = 10;
 
     return *valuePtr;
 }
@@ -440,6 +448,69 @@ uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNa
         }
 
         ImGui::TreePop();
+    }
+
+    return *valuePtr;
+}
+
+float32 UiReflector::consumeFloat32Euler(FieldNameString name, uint32 offset)
+{
+    float32* valuePtr = (float32*)((char*)this->reflectionTarget() + offset);
+    uint32 parentId = ImGui::GetID("");
+    bool isHot = this->editor->componentList.lastFrameActiveId == parentId;
+
+    if (isHot)
+    {
+        float32 nonCanonicalValue;
+        if (name == "x" || name == "X")
+        {
+            nonCanonicalValue = this->editor->componentList.hotXfmEuler.x;
+        }
+        else if (name == "y" || name == "Y")
+        {
+            nonCanonicalValue = this->editor->componentList.hotXfmEuler.y;
+        }
+        else if (name == "z" || name == "Z")
+        {
+            nonCanonicalValue = this->editor->componentList.hotXfmEuler.z;
+        }
+        else
+        {
+            assert(false);
+        }
+        
+        this->pushReflectionTarget(&nonCanonicalValue);
+        *valuePtr  = this->consumeFloat32(name, 0);
+        this->popReflectionTarget();
+    }
+    else
+    {
+        *valuePtr = this->consumeFloat32(name, offset);
+    }
+
+    if (ImGui::IsItemActive())
+    {
+        this->editor->componentList.thisFrameActiveId = parentId;
+    }
+
+    if (isHot || this->editor->componentList.lastFrameActiveId == 0)
+    {
+        if (name == "x" || name == "X")
+        {
+            this->editor->componentList.hotXfmEuler.x = *valuePtr;
+        }
+        else if (name == "y" || name == "Y")
+        {
+            this->editor->componentList.hotXfmEuler.y = *valuePtr;
+        }
+        else if (name == "z" || name == "Z")
+        {
+            this->editor->componentList.hotXfmEuler.z = *valuePtr;
+        }
+        else
+        {
+            assert(false);
+        }
     }
 
     return *valuePtr;

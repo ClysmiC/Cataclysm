@@ -7,6 +7,7 @@
 #include <stack>
 
 struct CameraComponent;
+struct EditorState;
 
 enum class ReflectionPurpose
 {
@@ -73,6 +74,12 @@ struct IReflector
     virtual float64 consumeFloat64(FieldNameString name, uint32 offset) = 0;
     virtual bool    consumeBool(FieldNameString name, uint32 offset) = 0;
 
+    //
+    // This may need special treatment (i.e., UI uses the stored euler value instead of the canonical one)
+    // until the user ends their input
+    //
+    virtual float32 consumeFloat32Euler(FieldNameString name, uint32 offset) = 0;
+
     // Note: Consumable enums must have underlying type uint32
     // Potential todo: make consumeEnumInt32, consumeEnumUInt32, etc. (but I think it is fine to assume uint32 and enforce
     // that for now)
@@ -85,6 +92,8 @@ private:
 struct UiReflector : public IReflector
 {
     UiReflector();
+
+    EditorState* editor;
     
     bool pushStruct(StructNameString name) override;
     void popStruct() override;
@@ -98,6 +107,8 @@ struct UiReflector : public IReflector
     float64 consumeFloat64(FieldNameString name, uint32 offset) override;
     bool    consumeBool(FieldNameString name, uint32 offset) override;
     uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount) override;
+
+    float32 consumeFloat32Euler(FieldNameString name, uint32 offset) override;
 };
 
 struct Game;
@@ -105,6 +116,8 @@ bool testUiReflection(Game* game, Entity e);
 
 void reflectVec2(IReflector* reflector, uint32 startingOffset);
 void reflectVec3(IReflector* reflector, uint32 startingOffset);
+void reflectVec3Rgb(IReflector* reflector, uint32 startingOffset);
+void reflectVec3Euler(IReflector* reflector, uint32 startingOffset);
 void reflectVec4(IReflector* reflector, uint32 startingOffset);
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset);
 

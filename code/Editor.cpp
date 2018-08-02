@@ -202,11 +202,14 @@ void showEditor(EditorState* editor)
     //
     if (editor->selectedEntity.id != 0)
     {
+        editor->componentList.thisFrameActiveId = 0;
+            
         Entity e = editor->selectedEntity;
         
         // TODO: handle component groups
         UiReflector reflector;
         reflector.useLocalXfm = editor->isLocalXfm;
+        reflector.editor = editor;
 
         reflector.startReflection(*getFriendlyName(e));
     
@@ -309,6 +312,8 @@ void showEditor(EditorState* editor)
 
         reflector.endReflection();
         ImGui::End();
+
+        editor->componentList.lastFrameActiveId = editor->componentList.thisFrameActiveId;
     }
 
     //

@@ -32,7 +32,7 @@ enum class Axis3D : uint32
 
 union Vec2
 {
-    Vec2() = default;
+    Vec2();
     Vec2(float32 value);
     Vec2(float32 x, float32 y);
     
@@ -48,7 +48,7 @@ union Vec2
 
 union Vec3
 {
-    Vec3() = default;
+    Vec3();
     Vec3(Axis3D unitAxis);
     Vec3(float32 value);
     Vec3(Vec2 xy, float32 z);
@@ -74,7 +74,7 @@ union Vec3
 
 union Vec4
 {
-    Vec4() = default;
+    Vec4();
     Vec4(float32 value);
     Vec4(Vec2 xy, float32 z, float32 w);
     Vec4(Vec2 xy, Vec2 zw);
@@ -466,6 +466,11 @@ inline Quaternion relativeRotation(Quaternion start, Quaternion end)
     result = end * inverse(start);
 
     return result;
+}
+inline Quaternion positiveW(Quaternion q)
+{
+    if (q.w > 0) return q;
+    return -q;
 }
 
 ///////////////////////////////////////////

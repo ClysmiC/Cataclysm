@@ -8,6 +8,18 @@ void setParent(Entity child, Entity parent)
     assert(child.id != 0 && parent.id != 0);
     
     Entity oldParent = getParent(child);
+
+    TransformComponent* childXfm = getTransformComponent(child);
+    Vec3 oldWorldPosition;
+    Vec3 oldWorldScale;
+    Quaternion oldWorldOrientation;
+
+    if (childXfm)
+    {
+        oldWorldPosition = childXfm->position();
+        oldWorldScale = childXfm->scale();
+        oldWorldOrientation = childXfm->orientation();
+    }
     
     if (oldParent.id != 0)
     {
@@ -25,6 +37,13 @@ void setParent(Entity child, Entity parent)
 
     EntityDetails* parentDetails = getEntityDetails(parent);
     parentDetails->children.push_back(child);
+
+    if (childXfm)
+    {
+        childXfm->setPosition(oldWorldPosition);
+        childXfm->setScale(oldWorldScale);
+        childXfm->setOrientation(oldWorldOrientation);
+    }
 }
 
 Entity getParent(Entity e)
