@@ -3733,6 +3733,8 @@ void ImGui::NewFrame()
     if (g.ScalarAsInputTextId && g.ActiveId != g.ScalarAsInputTextId)
         g.ScalarAsInputTextId = 0;
 
+    g.Als_LastToggledTreeNodeId = 0;
+
     // Elapse drag & drop payload
     if (g.DragDropActive && g.DragDropPayload.DataFrameCount + 1 < g.FrameCount)
     {
@@ -4998,6 +5000,13 @@ bool ImGui::IsItemDeactivatedAfterChange()
 {
     ImGuiContext& g = *GImGui;
     return IsItemDeactivated() && (g.ActiveIdPreviousFrameValueChanged || (g.ActiveId == 0 && g.ActiveIdValueChanged));
+}
+
+bool ImGui::Als_IsTreeNodeToggled()
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = g.CurrentWindow;
+    return g.Als_LastToggledTreeNodeId == window->DC.LastItemId;
 }
 
 bool ImGui::IsItemFocused()
@@ -8461,6 +8470,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         {
             is_open = !is_open;
             window->DC.StateStorage->SetInt(id, is_open);
+            g.Als_LastToggledTreeNodeId = id;
         }
     }
     if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)

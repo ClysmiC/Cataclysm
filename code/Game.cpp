@@ -467,7 +467,7 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-#if 0
+#if 1
         ImGui::ShowDemoWindow();
 #endif
         

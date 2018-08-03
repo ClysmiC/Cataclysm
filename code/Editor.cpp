@@ -320,7 +320,7 @@ void showEditor(EditorState* editor)
     // Show the entity list
     //
     {
-        struct
+        struct // drawEntityAndChildren(..)
         {
             void operator () (Entity e, EditorState* editor)
             {
@@ -362,15 +362,44 @@ void showEditor(EditorState* editor)
                     ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
                     ImGui::PushStyleColor(ImGuiCol_Header, buttonColor);
 
-                    bool open = ImGui::TreeNodeEx((*getFriendlyName(e) + "##" + e.id).cstr(), ImGuiTreeNodeFlags_Framed);
+                    bool open = ImGui::TreeNodeEx((*getFriendlyName(e) + "##" + e.id).cstr(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow);
+                    bool toggled = ImGui::Als_IsTreeNodeToggled();
+
                     if (ImGui::IsItemActive())
                     {
                         editor->entityList.dragging = e;
                     }
 
+                    if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
+                    {
+                        editor->selectedEntity = e;
+                    }
+
+                    // @CopyPaste (from the no-children case)
+                    {
+                        if (ImGui::BeginDragDropSource())
+                        {
+                            editor->entityList.dragging = e;
+                            ImGui::SetDragDropPayload("entity", &editor->entityList.dragging, sizeof(Entity));
+                            ImGui::EndDragDropSource();
+                        }
+
+                        if (ImGui::BeginDragDropTarget())
+                        {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("entity"))
+                            {
+                                Entity dragged = *(Entity*)payload->Data;
+
+                                if (dragged.id != e.id)
+                                {
+                                    setParent(dragged, e);
+                                }
+                            }
+                        }
+                    }
+
                     if (open)
                     {
-                        // @Untested: does dereferencing the pointer copy the list? (it shouldn't)
                         for (Entity child : *getChildren(e))
                         {
                             (*this)(child, editor); // recursively draw children
