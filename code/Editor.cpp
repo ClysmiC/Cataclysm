@@ -8,6 +8,8 @@
 
 #include "DebugDraw.h"
 
+const char* EditorState::EntityListUi::DRAG_DROP_ID = "entity_drag_drop";
+
 EditorState::EditorState()
 {
     this->translator.pseudoEntity = makeEntity(&this->pseudoEcs, "Translator");
@@ -32,8 +34,6 @@ EditorState::EditorState()
     this->translator.zAxisHandle->type = ColliderType::RECT3;
     this->translator.zAxisHandle->xfmOffset = Vec3(0, 0, longDim / 2);
     this->translator.zAxisHandle->rect3Lengths = Vec3(shortDim, shortDim, longDim);
-
-    this->entityList.dragging.id = 0;
 }
 
 void showEditor(EditorState* editor)
@@ -337,14 +337,13 @@ void showEditor(EditorState* editor)
 
                         if (ImGui::BeginDragDropSource())
                         {
-                            editor->entityList.dragging = e;
-                            ImGui::SetDragDropPayload("entity", &editor->entityList.dragging, sizeof(Entity));
+                            ImGui::SetDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID, &e, sizeof(Entity));
                             ImGui::EndDragDropSource();
                         }
 
                         if (ImGui::BeginDragDropTarget())
                         {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("entity"))
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
                             {
                                 Entity dragged = *(Entity*)payload->Data;
 
@@ -365,11 +364,6 @@ void showEditor(EditorState* editor)
                     bool open = ImGui::TreeNodeEx((*getFriendlyName(e) + "##" + e.id).cstr(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow);
                     bool toggled = ImGui::Als_IsTreeNodeToggled();
 
-                    if (ImGui::IsItemActive())
-                    {
-                        editor->entityList.dragging = e;
-                    }
-
                     if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
                     {
                         editor->selectedEntity = e;
@@ -379,14 +373,13 @@ void showEditor(EditorState* editor)
                     {
                         if (ImGui::BeginDragDropSource())
                         {
-                            editor->entityList.dragging = e;
-                            ImGui::SetDragDropPayload("entity", &editor->entityList.dragging, sizeof(Entity));
+                            ImGui::SetDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID, &e, sizeof(Entity));
                             ImGui::EndDragDropSource();
                         }
 
                         if (ImGui::BeginDragDropTarget())
                         {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("entity"))
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
                             {
                                 Entity dragged = *(Entity*)payload->Data;
 
@@ -417,7 +410,17 @@ void showEditor(EditorState* editor)
         ImGui::SetNextWindowPos(ImVec2(game->window->width - 300, game->window->height - 500));
         ImGui::Begin("Entities", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-        ImGui::PushItemWidth(-1);
+        ImGui::Text("(drag here to unparent)");
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
+            {
+                Entity dragged = *(Entity*)payload->Data;
+                removeParent(dragged);
+            }
+        }
+        
+        // ImGui::PushItemWidth(-1);
         {   
             for (Entity e : game->activeScene->ecs.entityList)
             {
@@ -426,12 +429,9 @@ void showEditor(EditorState* editor)
                 if (xfm && getParent(e).id != 0) continue;
 
                 drawEntityAndChildren(e, editor);
-
-                // TODO: detect lift mouse on other entity in list
-                // if dragging, set parent
             }
         }
-        ImGui::PopItemWidth();
+        // ImGui::PopItemWidth();
                 
         ImGui::End();
     }

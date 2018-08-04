@@ -13,6 +13,7 @@ struct EntityDetails : public Component
     std::vector<Entity> children;
 };
 
+void removeParent(Entity e);
 void setParent(Entity child, Entity parent);
 Entity getParent(Entity e);
 std::vector<Entity>* getChildren(Entity e);

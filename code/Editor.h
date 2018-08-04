@@ -32,7 +32,7 @@ struct EditorState
 
     struct EntityListUi
     {
-        Entity dragging;    // Entity we clicked and started dragging
+        static const char* DRAG_DROP_ID;
     };
 
     struct ComponentListUi
