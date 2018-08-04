@@ -264,7 +264,7 @@ void showEditor(EditorState* editor)
                         reflector.popReflectionTarget();
                     }
                     
-                    reflectEntityDetailsComponent(&reflector, details, 0);
+                    reflectEntityDetailsComponent(&reflector, 0);
                 }
             }
             
@@ -290,7 +290,7 @@ void showEditor(EditorState* editor)
                     else
                     {
                         reflector.setPrimaryReflectionTarget(collider);
-                        reflectColliderComponent(&reflector, collider, 0);
+                        reflectColliderComponent(&reflector, 0);
                     }
                 }
             }

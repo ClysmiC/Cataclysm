@@ -93,7 +93,7 @@ void reflectQuaternion(IReflector* reflector, uint32 startingOffset)
     }
 }
 
-void reflectEntityDetailsComponent (IReflector* reflector, EntityDetails* details, uint32 startingOffset)
+void reflectEntityDetailsComponent (IReflector* reflector, uint32 startingOffset)
 {
     if (reflector->purpose != ReflectionPurpose::UI)
     {
@@ -189,8 +189,9 @@ void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
     }
 }
 
-void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider, uint32 startingOffset)
+void reflectColliderComponent(IReflector* reflector, uint32 startingOffset)
 {
+    ColliderComponent* collider = (ColliderComponent*)((char*)reflector->reflectionTarget() + startingOffset);
     ColliderComponent origCc = *collider;
     reflector->consumeEnum("Type", startingOffset + offsetof(ColliderComponent, type), ColliderTypeNames, (uint32)ColliderType::ENUM_VALUE_COUNT);
 
@@ -295,8 +296,10 @@ void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider
     }
 }
 
-void reflectCameraComponent(IReflector* reflector, CameraComponent* camera, uint32 startingOffset)
+void reflectCameraComponent(IReflector* reflector, uint32 startingOffset)
 {
+    CameraComponent* camera = (CameraComponent*)((char*)reflector->reflectionTarget() + startingOffset);
+
     reflector->consumeBool("Is Ortho?", startingOffset + offsetof(CameraComponent, isOrthographic));
     
     if (camera->isOrthographic)
