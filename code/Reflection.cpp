@@ -42,6 +42,21 @@ void reflectVec3Euler(IReflector* reflector, uint32 startingOffset)
     reflector->consumeFloat32Euler("Z", startingOffset + offsetof(Vec3, z));
 }
 
+void reflectVec3Normalized(IReflector* reflector, uint32 startingOffset)
+{
+    Vec3* v = (Vec3*)((char*)reflector->reflectionTarget() + startingOffset);
+
+    reflector->pushReflectionTarget(v);
+    {
+        reflector->consumeFloat32NormalizedVec3("X", offsetof(Vec3, x));
+        reflector->consumeFloat32NormalizedVec3("Y", offsetof(Vec3, y));
+        reflector->consumeFloat32NormalizedVec3("Z", offsetof(Vec3, z));
+    }
+
+    v->normalizeInPlace();
+    reflector->popReflectionTarget();
+}
+
 void reflectVec4(IReflector* reflector, uint32 startingOffset)
 {
     reflector->consumeFloat32("X", startingOffset + offsetof(Vec4, x));
@@ -308,7 +323,7 @@ void reflectDirectionalLightComponent(IReflector* reflector, uint32 startingOffs
 
     if (reflector->pushStruct("Direction"))
     {
-        reflectVec3(reflector, startingOffset + offsetof(DirectionalLightComponent, direction));
+        reflectVec3Normalized(reflector, startingOffset + offsetof(DirectionalLightComponent, direction));
         reflector->popStruct();
     }
 }
@@ -520,6 +535,69 @@ float32 UiReflector::consumeFloat32Euler(FieldNameString name, uint32 offset, Re
         else if (name == "z" || name == "Z")
         {
             this->editor->componentList.hotXfmEuler.z = *valuePtr;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+
+    return *valuePtr;
+}
+
+float32 UiReflector::consumeFloat32NormalizedVec3(FieldNameString name, uint32 offset, ReflectionFlags flags)
+{
+    float32* valuePtr = (float32*)((char*)this->reflectionTarget() + offset);
+    uint32 parentId = ImGui::GetID("");
+    bool isHot = this->editor->componentList.lastFrameActiveId == parentId;
+
+    if (isHot)
+    {
+        float32 nonCanonicalValue;
+        if (name == "x" || name == "X")
+        {
+            nonCanonicalValue = this->editor->componentList.hotNormalizedVec3.x;
+        }
+        else if (name == "y" || name == "Y")
+        {
+            nonCanonicalValue = this->editor->componentList.hotNormalizedVec3.y;
+        }
+        else if (name == "z" || name == "Z")
+        {
+            nonCanonicalValue = this->editor->componentList.hotNormalizedVec3.z;
+        }
+        else
+        {
+            assert(false);
+        }
+        
+        this->pushReflectionTarget(&nonCanonicalValue);
+        *valuePtr  = this->consumeFloat32(name, 0);
+        this->popReflectionTarget();
+    }
+    else
+    {
+        *valuePtr = this->consumeFloat32(name, offset);
+    }
+
+    if (ImGui::IsItemActive())
+    {
+        this->editor->componentList.thisFrameActiveId = parentId;
+    }
+
+    if (isHot || this->editor->componentList.lastFrameActiveId == 0)
+    {
+        if (name == "x" || name == "X")
+        {
+            this->editor->componentList.hotNormalizedVec3.x = *valuePtr;
+        }
+        else if (name == "y" || name == "Y")
+        {
+            this->editor->componentList.hotNormalizedVec3.y = *valuePtr;
+        }
+        else if (name == "z" || name == "Z")
+        {
+            this->editor->componentList.hotNormalizedVec3.z = *valuePtr;
         }
         else
         {

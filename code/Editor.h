@@ -46,6 +46,8 @@ struct EditorState
         // to them from quaternion will give a different (but identical) rotation.
         // Store the user-entered rotation until focus leaves the "hot" field and then
         Vec3 hotXfmEuler;
+        
+        Vec3 hotNormalizedVec3;
     };
 
     //

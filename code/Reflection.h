@@ -86,6 +86,8 @@ struct IReflector
     // until the user ends their input
     //
     virtual float32 consumeFloat32Euler(FieldNameString name, uint32 offset, ReflectionFlags flags=0) { return consumeFloat32(name, offset, flags); };
+    
+    virtual float32 consumeFloat32NormalizedVec3(FieldNameString name, uint32 offset, ReflectionFlags flags=0) { return consumeFloat32(name, offset, flags); };
 
     // Note: Consumable enums must have underlying type uint32
     // Potential todo: make consumeEnumInt32, consumeEnumUInt32, etc. (but I think it is fine to assume uint32 and enforce
@@ -119,6 +121,7 @@ struct UiReflector : public IReflector
     uint32  consumeEnum   (FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount, ReflectionFlags flags=0) override;
 
     float32 consumeFloat32Euler(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    float32 consumeFloat32NormalizedVec3(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
 };
 
 struct Game;
@@ -130,6 +133,7 @@ void reflectVec3Rgb(IReflector* reflector, uint32 startingOffset);
 void reflectVec3Euler(IReflector* reflector, uint32 startingOffset);
 void reflectVec4(IReflector* reflector, uint32 startingOffset);
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset);
+void reflectVec3Normalized(IReflector* reflector, uint32 startingOffset); // renormalize value when changed
 
 void reflectEntityDetailsComponent   (IReflector* reflector, EntityDetails* details, uint32 startingOffset);
 void reflectTransformComponent       (IReflector* reflector, uint32 startingOffset);

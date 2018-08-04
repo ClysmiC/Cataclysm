@@ -479,11 +479,6 @@ int main()
         deltaTMs = timeMs - lastTimeMs;
         lastTimeMs = timeMs;
 
-        if (keys[GLFW_KEY_1] && !lastKeys[GLFW_KEY_1])
-        {
-            debug_hidePortalContents = !debug_hidePortalContents;
-        }
-        
         updateGame(game);
 
         // Rendering

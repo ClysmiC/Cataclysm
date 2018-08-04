@@ -345,11 +345,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransfor
             {
                 glStencilFunc(GL_EQUAL, 1, 0xFF);
                 glStencilMask(0x00);
-        
-                if (!debug_hidePortalContents)
-                {
-                    renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
-                }
+                renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
             }
         }
         glDisable(GL_STENCIL_TEST);
