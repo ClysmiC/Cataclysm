@@ -218,11 +218,12 @@ void showEditor(EditorState* editor)
         ImGui::Begin((*getFriendlyName(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
         // Get components
+        EntityDetails* details = getEntityDetails(e);
         TransformComponent* transform = getTransformComponent(e);
         ColliderComponent* collider = getColliderComponent(e);
         CameraComponent* camera = getCameraComponent(e);
         PortalComponent* portal = getPortalComponent(e);
-        DirectionalLightComponent* directionalLights = getDirectionalLightComponent(e);
+        DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
         auto pointLights = getPointLightComponents(e);
         auto renderComponents = getRenderComponents(e);
 
@@ -249,6 +250,24 @@ void showEditor(EditorState* editor)
         // Component reflection
         //
         {
+            assert(details);
+            {
+                if (ImGui::CollapsingHeader("Details"))
+                {
+                    reflector.setPrimaryReflectionTarget(details);
+                    
+                    // Sneak the id in here even though it is part of the entity, not the entity details
+                    {
+                        uint32 entityId = details->entity.id;
+                        reflector.pushReflectionTarget(&entityId);
+                        reflector.consumeUInt32("ID", 0, ReflectionFlag_ReadOnly);
+                        reflector.popReflectionTarget();
+                    }
+                    
+                    reflectEntityDetailsComponent(&reflector, details, 0);
+                }
+            }
+            
             if (transform)
             {
                 if (ImGui::CollapsingHeader("Transform"))
@@ -262,8 +281,17 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Collider"))
                 {
-                    reflector.setPrimaryReflectionTarget(collider);
-                    reflectColliderComponent(&reflector, collider, 0);
+                    ImGui::SameLine();
+                    if (ImGui::Button("x"))
+                    {
+                        int x = 0;
+                        // TODO: remove component
+                    }
+                    else
+                    {
+                        reflector.setPrimaryReflectionTarget(collider);
+                        reflectColliderComponent(&reflector, collider, 0);
+                    }
                 }
             }
 
@@ -278,14 +306,22 @@ void showEditor(EditorState* editor)
             //     }
             // }
     
-            // if (directionalLight)
-            // {
-            //     if (ImGui::CollapsingHeader("Directional Light"))
-            //     {
-            //         reflector.reflectionTarget = directionalLight;
-            //         reflectDirectionalLightComponent(&reflector, 0);
-            //     }
-            // }
+            if (directionalLight)
+            {
+                if (ImGui::CollapsingHeader("Directional Light"))
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("x"))
+                    {
+                        // TODO: remove component
+                    }
+                    else
+                    {
+                        reflector.setPrimaryReflectionTarget(directionalLight);
+                        reflectDirectionalLightComponent(&reflector, 0);
+                    }
+                }
+            }
     
             // if (pointLight)
             // {
@@ -300,13 +336,20 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Portal"))
                 {
-                    reflector.setPrimaryReflectionTarget(portal);
-                    reflectPortalComponent(&reflector, 0);
+                    ImGui::SameLine();
+                    if (ImGui::Button("x"))
+                    {
+                        // TODO: remove component
+                    }
+                    else
+                    {
+                        reflector.setPrimaryReflectionTarget(portal);
+                        reflectPortalComponent(&reflector, 0);
+                    }
                 }
             }
     
-            // TODO
-            // RenderComponent* t = getRenderComponent(e);
+            // TODO: other components
         }
     
 

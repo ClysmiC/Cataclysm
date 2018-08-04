@@ -5,6 +5,7 @@
 #include "ColliderComponent.h"
 #include "CameraComponent.h"
 #include "DirectionalLightComponent.h"
+#include "EntityDetails.h"
 #include "PointLightComponent.h"
 #include "PortalComponent.h"
 #include "RenderComponent.h"
@@ -75,6 +76,16 @@ void reflectQuaternion(IReflector* reflector, uint32 startingOffset)
         reflector->consumeFloat32("Z", startingOffset + offsetof(Quaternion, z));
         reflector->consumeFloat32("W", startingOffset + offsetof(Quaternion, w));
     }
+}
+
+void reflectEntityDetailsComponent (IReflector* reflector, EntityDetails* details, uint32 startingOffset)
+{
+    if (reflector->purpose != ReflectionPurpose::UI)
+    {
+        // TODO: reflect other stuff (e.g. for serialization in the future)
+    }
+
+    reflector->consumeString16("Name", startingOffset + offsetof(EntityDetails, friendlyName));
 }
 
 void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
@@ -348,6 +359,7 @@ void UiReflector::endReflection()
 bool UiReflector::pushStruct(StructNameString name)
 {
     bool result = ImGui::TreeNode(name.cstr());
+    
     return result;
 }
 
@@ -356,36 +368,40 @@ void UiReflector::popStruct()
     ImGui::TreePop();
 }
 
-int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset)
+int32 UiReflector::consumeInt32(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     int32* valuePtr = (int32*)((char*)reflectionTarget() + offset);
     int32 value = *valuePtr;
 
-    // std::string text = name + ": " + std::to_string(value);
-
-    // ImGui::Text(text.c_str());
+    // TODO
 
     return *valuePtr;
 }
 
-uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset)
+uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     uint32* valuePtr = (uint32*)((char*)reflectionTarget() + offset);
-    uint32 value = *valuePtr;
+    uint32 valueCopy = *valuePtr;
 
-    // std::string text = name + ": " + std::to_string(value);
-    
-    // ImGui::Text(text.c_str());
+    ImGuiInputTextFlags imguiFlags = 0;
+    if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
+
+    if (ImGui::InputScalar(name.cstr(), ImGuiDataType_U32, &valueCopy, nullptr, nullptr, nullptr, imguiFlags))
+    {
+        // This updates the actual value
+        *valuePtr = valueCopy;
+    }
 
     return *valuePtr;
 }
 
-float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
+float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     float32* valuePtr = (float32*)((char*)reflectionTarget() + offset);
     float32 valueCopy = *valuePtr;
 
-    typedef ImGuiInputTextFlags_ Flags;
+    ImGuiInputTextFlags imguiFlags = 0;
+    if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
         
     if (ImGui::InputScalar(name.cstr(), ImGuiDataType_Float, &valueCopy))
     {
@@ -393,12 +409,10 @@ float32 UiReflector::consumeFloat32(FieldNameString name, uint32 offset)
         *valuePtr = valueCopy;
     }
 
-    valueCopy = 10;
-
     return *valuePtr;
 }
 
-float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset)
+float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     float64* valuePtr = (float64*)((char*)reflectionTarget() + offset);
     float64 value = *valuePtr;
@@ -410,7 +424,7 @@ float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset)
     return *valuePtr;
 }
 
-bool UiReflector::consumeBool(FieldNameString name, uint32 offset)
+bool UiReflector::consumeBool(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     bool* valuePtr = (bool*)((char*)reflectionTarget() + offset);
     bool value = *valuePtr;
@@ -422,7 +436,7 @@ bool UiReflector::consumeBool(FieldNameString name, uint32 offset)
     return *valuePtr;
 }
 
-uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount)
+uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount, ReflectionFlags flags)
 {
     // TODO: not sure how this should work...
     
@@ -453,7 +467,7 @@ uint32 UiReflector::consumeEnum(FieldNameString name, uint32 offset, EnumValueNa
     return *valuePtr;
 }
 
-float32 UiReflector::consumeFloat32Euler(FieldNameString name, uint32 offset)
+float32 UiReflector::consumeFloat32Euler(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     float32* valuePtr = (float32*)((char*)this->reflectionTarget() + offset);
     uint32 parentId = ImGui::GetID("");
@@ -511,6 +525,25 @@ float32 UiReflector::consumeFloat32Euler(FieldNameString name, uint32 offset)
         {
             assert(false);
         }
+    }
+
+    return *valuePtr;
+}
+
+string16 UiReflector::consumeString16(FieldNameString name, uint32 offset, ReflectionFlags flags)
+{
+    string16* valuePtr = (string16*)((char*)reflectionTarget() + offset);
+    string16 value = *valuePtr;
+    string16 valueCopy = value;
+
+    ImGuiInputTextFlags imguiFlags = 0;
+    if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
+
+    if (ImGui::InputText(name.cstr(), valueCopy.data, 16, imguiFlags))
+    {
+        // This updates the actual value
+        *valuePtr = valueCopy;
+        valuePtr->invalidateLength();
     }
 
     return *valuePtr;

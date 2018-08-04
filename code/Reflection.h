@@ -8,6 +8,7 @@
 
 struct CameraComponent;
 struct EditorState;
+struct EntityDetails;
 
 enum class ReflectionPurpose
 {
@@ -20,6 +21,9 @@ typedef string16 EnumValueNameString;
 typedef string16 StructNameString;
 typedef string16 FieldNameString;
 typedef string16 EntityNameString;
+
+typedef uint64 ReflectionFlags;
+const static ReflectionFlags ReflectionFlag_ReadOnly = 1 << 0;
 
 struct IReflector
 {
@@ -68,22 +72,25 @@ struct IReflector
     //
     // "Consume" is "end of the line" for reflection. It operates on primitives.
     //
-    virtual int32   consumeInt32(FieldNameString name, uint32 offset) = 0;
-    virtual uint32  consumeUInt32(FieldNameString name, uint32 offset) = 0;
-    virtual float32 consumeFloat32(FieldNameString name, uint32 offset) = 0;
-    virtual float64 consumeFloat64(FieldNameString name, uint32 offset) = 0;
-    virtual bool    consumeBool(FieldNameString name, uint32 offset) = 0;
+    virtual int32   consumeInt32  (FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+    virtual uint32  consumeUInt32 (FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+    virtual float32 consumeFloat32(FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+    virtual float64 consumeFloat64(FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+    virtual bool    consumeBool   (FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+
+    // TODO: templatize this?
+    virtual string16 consumeString16(FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
 
     //
     // This may need special treatment (i.e., UI uses the stored euler value instead of the canonical one)
     // until the user ends their input
     //
-    virtual float32 consumeFloat32Euler(FieldNameString name, uint32 offset) = 0;
+    virtual float32 consumeFloat32Euler(FieldNameString name, uint32 offset, ReflectionFlags flags=0) { return consumeFloat32(name, offset, flags); };
 
     // Note: Consumable enums must have underlying type uint32
     // Potential todo: make consumeEnumInt32, consumeEnumUInt32, etc. (but I think it is fine to assume uint32 and enforce
     // that for now)
-    virtual uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount) = 0;
+    virtual uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount, ReflectionFlags flags=0) = 0;
     
 private:
     std::stack<void*> reflectionTargets;
@@ -101,14 +108,17 @@ struct UiReflector : public IReflector
     bool startReflection(EntityNameString label) override;
     void endReflection() override;
     
-    int32   consumeInt32(FieldNameString name, uint32 offset) override;
-    uint32  consumeUInt32(FieldNameString name, uint32 offset) override;
-    float32 consumeFloat32(FieldNameString name, uint32 offset) override;
-    float64 consumeFloat64(FieldNameString name, uint32 offset) override;
-    bool    consumeBool(FieldNameString name, uint32 offset) override;
-    uint32  consumeEnum(FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount) override;
+    int32   consumeInt32  (FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    uint32  consumeUInt32 (FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    float32 consumeFloat32(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    float64 consumeFloat64(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    bool    consumeBool   (FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    
+    string16 consumeString16(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+        
+    uint32  consumeEnum   (FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount, ReflectionFlags flags=0) override;
 
-    float32 consumeFloat32Euler(FieldNameString name, uint32 offset) override;
+    float32 consumeFloat32Euler(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
 };
 
 struct Game;
@@ -121,13 +131,14 @@ void reflectVec3Euler(IReflector* reflector, uint32 startingOffset);
 void reflectVec4(IReflector* reflector, uint32 startingOffset);
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset);
 
-void reflectTransformComponent(IReflector* reflector, uint32 startingOffset);
-void reflectColliderComponent(IReflector* reflector, ColliderComponent* collider, uint32 startingOffset);
-void reflectCameraComponent(IReflector* reflector, CameraComponent* camera, uint32 startingOffset);
+void reflectEntityDetailsComponent   (IReflector* reflector, EntityDetails* details, uint32 startingOffset);
+void reflectTransformComponent       (IReflector* reflector, uint32 startingOffset);
+void reflectColliderComponent        (IReflector* reflector, ColliderComponent* collider, uint32 startingOffset);
+void reflectCameraComponent          (IReflector* reflector, CameraComponent* camera, uint32 startingOffset);
 void reflectDirectionalLightComponent(IReflector* reflector, uint32 startingOffset);
-void reflectPointLightComponent(IReflector* reflector, uint32 startingOffset);
-void reflectPortalComponent(IReflector* reflector, uint32 startingOffset);
-void reflectRenderComponent(IReflector* reflector, uint32 startingOffset);
+void reflectPointLightComponent      (IReflector* reflector, uint32 startingOffset);
+void reflectPortalComponent          (IReflector* reflector, uint32 startingOffset);
+void reflectRenderComponent          (IReflector* reflector, uint32 startingOffset);
 
 //
 // Enums whose names are exposed via reflection

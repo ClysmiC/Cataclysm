@@ -76,6 +76,20 @@ template <uint16 SIZE> struct _als_fixed_string
         this->data[this->length] = '\0';
     }
 
+    //
+    // If the buffer gets written to directly (not thru an als_fixed_string function or operator),
+    // call this to update the length field
+    //
+    uint16 invalidateLength()
+    {
+        for (this->length = 0; this->length < SIZE; this->length++)
+        {
+            if (data[this->length] == '\0') break;
+        }
+
+        return this->length;
+    }
+
     // =========================
     //
     // Operator overloads

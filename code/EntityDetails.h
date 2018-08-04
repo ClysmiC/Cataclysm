@@ -8,8 +8,8 @@
 struct EntityDetails : public Component
 {
     Entity parent;
-    uint64 flags;
-    string16 friendlyName;
+    uint64 flags = 0;
+    string16 friendlyName = "";
     std::vector<Entity> children;
 };
 
