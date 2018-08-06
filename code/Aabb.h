@@ -31,9 +31,10 @@ Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> rcg)
     Vec3 minPoint = Vec3(FLT_MAX);
     Vec3 maxPoint = Vec3(-FLT_MAX);
     
-    FOR_COMPONENT_GROUP(rcg)
+    for (uint32 i = 0; i < rcg.numComponents; i++)
     {
-        Aabb bounds = aabbFromRenderComponent(it.ptr);
+        RenderComponent* it = &rcg[i];
+        Aabb bounds = aabbFromRenderComponent(it);
         Vec3 boundsMin = bounds.center - bounds.halfDim;
         Vec3 boundsMax = bounds.center + bounds.halfDim;
 
@@ -58,10 +59,12 @@ Aabb aabbFromColliders(ComponentGroup<ColliderComponent, BUCKET_SIZE> colliders)
 {
     Vec3 minPoint = Vec3(FLT_MAX);
     Vec3 maxPoint = Vec3(-FLT_MAX);
-    
-    FOR_COMPONENT_GROUP(colliders)
+
+    for (uint32 i = 0; i < colliders.numComponents; i++)    
     {
-        Aabb bounds = aabbFromCollider(it.ptr);
+        ColliderComponent* it = &colliders[i];
+
+        Aabb bounds = aabbFromCollider(it);
         Vec3 boundsMin = bounds.center - bounds.halfDim;
         Vec3 boundsMax = bounds.center + bounds.halfDim;
 

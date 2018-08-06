@@ -228,10 +228,12 @@ void buildTestScene3(Scene* scene)
         
         auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
 
-        FOR_COMPONENT_GROUP(rcc)
+        auto it = (rcc).bucketArray->addressOf((rcc).components[0]);
+
+        for (uint32 j = 0; j < rcc.numComponents; j++)
         {
-            RenderComponent *rc = it.ptr;
-            new (rc) RenderComponent(e, &(shuttleMesh->submeshes[it.index]));
+            RenderComponent *rc = &rcc[j];
+            new (rc) RenderComponent(e, &(shuttleMesh->submeshes[j]));
         }
     }
 }

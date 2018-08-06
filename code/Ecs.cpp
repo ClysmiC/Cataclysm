@@ -27,19 +27,21 @@ uint32 Ecs::nextEntityId = 1;
 template<class T, uint32 BUCKET_SIZE>
 T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
-    assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
-
     BucketLocator location = componentList->components.occupyEmptySlot();
     T* result = componentList->components.addressOf(location);
     result->entity = e;
 
-    ComponentGroup<T, BUCKET_SIZE> cg;
-    cg.firstComponent = location;
-    cg.numComponents = 1;
-    cg.entity = e;
-    cg.bucketArray = &componentList->components;
+    //
+    // Creates new component group entry if one doesn't exist. Otherwise, modifies the existing one
+    //
+    ComponentGroup<T, BUCKET_SIZE>* cg = &(componentList->lookup[e.id]);
+    cg->entity = e;
+    cg->bucketArray = &componentList->components;
 
-    componentList->lookup[e.id] = cg;
+    assert(cg->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
+
+    cg->components[cg->numComponents] = location;
+    cg->numComponents++;
     
     return result;    
 }
@@ -53,37 +55,37 @@ T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
         return nullptr;
     }
 
-    return componentList->components.addressOf(it->second.firstComponent);
+    ComponentGroup<T, BUCKET_SIZE> cg = it->second;
+    assert(cg.numComponents > 0);
+
+    return &(cg)[0];
 }
 
 template<class T, uint32 BUCKET_SIZE>
 ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents)
 {
-    assert(componentList->lookup.find(e.id) == componentList->lookup.end()); // doesnt already exist
-    
-    BucketLocator firstComponent = BucketLocator();
+    //
+    // Creates new component group entry if one doesn't exist. Otherwise, modifies the existing one
+    //
+    ComponentGroup<T, BUCKET_SIZE>* cg = &(componentList->lookup[e.id]);
+    cg->entity = e;
+    cg->bucketArray = &componentList->components;
 
     for (uint32 i = 0; i < numComponents; i++)
     {
         BucketLocator locator = componentList->components.occupyEmptySlot();
-        T* result = componentList->components.addressOf(locator);
-        result->entity = e;
+        T* component = componentList->components.addressOf(locator);
+        component->entity = e;
 
-        if (i == 0)
-        {
-            firstComponent = locator;
-        }
+        assert(cg->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
+
+        cg->components[cg->numComponents] = locator;
+        cg->numComponents++;
     }
 
-    ComponentGroup<T, BUCKET_SIZE> cg;
-    cg.firstComponent = firstComponent;
-    cg.numComponents = numComponents;
-    cg.entity = e;
-    cg.bucketArray = &componentList->components;
+    cg->bucketArray = &componentList->components;
 
-    componentList->lookup[e.id] = cg;
-
-    return cg;
+    return *cg;
 }
 
 template<class T, uint32 BUCKET_SIZE>
@@ -112,6 +114,7 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     details->entity.id = result.id;
     details->entity.ecs = result.ecs;
     details->flags = 0;
+    details->parent.id = 0;
     details->friendlyName = friendlyName;
     
     Ecs::nextEntityId++;

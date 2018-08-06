@@ -90,21 +90,27 @@ EntityDetails* getEntityDetails(Entity entity);
 
 TransformComponent* addTransformComponent(Entity e);
 TransformComponent* getTransformComponent(Entity e);
+bool                removeTransformComponent(TransformComponent** ppComponent);
 
 CameraComponent* addCameraComponent(Entity e);
 CameraComponent* getCameraComponent(Entity e);
+bool             removeCameraComponent(CameraComponent** ppComponent);
 
 PortalComponent* addPortalComponent(Entity e);
 PortalComponent* getPortalComponent(Entity e);
+bool             removePortalComponent(PortalComponent** ppComponent);
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e);
 DirectionalLightComponent* getDirectionalLightComponent(Entity e);
+bool                       removeDirectionalLightComponent(DirectionalLightComponent** ppComponent);
 
 TerrainComponent* addTerrainComponent(Entity e);
 TerrainComponent* getTerrainComponent(Entity e);
+bool              removeTerrainComponent(TerrainComponent** ppComponent);
 
 WalkComponent* addWalkComponent(Entity e);
 WalkComponent* getWalkComponent(Entity e);
+bool           removeWalkComponent(WalkComponent** ppComponent);
     
 RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);
