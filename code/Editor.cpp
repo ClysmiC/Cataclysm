@@ -279,19 +279,16 @@ void showEditor(EditorState* editor)
     
             if (collider)
             {
-                if (ImGui::CollapsingHeader("Collider"))
+                bool xNotClicked = true;
+                if (ImGui::CollapsingHeader("Collider", &xNotClicked))
                 {
-                    ImGui::SameLine();
-                    if (ImGui::Button("x"))
-                    {
-                        int x = 0;
-                        // TODO: remove component
-                    }
-                    else
-                    {
-                        reflector.setPrimaryReflectionTarget(collider);
-                        reflectColliderComponent(&reflector, 0);
-                    }
+                    reflector.setPrimaryReflectionTarget(collider);
+                    reflectColliderComponent(&reflector, 0);
+                }
+
+                if (!xNotClicked)
+                {
+                    // TODO
                 }
             }
 
@@ -308,18 +305,17 @@ void showEditor(EditorState* editor)
     
             if (directionalLight)
             {
-                if (ImGui::CollapsingHeader("Directional Light"))
+                bool xNotClicked = true;
+                if (ImGui::CollapsingHeader("Directional Light", &xNotClicked))
                 {
-                    ImGui::SameLine();
-                    if (ImGui::Button("x"))
-                    {
-                        // TODO: remove component
-                    }
-                    else
-                    {
-                        reflector.setPrimaryReflectionTarget(directionalLight);
-                        reflectDirectionalLightComponent(&reflector, 0);
-                    }
+                    reflector.setPrimaryReflectionTarget(directionalLight);
+                    reflectDirectionalLightComponent(&reflector, 0);
+                }
+
+                if (!xNotClicked)
+                {
+                    removeDirectionalLightComponent(&directionalLight);
+                    assert(directionalLight == nullptr);
                 }
             }
     
@@ -336,16 +332,8 @@ void showEditor(EditorState* editor)
             {
                 if (ImGui::CollapsingHeader("Portal"))
                 {
-                    ImGui::SameLine();
-                    if (ImGui::Button("x"))
-                    {
-                        // TODO: remove component
-                    }
-                    else
-                    {
-                        reflector.setPrimaryReflectionTarget(portal);
-                        reflectPortalComponent(&reflector, 0);
-                    }
+                    reflector.setPrimaryReflectionTarget(portal);
+                    reflectPortalComponent(&reflector, 0);
                 }
             }
     

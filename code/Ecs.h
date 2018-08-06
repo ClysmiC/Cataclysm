@@ -80,7 +80,7 @@ template<class T, uint32 BUCKET_SIZE>
 ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents);
 
 template<class T, uint32 BUCKET_SIZE>
-ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e);
+bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* component);
 
 //
 // Entity functions

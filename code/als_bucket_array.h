@@ -138,6 +138,28 @@ public:
         return result;
     }
 
+    bool remove(BucketLocator locator)
+    {
+        if (this->isOccupied(locator))
+        {
+            Bucket* bucket = this->buckets[locator.bucketIndex];
+            bucket->occupied[locator.slotIndex] = false;
+            bucket->count--;
+            this->count--;
+
+            if (bucket->count == BUCKET_SIZE - 1)
+            {
+                this->unfullBuckets.push_back(bucket);
+            }
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     bool isOccupied(BucketLocator locator)
     {
         if (locator.bucketIndex < 0 || locator.slotIndex < 0 || this->buckets.empty()) return false;

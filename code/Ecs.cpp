@@ -102,6 +102,44 @@ ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
     return result;
 }
 
+template<class T, uint32 BUCKET_SIZE>
+bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* toRemove)
+{
+    auto it = componentList->lookup.find(toRemove->entity.id);
+    if (it == componentList->lookup.end())
+    {
+        return false;
+    }
+
+    ComponentGroup<T, BUCKET_SIZE> &thisEntitiesComponents = it->second;
+
+    for (uint32 i = 0; i < thisEntitiesComponents.numComponents; i++)
+    {
+        T* component = &thisEntitiesComponents[i];
+
+        if (component == toRemove)
+        {
+            // Remove from bucket array
+            componentList->components.remove(thisEntitiesComponents.components[i]);
+                
+            // Unordered remove from the lookup entry array
+            thisEntitiesComponents.components[i] = thisEntitiesComponents.components[thisEntitiesComponents.numComponents - 1];
+            thisEntitiesComponents.numComponents--;
+
+            if (thisEntitiesComponents.numComponents == 0)
+            {
+                // Removed last of this component type for an entity, remove that entity from the
+                // lookup table
+                componentList->lookup.erase(it);
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 Entity makeEntity(Ecs* ecs, string16 friendlyName)
 {
     Entity result;
@@ -197,6 +235,16 @@ DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->directionalLights, e);
+}
+
+bool removeDirectionalLightComponent(DirectionalLightComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->directionalLights), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
 }
 
 PointLightComponent* addPointLightComponent(Entity e)
@@ -423,6 +471,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
                 setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
             }
 
+            bool dirLightSet = false;
             FOR_BUCKET_ARRAY (ecs->directionalLights.components)
             {
                 // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
@@ -435,6 +484,14 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
                 
                 setVec3(shader, directionVarName, dlc->direction);
                 setVec3(shader, intensityVarName, dlc->intensity);
+
+                dirLightSet = true;
+            }
+
+            if (!dirLightSet)
+            {
+                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+                setVec3(shader, intensityVarName, Vec3(0, 0, 0));
             }
         }
 
