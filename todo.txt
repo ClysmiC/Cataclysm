@@ -1,9 +1,12 @@
-ARRAY_BUCKET data structure for components
+[ ] Make TransformComponent mandatory (so many things depend on it)
+[ ] Delete entity functionality
+[ ] Add component functionality
+[ ] Add entity functionality
+[ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
 
-TRANSFER OWNERSHIP OF COMPONENTS BETWEEN SCENES
-  - This invalidates pointers... can we use a handle somehow?
-  - The pointers should stay valid until the end of frame (i.e., actual transition happens at known time at end of frame)
-  - Maybe overload assigning of the pointers to discourage saving them?
+[ ] Reflect render component.... group them together based on mesh file somehow?
+[ ] Add point light back in
+[ ] Draw sticker to show where point light, camera, and directional light are
 
 REORGANIZE DIRECTORY
   - Change Types.h to als_types

@@ -6,5 +6,7 @@ struct WalkComponent : public Component
 {
     bool isGrounded = false;
     
-    Entity terrain; 
+    Entity terrain;
+
+    static constexpr bool multipleAllowedPerEntity = false;
 };

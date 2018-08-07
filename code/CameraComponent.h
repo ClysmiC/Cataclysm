@@ -27,6 +27,8 @@ struct CameraComponent : public Component
     // TODO: wrappers around the math library calls
     // initPerspective(..)
     // initOrtho(..)
+
+    static constexpr bool multipleAllowedPerEntity = false;
 };
 
 void recalculateProjectionMatrix(CameraComponent* camera);

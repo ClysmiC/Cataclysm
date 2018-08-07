@@ -11,7 +11,7 @@ struct Ecs;
 
 struct Entity
 {
-    uint32 id;
-    Ecs* ecs;
+    uint32 id = 0;
+    Ecs* ecs = nullptr;
 };
 

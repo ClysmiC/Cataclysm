@@ -38,6 +38,7 @@ T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
     cg->entity = e;
     cg->bucketArray = &componentList->components;
 
+    assert(cg->numComponents == 0 || T::multipleAllowedPerEntity);
     assert(cg->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
 
     cg->components[cg->numComponents] = location;
@@ -64,6 +65,8 @@ T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 template<class T, uint32 BUCKET_SIZE>
 ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents)
 {
+    assert(T::multipleAllowedPerEntity);
+    
     //
     // Creates new component group entry if one doesn't exist. Otherwise, modifies the existing one
     //
@@ -91,6 +94,8 @@ ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
 template<class T, uint32 BUCKET_SIZE>
 ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
+    assert(T::multipleAllowedPerEntity);
+    
     ComponentGroup<T, BUCKET_SIZE> result;
     
     auto it = componentList->lookup.find(e.id);
@@ -146,7 +151,7 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     result.id = Ecs::nextEntityId;
     result.ecs = ecs;
 
-    ecs->entityList.push_back(result);
+    ecs->entities.push_back(result);
 
     EntityDetails* details = addComponent(&ecs->entityDetails, result);
     details->entity.id = result.id;
@@ -183,6 +188,21 @@ CameraComponent* addCameraComponent(Entity e)
     return addComponent(&e.ecs->cameras, e);
 }
 
+CameraComponent* getCameraComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->cameras, e);
+}
+
+bool removeCameraComponent(CameraComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    assert((*ppComponent)->entity.id != (*ppComponent)->entity.ecs->scene->game->activeCamera.id);
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->cameras), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    return success;
+}
+
 TerrainComponent* addTerrainComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
@@ -205,12 +225,6 @@ WalkComponent* getWalkComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->walkComponents, e);
-}
-
-CameraComponent* getCameraComponent(Entity e)
-{
-    if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->cameras, e);
 }
 
 PortalComponent* addPortalComponent(Entity e)
@@ -317,6 +331,14 @@ ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponen
 {
     if (e.id == 0) return ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE>();
     return getComponents(&e.ecs->colliders, e);
+}
+
+bool removeColliderComponent(ColliderComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->colliders), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    return success;
 }
 
 void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
@@ -505,7 +527,7 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
     result.hit = false;
     result.t = -1;
 
-    for (Entity& e : ecs->entityList)
+    for (Entity& e : ecs->entities)
     {       
         TransformComponent* xfm = getTransformComponent(e);
         
@@ -556,29 +578,33 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
 
 PointLightComponent* closestPointLight(TransformComponent* xfm)
 {
-    Ecs* ecs = xfm->entity.ecs;
+    return nullptr;
+
+    // TODO: give point-lights some lovin in the future when we have better editor capability
     
-    PointLightComponent* closest = nullptr;
-    float32 closestDistance = FLT_MAX;
+    // Ecs* ecs = xfm->entity.ecs;
+    
+    // PointLightComponent* closest = nullptr;
+    // float32 closestDistance = FLT_MAX;
 
-    FOR_BUCKET_ARRAY (ecs->pointLights.components)
-    {
-        PointLightComponent* pl = it.ptr;
-        TransformComponent* plXfm = getTransformComponent(pl->entity);
+    // FOR_BUCKET_ARRAY (ecs->pointLights.components)
+    // {
+    //     PointLightComponent* pl = it.ptr;
+    //     TransformComponent* plXfm = getTransformComponent(pl->entity);
 
-        assert(plXfm != nullptr);
-        if (plXfm == nullptr) continue;
+    //     assert(plXfm != nullptr);
+    //     if (plXfm == nullptr) continue;
         
-        float32 dist = distance(xfm->position(), plXfm->position());
+    //     float32 dist = distance(xfm->position(), plXfm->position());
 
-        if (dist < closestDistance)
-        {
-            closestDistance = dist;
-            closest = pl;
-        }
-    }
+    //     if (dist < closestDistance)
+    //     {
+    //         closestDistance = dist;
+    //         closest = pl;
+    //     }
+    // }
 
-    return closest;
+    // return closest;
 }
 
 void walkAndCamera(Game* game)
@@ -699,7 +725,8 @@ void walkAndCamera(Game* game)
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
                 rebaseTransformInPlace(pc, xfm);
-                game->activeScene = pc->connectedPortal->entity.ecs->scene;
+                EntityDetails* connectedPortal = getEntityDetails(game, pc->connectedPortalEntityId);
+                game->activeScene = connectedPortal->entity.ecs->scene;
             }
         }
     }

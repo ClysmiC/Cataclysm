@@ -53,7 +53,7 @@ struct Ecs
     static constexpr uint32 COLLIDER_BUCKET_SIZE = 512;
     static constexpr uint32 WALK_COMPONENT_BUCKET_SIZE = 8;
 
-    std::vector<Entity> entityList; // TODO: rename to entities
+    std::vector<Entity> entities;
     ComponentList<EntityDetails,             ENTITY_DETAILS_BUCKET_SIZE>      entityDetails;
 
     ComponentList<TransformComponent,        TRANSFORM_BUCKET_SIZE>           transforms;
@@ -121,6 +121,7 @@ ColliderComponent* addColliderComponent(Entity e);
 ColliderComponent* getColliderComponent(Entity e);
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addColliderComponents(Entity e, uint32 numComponents);
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponents(Entity e);
+bool                                                         removeColliderComponent(ColliderComponent** ppComponent);
 
 PointLightComponent* addPointLightComponent(Entity e);
 PointLightComponent* getPointLightComponent(Entity e);

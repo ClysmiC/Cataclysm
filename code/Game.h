@@ -35,10 +35,12 @@ struct Game
 
     Entity player;
 
-    int numScenes;
+    uint32 numScenes;
 };
 
 Scene* makeScene(Game* game);
 void makeSceneActive(Game* game, Scene* scene);
 void makeCameraActive(Game* game, Entity camera);
 
+EntityDetails* getEntityDetails(Game* game, uint32 entityId);
+Entity getEntity(Game* game, uint32 entityId);

@@ -39,6 +39,8 @@ struct ColliderComponent : public Component
             Vec3 rect3Lengths;
         };
     };
+
+    static constexpr bool multipleAllowedPerEntity = true;
 };
 
 Vec3 colliderCenter(ColliderComponent* collider);

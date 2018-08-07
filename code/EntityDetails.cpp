@@ -120,3 +120,21 @@ string16* getFriendlyName(Entity e)
     return result;
 }
 
+string32 getFriendlyNameAndId(Entity e)
+{
+    EntityDetails* details = getEntityDetails(e);
+    string32 result;
+
+    if (e.id == 0)
+    {
+        result = "null (0)";
+    }
+    else
+    {
+        sprintf_s((char*)result.cstr(), 32, "%s (%u)", details->friendlyName.cstr(), e.id);
+        result.invalidateLength();
+    }
+    
+    return result;
+}
+

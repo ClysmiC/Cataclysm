@@ -8558,6 +8558,46 @@ bool ImGui::CollapsingHeader(const char* label, bool* p_open, ImGuiTreeNodeFlags
     return is_open;
 }
 
+bool ImGui::Als_CollapsingHeaderTreeNode(const char* label, ImGuiTreeNodeFlags flags)
+{
+    // @CopyPaste
+
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiTreeNodeFlags collapsingHeaderFlagsWithTreePush = ImGuiTreeNodeFlags_CollapsingHeader & ~ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    return TreeNodeBehavior(window->GetID(label), flags | collapsingHeaderFlagsWithTreePush, label);
+}
+
+bool ImGui::Als_CollapsingHeaderTreeNode(const char* label, bool* p_open, ImGuiTreeNodeFlags flags)
+{
+    // @CopyPaste
+
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    if (p_open && !*p_open)
+        return false;
+
+    ImGuiID id = window->GetID(label);
+    ImGuiTreeNodeFlags collapsingHeaderFlagsWithTreePush = ImGuiTreeNodeFlags_CollapsingHeader & ~ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    bool is_open = TreeNodeBehavior(id, flags | collapsingHeaderFlagsWithTreePush | (p_open ? ImGuiTreeNodeFlags_AllowItemOverlap : 0), label);
+    if (p_open)
+    {
+        // Create a small overlapping close button // FIXME: We can evolve this into user accessible helpers to add extra buttons on title bars, headers, etc.
+        ImGuiContext& g = *GImGui;
+        float button_sz = g.FontSize * 0.5f;
+        ImGuiItemHoveredDataBackup last_item_backup;
+        if (CloseButton(window->GetID((void*)(intptr_t)(id+1)), ImVec2(ImMin(window->DC.LastItemRect.Max.x, window->ClipRect.Max.x) - g.Style.FramePadding.x - button_sz, window->DC.LastItemRect.Min.y + g.Style.FramePadding.y + button_sz), button_sz))
+            *p_open = false;
+        last_item_backup.Restore();
+    }
+
+    return is_open;
+}
+
 bool ImGui::TreeNodeEx(const char* label, ImGuiTreeNodeFlags flags)
 {
     ImGuiWindow* window = GetCurrentWindow();

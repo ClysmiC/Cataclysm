@@ -367,7 +367,7 @@ UiReflector::UiReflector()
 
 bool UiReflector::startReflection(EntityNameString label)
 {
-    return true; // todo: revisit if we need this api
+    return true; // @todo: revisit if we need this api
 }
 
 void UiReflector::endReflection()

@@ -11,7 +11,9 @@ struct Scene;
 struct PortalComponent : public Component
 {
     PortalComponent() = default;
-    PortalComponent* connectedPortal;
+    uint32 connectedPortalEntityId;
+    
+    static constexpr bool multipleAllowedPerEntity = false;
 };
 
 Shader* portalShader();
@@ -19,6 +21,7 @@ Shader* portalShader();
 void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToConnectedPortal=true);
 Vec2 getDimensions(PortalComponent* portal);
 
+PortalComponent* getConnectedPortal(PortalComponent* portal);
 Scene* getConnectedScene(PortalComponent* portal);
 TransformComponent* getConnectedSceneXfm(PortalComponent* portal);
 

@@ -14,6 +14,8 @@ struct RenderComponent : public Component
     Material* material;
 
     SubmeshOpenGlInfo submeshOpenGlInfo;
+
+    static constexpr bool multipleAllowedPerEntity = true;
 };
 
 void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  CameraComponent* camera, ITransform *cameraXfm);

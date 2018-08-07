@@ -48,7 +48,7 @@ struct TerrainChunk
 struct TerrainComponent : public Component
 {
     TerrainComponent() = default;
-    TerrainComponent(FilenameString heightmap, Vec3 origin, float32 xLength, float32 zLength, float32 minHeight, float32 maxHeight);
+    TerrainComponent(Entity entity, FilenameString heightmap, Vec3 origin, float32 xLength, float32 zLength, float32 minHeight, float32 maxHeight);
 
     Vec3 origin;
     
@@ -62,6 +62,8 @@ struct TerrainComponent : public Component
     uint32 zVerticesPerChunk = 32;
     
     std::vector<std::vector<TerrainChunk>> chunks;
+
+    static constexpr bool multipleAllowedPerEntity = true;
 };
 
 uint32 xVerticesInChunk(TerrainChunk* chunk);

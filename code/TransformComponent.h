@@ -15,4 +15,6 @@ struct TransformComponent : public Component, public ITransform
 
     virtual ITransform* getParent() override;
     virtual std::vector<ITransform*> getChildren() override;
+
+    static constexpr bool multipleAllowedPerEntity = false;
 };

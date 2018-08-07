@@ -2,6 +2,7 @@
 
 #include "PortalComponent.h"
 #include "ResourceManager.h"
+#include "Game.h"
 #include "Ecs.h"
 
 Shader* portalShader()
@@ -25,24 +26,10 @@ void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToCon
     }
     else assert(false);
 
-
-    // Don't set the collider dimensions -- these default to 1x1 (as do the portal dimensions)
-    // but they are affected by xfm->scale, so they will already scale up
-    
-    // ColliderComponent* collider = getColliderComponent(portal->entity);
-    // if (collider && collider->type == ColliderType::RECT3)
-    // {
-    //     collider->xLength = dimensions.x;
-    //     collider->yLength = dimensions.y;
-    // }
-    // else
-    // {
-    //     assert(false);
-    // }
-
     if (propogateToConnectedPortal)
     {
-        setDimensions(portal->connectedPortal, dimensions, false);
+        PortalComponent* connectedPortal = getConnectedPortal(portal);
+        setDimensions(connectedPortal, dimensions, false);
     }
 }
 
@@ -58,14 +45,27 @@ Vec2 getDimensions(PortalComponent* portal)
     return result;
 }
 
+PortalComponent* getConnectedPortal(PortalComponent* portal)
+{
+    Entity connectedPortal = getEntity(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
+    PortalComponent* connectedPortalComponent = getPortalComponent(connectedPortal);
+
+    assert(connectedPortalComponent != nullptr);
+
+    return connectedPortalComponent;
+}
+
 Scene* getConnectedScene(PortalComponent* portal)
 {
-    return portal->connectedPortal->entity.ecs->scene;
+    EntityDetails* connectedPortal = getEntityDetails(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
+    return connectedPortal->entity.ecs->scene;
 }
 
 TransformComponent* getConnectedSceneXfm(PortalComponent* portal)
 {
-    return getTransformComponent(portal->connectedPortal->entity);
+    Entity connectedPortal = getEntity(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
+    TransformComponent* result = getTransformComponent(connectedPortal);
+    return result;
 }
 
 Vec3 intoPortalNormal(PortalComponent* portal)
@@ -119,8 +119,8 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, ITransform
 {
     PortalComponent* portal1Component = addPortalComponent(portal1);
     PortalComponent* portal2Component = addPortalComponent(portal2);
-    portal1Component->connectedPortal = portal2Component;
-    portal2Component->connectedPortal = portal1Component;
+    portal1Component->connectedPortalEntityId = portal2.id;
+    portal2Component->connectedPortalEntityId = portal1.id;
     
     TransformComponent* portal1XfmComponent = addTransformComponent(portal1);
     portal1XfmComponent->setPosition(portal1Xfm->position());

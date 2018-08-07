@@ -37,6 +37,47 @@ float mouseYPrev;
 float32 timeMs;
 float32 deltaTMs;
 
+EntityDetails* getEntityDetails(Game* game, uint32 entityId)
+{
+    //
+    // @Slow
+    // Can we accelerate this somehow? It is very convenient to be able to get the entire entity just from its id
+    // (so that way we can only store the ID of "linked" entities (like portals) and not worry about having things
+    // like the entity's ecs go out of date (if the entity were to, say, enter a new scene)
+    //
+    
+    EntityDetails* result = nullptr;
+    
+    for (uint32 i = 0; i < game->numScenes; i++)
+    {
+        Entity probe;
+        probe.id = entityId;
+        probe.ecs = &game->scenes[i].ecs;
+
+        result = getEntityDetails(probe);
+
+        if (result) break;
+    }
+
+    return result;
+}
+
+Entity getEntity(Game* game, uint32 entityId)
+{
+    // @Slow
+    // Can we accelerate this somehow? It is very convenient to be able to get the entire entity just from its id
+    // (so that way we can only store the ID of "linked" entities (like portals) and not worry about having things
+    // like the entity's ecs go out of date (if the entity were to, say, enter a new scene)
+    Entity result;
+    EntityDetails* details = getEntityDetails(game, entityId);
+
+    if (details)
+    {
+        result = details->entity;
+    }
+
+    return result;
+}
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
 
@@ -91,6 +132,13 @@ void buildTestScene1(Scene* scene)
         
         TransformComponent *tc = addTransformComponent(e);
         ColliderComponent* cc = addColliderComponent(e);
+
+        if (i == 0)
+        {
+            // add some more collider components to test having multiple components on an entity
+            addColliderComponent(e);
+            addColliderComponent(e);
+        }
         tc->setPosition(hexPositions[i]);
         tc->setScale(Vec3(.25));
         
@@ -117,7 +165,7 @@ void buildTestScene1(Scene* scene)
         xfm->setPosition(Vec3(0, 0, 0));
         
         TerrainComponent* tc = addTerrainComponent(e);
-        new (tc) TerrainComponent("heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
+        new (tc) TerrainComponent(e, "heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
 
         uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 
@@ -398,7 +446,7 @@ int main()
     setParent(camera, player);
     cameraXfm->setLocalPosition(Vec3(0, 2, 0));
     
-#if 1
+#if 0
     cameraComponent->isOrthographic = false;
     cameraComponent->perspectiveFov = 60.0f;
 #else

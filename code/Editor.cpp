@@ -39,6 +39,37 @@ EditorState::EditorState()
 void showEditor(EditorState* editor)
 {
     //
+    // Local functions
+    //
+    // struct // imguiComponentHeader(..)
+    // {
+    //     bool operator() (const char* label, bool* isXPressedOut = nullptr)
+    //     {
+
+    //         // @CopyPaste (with modifications) from imgui.cpp CollapsingHeader function that draws an X button. I want that behavior,
+    //         //            but for a regular tree-node, so I am copy-pasting.
+    //         bool isOpen = TreeNodeEx(label, ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_AllowItemOverlap);
+
+    //         if (isXPressedOut)
+    //         {
+    //             ImGuiContext* g = ImGui::GetCurrentContext();
+    //             ImGuiWindow* window = ImGui::GetCurrentWindow();
+    //             float button_sz = g.FontSize * 0.5f;
+    //             if (CloseButton(ImGui::GetID(label + 1), ImVec2(ImMin(window->DC.LastItemRect.Max.x, window->ClipRect.Max.x) - g.Style.FramePadding.x - button_sz, window->DC.LastItemRect.Min.y + g.Style.FramePadding.y + button_sz), button_sz)
+    //             {
+    //                 *isXPressedOut = true;
+    //             }
+    //             else
+    //             {
+    //                 *isXPressedOut = false;
+    //             }
+    //         }
+
+    //         return isOpen;
+    //     }
+    // } imguiComponentHeader;
+    
+    //
     // Preamble
     //
     Game* game = editor->game;
@@ -64,12 +95,12 @@ void showEditor(EditorState* editor)
 
         if (e.id != 0)
         {
-            if (game->editor.drawAabb)
+            if (editor->drawAabb)
             {
                 DebugDraw::instance().drawAabb(e);
             }
                 
-            if (game->editor.drawCollider)
+            if (editor->drawCollider)
             {
                 ColliderComponent* cc = getColliderComponent(e);
 
@@ -215,12 +246,12 @@ void showEditor(EditorState* editor)
     
         ImGui::SetNextWindowSize(ImVec2(300, 500));
         ImGui::SetNextWindowPos(ImVec2(0, game->window->height - 500));
-        ImGui::Begin((*getFriendlyName(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        ImGui::Begin((getFriendlyNameAndId(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
         // Get components
         EntityDetails* details = getEntityDetails(e);
         TransformComponent* transform = getTransformComponent(e);
-        ColliderComponent* collider = getColliderComponent(e);
+        auto colliders = getColliderComponents(e);
         CameraComponent* camera = getCameraComponent(e);
         PortalComponent* portal = getPortalComponent(e);
         DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
@@ -235,14 +266,14 @@ void showEditor(EditorState* editor)
             if (renderComponents.numComponents > 0 && transform != nullptr)
             {
                 sameLine = true;
-                ImGui::Checkbox("aabb", &game->editor.drawAabb);
+                ImGui::Checkbox("aabb", &editor->drawAabb);
             }
 
-            if (collider != nullptr)
+            if (colliders.numComponents > 0)
             {
-                if (sameLine) ImGui::SameLine();
+               if (sameLine) ImGui::SameLine();
             
-                ImGui::Checkbox("coll", &game->editor.drawCollider);
+               ImGui::Checkbox("coll", &editor->drawCollider);
             }
         }
 
@@ -252,7 +283,7 @@ void showEditor(EditorState* editor)
         {
             assert(details);
             {
-                if (ImGui::CollapsingHeader("Details"))
+                if (ImGui::Als_CollapsingHeaderTreeNode("Details"))
                 {
                     reflector.setPrimaryReflectionTarget(details);
                     
@@ -265,51 +296,100 @@ void showEditor(EditorState* editor)
                     }
                     
                     reflectEntityDetailsComponent(&reflector, 0);
+
+                    ImGui::TreePop();
                 }
             }
             
             if (transform)
             {
-                if (ImGui::CollapsingHeader("Transform"))
+                if (ImGui::Als_CollapsingHeaderTreeNode("Transform"))
                 {
                     reflector.setPrimaryReflectionTarget(transform);
                     reflectTransformComponent(&reflector, 0);
+
+                    ImGui::TreePop();
                 }
             }
     
-            if (collider)
+            if (colliders.numComponents > 0)
             {
-                bool xNotClicked = true;
-                if (ImGui::CollapsingHeader("Collider", &xNotClicked))
+                bool multipleColliders = colliders.numComponents > 1;
+                bool multipleColliderHeaderOpen = false;
+                
+                if (multipleColliders)
                 {
-                    reflector.setPrimaryReflectionTarget(collider);
-                    reflectColliderComponent(&reflector, 0);
+                    char buffer[32];
+                    sprintf_s(buffer, 32, "Colliders (%d)", colliders.numComponents);
+                    multipleColliderHeaderOpen = ImGui::Als_CollapsingHeaderTreeNode(buffer);
                 }
 
-                if (!xNotClicked)
+                if (!multipleColliders || multipleColliderHeaderOpen)
                 {
-                    // TODO
+                    for (uint32 i = 0; i < colliders.numComponents; i++)
+                    {
+                        ColliderComponent* cc = &colliders[i];
+                        
+                        bool xNotClicked = true;
+                        char labelBuffer[32];
+                        sprintf_s(labelBuffer, 32, "Collider##%d", i);
+                        if (ImGui::Als_CollapsingHeaderTreeNode(labelBuffer, &xNotClicked))
+                        {
+                            reflector.setPrimaryReflectionTarget(cc);
+                            reflectColliderComponent(&reflector, 0);
+
+                            ImGui::TreePop();
+                        }
+
+                        if (!xNotClicked) removeColliderComponent(&cc);
+                    }
+                }
+
+                if (multipleColliderHeaderOpen)
+                {
+                    ImGui::TreePop();
                 }
             }
 
             // TODO
     
-            // if (camera)
-            // {
-            //     if (ImGui::CollapsingHeader("Camera"))
-            //     {
-            //         reflector.reflectionTarget = camera;
-            //         reflectCameraComponent(&reflector, camera, 0);
-            //     }
-            // }
+            if (camera)
+            {
+                bool headerOpen = false;
+                bool xNotClicked = true;
+                if (camera->entity.id == game->activeCamera.id)
+                {
+                    headerOpen = ImGui::Als_CollapsingHeaderTreeNode("Camera");
+                }
+                else
+                {
+                    headerOpen = ImGui::Als_CollapsingHeaderTreeNode("Camera", &xNotClicked);
+                }
+                
+                if (headerOpen)
+                {
+                    reflector.setPrimaryReflectionTarget(camera);
+                    reflectCameraComponent(&reflector, 0);
+
+                    ImGui::TreePop();
+                }
+
+                if (!xNotClicked)
+                {
+                    // @TODO light this up
+                    // removeCameraComponent(camera);
+                }
+            }
     
             if (directionalLight)
             {
                 bool xNotClicked = true;
-                if (ImGui::CollapsingHeader("Directional Light", &xNotClicked))
+                if (ImGui::Als_CollapsingHeaderTreeNode("Directional Light", &xNotClicked))
                 {
                     reflector.setPrimaryReflectionTarget(directionalLight);
                     reflectDirectionalLightComponent(&reflector, 0);
+
+                    ImGui::TreePop();
                 }
 
                 if (!xNotClicked)
@@ -318,7 +398,8 @@ void showEditor(EditorState* editor)
                     assert(directionalLight == nullptr);
                 }
             }
-    
+
+            // @TODO
             // if (pointLight)
             // {
             //     if (ImGui::CollapsingHeader("Point Light"))
@@ -334,10 +415,12 @@ void showEditor(EditorState* editor)
                 {
                     reflector.setPrimaryReflectionTarget(portal);
                     reflectPortalComponent(&reflector, 0);
+
+                    ImGui::TreePop();
                 }
             }
     
-            // TODO: other components
+            // @TODO: other components
         }
     
 
@@ -361,7 +444,7 @@ void showEditor(EditorState* editor)
                     ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Button);
                     ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
                     {
-                        if (ImGui::Button((*getFriendlyName(e) + "##" + e.id).cstr(), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetTextLineHeightWithSpacing())))
+                        if (ImGui::Button(getFriendlyNameAndId(e).cstr(), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetTextLineHeightWithSpacing())))
                         {
                             editor->selectedEntity = e;
                         }
@@ -392,7 +475,7 @@ void showEditor(EditorState* editor)
                     ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
                     ImGui::PushStyleColor(ImGuiCol_Header, buttonColor);
 
-                    bool open = ImGui::TreeNodeEx((*getFriendlyName(e) + "##" + e.id).cstr(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow);
+                    bool open = ImGui::TreeNodeEx(getFriendlyNameAndId(e).cstr(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow);
                     bool toggled = ImGui::Als_IsTreeNodeToggled();
 
                     if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
@@ -453,7 +536,7 @@ void showEditor(EditorState* editor)
         
         // ImGui::PushItemWidth(-1);
         {   
-            for (Entity e : game->activeScene->ecs.entityList)
+            for (Entity e : game->activeScene->ecs.entities)
             {
                 // Skip entity if it has a parent
                 TransformComponent* xfm = getTransformComponent(e);
