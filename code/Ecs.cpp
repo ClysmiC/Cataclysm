@@ -154,11 +154,16 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     ecs->entities.push_back(result);
 
     EntityDetails* details = addComponent(&ecs->entityDetails, result);
+    assert(details != nullptr);
+    
     details->entity.id = result.id;
     details->entity.ecs = result.ecs;
     details->flags = 0;
     details->parent.id = 0;
     details->friendlyName = friendlyName;
+
+    TransformComponent* xfm = addComponent(&ecs->transforms, result);
+    assert(xfm != nullptr);
     
     Ecs::nextEntityId++;
     return result;
@@ -168,12 +173,6 @@ EntityDetails* getEntityDetails(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->entityDetails, e);
-}
-
-TransformComponent* addTransformComponent(Entity e)
-{
-    if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->transforms, e);
 }
 
 TransformComponent* getTransformComponent(Entity e)

@@ -87,10 +87,7 @@ bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* compo
 //
 Entity makeEntity(Ecs* ecs, string16 friendlyName="");
 EntityDetails* getEntityDetails(Entity entity);
-
-TransformComponent* addTransformComponent(Entity e);
 TransformComponent* getTransformComponent(Entity e);
-bool                removeTransformComponent(TransformComponent** ppComponent);
 
 CameraComponent* addCameraComponent(Entity e);
 CameraComponent* getCameraComponent(Entity e);

@@ -130,7 +130,7 @@ void buildTestScene1(Scene* scene)
     {
         Entity e = makeEntity(&scene->ecs, "hex");
         
-        TransformComponent *tc = addTransformComponent(e);
+        TransformComponent *tc = getTransformComponent(e);
         ColliderComponent* cc = addColliderComponent(e);
 
         if (i == 0)
@@ -161,7 +161,7 @@ void buildTestScene1(Scene* scene)
         //       we could assume the origin at this case, or maybe set a flag on the entity that explicitly
         //       says we don't store a transform so we can have the robustness of that check without the memory
         //       overhead
-        TransformComponent *xfm = addTransformComponent(e);
+        TransformComponent *xfm = getTransformComponent(e);
         xfm->setPosition(Vec3(0, 0, 0));
         
         TerrainComponent* tc = addTerrainComponent(e);
@@ -220,7 +220,7 @@ void buildTestScene2(Scene* scene)
     for (uint32 i = 0; i < icosahedronCount; i++)
     {
         Entity e = makeEntity(&scene->ecs, "icosahedron");
-        TransformComponent *tc = addTransformComponent(e);
+        TransformComponent *tc = getTransformComponent(e);
         tc->setPosition(icosahedronPositions[i]);
 
         auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
@@ -270,7 +270,7 @@ void buildTestScene3(Scene* scene)
     for (uint32 i = 0; i < shuttleCount; i++)
     {
         Entity e = makeEntity(&scene->ecs, "shuttle");
-        TransformComponent *tc = addTransformComponent(e);
+        TransformComponent *tc = getTransformComponent(e);
         tc->setPosition(shuttlePositions[i]);
         tc->setScale(Vec3(.25));
         
@@ -416,7 +416,7 @@ int main()
     // scene. Maybe the game has its own ECS outside of scenes or maybe make system to transfer ownership
     // from one scene to another scene
     Entity camera = makeEntity(&testScene1->ecs, "camera");
-    TransformComponent* cameraXfm = addTransformComponent(camera);
+    TransformComponent* cameraXfm = getTransformComponent(camera);
     CameraComponent* cameraComponent = addCameraComponent(camera);
     cameraComponent->window = &window;
 
@@ -425,7 +425,7 @@ int main()
     Entity player = makeEntity(&testScene1->ecs, "player");
     game->player = player;
     {
-        TransformComponent* playerXfm = addTransformComponent(player);
+        TransformComponent* playerXfm = getTransformComponent(player);
         
         ColliderComponent* playerCollider = addColliderComponent(player);
         playerCollider->type = ColliderType::RECT3;

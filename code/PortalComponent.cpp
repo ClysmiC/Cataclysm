@@ -122,12 +122,12 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, ITransform
     portal1Component->connectedPortalEntityId = portal2.id;
     portal2Component->connectedPortalEntityId = portal1.id;
     
-    TransformComponent* portal1XfmComponent = addTransformComponent(portal1);
+    TransformComponent* portal1XfmComponent = getTransformComponent(portal1);
     portal1XfmComponent->setPosition(portal1Xfm->position());
     portal1XfmComponent->setOrientation(portal1Xfm->orientation());
     portal1XfmComponent->setScale(portal1Xfm->scale());
 
-    TransformComponent* portal2XfmComponent = addTransformComponent(portal2);
+    TransformComponent* portal2XfmComponent = getTransformComponent(portal2);
     portal2XfmComponent->setPosition(portal2Xfm->position());
     portal2XfmComponent->setOrientation(portal2Xfm->orientation());
     portal2XfmComponent->setScale(portal2Xfm->scale());

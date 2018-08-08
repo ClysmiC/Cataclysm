@@ -13,7 +13,6 @@ const char* EditorState::EntityListUi::DRAG_DROP_ID = "entity_drag_drop";
 EditorState::EditorState()
 {
     this->translator.pseudoEntity = makeEntity(&this->pseudoEcs, "Translator");
-    addTransformComponent(this->translator.pseudoEntity);
     auto colliders = addColliderComponents(this->translator.pseudoEntity, 3);
 
     this->translator.xAxisHandle = &colliders[0];
