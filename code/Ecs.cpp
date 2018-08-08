@@ -239,6 +239,22 @@ PortalComponent* getPortalComponent(Entity e)
     return getComponent(&e.ecs->portals, e);
 }
 
+bool removePortalComponent(PortalComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+
+    PortalComponent* connectedPortal = getPortalComponent(getEntity((*ppComponent)->entity.ecs->scene->game, (*ppComponent)->connectedPortalEntityId));
+    if (connectedPortal != nullptr)
+    {
+        connectedPortal->connectedPortalEntityId = 0;
+    }
+    
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->portals), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    
+    return success;
+}
+
 DirectionalLightComponent* addDirectionalLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
@@ -356,6 +372,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransfor
         // into the dest scene.
         //
         PortalComponent* pc = scene->ecs.portals.components.addressOf(it.locator);
+        if (pc->connectedPortalEntityId == 0) continue;
 
         TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
         TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
@@ -714,6 +731,8 @@ void walkAndCamera(Game* game)
     FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
     {
         PortalComponent* pc = it.ptr;
+        if (pc->connectedPortalEntityId == 0) continue;
+        
         ColliderComponent* cc = getColliderComponent(pc->entity);
 
         if (pointInsideCollider(cc, xfm->position()))

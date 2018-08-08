@@ -13,7 +13,8 @@ ColliderComponent::ColliderComponent()
     this->rect3Lengths.z = 1;
 }
 
-ColliderComponent::ColliderComponent(Aabb aabb)
+ColliderComponent::ColliderComponent(Entity e, Aabb aabb)
+    : Component(e)
 {
     this->xfmOffset = Vec3(0, 0, 0);
     this->type = ColliderType::RECT3;

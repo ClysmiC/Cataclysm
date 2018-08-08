@@ -226,7 +226,7 @@ void buildTestScene2(Scene* scene)
         auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
 
         ColliderComponent *cc = addColliderComponent(e);
-        new (cc) ColliderComponent(icosahedronMesh->bounds);
+        new (cc) ColliderComponent(e, icosahedronMesh->bounds);
                                    
         for(uint32 j = 0; j < icosahedronMesh->submeshes.size(); j++)
         {
@@ -446,7 +446,7 @@ int main()
     setParent(camera, player);
     cameraXfm->setLocalPosition(Vec3(0, 2, 0));
     
-#if 0
+#if 1
     cameraComponent->isOrthographic = false;
     cameraComponent->perspectiveFov = 60.0f;
 #else
@@ -462,8 +462,6 @@ int main()
     DebugDraw::instance().cameraComponent = cameraComponent;
     DebugDraw::instance().cameraXfm = cameraXfm;
     DebugDraw::instance().window = &window;
-
-    ColliderComponent* debugCC;
     
     //
     // Set up portal from scene 1<->2
@@ -483,8 +481,6 @@ int main()
         Vec2 dimensions(2, 3);
         
         createPortalFromTwoBlankEntities(portal1, portal2, &portal1Xfm, &portal2Xfm, dimensions);
-
-        debugCC = getColliderComponent(portal1);
     }
 
     //

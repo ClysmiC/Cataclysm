@@ -7,11 +7,12 @@
 
 struct TransformComponent : public Component, public ITransform
 {
-    TransformComponent();
-    TransformComponent(Vec3 position);
-    TransformComponent(Vec3 position, Quaternion orientation);
-    TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale);
-    TransformComponent(ITransform& transform);
+    TransformComponent() = default;
+    TransformComponent(Entity e);
+    TransformComponent(Entity e, Vec3 position);
+    TransformComponent(Entity e, Vec3 position, Quaternion orientation);
+    TransformComponent(Entity e, Vec3 position, Quaternion orientation, Vec3 scale);
+    TransformComponent(Entity e, ITransform& transform);
 
     virtual ITransform* getParent() override;
     virtual std::vector<ITransform*> getChildren() override;

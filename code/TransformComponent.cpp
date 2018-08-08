@@ -2,28 +2,29 @@
 #include "Ecs.h"
 #include <algorithm>
 
-TransformComponent::TransformComponent()
-    : TransformComponent(Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
+TransformComponent::TransformComponent(Entity e)
+    : TransformComponent(e, Vec3(0, 0, 0), Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-TransformComponent::TransformComponent(Vec3 position)
-    : TransformComponent(position, Quaternion(), Vec3(1, 1, 1))
+TransformComponent::TransformComponent(Entity e, Vec3 position)
+    : TransformComponent(e, position, Quaternion(), Vec3(1, 1, 1))
 {
 }
 
-TransformComponent::TransformComponent(Vec3 position, Quaternion orientation)
-    : TransformComponent(position, orientation, Vec3(1, 1, 1))
+TransformComponent::TransformComponent(Entity e, Vec3 position, Quaternion orientation)
+    : TransformComponent(e, position, orientation, Vec3(1, 1, 1))
 {
 }
 
-TransformComponent::TransformComponent(ITransform& transform)
-    : TransformComponent(transform.position(), transform.orientation(), transform.scale())
+TransformComponent::TransformComponent(Entity e, ITransform& transform)
+    : TransformComponent(e, transform.position(), transform.orientation(), transform.scale())
 {
 }
 
-TransformComponent::TransformComponent(Vec3 position, Quaternion orientation, Vec3 scale)
-    : ITransform(position, orientation, scale)
+TransformComponent::TransformComponent(Entity e, Vec3 position, Quaternion orientation, Vec3 scale)
+    : Component(e)
+    , ITransform(position, orientation, scale)
 {
 }
 

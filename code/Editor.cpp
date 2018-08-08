@@ -411,12 +411,43 @@ void showEditor(EditorState* editor)
     
             if (portal)
             {
-                if (ImGui::CollapsingHeader("Portal"))
+                bool xNotClicked = true;
+                if (ImGui::Als_CollapsingHeaderTreeNode("Portal", &xNotClicked))
                 {
+                    uint32 connectedPortalIdBeforeReflect = portal->connectedPortalEntityId;
                     reflector.setPrimaryReflectionTarget(portal);
                     reflectPortalComponent(&reflector, 0);
 
+                    if (portal->connectedPortalEntityId != connectedPortalIdBeforeReflect)
+                    {
+                        PortalComponent* newConnectedPortal = getPortalComponent(getEntity(game, portal->connectedPortalEntityId));
+                        if (!newConnectedPortal)
+                        {
+                            // Entered ID doesn't have portal component, revert the update
+                            portal->connectedPortalEntityId = connectedPortalIdBeforeReflect;
+                        }
+                        else
+                        {
+                            uint32 newConnectedPortalOldConnectionId = newConnectedPortal->connectedPortalEntityId;
+                            newConnectedPortal->connectedPortalEntityId = e.id;
+
+                            if (newConnectedPortalOldConnectionId != 0)
+                            {
+                                PortalComponent* unlinkedPortal = getPortalComponent(getEntity(game, newConnectedPortalOldConnectionId));
+                                assert(unlinkedPortal != nullptr);
+
+                                unlinkedPortal->connectedPortalEntityId = 0;
+                            }
+                        }
+                    }
+
                     ImGui::TreePop();
+                }
+
+                if (!xNotClicked)
+                {
+                    removePortalComponent(&portal);
+                    assert(portal == nullptr);
                 }
             }
     

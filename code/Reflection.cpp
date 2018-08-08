@@ -346,12 +346,12 @@ void reflectPointLightComponent(IReflector* reflector, uint32 startingOffset)
 
 void reflectPortalComponent(IReflector* reflector, uint32 startingOffset)
 {
-    // nothing to reflect for ui ?
+    reflector->consumeUInt32("Linked ID", startingOffset + offsetof(PortalComponent, connectedPortalEntityId), ReflectionFlag_DontAutoUpdate);
 }
 
 void reflectRenderComponent(IReflector* reflector, uint32 startingOffset)
 {
-    // todo
+    // TODO
 }
 
 IReflector::IReflector(ReflectionPurpose purpose)
@@ -402,7 +402,8 @@ uint32 UiReflector::consumeUInt32(FieldNameString name, uint32 offset, Reflectio
     uint32 valueCopy = *valuePtr;
 
     ImGuiInputTextFlags imguiFlags = 0;
-    if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
+    if (flags & ReflectionFlag_ReadOnly) imguiFlags       |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
+    if (flags & ReflectionFlag_DontAutoUpdate) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
 
     if (ImGui::InputScalar(name.cstr(), ImGuiDataType_U32, &valueCopy, nullptr, nullptr, nullptr, imguiFlags))
     {

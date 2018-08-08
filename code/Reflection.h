@@ -23,7 +23,8 @@ typedef string16 FieldNameString;
 typedef string16 EntityNameString;
 
 typedef uint64 ReflectionFlags;
-const static ReflectionFlags ReflectionFlag_ReadOnly = 1 << 0;
+const static ReflectionFlags ReflectionFlag_ReadOnly                 = 1 << 0;
+const static ReflectionFlags ReflectionFlag_DontAutoUpdate           = 1 << 1; 
 
 struct IReflector
 {

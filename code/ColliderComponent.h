@@ -18,7 +18,7 @@ enum class ColliderType : uint32
 struct ColliderComponent : public Component
 {
     ColliderComponent();
-    ColliderComponent(Aabb aabb);
+    ColliderComponent(Entity e, Aabb aabb);
     
     Vec3 xfmOffset;
     ColliderType type;
