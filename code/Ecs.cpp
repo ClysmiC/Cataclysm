@@ -169,6 +169,46 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     return result;
 }
 
+bool deleteEntity(Entity e)
+{
+    EntityDetails* details = getEntityDetails(e);
+    if (details == nullptr)
+    {
+        assert(false);
+        return false;
+    }
+
+    TransformComponent*        xfm              = getTransformComponent(e);
+    CameraComponent*           camera           = getCameraComponent(e);
+    DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
+    TerrainComponent*          terrain          = getTerrainComponent(e);
+    auto                       pointLights      = getPointLightComponents(e);
+    auto                       renderComponents = getRenderComponents(e);
+    PortalComponent*           portal           = getPortalComponent(e);
+    auto                       colliders        = getColliderComponents(e);
+    WalkComponent*             walk             = getWalkComponent(e);
+
+    Ecs* ecs = e.ecs;
+
+    // Remove mandatory components
+    removeComponent(&ecs->entityDetails, details);
+    removeComponent(&ecs->transforms,    xfm);
+
+    // Remove optional single components
+    if (camera)           removeComponent(&ecs->cameras,           camera);
+    if (directionalLight) removeComponent(&ecs->directionalLights, directionalLight);
+    if (terrain)          removeComponent(&ecs->terrains,           terrain);
+    if (portal)           removeComponent(&ecs->portals,           portal);
+    if (walk)             removeComponent(&ecs->walkComponents,    walk);
+
+    // Remove optional multi components
+    if (pointLights.numComponents > 0)      for (uint32 i = 0; i < pointLights.numComponents;      i++) removeComponent(&ecs->pointLights,      &pointLights[i]);
+    if (renderComponents.numComponents > 0) for (uint32 i = 0; i < renderComponents.numComponents; i++) removeComponent(&ecs->renderComponents, &renderComponents[i]);
+    if (colliders.numComponents > 0)        for (uint32 i = 0; i < colliders.numComponents;        i++) removeComponent(&ecs->colliders,        &colliders[i]);
+
+    return true;
+}
+
 EntityDetails* getEntityDetails(Entity e)
 {
     if (e.id == 0) return nullptr;
