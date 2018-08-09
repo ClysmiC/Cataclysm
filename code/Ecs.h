@@ -114,6 +114,7 @@ RenderComponent* addRenderComponent(Entity e);
 RenderComponent* getRenderComponent(Entity e);
 ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> addRenderComponents(Entity e, uint32 numComponents);
 ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> getRenderComponents(Entity e);
+bool           removeRenderComponent(RenderComponent** ppComponent);
 
 ColliderComponent* addColliderComponent(Entity e);
 ColliderComponent* getColliderComponent(Entity e);
@@ -125,6 +126,7 @@ PointLightComponent* addPointLightComponent(Entity e);
 PointLightComponent* getPointLightComponent(Entity e);
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightComponents(Entity e, uint32 numComponents);
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightComponents(Entity e);
+bool           removePointLightComponent(PointLightComponent** ppComponent);
 
 // TODO: do these belong in Ecs.h?
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal=false, ITransform* destPortalXfm=nullptr);

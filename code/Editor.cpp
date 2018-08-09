@@ -38,37 +38,6 @@ EditorState::EditorState()
 void showEditor(EditorState* editor)
 {
     //
-    // Local functions
-    //
-    // struct // imguiComponentHeader(..)
-    // {
-    //     bool operator() (const char* label, bool* isXPressedOut = nullptr)
-    //     {
-
-    //         // @CopyPaste (with modifications) from imgui.cpp CollapsingHeader function that draws an X button. I want that behavior,
-    //         //            but for a regular tree-node, so I am copy-pasting.
-    //         bool isOpen = TreeNodeEx(label, ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_AllowItemOverlap);
-
-    //         if (isXPressedOut)
-    //         {
-    //             ImGuiContext* g = ImGui::GetCurrentContext();
-    //             ImGuiWindow* window = ImGui::GetCurrentWindow();
-    //             float button_sz = g.FontSize * 0.5f;
-    //             if (CloseButton(ImGui::GetID(label + 1), ImVec2(ImMin(window->DC.LastItemRect.Max.x, window->ClipRect.Max.x) - g.Style.FramePadding.x - button_sz, window->DC.LastItemRect.Min.y + g.Style.FramePadding.y + button_sz), button_sz)
-    //             {
-    //                 *isXPressedOut = true;
-    //             }
-    //             else
-    //             {
-    //                 *isXPressedOut = false;
-    //             }
-    //         }
-
-    //         return isOpen;
-    //     }
-    // } imguiComponentHeader;
-    
-    //
     // Preamble
     //
     Game* game = editor->game;
@@ -468,85 +437,62 @@ void showEditor(EditorState* editor)
         {
             void operator () (Entity e, EditorState* editor)
             {
-                TransformComponent* xfm = getTransformComponent(e);
-                if (!xfm || getChildren(e)->size() == 0)
+                // Set color to highlighted if entity is selected
+                ImVec4 headerColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
+                ImGui::PushStyleColor(ImGuiCol_Header, headerColor);
+
+                typedef ImGuiTreeNodeFlags Flags;
+                Flags flags = 0;
+                flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+                flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+                if (getChildren(e)->size() == 0)       flags |= ImGuiTreeNodeFlags_Leaf;
+
+                bool xNotClicked = true;
+                bool open = ImGui::Als_CollapsingHeaderTreeNode(getFriendlyNameAndId(e).cstr(), &xNotClicked, flags);
+                bool toggled = ImGui::Als_IsTreeNodeToggled();
+
+                if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
                 {
-                    ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Button);
-                    ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
-                    {
-                        if (ImGui::Button(getFriendlyNameAndId(e).cstr(), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetTextLineHeightWithSpacing())))
-                        {
-                            editor->selectedEntity = e;
-                        }
-
-                        if (ImGui::BeginDragDropSource())
-                        {
-                            ImGui::SetDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID, &e, sizeof(Entity));
-                            ImGui::EndDragDropSource();
-                        }
-
-                        if (ImGui::BeginDragDropTarget())
-                        {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
-                            {
-                                Entity dragged = *(Entity*)payload->Data;
-
-                                if (dragged.id != e.id)
-                                {
-                                    setParent(dragged, e);
-                                }
-                            }
-                        }
-                    }
-                    ImGui::PopStyleColor();
+                    // @Hack: This is the best way I could find to detect if the header was clicked but NOT opened
+                    editor->selectedEntity = e;
                 }
-                else
+
+                if (ImGui::BeginDragDropSource())
                 {
-                    ImVec4 buttonColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
-                    ImGui::PushStyleColor(ImGuiCol_Header, buttonColor);
-
-                    bool open = ImGui::TreeNodeEx(getFriendlyNameAndId(e).cstr(), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow);
-                    bool toggled = ImGui::Als_IsTreeNodeToggled();
-
-                    if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
-                    {
-                        editor->selectedEntity = e;
-                    }
-
-                    // @CopyPaste (from the no-children case)
-                    {
-                        if (ImGui::BeginDragDropSource())
-                        {
-                            ImGui::SetDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID, &e, sizeof(Entity));
-                            ImGui::EndDragDropSource();
-                        }
-
-                        if (ImGui::BeginDragDropTarget())
-                        {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
-                            {
-                                Entity dragged = *(Entity*)payload->Data;
-
-                                if (dragged.id != e.id)
-                                {
-                                    setParent(dragged, e);
-                                }
-                            }
-                        }
-                    }
-
-                    if (open)
-                    {
-                        for (Entity child : *getChildren(e))
-                        {
-                            (*this)(child, editor); // recursively draw children
-                        }
-
-                        ImGui::TreePop();
-                    }
-
-                    ImGui::PopStyleColor();
+                    ImGui::SetDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID, &e, sizeof(Entity));
+                    ImGui::EndDragDropSource();
                 }
+
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(EditorState::EntityListUi::DRAG_DROP_ID))
+                    {
+                        Entity dragged = *(Entity*)payload->Data;
+
+                        if (dragged.id != e.id)
+                        {
+                            setParent(dragged, e);
+                        }
+                    }
+                }
+
+                if (open)
+                {
+                    for (Entity child : *getChildren(e))
+                    {
+                        (*this)(child, editor); // recursively draw children
+                    }
+
+                    ImGui::TreePop();
+                }
+
+                if (!xNotClicked)
+                {
+                    // TODO: Add this to a list of entities to be removed at the end of the frame... don't want to remove it while iterating!
+                    //       Also, should we remove the children entities too? I suspect so.
+                }
+
+                ImGui::PopStyleColor();
             }
         } drawEntityAndChildren;
 

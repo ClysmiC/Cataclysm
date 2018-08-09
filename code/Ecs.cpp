@@ -191,20 +191,58 @@ bool deleteEntity(Entity e)
     Ecs* ecs = e.ecs;
 
     // Remove mandatory components
-    removeComponent(&ecs->entityDetails, details);
-    removeComponent(&ecs->transforms,    xfm);
+    {
+        removeComponent(&ecs->entityDetails, details);
+        removeComponent(&ecs->transforms,    xfm);
+    }
 
+    //
+    // @Note: For the most part, we could directly call templated removeComponent function and just pass the correct collection,
+    //        but some components have some logic when they get removed. For example, portal components will unlink their
+    //        connected portal (if any) when they are removed.
+    //
+    //        We do call the templated version for the mandatory components simply because they are so few and we know none of
+    //        them require special logic. This isn't necessarily so however, so it could be changed.
+    //
+    
     // Remove optional single components
-    if (camera)           removeComponent(&ecs->cameras,           camera);
-    if (directionalLight) removeComponent(&ecs->directionalLights, directionalLight);
-    if (terrain)          removeComponent(&ecs->terrains,           terrain);
-    if (portal)           removeComponent(&ecs->portals,           portal);
-    if (walk)             removeComponent(&ecs->walkComponents,    walk);
+    {
+        if (camera)           removeCameraComponent(&camera);
+        if (directionalLight) removeDirectionalLightComponent(&directionalLight);
+        if (terrain)          removeTerrainComponent(&terrain);
+        if (portal)           removePortalComponent(&portal);
+        if (walk)             removeWalkComponent(&walk);
+    }
 
     // Remove optional multi components
-    if (pointLights.numComponents > 0)      for (uint32 i = 0; i < pointLights.numComponents;      i++) removeComponent(&ecs->pointLights,      &pointLights[i]);
-    if (renderComponents.numComponents > 0) for (uint32 i = 0; i < renderComponents.numComponents; i++) removeComponent(&ecs->renderComponents, &renderComponents[i]);
-    if (colliders.numComponents > 0)        for (uint32 i = 0; i < colliders.numComponents;        i++) removeComponent(&ecs->colliders,        &colliders[i]);
+    {
+        if (pointLights.numComponents > 0)
+        {
+            for (uint32 i = 0; i < pointLights.numComponents; i++)
+            {
+                PointLightComponent* component = &pointLights[i];
+                removePointLightComponent(&component);
+            }
+        }
+
+        if (renderComponents.numComponents > 0)
+        {
+            for (uint32 i = 0; i < renderComponents.numComponents; i++)
+            {
+                RenderComponent* component = &renderComponents[i];
+                removeRenderComponent(&component);
+            }
+        }
+
+        if (colliders.numComponents > 0)
+        {
+            for (uint32 i = 0; i < colliders.numComponents; i++)
+            {
+                ColliderComponent* component = &colliders[i];
+                removeColliderComponent(&component);
+            }
+        }
+    }
 
     return true;
 }
@@ -254,6 +292,16 @@ TerrainComponent* getTerrainComponent(Entity e)
     return getComponent(&e.ecs->terrains, e);
 }
 
+bool removeTerrainComponent(TerrainComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->terrains), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
+}
+
 WalkComponent* addWalkComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
@@ -264,6 +312,16 @@ WalkComponent* getWalkComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->walkComponents, e);
+}
+
+bool removeWalkComponent(WalkComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->walkComponents), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
 }
 
 PortalComponent* addPortalComponent(Entity e)
@@ -340,6 +398,14 @@ ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightC
     return getComponents(&e.ecs->pointLights, e);
 }
 
+bool removePointLightComponent(PointLightComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->pointLights), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    return success;
+}
+
 RenderComponent* addRenderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
@@ -362,6 +428,14 @@ ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> getRenderComp
 {
     if (e.id == 0) return ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE>();
     return getComponents(&e.ecs->renderComponents, e);
+}
+
+bool removeRenderComponent(RenderComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->renderComponents), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    return success;
 }
 
 ColliderComponent* addColliderComponent(Entity e)
