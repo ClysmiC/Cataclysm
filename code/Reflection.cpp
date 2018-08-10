@@ -346,7 +346,11 @@ void reflectPointLightComponent(IReflector* reflector, uint32 startingOffset)
 
 void reflectPortalComponent(IReflector* reflector, uint32 startingOffset)
 {
-    reflector->consumeUInt32("Linked ID", startingOffset + offsetof(PortalComponent, connectedPortalEntityId), ReflectionFlag_DontAutoUpdate);
+    reflector->consumeUInt32(
+        "Linked ID",
+        startingOffset + offsetof(PortalComponent, connectedPortal) + offsetof(PotentiallyStaleEntity, id),
+        ReflectionFlag_DontAutoUpdate
+    );
 }
 
 void reflectRenderComponent(IReflector* reflector, uint32 startingOffset)

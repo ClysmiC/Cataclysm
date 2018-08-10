@@ -41,6 +41,7 @@ struct Ecs
     static uint32 nextEntityId;
     
     Scene* scene;
+    Game* game;
 
     static constexpr uint32 ENTITY_DETAILS_BUCKET_SIZE = 512;
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
@@ -86,9 +87,13 @@ bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* compo
 // Entity functions
 //
 Entity makeEntity(Ecs* ecs, string16 friendlyName="");
-bool   deleteEntity(Entity entity);
+bool   markEntityForDeletion(Entity entity);
+
 EntityDetails* getEntityDetails(Entity entity);
+bool           removeEntityDetails(EntityDetails** ppComponent);
+
 TransformComponent* getTransformComponent(Entity e);
+bool                removeTransformComponent(TransformComponent** ppComponent);
 
 CameraComponent* addCameraComponent(Entity e);
 CameraComponent* getCameraComponent(Entity e);

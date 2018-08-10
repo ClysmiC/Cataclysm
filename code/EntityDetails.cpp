@@ -1,5 +1,6 @@
 #include "EntityDetails.h"
 
+#include "Game.h"
 #include "Ecs.h"
 #include <algorithm>
 
@@ -7,7 +8,8 @@ void removeParent(Entity e)
 {
     if (e.id == 0) return;
 
-    Entity parent = getParent(e);
+    PotentiallyStaleEntity staleParent = getParent(e);
+    Entity parent = getEntity(getGame(e), &staleParent);
 
     if (parent.id == 0) return;
 
@@ -29,8 +31,8 @@ void removeParent(Entity e)
     //
     // Remove self from parent's children
     //
-    std::vector<Entity>* parentChildren = getChildren(parent);
-    auto found = std::find_if(parentChildren->begin(), parentChildren->end(), [e](Entity e2) { return e.id == e2.id; });
+    std::vector<PotentiallyStaleEntity>* parentChildren = getChildren(parent);
+    auto found = std::find_if(parentChildren->begin(), parentChildren->end(), [e](PotentiallyStaleEntity e2) { return e.id == e2.id; });
     if (found != parentChildren->end())
     {
         parentChildren->erase(found);
@@ -86,10 +88,10 @@ void setParent(Entity child, Entity parent)
     // Set parent
     //
     EntityDetails* childDetails = getEntityDetails(child);
-    childDetails->parent = parent;
+    childDetails->parent = PotentiallyStaleEntity(parent);
 
     EntityDetails* parentDetails = getEntityDetails(parent);
-    parentDetails->children.push_back(child);
+    parentDetails->children.push_back(PotentiallyStaleEntity(child));
 
     if (childXfm)
     {
@@ -99,16 +101,16 @@ void setParent(Entity child, Entity parent)
     }
 }
 
-Entity getParent(Entity e)
+PotentiallyStaleEntity getParent(Entity e)
 {
-    Entity result;
+    PotentiallyStaleEntity result;
     result = getEntityDetails(e)->parent;
     return result;
 }
 
-std::vector<Entity>* getChildren(Entity e)
+std::vector<PotentiallyStaleEntity>* getChildren(Entity e)
 {
-    std::vector<Entity>* result;
+    std::vector<PotentiallyStaleEntity>* result;
     result = &getEntityDetails(e)->children;
     return result;
 }

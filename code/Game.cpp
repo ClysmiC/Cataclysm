@@ -78,6 +78,120 @@ Entity getEntity(Game* game, uint32 entityId)
 
     return result;
 }
+
+Entity getEntity(Game* game, PotentiallyStaleEntity* potentiallyStaleEntity)
+{
+    Entity result; potentiallyStaleEntity;
+    result.id = potentiallyStaleEntity->id;
+    result.ecs = potentiallyStaleEntity->ecs;
+
+    if (potentiallyStaleEntity->id == 0) return result;
+
+    if (result.ecs == nullptr || getEntityDetails(result) == nullptr)
+    {
+        // Stale!
+        result = getEntity(game, potentiallyStaleEntity->id);
+        potentiallyStaleEntity->ecs = result.ecs; // Update the stale entity so it won't be stale next time!
+    }
+
+    return result;
+}
+
+Game* getGame(Entity e)
+{
+    return e.ecs->game;
+}
+
+void deleteMarkedEntities(Game* game)
+{
+    for (PotentiallyStaleEntity staleEntity : game->entitiesMarkedForDeletion)
+    {
+        Entity e = getEntity(game, &staleEntity);
+        EntityDetails* details = getEntityDetails(e);
+        if (details == nullptr)
+        {
+            assert(false);
+            continue;
+        }
+
+        TransformComponent*        xfm              = getTransformComponent(e);
+        CameraComponent*           camera           = getCameraComponent(e);
+        DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
+        TerrainComponent*          terrain          = getTerrainComponent(e);
+        auto                       pointLights      = getPointLightComponents(e);
+        auto                       renderComponents = getRenderComponents(e);
+        PortalComponent*           portal           = getPortalComponent(e);
+        auto                       colliders        = getColliderComponents(e);
+        WalkComponent*             walk             = getWalkComponent(e);
+
+        Ecs* ecs = e.ecs;
+
+        // Remove mandatory components
+        {
+            removeComponent(&ecs->entityDetails, details);
+            removeComponent(&ecs->transforms,    xfm);
+        }
+
+        //
+        // @Note: For the most part, we could directly call templated removeComponent function and just pass the correct collection,
+        //        but some components have some logic when they get removed. For example, portal components will unlink their
+        //        connected portal (if any) when they are removed.
+        //
+        //        We do call the templated version for the mandatory components simply because they are so few and we know none of
+        //        them require special logic. This isn't necessarily so however, so it could be changed.
+        //
+    
+        // Remove optional single components
+        {
+            if (camera)           removeCameraComponent(&camera);
+            if (directionalLight) removeDirectionalLightComponent(&directionalLight);
+            if (terrain)          removeTerrainComponent(&terrain);
+            if (portal)           removePortalComponent(&portal);
+            if (walk)             removeWalkComponent(&walk);
+        }
+
+        // Remove optional multi components
+        {
+            if (pointLights.numComponents > 0)
+            {
+                for (uint32 i = 0; i < pointLights.numComponents; i++)
+                {
+                    PointLightComponent* component = &pointLights[i];
+                    removePointLightComponent(&component);
+                }
+            }
+
+            if (renderComponents.numComponents > 0)
+            {
+                for (uint32 i = 0; i < renderComponents.numComponents; i++)
+                {
+                    RenderComponent* component = &renderComponents[i];
+                    removeRenderComponent(&component);
+                }
+            }
+
+            if (colliders.numComponents > 0)
+            {
+                for (uint32 i = 0; i < colliders.numComponents; i++)
+                {
+                    ColliderComponent* component = &colliders[i];
+                    removeColliderComponent(&component);
+                }
+            }
+        }
+
+        e.ecs->entities.erase(std::find(e.ecs->entities.begin(), e.ecs->entities.end(), e));
+
+        if (game->editor.selectedEntity.id == e.id)
+        {
+            game->editor.selectedEntity.id = 0;
+        }
+    }
+
+
+    game->entitiesMarkedForDeletion.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
 
@@ -341,8 +455,10 @@ Scene* makeScene(Game* game)
     Scene* result = game->scenes + game->numScenes;
     
     new (result) Scene();
-
+    
     result->game = game;
+    result->ecs.game = game;
+    
     game->numScenes++;
 
     return result;
@@ -399,6 +515,7 @@ int main()
 
     Game* game = new Game();
     game->editor.game = game;
+    game->editor.pseudoEcs.game = game;
     game->editor.isEnabled = false;
     game->window = &window;
     
@@ -526,6 +643,7 @@ int main()
         lastTimeMs = timeMs;
 
         updateGame(game);
+        deleteMarkedEntities(game);
 
         // Rendering
         ImGui::Render();

@@ -18,7 +18,7 @@ struct ComponentGroup
         return *(bucketArray->addressOf(this->components[index]));
     }
 
-    Entity entity;
+    PotentiallyStaleEntity entity;
 
     BucketArray<T, BUCKET_SIZE>* bucketArray;
     BucketLocator components[MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY];

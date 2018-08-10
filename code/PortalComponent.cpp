@@ -47,7 +47,7 @@ Vec2 getDimensions(PortalComponent* portal)
 
 PortalComponent* getConnectedPortal(PortalComponent* portal)
 {
-    Entity connectedPortal = getEntity(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
+    Entity connectedPortal = getEntity(getGame(portal->entity), &portal->connectedPortal);
     PortalComponent* connectedPortalComponent = getPortalComponent(connectedPortal);
 
     assert(connectedPortalComponent != nullptr);
@@ -57,13 +57,13 @@ PortalComponent* getConnectedPortal(PortalComponent* portal)
 
 Scene* getConnectedScene(PortalComponent* portal)
 {
-    EntityDetails* connectedPortal = getEntityDetails(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
-    return connectedPortal->entity.ecs->scene;
+    Entity connectedPortal = getEntity(getGame(portal->entity), &portal->connectedPortal);
+    return connectedPortal.ecs->scene;
 }
 
 TransformComponent* getConnectedSceneXfm(PortalComponent* portal)
 {
-    Entity connectedPortal = getEntity(portal->entity.ecs->scene->game, portal->connectedPortalEntityId);
+    Entity connectedPortal = getEntity(getGame(portal->entity), &portal->connectedPortal);
     TransformComponent* result = getTransformComponent(connectedPortal);
     return result;
 }
@@ -119,8 +119,8 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, ITransform
 {
     PortalComponent* portal1Component = addPortalComponent(portal1);
     PortalComponent* portal2Component = addPortalComponent(portal2);
-    portal1Component->connectedPortalEntityId = portal2.id;
-    portal2Component->connectedPortalEntityId = portal1.id;
+    portal1Component->connectedPortal = portal2;
+    portal2Component->connectedPortal = portal1;
     
     TransformComponent* portal1XfmComponent = getTransformComponent(portal1);
     portal1XfmComponent->setPosition(portal1Xfm->position());

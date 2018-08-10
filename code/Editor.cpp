@@ -382,29 +382,28 @@ void showEditor(EditorState* editor)
                 bool xNotClicked = true;
                 if (ImGui::Als_CollapsingHeaderTreeNode("Portal", &xNotClicked))
                 {
-                    uint32 connectedPortalIdBeforeReflect = portal->connectedPortalEntityId;
+                    PotentiallyStaleEntity connectedPortalBeforeReflect = portal->connectedPortal;
                     reflector.setPrimaryReflectionTarget(portal);
                     reflectPortalComponent(&reflector, 0);
 
-                    if (portal->connectedPortalEntityId != connectedPortalIdBeforeReflect)
+                    if (portal->connectedPortal.id != connectedPortalBeforeReflect.id)
                     {
-                        PortalComponent* newConnectedPortal = getPortalComponent(getEntity(game, portal->connectedPortalEntityId));
+                        PortalComponent* newConnectedPortal = getPortalComponent(getEntity(getGame(portal->entity), &portal->connectedPortal));
                         if (!newConnectedPortal)
                         {
-                            // Entered ID doesn't have portal component, revert the update
-                            portal->connectedPortalEntityId = connectedPortalIdBeforeReflect;
+                            portal->connectedPortal = connectedPortalBeforeReflect;
                         }
                         else
                         {
-                            uint32 newConnectedPortalOldConnectionId = newConnectedPortal->connectedPortalEntityId;
-                            newConnectedPortal->connectedPortalEntityId = e.id;
+                            PotentiallyStaleEntity newPortalOldConnected = newConnectedPortal->connectedPortal;
+                            newConnectedPortal->connectedPortal = e;
 
-                            if (newConnectedPortalOldConnectionId != 0)
+                            if (newPortalOldConnected.id != 0)
                             {
-                                PortalComponent* unlinkedPortal = getPortalComponent(getEntity(game, newConnectedPortalOldConnectionId));
+                                PortalComponent* unlinkedPortal = getPortalComponent(getEntity(getGame(portal->entity), &newPortalOldConnected));
                                 assert(unlinkedPortal != nullptr);
 
-                                unlinkedPortal->connectedPortalEntityId = 0;
+                                unlinkedPortal->connectedPortal.id = 0;
                             }
                         }
                     }
@@ -438,7 +437,7 @@ void showEditor(EditorState* editor)
             void operator () (Entity e, EditorState* editor)
             {
                 // Set color to highlighted if entity is selected
-                ImVec4 headerColor = e.id == (editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
+                ImVec4 headerColor = (e.id == editor->selectedEntity.id) ? ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered) : ImGui::GetStyleColorVec4(ImGuiCol_Header);
                 ImGui::PushStyleColor(ImGuiCol_Header, headerColor);
 
                 typedef ImGuiTreeNodeFlags Flags;
@@ -478,9 +477,9 @@ void showEditor(EditorState* editor)
 
                 if (open)
                 {
-                    for (Entity child : *getChildren(e))
+                    for (PotentiallyStaleEntity child : *getChildren(e))
                     {
-                        (*this)(child, editor); // recursively draw children
+                        (*this)(getEntity(getGame(e), &child), editor); // recursively draw children
                     }
 
                     ImGui::TreePop();
@@ -488,8 +487,7 @@ void showEditor(EditorState* editor)
 
                 if (!xNotClicked)
                 {
-                    // TODO: Add this to a list of entities to be removed at the end of the frame... don't want to remove it while iterating!
-                    //       Also, should we remove the children entities too? I suspect so.
+                    markEntityForDeletion(e);
                 }
 
                 ImGui::PopStyleColor();

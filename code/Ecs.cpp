@@ -165,11 +165,14 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     TransformComponent* xfm = addComponent(&ecs->transforms, result);
     assert(xfm != nullptr);
     
+    xfm->entity.id = result.id;
+    xfm->entity.ecs = result.ecs;
+    
     Ecs::nextEntityId++;
     return result;
 }
 
-bool deleteEntity(Entity e)
+bool markEntityForDeletion(Entity e)
 {
     EntityDetails* details = getEntityDetails(e);
     if (details == nullptr)
@@ -178,72 +181,18 @@ bool deleteEntity(Entity e)
         return false;
     }
 
-    TransformComponent*        xfm              = getTransformComponent(e);
-    CameraComponent*           camera           = getCameraComponent(e);
-    DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
-    TerrainComponent*          terrain          = getTerrainComponent(e);
-    auto                       pointLights      = getPointLightComponents(e);
-    auto                       renderComponents = getRenderComponents(e);
-    PortalComponent*           portal           = getPortalComponent(e);
-    auto                       colliders        = getColliderComponents(e);
-    WalkComponent*             walk             = getWalkComponent(e);
+    details->flags |= EntityFlag_MarkedForDeletion;
 
-    Ecs* ecs = e.ecs;
+    Game* game = getGame(e);
+    PotentiallyStaleEntity toDelete = PotentiallyStaleEntity(e);
+    game->entitiesMarkedForDeletion.push_back(toDelete);
 
-    // Remove mandatory components
+    for (PotentiallyStaleEntity child : *getChildren(e))
     {
-        removeComponent(&ecs->entityDetails, details);
-        removeComponent(&ecs->transforms,    xfm);
+        bool childDelete = markEntityForDeletion(getEntity(game, &child));
+        assert(childDelete);
     }
-
-    //
-    // @Note: For the most part, we could directly call templated removeComponent function and just pass the correct collection,
-    //        but some components have some logic when they get removed. For example, portal components will unlink their
-    //        connected portal (if any) when they are removed.
-    //
-    //        We do call the templated version for the mandatory components simply because they are so few and we know none of
-    //        them require special logic. This isn't necessarily so however, so it could be changed.
-    //
     
-    // Remove optional single components
-    {
-        if (camera)           removeCameraComponent(&camera);
-        if (directionalLight) removeDirectionalLightComponent(&directionalLight);
-        if (terrain)          removeTerrainComponent(&terrain);
-        if (portal)           removePortalComponent(&portal);
-        if (walk)             removeWalkComponent(&walk);
-    }
-
-    // Remove optional multi components
-    {
-        if (pointLights.numComponents > 0)
-        {
-            for (uint32 i = 0; i < pointLights.numComponents; i++)
-            {
-                PointLightComponent* component = &pointLights[i];
-                removePointLightComponent(&component);
-            }
-        }
-
-        if (renderComponents.numComponents > 0)
-        {
-            for (uint32 i = 0; i < renderComponents.numComponents; i++)
-            {
-                RenderComponent* component = &renderComponents[i];
-                removeRenderComponent(&component);
-            }
-        }
-
-        if (colliders.numComponents > 0)
-        {
-            for (uint32 i = 0; i < colliders.numComponents; i++)
-            {
-                ColliderComponent* component = &colliders[i];
-                removeColliderComponent(&component);
-            }
-        }
-    }
-
     return true;
 }
 
@@ -253,10 +202,44 @@ EntityDetails* getEntityDetails(Entity e)
     return getComponent(&e.ecs->entityDetails, e);
 }
 
+bool removeEntityDetails(EntityDetails** ppComponent)
+{
+    if (!ppComponent) return false;
+    if (((*ppComponent)->flags & EntityFlag_MarkedForDeletion) == 0)
+    {
+        assert(false);
+        return false;
+    }
+    
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->entityDetails), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
+}
+
 TransformComponent* getTransformComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
     return getComponent(&e.ecs->transforms, e);
+}
+
+bool removeTransformComponent(TransformComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    EntityDetails* details = getEntityDetails((*ppComponent)->entity);
+    
+    if ((details->flags & EntityFlag_MarkedForDeletion) == 0)
+    {
+        assert(false);
+        return false;
+    }
+    
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->transforms), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
 }
 
 CameraComponent* addCameraComponent(Entity e)
@@ -340,10 +323,11 @@ bool removePortalComponent(PortalComponent** ppComponent)
 {
     if (!ppComponent) return false;
 
-    PortalComponent* connectedPortal = getPortalComponent(getEntity((*ppComponent)->entity.ecs->scene->game, (*ppComponent)->connectedPortalEntityId));
+    PotentiallyStaleEntity pse = (*ppComponent)->connectedPortal;
+    PortalComponent* connectedPortal = getPortalComponent(getEntity(getGame((*ppComponent)->entity), &(*ppComponent)->connectedPortal));
     if (connectedPortal != nullptr)
     {
-        connectedPortal->connectedPortalEntityId = 0;
+        connectedPortal->connectedPortal.id = 0;
     }
     
     bool success = removeComponent(&((*ppComponent)->entity.ecs->portals), *ppComponent);
@@ -485,7 +469,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransfor
         // into the dest scene.
         //
         PortalComponent* pc = scene->ecs.portals.components.addressOf(it.locator);
-        if (pc->connectedPortalEntityId == 0) continue;
+        if (pc->connectedPortal.id == 0) continue;
 
         TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
         TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
@@ -844,7 +828,7 @@ void walkAndCamera(Game* game)
     FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
     {
         PortalComponent* pc = it.ptr;
-        if (pc->connectedPortalEntityId == 0) continue;
+        if (pc->connectedPortal.id == 0) continue;
         
         ColliderComponent* cc = getColliderComponent(pc->entity);
 
@@ -857,7 +841,7 @@ void walkAndCamera(Game* game)
             if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
             {
                 rebaseTransformInPlace(pc, xfm);
-                EntityDetails* connectedPortal = getEntityDetails(game, pc->connectedPortalEntityId);
+                EntityDetails* connectedPortal = getEntityDetails(getEntity(getGame(pc->entity), &pc->connectedPortal));
                 game->activeScene = connectedPortal->entity.ecs->scene;
             }
         }

@@ -1,5 +1,6 @@
 #include "TransformComponent.h"
 #include "Ecs.h"
+#include "Game.h"
 #include <algorithm>
 
 TransformComponent::TransformComponent(Entity e)
@@ -30,8 +31,8 @@ TransformComponent::TransformComponent(Entity e, Vec3 position, Quaternion orien
 
 ITransform* TransformComponent::getParent()
 {
-    Entity parent = ::getParent(this->entity);
-    TransformComponent* result = getTransformComponent(parent);
+    PotentiallyStaleEntity parent = ::getParent(this->entity);
+    TransformComponent* result = getTransformComponent(getEntity(getGame(this->entity), &parent));
     return result;
 }
      
@@ -42,7 +43,7 @@ std::vector<ITransform*> TransformComponent::getChildren()
     
     for (auto e : *::getChildren(this->entity))
     {
-        TransformComponent* xfm = getTransformComponent(e);
+        TransformComponent* xfm = getTransformComponent(getEntity(getGame(this->entity), &e));
 
         if (xfm)
         {

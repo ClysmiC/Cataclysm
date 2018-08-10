@@ -3,6 +3,8 @@
 #include "Scene.h"
 #include "Editor.h"
 
+struct Game;
+
 extern float mouseX;
 extern float mouseY;
 extern float mouseXPrev;
@@ -31,11 +33,15 @@ struct Game
 
     Scene* activeScene;
     Window* window;
-    Entity activeCamera;
 
+    // @TODO: Should these be PotentiallyStaleEntity ?
+    Entity activeCamera;
     Entity player;
 
     uint32 numScenes;
+
+    // End of frame bookkeeping
+    std::vector<PotentiallyStaleEntity> entitiesMarkedForDeletion;
 };
 
 Scene* makeScene(Game* game);
@@ -43,4 +49,9 @@ void makeSceneActive(Game* game, Scene* scene);
 void makeCameraActive(Game* game, Entity camera);
 
 EntityDetails* getEntityDetails(Game* game, uint32 entityId);
+Entity getEntity(Game* game, PotentiallyStaleEntity* potentiallyStaleEntity);
 Entity getEntity(Game* game, uint32 entityId);
+
+Game* getGame(Entity e);
+
+void deleteMarkedEntities(Game* game);

@@ -1,5 +1,18 @@
+=====================
+==== TOP OF MIND ====
+=====================
+
 [X] Make TransformComponent mandatory (so many things depend on it)
-[ ] Delete entity functionality (backend, and UI)
+[X] Instead of using Entity (that could be stale) or uint32 ID, typedef PossiblyStaleEntity -> Entity and store that.
+    getEntity(PossiblyStaleEntity) will check the last known ecs of the possibly stale entity, and if it can't find it,
+    then will check all of the ECS's (and update the possibly stale entity)
+
+[X] Make easier way to access game.  Then, potentially stale entity only has to have an id, and ecs can be null (if desired)
+
+[~] Delete entity functionality
+    [~] Backend
+    [X] UI
+    
 [ ] Add component functionality (in UI)
 [ ] Add entity functionality (in UI)
 [ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
@@ -8,13 +21,25 @@
 [ ] Add point light back in
 [ ] Draw sticker to show where point light, camera, and directional light are
 
-REORGANIZE DIRECTORY
-  - Change Types.h to als_types
-  - Make subdir for als_ files... consider renaming them too
-  - Make subdir for components
-  - Make subdir for systems (i.e., behaviors that use components)
-  - Split between engine and game-specific stuff (like portal)
-  - Clean up #includes and aggressively forward-declare to lower compile times
+======================
+==== MID PRIOIRTY ====
+======================
+
+[ ] REORGANIZE DIRECTORY
+      - Change Types.h to als_types
+      - Make subdir for als_ files... consider renaming them too
+      - Make subdir for components
+      - Make subdir for systems (i.e., behaviors that use components)
+      - Split between engine and game-specific stuff (like portal)
+      - Clean up #includes and aggressively forward-declare to lower compile times
+      - Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"
+      - Take non-Ecs stuff out of Ecs.h
 
 
-- Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
+[ ] Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
+
+======================
+==== LOW PRIORITY ====
+======================
+
+[ ] Consider making a global Game* instead of passing the Game* around everywhere

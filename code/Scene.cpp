@@ -2,8 +2,8 @@
 
 Scene::Scene()
 {
-    ecs.scene = this;
-    cubemap = nullptr;
+    this->ecs.scene = this;
+    this->cubemap = nullptr;
 }
 
 void addCubemap(Scene* scene, Cubemap* cubemap)

@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "als_math.h"
 #include "TransformComponent.h"
+#include "Entity.h"
 
 struct Scene;
 struct Shader;
@@ -11,7 +12,7 @@ struct Scene;
 struct PortalComponent : public Component
 {
     PortalComponent() = default;
-    uint32 connectedPortalEntityId;
+    PotentiallyStaleEntity connectedPortal;
     
     static constexpr bool multipleAllowedPerEntity = false;
 };
