@@ -15,12 +15,11 @@
     [X] BUG: some X clicks on editor entity list aren't registering?
     
 [X] Add component functionality (in UI)
-[ ] Add entity functionality (in UI)
+[X] Add entity functionality (in UI)
 [ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
 
-[ ] Reflect render component.... group them together based on mesh file somehow?
 [ ] Add point light back in
-[ ] Draw sticker to show where point light, camera, and directional light are
+[ ] Draw sticker to show where point light, camera, and directional light are. Even as simple as just a circle (pretty sure I added that to debugdraw)
 
 ======================
 ==== MID PRIOIRTY ====
@@ -43,4 +42,7 @@
 ==== LOW PRIORITY ====
 ======================
 
+[ ] Figure out the story for reflecting RenderComponent and adding RenderComponent thru Editor (they should be clumped together by MESH (not submesh))
+    - Note: maybe the RenderComponent just has a reference to the mesh id?
+    
 [ ] Consider making a global Game* instead of passing the Game* around everywhere

@@ -32,6 +32,7 @@ struct EditorState
 
     struct EntityListUi
     {
+        static const char* ADD_ENTITY_POPUP_ID;
         static const char* DRAG_DROP_ID;
     };
 
@@ -57,7 +58,7 @@ struct EditorState
     //
     Game* game;
     bool isEnabled = false;
-    Entity selectedEntity;
+    Entity selectedEntity; // @Think: Should this be PotentiallyStaleEntity?
     Ecs pseudoEcs;
 
     //

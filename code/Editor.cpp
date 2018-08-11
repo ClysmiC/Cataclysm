@@ -9,6 +9,7 @@
 #include "DebugDraw.h"
 
 const char* EditorState::EntityListUi::DRAG_DROP_ID              = "entity_drag_drop";
+const char* EditorState::EntityListUi::ADD_ENTITY_POPUP_ID       = "add_entity";
 const char* EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID = "add_component";
 
 EditorState::EditorState()
@@ -549,6 +550,24 @@ void showEditor(EditorState* editor)
         ImGui::SetNextWindowPos(ImVec2(game->window->width - 300, game->window->height - 500));
         ImGui::Begin("Entities", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+        if(ImGui::Button("Add Entity (+)"))
+        {
+            ImGui::OpenPopup(EditorState::EntityListUi::ADD_ENTITY_POPUP_ID);
+        }
+
+        if (ImGui::BeginPopup(EditorState::EntityListUi::ADD_ENTITY_POPUP_ID))
+        {
+            if (ImGui::Selectable("Blank Entity"))
+            {
+                Entity e = makeEntity(&game->activeScene->ecs, "New Entity");
+                editor->selectedEntity = e;
+            }
+
+            // TODO: Add new entity "templates" here
+            
+            ImGui::EndPopup();
+        }
+        
         ImGui::Text("(drag here to unparent)");
         if (ImGui::BeginDragDropTarget())
         {
@@ -559,7 +578,6 @@ void showEditor(EditorState* editor)
             }
         }
         
-        // ImGui::PushItemWidth(-1);
         {   
             for (Entity e : game->activeScene->ecs.entities)
             {
