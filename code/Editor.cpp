@@ -47,6 +47,12 @@ void showEditor(EditorState* editor)
     bool mousePressed = mouseHeld && !lastMouseButtons[GLFW_MOUSE_BUTTON_1];
     bool clickHandled = false;
 
+    if (mouseButtons[GLFW_MOUSE_BUTTON_1])
+    {
+        // debug
+        int debug = 0;
+    }
+
     if (mouseHeld == true)
     {
         int x = 0;
