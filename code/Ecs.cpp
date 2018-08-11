@@ -599,9 +599,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
         assert(xfm != nullptr); // Render component cannot exist without corresponding transform component
         if (xfm == nullptr) continue;
 
-        // TODO: pass closest lights to RenderComponent draw...
-        // ECS should be responsible for finding the light, but render component should be responsible
-        // for handling the lighting
+        // TODO: Lighting is a total mess... figure out a better way to do it
         if (rc.material->receiveLight)
         {
             PointLightComponent* pl = closestPointLight(xfm);
@@ -618,8 +616,11 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
                 setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
                 setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
             }
+            else
+            {
+                setVec3(shader, "pointLights[0].intensity", Vec3(0));
+            }
 
-            bool dirLightSet = false;
             FOR_BUCKET_ARRAY (ecs->directionalLights.components)
             {
                 // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
@@ -633,10 +634,9 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
                 setVec3(shader, directionVarName, dlc->direction);
                 setVec3(shader, intensityVarName, dlc->intensity);
 
-                dirLightSet = true;
             }
 
-            if (!dirLightSet)
+            if (ecs->directionalLights.count() == 0)
             {
                 string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
                 setVec3(shader, intensityVarName, Vec3(0, 0, 0));
@@ -704,33 +704,29 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
 
 PointLightComponent* closestPointLight(TransformComponent* xfm)
 {
-    return nullptr;
-
-    // TODO: give point-lights some lovin in the future when we have better editor capability
+    Ecs* ecs = xfm->entity.ecs;
     
-    // Ecs* ecs = xfm->entity.ecs;
-    
-    // PointLightComponent* closest = nullptr;
-    // float32 closestDistance = FLT_MAX;
+    PointLightComponent* closest = nullptr;
+    float32 closestDistance = FLT_MAX;
 
-    // FOR_BUCKET_ARRAY (ecs->pointLights.components)
-    // {
-    //     PointLightComponent* pl = it.ptr;
-    //     TransformComponent* plXfm = getTransformComponent(pl->entity);
+    FOR_BUCKET_ARRAY (ecs->pointLights.components)
+    {
+        PointLightComponent* pl = it.ptr;
+        TransformComponent* plXfm = getTransformComponent(pl->entity);
 
-    //     assert(plXfm != nullptr);
-    //     if (plXfm == nullptr) continue;
+        assert(plXfm != nullptr);
+        if (plXfm == nullptr) continue;
         
-    //     float32 dist = distance(xfm->position(), plXfm->position());
+        float32 dist = distance(xfm->position(), plXfm->position());
 
-    //     if (dist < closestDistance)
-    //     {
-    //         closestDistance = dist;
-    //         closest = pl;
-    //     }
-    // }
+        if (dist < closestDistance)
+        {
+            closestDistance = dist;
+            closest = pl;
+        }
+    }
 
-    // return closest;
+    return closest;
 }
 
 void walkAndCamera(Game* game)

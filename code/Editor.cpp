@@ -270,7 +270,7 @@ void showEditor(EditorState* editor)
             if (!camera && ImGui::Selectable("Camera"))            addCameraComponent(e);
             if (!portal && ImGui::Selectable("Portal"))            addPortalComponent(e);
             if (           ImGui::Selectable("Directional Light")) addDirectionalLightComponent(e);
-            // if (           ImGui::Selectable("Point Light"))       addPointLightComponent(e); @TODO
+            if (           ImGui::Selectable("Point Light"))       addPointLightComponent(e);
             // @TODO: add render component
 
             ImGui::EndPopup();
@@ -349,8 +349,6 @@ void showEditor(EditorState* editor)
                     ImGui::TreePop();
                 }
             }
-
-            // TODO
     
             if (camera)
             {
@@ -419,15 +417,44 @@ void showEditor(EditorState* editor)
                 }
             }
 
-            // @TODO
-            // if (pointLight)
-            // {
-            //     if (ImGui::CollapsingHeader("Point Light"))
-            //     {
-            //         reflector.reflectionTarget = pointLight;
-            //         reflectPointLightComponent(&reflector, 0);
-            //     }
-            // }
+            if (pointLights.numComponents > 0)
+            {
+                bool multiple = pointLights.numComponents > 1;
+                bool multipleHeaderOpen = false;
+                
+                if (multiple)
+                {
+                    char buffer[32];
+                    sprintf_s(buffer, 32, "Point Lights (%d)", pointLights.numComponents);
+                    multipleHeaderOpen = ImGui::Als_CollapsingHeaderTreeNode(buffer);
+                }
+
+                if (!multiple || multipleHeaderOpen)
+                {
+                    for (uint32 i = 0; i < pointLights.numComponents; i++)
+                    {
+                        PointLightComponent* component = &pointLights[i];
+                        
+                        bool xNotClicked = true;
+                        char labelBuffer[32];
+                        sprintf_s(labelBuffer, 32, "Point Light##%d", i);
+                        if (ImGui::Als_CollapsingHeaderTreeNode(labelBuffer, &xNotClicked))
+                        {
+                            reflector.setPrimaryReflectionTarget(component);
+                            reflectPointLightComponent(&reflector, 0);
+
+                            ImGui::TreePop();
+                        }
+
+                        if (!xNotClicked) removePointLightComponent(&component);
+                    }
+                }
+
+                if (multipleHeaderOpen)
+                {
+                    ImGui::TreePop();
+                }
+            }
     
             if (portal)
             {

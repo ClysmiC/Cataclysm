@@ -16,16 +16,18 @@
     
 [X] Add component functionality (in UI)
 [X] Add entity functionality (in UI)
-[ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
 
-[ ] Add point light back in
+[X] Add point light back in
 [ ] Draw sticker to show where point light, camera, and directional light are. Even as simple as just a circle (pretty sure I added that to debugdraw)
+
+[ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
+    DON'T SKIP THIS
 
 ======================
 ==== MID PRIOIRTY ====
 ======================
 
-[ ] REORGANIZE DIRECTORY
+[ ] REORGANIZE DIRECTORYf
       - Change Types.h to als_types
       - Make subdir for als_ files... consider renaming them too
       - Make subdir for components
