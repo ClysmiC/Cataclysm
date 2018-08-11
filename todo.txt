@@ -9,12 +9,12 @@
 
 [X] Make easier way to access game.  Then, potentially stale entity only has to have an id, and ecs can be null (if desired)
 
-[~] Delete entity functionality
+[X] Delete entity functionality
     [X] Backend
     [X] UI
-    [ ] BUG: some X clicks on editor entity list aren't registering?
+    [X] BUG: some X clicks on editor entity list aren't registering?
     
-[ ] Add component functionality (in UI)
+[X] Add component functionality (in UI)
 [ ] Add entity functionality (in UI)
 [ ] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
 

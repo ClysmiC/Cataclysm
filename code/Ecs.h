@@ -105,6 +105,8 @@ bool             removePortalComponent(PortalComponent** ppComponent);
 
 DirectionalLightComponent* addDirectionalLightComponent(Entity e);
 DirectionalLightComponent* getDirectionalLightComponent(Entity e);
+ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> addDirectionalLightComponents(Entity e, uint32 numComponents);
+ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> getDirectionalLightComponents(Entity e);
 bool                       removeDirectionalLightComponent(DirectionalLightComponent** ppComponent);
 
 TerrainComponent* addTerrainComponent(Entity e);

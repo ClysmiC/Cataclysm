@@ -136,8 +136,6 @@ void reflectVec4(IReflector* reflector, uint32 startingOffset);
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset);
 void reflectVec3Normalized(IReflector* reflector, uint32 startingOffset); // renormalize value when changed
 
-void reflectPotentiallyStaleEntity(IReflector* reflect, uint32 startingOffset);
-
 void reflectEntityDetailsComponent   (IReflector* reflector, uint32 startingOffset);
 void reflectTransformComponent       (IReflector* reflector, uint32 startingOffset);
 void reflectColliderComponent        (IReflector* reflector, uint32 startingOffset);

@@ -348,6 +348,18 @@ DirectionalLightComponent* getDirectionalLightComponent(Entity e)
     return getComponent(&e.ecs->directionalLights, e);
 }
 
+ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> addDirectionalLightComponents(Entity e, uint32 numComponents)
+{
+    if (e.id == 0) return ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE>();
+    return addComponents(&e.ecs->directionalLights, e, numComponents);
+}
+
+ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> getDirectionalLightComponents(Entity e)
+{
+    if (e.id == 0) return ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE>();
+    return getComponents(&e.ecs->directionalLights, e);
+}
+
 bool removeDirectionalLightComponent(DirectionalLightComponent** ppComponent)
 {
     if (!ppComponent) return false;

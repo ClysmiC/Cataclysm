@@ -8,7 +8,8 @@
 
 #include "DebugDraw.h"
 
-const char* EditorState::EntityListUi::DRAG_DROP_ID = "entity_drag_drop";
+const char* EditorState::EntityListUi::DRAG_DROP_ID              = "entity_drag_drop";
+const char* EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID = "add_component";
 
 EditorState::EditorState()
 {
@@ -201,6 +202,7 @@ void showEditor(EditorState* editor)
             editor->selectedEntity = rayResult.hitEntity;
         }
     }
+    
 
     //
     // Show the component list
@@ -228,7 +230,7 @@ void showEditor(EditorState* editor)
         auto colliders = getColliderComponents(e);
         CameraComponent* camera = getCameraComponent(e);
         PortalComponent* portal = getPortalComponent(e);
-        DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
+        auto directionalLights = getDirectionalLightComponents(e);
         auto pointLights = getPointLightComponents(e);
         auto renderComponents = getRenderComponents(e);
 
@@ -249,6 +251,28 @@ void showEditor(EditorState* editor)
             
                ImGui::Checkbox("coll", &editor->drawCollider);
             }
+        }
+
+        //
+        // Add component button
+        //
+        if (ImGui::Button("Add Component (+)"))
+        {
+            ImGui::OpenPopup(EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID);
+        }
+        
+        if (ImGui::BeginPopup(EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID))
+        {
+            // Note: Use short-circuit evaluation to not show selectable for components
+            //       that we can't add (e.g., if we already have a camera component)
+            if (           ImGui::Selectable("Collider"))          addColliderComponent(e);
+            if (!camera && ImGui::Selectable("Camera"))            addCameraComponent(e);
+            if (!portal && ImGui::Selectable("Portal"))            addPortalComponent(e);
+            if (           ImGui::Selectable("Directional Light")) addDirectionalLightComponent(e);
+            // if (           ImGui::Selectable("Point Light"))       addPointLightComponent(e); @TODO
+            // @TODO: add render component
+
+            ImGui::EndPopup();
         }
 
         //
@@ -355,21 +379,42 @@ void showEditor(EditorState* editor)
                 }
             }
     
-            if (directionalLight)
+            if (directionalLights.numComponents > 0)
             {
-                bool xNotClicked = true;
-                if (ImGui::Als_CollapsingHeaderTreeNode("Directional Light", &xNotClicked))
+                bool multiple = directionalLights.numComponents > 1;
+                bool multipleHeaderOpen = false;
+                
+                if (multiple)
                 {
-                    reflector.setPrimaryReflectionTarget(directionalLight);
-                    reflectDirectionalLightComponent(&reflector, 0);
-
-                    ImGui::TreePop();
+                    char buffer[32];
+                    sprintf_s(buffer, 32, "Directional Lights (%d)", directionalLights.numComponents);
+                    multipleHeaderOpen = ImGui::Als_CollapsingHeaderTreeNode(buffer);
                 }
 
-                if (!xNotClicked)
+                if (!multiple || multipleHeaderOpen)
                 {
-                    removeDirectionalLightComponent(&directionalLight);
-                    assert(directionalLight == nullptr);
+                    for (uint32 i = 0; i < directionalLights.numComponents; i++)
+                    {
+                        DirectionalLightComponent* component = &directionalLights[i];
+                        
+                        bool xNotClicked = true;
+                        char labelBuffer[32];
+                        sprintf_s(labelBuffer, 32, "Directional Light##%d", i);
+                        if (ImGui::Als_CollapsingHeaderTreeNode(labelBuffer, &xNotClicked))
+                        {
+                            reflector.setPrimaryReflectionTarget(component);
+                            reflectDirectionalLightComponent(&reflector, 0);
+
+                            ImGui::TreePop();
+                        }
+
+                        if (!xNotClicked) removeDirectionalLightComponent(&component);
+                    }
+                }
+
+                if (multipleHeaderOpen)
+                {
+                    ImGui::TreePop();
                 }
             }
 

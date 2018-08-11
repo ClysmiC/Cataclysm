@@ -48,6 +48,8 @@ struct EditorState
         Vec3 hotXfmEuler;
         
         Vec3 hotNormalizedVec3;
+
+        static const char* ADD_COMPONENT_POPUP_ID;
     };
 
     //
