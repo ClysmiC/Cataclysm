@@ -1,6 +1,6 @@
 #include "Ray.h"
 #include "Aabb.h"
-#include "Ecs.h"
+#include "ecs/Ecs.h"
 
 Ray::Ray(Vec3 position, Vec3 direction)
     : position(position)

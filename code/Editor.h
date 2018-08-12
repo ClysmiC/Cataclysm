@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Ecs.h"
-#include "ColliderComponent.h"
+#include "ecs/Ecs.h"
+#include "ecs/components/ColliderComponent.h"
 
 struct Game;
 

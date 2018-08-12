@@ -1,8 +1,8 @@
 #pragma once
 
-#include "als_math.h"
+#include "als/als_math.h"
 #include "Transform.h"
-#include "ComponentGroup.h"
+#include "ecs/ComponentGroup.h"
 
 struct RenderComponent;
 struct ColliderComponent;

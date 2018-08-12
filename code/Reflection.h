@@ -1,9 +1,9 @@
 #pragma once
 
-#include "als_math.h"
-#include "als_fixed_string.h"
+#include "als/als_math.h"
+#include "als/als_fixed_string.h"
 
-#include "ColliderComponent.h" // needed for ColliderType enum
+#include "ecs/components/ColliderComponent.h" // needed for ColliderType enum
 #include <stack>
 
 struct CameraComponent;

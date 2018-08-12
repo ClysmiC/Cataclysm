@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Ecs.h"
-#include "Entity.h"
-#include "Cubemap.h"
-#include "als_fixed_string.h"
+#include "ecs/Ecs.h"
+#include "ecs/Entity.h"
+#include "als/als_fixed_string.h"
 
 struct Game;
+struct Cubemap;
 
 struct Scene
 {

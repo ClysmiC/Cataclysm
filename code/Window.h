@@ -4,8 +4,8 @@
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
 
-#include "Types.h"
-#include "als_math.h"
+#include "als/als_types.h"
+#include "als/als_math.h"
 
 struct Window
 {

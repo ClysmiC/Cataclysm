@@ -1,25 +1,25 @@
 #pragma once
 
-#include "als_math.h"
-#include "Entity.h"
+#include "als/als_math.h"
+#include "ecs/Entity.h"
 
 struct Aabb;
 struct ColliderComponent;
 
 struct RaycastResult
 {
-	Entity hitEntity;
-	float32 t;
-	bool hit;
+    Entity hitEntity;
+    float32 t;
+    bool hit;
 };
 
 struct Ray
 {
-	Ray() = default;
-	Ray(Vec3 position, Vec3 direction);
-	
-	Vec3 position;
-	Vec3 direction;
+    Ray() = default;
+    Ray(Vec3 position, Vec3 direction);
+    
+    Vec3 position;
+    Vec3 direction;
 };
 
 float32 rayVsPlaneOneSided(Ray ray, Plane plane);

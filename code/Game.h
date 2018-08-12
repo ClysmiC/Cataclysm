@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Scene.h"
 #include "Editor.h"
+#include "Scene.h"
 
-struct Game;
+struct Scene;
 
 extern float mouseX;
 extern float mouseY;

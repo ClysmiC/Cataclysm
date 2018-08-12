@@ -1,7 +1,7 @@
 #include "Aabb.h"
 #include "float.h"
 #include <algorithm>
-#include "Ecs.h"
+#include "ecs/Ecs.h"
 
 Aabb::Aabb(Vec3 center, Vec3 halfDim)
 {

@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "resource/resources/Cubemap.h"
 
 Scene::Scene()
 {

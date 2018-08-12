@@ -1,16 +1,16 @@
 #include "Game.h"
 
-#include "Types.h"
+#include "als/als_types.h"
 #include "Window.h"
 
 #include <iostream>
 #include <thread>
 
-#include "Ecs.h"
-#include "ResourceManager.h"
+#include "ecs/Ecs.h"
+#include "resource/ResourceManager.h"
 #include "Scene.h"
 #include "DebugDraw.h"
-#include "Mesh.h"
+#include "resource/resources/Mesh.h"
 #include "GL/glew.h"
 #include "Ray.h"
 
@@ -18,11 +18,10 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "DebugGlobal.h"
 #include "Reflection.h"
 
-#include "als_fixed_string.h"
-#include "als_bucket_array.h"
+#include "als/als_fixed_string.h"
+#include "als/als_bucket_array.h"
 
 bool keys[1024];
 bool lastKeys[1024];
@@ -549,7 +548,7 @@ int main()
     
     Window window;
 
-#if 1
+#if 0
     debug_testBucketArray();
 #endif
 

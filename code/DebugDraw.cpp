@@ -1,13 +1,13 @@
-#include "als_math.h"
+#include "als/als_math.h"
 #include "DebugDraw.h"
 #include "GL/glew.h"
-#include "ResourceManager.h"
+#include "resource/ResourceManager.h"
 
-#include "Entity.h"
-#include "Ecs.h"
+#include "ecs/Entity.h"
+#include "ecs/Ecs.h"
 
-#include "TransformComponent.h"
-#include "ColliderComponent.h"
+#include "ecs/components/TransformComponent.h"
+#include "ecs/components/ColliderComponent.h"
 #include "Window.h"
 
 DebugDraw&
