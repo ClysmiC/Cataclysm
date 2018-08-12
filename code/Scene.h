@@ -6,6 +6,7 @@
 
 struct Game;
 struct Cubemap;
+struct ITransform;
 
 struct Scene
 {

@@ -20,6 +20,16 @@
 
 #include "als/als_util.h"
 
+#include "components/TransformComponent.h"
+#include "components/PortalComponent.h"
+#include "components/CameraComponent.h"
+#include "components/PointLightComponent.h"
+#include "components/DirectionalLightComponent.h"
+#include "components/RenderComponent.h"
+#include "components/ColliderComponent.h"
+#include "components/TerrainComponent.h"
+#include "components/WalkComponent.h"
+
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 

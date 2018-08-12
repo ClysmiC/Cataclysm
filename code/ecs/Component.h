@@ -8,5 +8,5 @@ struct Component
     Component() = default;
     Component(Entity entity);
     
-    Entity entity;
+    Entity entity; // Note: this needs to be updated for all of an entity's components if the entity moves ECSs
 };

@@ -1,12 +1,25 @@
 #include "Game.h"
 
 #include "als/als_types.h"
+#include "als/als_fixed_string.h"
+#include "als/als_bucket_array.h"
+
 #include "Window.h"
 
 #include <iostream>
 #include <thread>
 
 #include "ecs/Ecs.h"
+#include "ecs/components/TransformComponent.h"
+#include "ecs/components/PortalComponent.h"
+#include "ecs/components/CameraComponent.h"
+#include "ecs/components/PointLightComponent.h"
+#include "ecs/components/DirectionalLightComponent.h"
+#include "ecs/components/RenderComponent.h"
+#include "ecs/components/ColliderComponent.h"
+#include "ecs/components/TerrainComponent.h"
+#include "ecs/components/WalkComponent.h"
+
 #include "resource/ResourceManager.h"
 #include "Scene.h"
 #include "DebugDraw.h"
@@ -20,8 +33,6 @@
 
 #include "Reflection.h"
 
-#include "als/als_fixed_string.h"
-#include "als/als_bucket_array.h"
 
 bool keys[1024];
 bool lastKeys[1024];

@@ -1,7 +1,15 @@
 #include "Aabb.h"
 #include "float.h"
 #include <algorithm>
+
+#include "Transform.h"
+
 #include "ecs/Ecs.h"
+#include "ecs/components/RenderComponent.h"
+#include "ecs/components/ColliderComponent.h"
+#include "ecs/components/TransformComponent.h"
+#include "resource/Submesh.h"
+#include "resource/resources/Mesh.h"
 
 Aabb::Aabb(Vec3 center, Vec3 halfDim)
 {

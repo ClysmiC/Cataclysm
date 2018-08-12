@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "ecs/Component.h"
 
 struct WalkComponent : public Component
 {

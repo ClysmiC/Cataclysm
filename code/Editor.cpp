@@ -8,6 +8,15 @@
 
 #include "DebugDraw.h"
 
+#include "ecs/components/TransformComponent.h"
+#include "ecs/components/CameraComponent.h"
+#include "ecs/components/PortalComponent.h"
+#include "ecs/components/DirectionalLightComponent.h"
+#include "ecs/components/PointLightComponent.h"
+#include "ecs/components/RenderComponent.h"
+#include "ecs/components/WalkComponent.h"
+#include "ecs/components/TerrainComponent.h"
+
 const char* EditorState::EntityListUi::DRAG_DROP_ID              = "entity_drag_drop";
 const char* EditorState::EntityListUi::ADD_ENTITY_POPUP_ID       = "add_entity";
 const char* EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID = "add_component";

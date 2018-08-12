@@ -4,6 +4,8 @@
 #include "ecs/Ecs.h"
 #include <algorithm>
 
+#include "ecs/components/TransformComponent.h"
+
 void removeParent(Entity e)
 {
     if (e.id == 0) return;

@@ -6,21 +6,23 @@
 #include "ecs/components/EntityDetails.h"
 #include "Ray.h"
 #include "ComponentGroup.h"
-#include "components/TransformComponent.h"
-#include "components/PortalComponent.h"
-#include "components/CameraComponent.h"
-#include "components/PointLightComponent.h"
-#include "components/DirectionalLightComponent.h"
-#include "components/RenderComponent.h"
-#include "components/ColliderComponent.h"
-#include "components/TerrainComponent.h"
-#include "components/WalkComponent.h"
 
 #include <unordered_map>
 #include <vector>
 
+struct ITransform;
 struct Scene;
 struct Game;
+
+struct TransformComponent;
+struct PortalComponent;
+struct CameraComponent;
+struct PointLightComponent;
+struct DirectionalLightComponent;
+struct RenderComponent;
+struct ColliderComponent;
+struct TerrainComponent;
+struct WalkComponent;
 
 struct Ecs
 {

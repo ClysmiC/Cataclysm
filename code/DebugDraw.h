@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ecs/Entity.h"
-#include "Aabb.h"
+//#include "ecs/Entity.h"
+//#include "Aabb.h"
+
+#include "als/als_math.h"
 
 // not tweakable defines
 #define CUBE_VERTICES 8
@@ -11,10 +13,13 @@
 #define SPHERE_SUBDIVISIONS 3
 #define CIRCLE_EDGES       32
 
+struct Entity;
+struct CameraComponent;
 struct TransformComponent;
 struct ColliderComponent;
 struct Window;
 struct Shader;
+struct Aabb;
 
 struct DebugDraw
 {

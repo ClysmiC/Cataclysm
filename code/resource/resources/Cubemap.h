@@ -3,8 +3,6 @@
 #include "resource/Resource.h"
 #include "als/als_types.h"
 
-#include "ecs/components/CameraComponent.h"
-
 struct ITransform;
 struct CameraComponent;
 struct Shader;

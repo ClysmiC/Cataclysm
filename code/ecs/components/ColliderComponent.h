@@ -2,8 +2,9 @@
 
 #include "ecs/Component.h"
 #include "als/als_math.h"
-#include "Aabb.h"
 #include <string>
+
+struct Aabb;
 
 enum class ColliderType : uint32
 {

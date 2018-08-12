@@ -25,17 +25,17 @@
 ==== MID PRIOIRTY ====
 ======================
 
-[ ] REORGANIZE DIRECTORYf
-      - Change Types.h to als_types
-      - Make subdir for als_ files... consider renaming them too
-      - Make subdir for components
-      - Make subdir for systems (i.e., behaviors that use components)
-      - Split between engine and game-specific stuff (like portal)
-      - Clean up #includes and aggressively forward-declare to lower compile times
-      - Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"
-      - Take non-Ecs stuff out of Ecs.h
+[X] REORGANIZE DIRECTORYf
+      [X] Change Types.h to als_types
+      [X] Make subdir for als_ files... consider renaming them too
+      [X] Make subdir for components
+      [~] Clean up #includes and aggressively forward-declare to lower compile times
+      [ ] Take non-Ecs stuff out of Ecs.h, and put them into Systems
+      [ ] Make subdir for systems (i.e., behaviors that use components) inside of ecs/
+      [ ] Split between engine and game-specific stuff (like portal)
+      [ ] Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"
 
-
+[ ] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
 [ ] Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
 
 ======================

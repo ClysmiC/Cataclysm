@@ -1,9 +1,9 @@
 #pragma once
 
 #include "als/als_math.h"
-#include "Transform.h"
 #include "ecs/ComponentGroup.h"
 
+struct ITransform;
 struct RenderComponent;
 struct ColliderComponent;
 
@@ -26,7 +26,7 @@ Aabb aabbFromRenderComponent(RenderComponent* rc);
 Aabb aabbFromCollider(ColliderComponent* collider);
 
 template <uint32 BUCKET_SIZE>
-Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> rcg)
+Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> rcg) // TODO: change this param to pointer
 {
     Vec3 minPoint = Vec3(FLT_MAX);
     Vec3 maxPoint = Vec3(-FLT_MAX);

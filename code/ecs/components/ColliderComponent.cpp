@@ -4,6 +4,8 @@
 #include "TransformComponent.h"
 #include "ecs/Ecs.h"
 
+#include "Aabb.h"
+
 ColliderComponent::ColliderComponent()
 {
     this->xfmOffset = Vec3(0, 0, 0);

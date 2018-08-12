@@ -1,6 +1,16 @@
 #include "Scene.h"
 #include "resource/resources/Cubemap.h"
 
+#include "ecs/components/TransformComponent.h"
+#include "ecs/components/PortalComponent.h"
+#include "ecs/components/CameraComponent.h"
+#include "ecs/components/PointLightComponent.h"
+#include "ecs/components/DirectionalLightComponent.h"
+#include "ecs/components/RenderComponent.h"
+#include "ecs/components/ColliderComponent.h"
+#include "ecs/components/TerrainComponent.h"
+#include "ecs/components/WalkComponent.h"
+
 Scene::Scene()
 {
     this->ecs.scene = this;

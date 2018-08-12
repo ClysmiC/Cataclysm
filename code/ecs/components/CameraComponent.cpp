@@ -3,6 +3,8 @@
 #include "Window.h"
 #include "Ray.h"
 
+#include "ecs/components/TransformComponent.h"
+
 void recalculateProjectionMatrix(CameraComponent* camera)
 {
     if (camera->isOrthographic)

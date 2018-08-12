@@ -1,6 +1,9 @@
 #include "Ray.h"
 #include "Aabb.h"
+
 #include "ecs/Ecs.h"
+#include "ecs/components/TransformComponent.h"
+#include "ecs/components/ColliderComponent.h"
 
 Ray::Ray(Vec3 position, Vec3 direction)
     : position(position)

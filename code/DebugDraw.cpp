@@ -6,7 +6,9 @@
 #include "ecs/Entity.h"
 #include "ecs/Ecs.h"
 
+#include "ecs/components/CameraComponent.h"
 #include "ecs/components/TransformComponent.h"
+#include "ecs/components/RenderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "Window.h"
 

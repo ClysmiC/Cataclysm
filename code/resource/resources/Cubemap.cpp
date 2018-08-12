@@ -1,6 +1,7 @@
 #include "Cubemap.h"
 
 #include "resource/ResourceManager.h"
+#include "ecs/components/CameraComponent.h"
 #include "stb/stb_image.h"
 
 #include "Shader.h"
