@@ -34,7 +34,7 @@ struct BucketArray
 {
     struct Bucket
     {
-        uint32 index;
+        uint32 index = 0;
         uint32 count = 0;
         bool occupied[BUCKET_SIZE] = { 0 };
         T data[BUCKET_SIZE];
@@ -45,7 +45,7 @@ struct BucketArray
         uint32 index = 0;
         uint32 countToIterate = 0;
         BucketLocator locator = BucketLocator(0, 0);
-        T* ptr;
+        T* ptr = nullptr;
         _BucketArrayIteratorFlag flag = _BucketArrayIteratorFlag::ITERATING;
     };
 
@@ -53,7 +53,7 @@ struct BucketArray
     std::vector<Bucket* > buckets;
     std::vector<Bucket* > unfullBuckets;
 
-    uint32 count;
+    uint32 count = 0;
 
 private:
     Bucket* addBucket()
@@ -132,7 +132,7 @@ public:
     BucketLocator add(T item)
     {
         BucketLocator result = this->occupyEmptySlot();
-        T* slot = this->addressOf(locator);
+        T* slot = this->addressOf(result);
         *slot = item;
 
         return result;

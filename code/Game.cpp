@@ -22,6 +22,7 @@
 #include "Reflection.h"
 
 #include "als_fixed_string.h"
+#include "als_bucket_array.h"
 
 bool keys[1024];
 bool lastKeys[1024];
@@ -194,6 +195,69 @@ void deleteMarkedEntities(Game* game)
 
 ///////////////////////////////////////////////////////////////////////
 //////////// BEGIN SCRATCHPAD (throwaway or refactorable code)
+
+void debug_testBucketArray()
+{
+    BucketArray<int, 16> testArray;
+
+    for (int i = 0; i < 56; i++)
+    {
+        BucketLocator location = testArray.add(i);
+
+        if (i < 16)
+        {
+            assert(location.bucketIndex == 0);
+            assert(location.slotIndex == i);
+
+            assert(testArray.buckets.size() == 1);
+
+            if (i < 15)
+            {
+                assert(testArray.unfullBuckets.size() == 1);
+            }
+            else
+            {
+                assert(testArray.unfullBuckets.size() == 0);
+
+                BucketLocator toRemove = BucketLocator(0, 13);
+                testArray.remove(toRemove);
+                assert(testArray.unfullBuckets.size() == 1);
+
+                testArray.add(100);
+                assert(testArray.unfullBuckets.size() == 0);
+                assert(testArray.buckets.size() == 1);
+            }
+        }
+    }
+
+    FOR_BUCKET_ARRAY(testArray)
+    {
+        if (it.index == 13) assert(*it.ptr == 100);
+        else assert(*it.ptr == (int)it.index);
+    }
+
+    // Check the remaining stuff in debugger, too lazy to write asserts :)
+    BucketLocator toRemove = BucketLocator(1, 13);
+    testArray.remove(toRemove);
+    testArray.add(100);
+
+    for (int i = 0; i < 16; i++)
+    {
+        BucketLocator locator = BucketLocator(0, i);
+        testArray.remove(locator);
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        BucketLocator locator = BucketLocator(1, i);
+        testArray.remove(locator);
+    }
+
+    for (int i = 0; i < 24; i++)
+    {
+        testArray.add(-i);
+    }
+}
 
 void updateLastKeysAndMouseButtons()
 {
@@ -485,7 +549,11 @@ int main()
     
     Window window;
 
-    if(!initGlfwWindow(&window, windowWidth, windowHeight))
+#if 1
+    debug_testBucketArray();
+#endif
+
+    if (!initGlfwWindow(&window, windowWidth, windowHeight))
     {
         return -1;
     }
