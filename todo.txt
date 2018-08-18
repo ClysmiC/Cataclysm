@@ -29,13 +29,11 @@
       [X] Change Types.h to als_types
       [X] Make subdir for als_ files... consider renaming them too
       [X] Make subdir for components
-      [~] Clean up #includes and aggressively forward-declare to lower compile times
-      [ ] Take non-Ecs stuff out of Ecs.h, and put them into Systems
-      [ ] Make subdir for systems (i.e., behaviors that use components) inside of ecs/
-      [ ] Split between engine and game-specific stuff (like portal)
-      [ ] Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"
+      [X] Clean up #includes and aggressively forward-declare to lower compile times
+      [X] Take non-Ecs stuff out of Ecs.h, and put them into Systems
+      [X] Make subdir for systems (i.e., behaviors that use components) inside of ecs/
 
-[ ] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
+[~] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
 [ ] Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
 
 ======================
@@ -44,5 +42,11 @@
 
 [ ] Figure out the story for reflecting RenderComponent and adding RenderComponent thru Editor (they should be clumped together by MESH (not submesh))
     - Note: maybe the RenderComponent just has a reference to the mesh id?
-    
+
+===============
+==== MAYBE ====
+===============
+
 [ ] Consider making a global Game* instead of passing the Game* around everywhere
+[ ] Split between engine and game-specific stuff (like portal)
+[ ] Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"

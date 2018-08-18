@@ -11,6 +11,8 @@
 #include "ecs/components/TerrainComponent.h"
 #include "ecs/components/WalkComponent.h"
 
+#include "ecs/systems/RenderSystem.h"
+
 Scene::Scene()
 {
     this->ecs.scene = this;

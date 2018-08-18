@@ -137,11 +137,5 @@ ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightC
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightComponents(Entity e);
 bool           removePointLightComponent(PointLightComponent** ppComponent);
 
-// TODO: do these belong in Ecs.h?
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal=false, ITransform* destPortalXfm=nullptr);
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel=0);
-void walkAndCamera(Game* game);
-
+// TODO: where to put this?
 RaycastResult castRay(Ecs* ecs, Ray ray);
-    
-PointLightComponent* closestPointLight(TransformComponent* xfm);

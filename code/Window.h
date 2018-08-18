@@ -31,6 +31,3 @@ void cata_glfwKeyPressedCallback(GLFWwindow* window, int key, int scanCode, int 
 void cata_glfwMousePressedCallback(GLFWwindow* window, int button, int action, int modifiers);
 void cata_glfwMouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
 void cata_glfwErrorCallback(int e, const char* message);
-
-
-

@@ -33,6 +33,8 @@
 
 #include "Reflection.h"
 
+#include "ecs/systems/MovementSystem.h"
+
 
 bool keys[1024];
 bool lastKeys[1024];
