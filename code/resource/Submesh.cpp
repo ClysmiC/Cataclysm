@@ -1,4 +1,5 @@
 #include "Submesh.h"
+#include "resources/Material.h"
 
 #include "GL/glew.h"
 #include "assert.h"

@@ -9,6 +9,7 @@
 #include "DebugDraw.h"
 
 #include "ecs/components/TransformComponent.h"
+#include "ecs/components/ColliderComponent.h"
 #include "ecs/components/CameraComponent.h"
 #include "ecs/components/PortalComponent.h"
 #include "ecs/components/DirectionalLightComponent.h"

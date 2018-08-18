@@ -1,7 +1,6 @@
 #pragma once
 
 #include "als/als_math.h"
-#include "als/als_fixed_string.h"
 
 struct TransformComponent;
 struct CameraComponent;

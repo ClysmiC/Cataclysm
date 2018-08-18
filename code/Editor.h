@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ecs/Ecs.h"
-#include "ecs/components/ColliderComponent.h"
 
 struct Game;
+struct ColliderComponent;
 
 struct EditorState
 {

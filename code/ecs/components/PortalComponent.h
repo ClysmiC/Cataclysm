@@ -2,7 +2,6 @@
 
 #include "ecs/Component.h"
 #include "als/als_math.h"
-#include "TransformComponent.h"
 #include "ecs/Entity.h"
 
 struct Scene;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include "als/als_types.h"
 #include "resource/Resource.h"
 

@@ -2,10 +2,10 @@
 
 #include "resource/Submesh.h"
 #include "ecs/Component.h"
-#include "Transform.h"
-#include "CameraComponent.h"
 
 struct Material;
+struct ITransform;
+struct CameraComponent;
 
 struct RenderComponent : public Component
 {

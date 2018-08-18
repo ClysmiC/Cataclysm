@@ -26,7 +26,7 @@ Aabb aabbFromRenderComponent(RenderComponent* rc);
 Aabb aabbFromCollider(ColliderComponent* collider);
 
 template <uint32 BUCKET_SIZE>
-Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> rcg) // TODO: change this param to pointer
+Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> &rcg)
 {
     Vec3 minPoint = Vec3(FLT_MAX);
     Vec3 maxPoint = Vec3(-FLT_MAX);
@@ -55,7 +55,7 @@ Aabb aabbFromRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE> rcg) 
 }
 
 template <uint32 BUCKET_SIZE>
-Aabb aabbFromColliders(ComponentGroup<ColliderComponent, BUCKET_SIZE> colliders)
+Aabb aabbFromColliders(ComponentGroup<ColliderComponent, BUCKET_SIZE> &colliders)
 {
     Vec3 minPoint = Vec3(FLT_MAX);
     Vec3 maxPoint = Vec3(-FLT_MAX);

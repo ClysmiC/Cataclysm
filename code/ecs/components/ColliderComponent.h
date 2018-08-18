@@ -2,7 +2,6 @@
 
 #include "ecs/Component.h"
 #include "als/als_math.h"
-#include <string>
 
 struct Aabb;
 

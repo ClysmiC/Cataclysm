@@ -3,6 +3,12 @@
 #include <sstream>
 #include "assert.h"
 
+#include "resources/Material.h"
+#include "resources/Shader.h"
+#include "resources/Texture.h"
+#include "resources/Mesh.h"
+#include "resources/Cubemap.h"
+
 ResourceManager & ResourceManager::instance()
 {
     static ResourceManager *instance = new ResourceManager();

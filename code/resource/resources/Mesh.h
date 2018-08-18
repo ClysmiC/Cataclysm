@@ -1,12 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "Texture.h"
-#include "resource/MeshVertex.h"
 #include "resource/Submesh.h"
 #include "Aabb.h"
-
-#include "als/als_math.h"
 
 #include "resource/Resource.h"
 

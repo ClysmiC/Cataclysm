@@ -1,5 +1,7 @@
 #include "GL/glew.h"
 
+#include "TransformComponent.h"
+#include "ColliderComponent.h"
 #include "PortalComponent.h"
 #include "resource/ResourceManager.h"
 #include "Game.h"

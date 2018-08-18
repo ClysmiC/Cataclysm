@@ -1,4 +1,7 @@
+#include "Transform.h"
 #include "RenderComponent.h"
+#include "CameraComponent.h"
+
 #include "GL/glew.h"
 
 #include "Aabb.h"

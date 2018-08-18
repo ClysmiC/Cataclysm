@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 
+#include "als/als_types.h"
 #include "resource/Resource.h"
 #include "als/als_fixed_string_std_hash.h"
-#include "als/als_math.h"
 
 typedef string32 MaterialNameString;
 typedef string64 UniformNameString;
@@ -14,6 +14,10 @@ typedef string64 UniformNameString;
 //
 struct Texture;
 struct Shader;
+union Vec2;
+union Vec3;
+union Vec4;
+struct Mat4;
 
 struct Material
 {

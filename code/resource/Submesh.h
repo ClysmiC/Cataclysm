@@ -2,7 +2,6 @@
 
 #include "als/als_types.h"
 
-#include "resources/Material.h"
 #include "MeshVertex.h"
 #include <vector>
 
@@ -11,6 +10,7 @@
 #include "Aabb.h"
 
 struct Mesh;
+struct Material;
 
 struct SubmeshOpenGlInfo
 {

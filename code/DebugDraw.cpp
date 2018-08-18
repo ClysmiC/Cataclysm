@@ -2,6 +2,9 @@
 #include "DebugDraw.h"
 #include "GL/glew.h"
 #include "resource/ResourceManager.h"
+#include "resource/resources/Shader.h"
+#include "resource/Submesh.h"
+#include "resource/resources/Mesh.h"
 
 #include "ecs/Entity.h"
 #include "ecs/Ecs.h"

@@ -1,5 +1,7 @@
 #include "Material.h"
 #include "resource/ResourceManager.h"
+#include "Texture.h"
+#include "Shader.h"
 #include <fstream>
 #include <sstream>
 #include "assert.h"

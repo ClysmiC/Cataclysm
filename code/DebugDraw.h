@@ -1,8 +1,5 @@
 #pragma once
 
-//#include "ecs/Entity.h"
-//#include "Aabb.h"
-
 #include "als/als_math.h"
 
 // not tweakable defines

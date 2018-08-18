@@ -16,7 +16,7 @@ struct EntityDetails : public Component
     PotentiallyStaleEntity parent;
     uint64 flags = 0;
     string16 friendlyName = "";
-    std::vector<PotentiallyStaleEntity> children; // @TODO: these should probably just be ID's
+    std::vector<PotentiallyStaleEntity> children;
 
     static const bool multipleAllowedPerEntity = false;
 };

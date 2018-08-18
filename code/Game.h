@@ -3,8 +3,6 @@
 #include "Editor.h"
 #include "Scene.h"
 
-struct Scene;
-
 extern float mouseX;
 extern float mouseY;
 extern float mouseXPrev;
