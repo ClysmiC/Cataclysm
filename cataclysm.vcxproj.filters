@@ -1070,6 +1070,9 @@
     <ClCompile Include="code\ecs\systems\MovementSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="code\platform\win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\DebugDraw.h">
@@ -2318,6 +2321,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\ecs\systems\MovementSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\platform\platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\platform\win.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,3 +1,6 @@
+// Note: this file is a complete dumping grounds of implementations until I decide how I want to factor them out.
+// Will eventually clean it up...
+
 #include "Game.h"
 
 #include "als/als_types.h"
@@ -34,6 +37,11 @@
 #include "Reflection.h"
 
 #include "ecs/systems/MovementSystem.h"
+
+#include "platform/platform.h"
+
+#include <vector>
+#include <string>
 
 
 bool keys[1024];
@@ -569,6 +577,11 @@ int main()
     {
         return -1;
     }
+
+#if 1
+    // Test platform layer stuff
+    auto result = getAllFileNames("X:/resources", true, "obj");
+#endif
 
     IMGUI_CHECKVERSION();
 
