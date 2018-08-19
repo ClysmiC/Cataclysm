@@ -16,6 +16,7 @@ struct RenderComponent : public Component
     Material* material;
 
     SubmeshOpenGlInfo submeshOpenGlInfo;
+    bool isVisible = true;
 
     static constexpr bool multipleAllowedPerEntity = true;
 };

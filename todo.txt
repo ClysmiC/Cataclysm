@@ -2,51 +2,33 @@
 ==== TOP OF MIND ====
 =====================
 
-[X] Make TransformComponent mandatory (so many things depend on it)
-[X] Instead of using Entity (that could be stale) or uint32 ID, typedef PossiblyStaleEntity -> Entity and store that.
-    getEntity(PossiblyStaleEntity) will check the last known ecs of the possibly stale entity, and if it can't find it,
-    then will check all of the ECS's (and update the possibly stale entity)
-
-[X] Make easier way to access game.  Then, potentially stale entity only has to have an id, and ecs can be null (if desired)
-
-[X] Delete entity functionality
-    [X] Backend
-    [X] UI
-    [X] BUG: some X clicks on editor entity list aren't registering?
-    
-[X] Add component functionality (in UI)
-[X] Add entity functionality (in UI)
-
-[X] Add point light back in
-
-[X] Stress test adding/deleting several components, creating many buckets in the bucket array, etc.
+[~] Figure out the story for reflecting RenderComponent
+    [X] Reflect mesh name in UI
+    [X] Can set the component visible/invisible
+    [X] Can remove the render component(s) for a mesh for an entity
+        [ ] Remove/unload(?) it from resource manager if nothing else uses it (ref count?)
+    [ ] Add render component(s) for a mesh for an entity
+        [ ] Devise a way to list all known obj files and let user select one
+        [ ] Add it to resource manager if it isn't already
 
 ======================
 ==== MID PRIOIRTY ====
 ======================
 
-[X] REORGANIZE DIRECTORYf
-      [X] Change Types.h to als_types
-      [X] Make subdir for als_ files... consider renaming them too
-      [X] Make subdir for components
-      [X] Clean up #includes and aggressively forward-declare to lower compile times
-      [X] Take non-Ecs stuff out of Ecs.h, and put them into Systems
-      [X] Make subdir for systems (i.e., behaviors that use components) inside of ecs/
-
 [~] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
-[ ] Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
 
 ======================
 ==== LOW PRIORITY ====
 ======================
 
-[ ] Figure out the story for reflecting RenderComponent and adding RenderComponent thru Editor (they should be clumped together by MESH (not submesh))
+    
     - Note: maybe the RenderComponent just has a reference to the mesh id?
 
 ===============
 ==== MAYBE ====
 ===============
 
+[ ] Some way to ensure that we are iterating over every component type that can be in an entity (needed for UI, serialization, deleting an entity, etc.)
 [ ] Consider making a global Game* instead of passing the Game* around everywhere
 [ ] Split between engine and game-specific stuff (like portal)
 [ ] Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"

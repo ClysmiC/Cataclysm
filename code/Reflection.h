@@ -81,6 +81,7 @@ struct IReflector
 
     // TODO: templatize this?
     virtual string16 consumeString16(FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
+    virtual string256 consumeString256(FieldNameString name, uint32 offset, ReflectionFlags flags=0) = 0;
 
     //
     // This may need special treatment (i.e., UI uses the stored euler value instead of the canonical one)
@@ -118,6 +119,7 @@ struct UiReflector : public IReflector
     bool    consumeBool   (FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
     
     string16 consumeString16(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
+    string256 consumeString256(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
         
     uint32  consumeEnum   (FieldNameString name, uint32 offset, EnumValueNameString* enumNames, uint32 enumValueCount, ReflectionFlags flags=0) override;
 

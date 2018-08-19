@@ -9,6 +9,9 @@
 #include "ecs/components/PointLightComponent.h"
 #include "ecs/components/PortalComponent.h"
 #include "ecs/components/RenderComponent.h"
+
+#include "resource/resources/Mesh.h"
+
 #include "Editor.h"
 
 #include "DebugDraw.h"
@@ -355,7 +358,14 @@ void reflectPortalComponent(IReflector* reflector, uint32 startingOffset)
 
 void reflectRenderComponent(IReflector* reflector, uint32 startingOffset)
 {
-    // TODO
+    RenderComponent* rc = (RenderComponent*)((char*)reflector->reflectionTarget() + startingOffset);
+    reflector->consumeBool("Visible?", startingOffset + offsetof(RenderComponent, isVisible));
+
+    Mesh* mesh = rc->submesh->mesh;
+
+    reflector->pushReflectionTarget(mesh);
+    reflector->consumeString256("Mesh ID", startingOffset + offsetof(Mesh, id), ReflectionFlag_ReadOnly);
+    reflector->popReflectionTarget();
 }
 
 IReflector::IReflector(ReflectionPurpose purpose)
@@ -450,11 +460,12 @@ float64 UiReflector::consumeFloat64(FieldNameString name, uint32 offset, Reflect
 bool UiReflector::consumeBool(FieldNameString name, uint32 offset, ReflectionFlags flags)
 {
     bool* valuePtr = (bool*)((char*)reflectionTarget() + offset);
-    bool value = *valuePtr;
+    bool valueCopy = *valuePtr;
 
-    // std::string text = name + ": " + std::to_string(value);
-    
-    // ImGui::Text(text.c_str());
+    if (ImGui::Checkbox(name.cstr(), &valueCopy))
+    {
+        *valuePtr = valueCopy;
+    }
 
     return *valuePtr;
 }
@@ -621,6 +632,25 @@ string16 UiReflector::consumeString16(FieldNameString name, uint32 offset, Refle
     string16* valuePtr = (string16*)((char*)reflectionTarget() + offset);
     string16 value = *valuePtr;
     string16 valueCopy = value;
+
+    ImGuiInputTextFlags imguiFlags = 0;
+    if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;
+
+    if (ImGui::InputText(name.cstr(), valueCopy.data, 16, imguiFlags))
+    {
+        // This updates the actual value
+        *valuePtr = valueCopy;
+        valuePtr->invalidateLength();
+    }
+
+    return *valuePtr;
+}
+
+string256 UiReflector::consumeString256(FieldNameString name, uint32 offset, ReflectionFlags flags)
+{
+    string256* valuePtr = (string256*)((char*)reflectionTarget() + offset);
+    string256 value = *valuePtr;
+    string256 valueCopy = value;
 
     ImGuiInputTextFlags imguiFlags = 0;
     if (flags & ReflectionFlag_ReadOnly) imguiFlags |= ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly;

@@ -506,6 +506,41 @@ void showEditor(EditorState* editor)
                     assert(portal == nullptr);
                 }
             }
+
+            if (renderComponents.numComponents > 0)
+            {
+                // Just reflecting 1 render-component will give us all of the mesh information we need
+                bool xNotClicked = true;
+                bool isVisibleToggled = false;
+                if (ImGui::Als_CollapsingHeaderTreeNode("Render Mesh", &xNotClicked))
+                {
+                    bool isVisibleBeforeReflect = renderComponents[0].isVisible;
+                    reflector.setPrimaryReflectionTarget(&renderComponents[0]);
+                    reflectRenderComponent(&reflector, 0);
+
+                    isVisibleToggled = (isVisibleBeforeReflect != renderComponents[0].isVisible);
+
+                    ImGui::TreePop();
+                }
+
+                if (isVisibleToggled)
+                {
+                    for (uint32 i = 1; i < renderComponents.numComponents; i++)
+                    {
+                        renderComponents[i].isVisible = renderComponents[0].isVisible;
+                    }
+                }
+
+                if (!xNotClicked)
+                {
+                    for (uint32 i = 0; i < renderComponents.numComponents; i++)
+                    {
+                        RenderComponent* rc = &renderComponents[i];
+                        removeRenderComponent(&rc);
+                        assert(rc == nullptr);
+                    }
+                }
+            }
     
             // @TODO: other components
         }
@@ -625,7 +660,6 @@ void showEditor(EditorState* editor)
                 drawEntityAndChildren(e, editor);
             }
         }
-        // ImGui::PopItemWidth();
                 
         ImGui::End();
     }

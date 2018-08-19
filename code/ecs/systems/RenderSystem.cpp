@@ -47,6 +47,8 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
     {
         RenderComponent &rc = *it.ptr;
+        if (!rc.isVisible) continue;
+        
         TransformComponent* xfm = getTransformComponent(rc.entity);
 
         if (renderingViaPortal)
@@ -54,9 +56,6 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
             bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
             if (behindDestPortal) continue;
         }
-
-        assert(xfm != nullptr); // Render component cannot exist without corresponding transform component
-        if (xfm == nullptr) continue;
 
         // TODO: Lighting is a total mess... figure out a better way to do it
         if (rc.material->receiveLight)
