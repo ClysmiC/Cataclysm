@@ -3,10 +3,15 @@
 #include "Reflection.h"
 #include "Window.h"
 
+#include "als/als_util.h"
+
 #include "imgui/imgui.h"
 #include "GLFW/glfw3.h"
 
 #include "DebugDraw.h"
+#include "platform/platform.h"
+
+#include "resource/ResourceManager.h"
 
 #include "ecs/components/TransformComponent.h"
 #include "ecs/components/ColliderComponent.h"
@@ -21,6 +26,7 @@
 const char* EditorState::EntityListUi::DRAG_DROP_ID              = "entity_drag_drop";
 const char* EditorState::EntityListUi::ADD_ENTITY_POPUP_ID       = "add_entity";
 const char* EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID = "add_component";
+const char* EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID = "Select Mesh##add_render_component";
 
 EditorState::EditorState()
 {
@@ -221,16 +227,16 @@ void showEditor(EditorState* editor)
     if (editor->selectedEntity.id != 0)
     {
         editor->componentList.thisFrameActiveId = 0;
-            
+
         Entity e = editor->selectedEntity;
-        
+
         // TODO: handle component groups
         UiReflector reflector;
         reflector.useLocalXfm = editor->isLocalXfm;
         reflector.editor = editor;
 
         reflector.startReflection(*getFriendlyName(e));
-    
+
         ImGui::SetNextWindowSize(ImVec2(300, 500));
         ImGui::SetNextWindowPos(ImVec2(0, game->window->height - 500));
         ImGui::Begin((getFriendlyNameAndId(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
@@ -258,9 +264,9 @@ void showEditor(EditorState* editor)
 
             if (colliders.numComponents > 0)
             {
-               if (sameLine) ImGui::SameLine();
-            
-               ImGui::Checkbox("coll", &editor->drawCollider);
+                if (sameLine) ImGui::SameLine();
+
+                ImGui::Checkbox("coll", &editor->drawCollider);
             }
         }
 
@@ -271,17 +277,74 @@ void showEditor(EditorState* editor)
         {
             ImGui::OpenPopup(EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID);
         }
-        
+
         if (ImGui::BeginPopup(EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID))
         {
+
             // Note: Use short-circuit evaluation to not show selectable for components
             //       that we can't add (e.g., if we already have a camera component)
-            if (           ImGui::Selectable("Collider"))          addColliderComponent(e);
-            if (!camera && ImGui::Selectable("Camera"))            addCameraComponent(e);
-            if (!portal && ImGui::Selectable("Portal"))            addPortalComponent(e);
-            if (           ImGui::Selectable("Directional Light")) addDirectionalLightComponent(e);
-            if (           ImGui::Selectable("Point Light"))       addPointLightComponent(e);
-            // @TODO: add render component
+            if (ImGui::Selectable("Collider"))          addColliderComponent(e);
+            if (!camera && ImGui::Selectable("Camera")) addCameraComponent(e);
+            if (!portal && ImGui::Selectable("Portal")) addPortalComponent(e);
+            if (ImGui::Selectable("Directional Light")) addDirectionalLightComponent(e);
+            if (ImGui::Selectable("Point Light"))       addPointLightComponent(e);
+
+            // Select mesh modal window
+            {
+                // Use short-circuit evaluation
+                if (renderComponents.numComponents == 0 && ImGui::Selectable("Render Mesh", false, ImGuiSelectableFlags_DontClosePopups)) // @Hack: If the selectable closes, the below code only runs 1 frame. If we define the popup elsewhere, the ID stacks are incompatible. Easiest solution, just keep this popup open.
+                {
+                    ImGui::OpenPopup(EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID);
+                }
+
+                if (ImGui::BeginPopupModal(EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID))
+                {
+                    if (!editor->componentList.meshFileSelection.isOpen)
+                    {
+                        editor->componentList.meshFileSelection.isOpen = true;
+                        editor->componentList.meshFileSelection.meshFiles = getAllFileNames(ResourceManager::instance().resourceDirectory.cstr(), true, "obj");
+
+                        for (uint32 i = 0; i < editor->componentList.meshFileSelection.meshFiles.size(); i++)
+                        {
+                            if (i >= ARRAY_LEN(editor->componentList.meshFileSelection.meshFilesPtrs))
+                            {
+                                assert(false);
+                                break;
+                            }
+
+                            editor->componentList.meshFileSelection.meshFilesPtrs[i] = editor->componentList.meshFileSelection.meshFiles[i].c_str();
+                        }
+                    }
+
+                    // TODO: add search box to filter
+                    // @Idea: editorstate stores the search string. On update, it iterates over meshFiles and adds the pointers that contain the search query. Also need to track the length of the filtered results!
+                    ImGui::PushItemWidth(500);
+                    ImGui::ListBox("Mesh File", &editor->componentList.meshFileSelection.selectedIndex, editor->componentList.meshFileSelection.meshFilesPtrs, editor->componentList.meshFileSelection.meshFiles.size(), 6);
+                    ImGui::PopItemWidth();
+
+                    bool close = false;
+                    if (ImGui::Button("Add (+)"))
+                    {
+                        // TODO
+
+                        close = true;
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("Close"))
+                    {
+                        close = true;
+                    }
+
+                    ImGui::EndPopup();
+
+                    if (close)
+                    {
+                        ImGui::CloseCurrentPopup(); // Closes both mesh and add component popup (see @Hack about why we left this popup open)
+                    }
+                }
+            }
 
             ImGui::EndPopup();
         }

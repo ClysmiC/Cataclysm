@@ -7,8 +7,9 @@
     [X] Can set the component visible/invisible
     [X] Can remove the render component(s) for a mesh for an entity
         [ ] Remove/unload(?) it from resource manager if nothing else uses it (ref count?)
-    [ ] Add render component(s) for a mesh for an entity
-        [~] Devise a way to list all known obj files and let user select one
+    [~] Add render component(s) for a mesh for an entity
+        [X] Devise a way to list all known obj files and let user select one
+           [ ] Text box to filter!
         [ ] Add it to resource manager if it isn't already
 
 ======================

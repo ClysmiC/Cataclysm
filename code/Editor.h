@@ -50,7 +50,16 @@ struct EditorState
         
         Vec3 hotNormalizedVec3;
 
+        struct
+        {
+            int selectedIndex = 0;
+            bool isOpen = false; // Only load in the valid mesh files when this toggles to true
+            std::vector<std::string> meshFiles;
+            const char* meshFilesPtrs[2048]; // points into the meshFiles vector. This is the format ImGui expects. @ArbitraryLimit
+        } meshFileSelection;
+
         static const char* ADD_COMPONENT_POPUP_ID;
+        static const char* ADD_RENDER_COMPONENT_POPUP_ID;
     };
 
     //
