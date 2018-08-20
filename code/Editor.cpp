@@ -299,34 +299,55 @@ void showEditor(EditorState* editor)
 
                 if (ImGui::BeginPopupModal(EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID))
                 {
-                    if (!editor->componentList.meshFileSelection.isOpen)
+                    auto& meshPopup = editor->componentList.meshFileSelection;
+                    if (!meshPopup.isOpen || meshPopup.refreshFileList)
                     {
-                        editor->componentList.meshFileSelection.isOpen = true;
-                        editor->componentList.meshFileSelection.meshFiles = getAllFileNames(ResourceManager::instance().resourceDirectory.cstr(), true, "obj");
-
-                        for (uint32 i = 0; i < editor->componentList.meshFileSelection.meshFiles.size(); i++)
+                        if (!meshPopup.isOpen)
                         {
-                            if (i >= ARRAY_LEN(editor->componentList.meshFileSelection.meshFilesPtrs))
+                            // Only re-search for file if the popup was just opened. If it was just a filter update,
+                            // only filter the results, don't re-search the OS for files
+                            meshPopup.meshFiles = getAllFileNames(ResourceManager::instance().resourceDirectory.cstr(), true, "obj");
+                        }
+
+                        meshPopup.meshFilesCount = 0;
+                        meshPopup.isOpen = true;
+                        meshPopup.refreshFileList = false;
+
+
+                        for (uint32 i = 0; i < meshPopup.meshFiles.size(); i++)
+                        {
+                            if (i >= ARRAY_LEN(meshPopup.meshFilesPtrs))
                             {
                                 assert(false);
                                 break;
                             }
 
-                            editor->componentList.meshFileSelection.meshFilesPtrs[i] = editor->componentList.meshFileSelection.meshFiles[i].c_str();
+                            if (meshPopup.filter == "" || meshPopup.meshFiles[i].find(meshPopup.filter.cstr(), 0) != std::string::npos)
+                            {
+                                meshPopup.meshFilesPtrs[meshPopup.meshFilesCount] = meshPopup.meshFiles[i].c_str();
+                                meshPopup.meshFilesCount++;
+                            }
                         }
                     }
 
-                    // TODO: add search box to filter
-                    // @Idea: editorstate stores the search string. On update, it iterates over meshFiles and adds the pointers that contain the search query. Also need to track the length of the filtered results!
                     ImGui::PushItemWidth(500);
-                    ImGui::ListBox("Mesh File", &editor->componentList.meshFileSelection.selectedIndex, editor->componentList.meshFileSelection.meshFilesPtrs, editor->componentList.meshFileSelection.meshFiles.size(), 6);
+                    if (ImGui::InputText("Filter", meshPopup.filter.data, 256))
+                    {
+                        meshPopup.filter.invalidateLength();
+                        meshPopup.refreshFileList = true;
+                    }
+
+                    ImGui::PushItemWidth(500);
+                    ImGui::ListBox("Mesh File", &meshPopup.selectedIndex, meshPopup.meshFilesPtrs, meshPopup.meshFilesCount, 6);
                     ImGui::PopItemWidth();
 
                     bool close = false;
                     if (ImGui::Button("Add (+)"))
                     {
-                        // TODO
-
+                        ResourceManager& rm = ResourceManager::instance();
+                        Mesh* m = rm.initMesh(meshPopup.meshFilesPtrs[meshPopup.selectedIndex], true, true);
+                        auto rcc = addRenderComponents(e, m->submeshes.size());
+                        initRenderComponents(&rcc, m);
                         close = true;
                     }
 

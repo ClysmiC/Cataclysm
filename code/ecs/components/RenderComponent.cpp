@@ -6,7 +6,7 @@
 
 #include "Aabb.h"
 #include "DebugDraw.h"
-
+#include "resource/resources/Mesh.h"
 #include "resource/resources/Shader.h"
 
 RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)

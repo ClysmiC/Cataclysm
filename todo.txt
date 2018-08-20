@@ -7,16 +7,23 @@
     [X] Can set the component visible/invisible
     [X] Can remove the render component(s) for a mesh for an entity
         [ ] Remove/unload(?) it from resource manager if nothing else uses it (ref count?)
-    [~] Add render component(s) for a mesh for an entity
+    [X] Add render component(s) for a mesh for an entity
         [X] Devise a way to list all known obj files and let user select one
-           [ ] Text box to filter!
-        [ ] Add it to resource manager if it isn't already
+           [X] Text box to filter!
+        [X] Add it to resource manager if it isn't already
+        [ ] Load it async and maybe spin a wheel for better "loading" feedback?
 
 ======================
 ==== MID PRIOIRTY ====
 ======================
 
 [~] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
+[ ] Add quickhull implementation
+    [ ] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
+    [ ] Render the result using DebugDraw drawLine
+
+[ ] Port GJK/EPA code
+[ ] Collision when walking
 
 ======================
 ==== LOW PRIORITY ====
