@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ecs/Ecs.h"
+#include "ConvexHull.h"
 
 struct Game;
 struct ColliderComponent;
@@ -71,6 +72,7 @@ struct EditorState
     Game* game;
     bool isEnabled = false;
     Entity selectedEntity; // @Think: Should this be PotentiallyStaleEntity?
+    ConvexHull debug_selectedEntityHull; // Remove this... just using it to visually test quickhull!
     Ecs pseudoEcs;
 
     //
@@ -89,3 +91,4 @@ struct EditorState
 };
 
 void showEditor(EditorState* editor);
+void selectEntity(EditorState* editor, Entity e);

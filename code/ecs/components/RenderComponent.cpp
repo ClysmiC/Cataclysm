@@ -4,6 +4,7 @@
 
 #include "GL/glew.h"
 
+#include "ecs/Ecs.h"
 #include "Aabb.h"
 #include "DebugDraw.h"
 #include "resource/resources/Mesh.h"
@@ -15,6 +16,15 @@ RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
     submesh = submesh_;
     submeshOpenGlInfo = submesh->openGlInfo;
     material = submesh->material;
+}
+
+Mesh* getMesh(Entity e)
+{
+    RenderComponent* r = getRenderComponent(e);
+
+    if (!r) return nullptr;
+
+    return r->submesh->mesh;
 }
 
 void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, CameraComponent* camera, ITransform *cameraXfm)

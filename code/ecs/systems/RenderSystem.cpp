@@ -153,7 +153,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransfor
                 perturbedPortalXfm.setScale(sourceSceneXfm->scale());
 
                 Plane portalPlane = Plane(sourceSceneXfm->position(), outOfPortalNormal(pc));
-                bool closeEnoughToClipThroughNearPlane = distanceSquared(cameraXfm->position(), portalPlane) < .11 * .11;
+                bool closeEnoughToClipThroughNearPlane = distance(cameraXfm->position(), portalPlane) < .12;
                 if (closeEnoughToClipThroughNearPlane)
                 {
                     perturbedPortalXfm.setPosition(perturbedPortalXfm.position() + (intoPortalNormal(pc) * .1));

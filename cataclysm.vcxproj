@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="code\Aabb.cpp" />
     <ClCompile Include="code\als\als_math.cpp" />
+    <ClCompile Include="code\als\als_temp_alloc.cpp" />
     <ClCompile Include="code\DebugDraw.cpp" />
     <ClCompile Include="code\ecs\Component.cpp" />
     <ClCompile Include="code\ecs\components\CameraComponent.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="code\Game.cpp" />
     <ClCompile Include="code\platform\win.cpp" />
     <ClCompile Include="code\Quad.cpp" />
+    <ClCompile Include="code\Quickhull.cpp" />
     <ClCompile Include="code\Ray.cpp" />
     <ClCompile Include="code\Reflection.cpp" />
     <ClCompile Include="code\resource\ResourceManager.cpp" />
@@ -177,13 +179,16 @@
     <ClInclude Include="code\als\als_fixed_string.h" />
     <ClInclude Include="code\als\als_fixed_string_std_hash.h" />
     <ClInclude Include="code\als\als_math.h" />
+    <ClInclude Include="code\als\als_temp_alloc.h" />
     <ClInclude Include="code\als\als_types.h" />
     <ClInclude Include="code\als\als_util.h" />
+    <ClInclude Include="code\ConvexHull.h" />
     <ClInclude Include="code\DebugDraw.h" />
     <ClInclude Include="code\ecs\Component.h" />
     <ClInclude Include="code\ecs\ComponentGroup.h" />
     <ClInclude Include="code\ecs\components\CameraComponent.h" />
     <ClInclude Include="code\ecs\components\ColliderComponent.h" />
+    <ClInclude Include="code\ecs\components\ConvexHullColliderComponent.h" />
     <ClInclude Include="code\ecs\components\DirectionalLightComponent.h" />
     <ClInclude Include="code\ecs\components\EntityDetails.h" />
     <ClInclude Include="code\ecs\components\PointLightComponent.h" />
@@ -201,6 +206,7 @@
     <ClInclude Include="code\platform\platform.h" />
     <ClInclude Include="code\platform\win.h" />
     <ClInclude Include="code\Quad.h" />
+    <ClInclude Include="code\Quickhull.h" />
     <ClInclude Include="code\Ray.h" />
     <ClInclude Include="code\Reflection.h" />
     <ClInclude Include="code\resource\MeshVertex.h" />

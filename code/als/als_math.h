@@ -33,7 +33,7 @@ enum class Axis3D : uint32
 union Vec2
 {
     Vec2();
-    Vec2(float32 value);
+    explicit Vec2(float32 value);
     Vec2(float32 x, float32 y);
     
     struct
@@ -49,8 +49,8 @@ union Vec2
 union Vec3
 {
     Vec3();
-    Vec3(Axis3D unitAxis);
-    Vec3(float32 value);
+    explicit Vec3(Axis3D unitAxis);
+    explicit Vec3(float32 value);
     Vec3(Vec2 xy, float32 z);
     Vec3(float32 x, float32 y, float32 z);
     
@@ -75,7 +75,7 @@ union Vec3
 union Vec4
 {
     Vec4();
-    Vec4(float32 value);
+    explicit Vec4(float32 value);
     Vec4(Vec2 xy, float32 z, float32 w);
     Vec4(Vec2 xy, Vec2 zw);
     Vec4(Vec3 xyz, float32 w);
@@ -100,7 +100,7 @@ union Quaternion
 {
     Quaternion();
     Quaternion(Vec3 vector, float32 scalar);
-    Quaternion(Vec4 xyzw);
+    explicit Quaternion(Vec4 xyzw);
     Quaternion(float32 x, float32 y, float32 z, float32 w);
     
     struct
@@ -530,22 +530,20 @@ inline Vec3 project(Vec3 vectorA, Vec3 vectorB)
 }
 
 bool isNormal(Vec3);
-inline float32 distanceSquared(Vec3 vector, Plane plane)
-{
-    assert(isNormal(plane.normal));
 
-    Vec3 toVector = vector - plane.point;
-    Vec3 projection = project(toVector, plane.normal);
-    float32 result = lengthSquared(projection);
+// Note: negative distance means BEHIND the plane
+inline float32 signedDistance(Vec3 vector, Plane plane)
+{
+    Vec3 planeToVec = vector - plane.point;
+    
+    float32 result = dot(planeToVec, plane.normal);
     
     return result;
 }
 
 inline float32 distance(Vec3 vector, Plane plane)
 {
-    float32 result = distanceSquared(vector, plane);
-    result = sqrtf(result);
-    
+    float32 result = fabsf(signedDistance(vector, plane));
     return result;
 }
 
@@ -555,15 +553,33 @@ inline float32 distance(Vec2 vectorA, Vec2 vectorB)
     return result;
 }
 
+inline float32 distanceSquared(Vec2 vectorA, Vec2 vectorB)
+{
+    float32 result = lengthSquared(vectorA - vectorB);
+    return result;
+}
+
 inline float32 distance(Vec3 vectorA, Vec3 vectorB)
 {
     float32 result = length(vectorA - vectorB);
     return result;
 }
 
+inline float32 distanceSquared(Vec3 vectorA, Vec3 vectorB)
+{
+    float32 result = lengthSquared(vectorA - vectorB);
+    return result;
+}
+
 inline float32 distance(Vec4 vectorA, Vec4 vectorB)
 {
     float32 result = length(vectorA - vectorB);
+    return result;
+}
+
+inline float32 distanceSquared(Vec4 vectorA, Vec4 vectorB)
+{
+    float32 result = lengthSquared(vectorA - vectorB);
     return result;
 }
 

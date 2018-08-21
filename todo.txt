@@ -17,7 +17,7 @@
 ==== MID PRIOIRTY ====
 ======================
 
-[~] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
+[X] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
 [ ] Add quickhull implementation
     [ ] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
     [ ] Render the result using DebugDraw drawLine

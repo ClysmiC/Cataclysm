@@ -4,14 +4,17 @@
 #include "Window.h"
 
 #include "als/als_util.h"
+#include "als/als_temp_alloc.h"
 
 #include "imgui/imgui.h"
 #include "GLFW/glfw3.h"
 
+#include "Quickhull.h"
 #include "DebugDraw.h"
 #include "platform/platform.h"
 
 #include "resource/ResourceManager.h"
+#include "resource/resources/Mesh.h"
 
 #include "ecs/components/TransformComponent.h"
 #include "ecs/components/ColliderComponent.h"
@@ -53,6 +56,29 @@ EditorState::EditorState()
     this->translator.zAxisHandle->rect3Lengths = Vec3(shortDim, shortDim, longDim);
 }
 
+void selectEntity(EditorState* editor, Entity e)
+{
+    editor->selectedEntity = e;
+
+    Mesh* mesh = getMesh(e);
+
+    if (mesh)
+    {
+        uint32 verticesCount = meshVerticesCount(mesh);
+        Vec3* pointSoup = (Vec3*)tempAllocArray(sizeof(Vec3), verticesCount);
+
+        int index = 0;
+
+        for (uint32 i = 0; i < mesh->submeshes.size(); i++)
+        {
+            memcpy(pointSoup + index, mesh->submeshes[i].vertices.data(), sizeof(Vec3) * mesh->submeshes[i].vertices.size());
+            index += mesh->submeshes[i].vertices.size();
+        }
+
+        quickHull(pointSoup, verticesCount, &editor->debug_selectedEntityHull);
+    }
+}
+
 void showEditor(EditorState* editor)
 {
     //
@@ -64,17 +90,6 @@ void showEditor(EditorState* editor)
     bool mouseHeld = mouseButtons[GLFW_MOUSE_BUTTON_1] && !ImGui::GetIO().WantCaptureMouse;
     bool mousePressed = mouseHeld && !lastMouseButtons[GLFW_MOUSE_BUTTON_1];
     bool clickHandled = false;
-
-    if (mouseButtons[GLFW_MOUSE_BUTTON_1])
-    {
-        // debug
-        int debug = 0;
-    }
-
-    if (mouseHeld == true)
-    {
-        int x = 0;
-    }
 
     Ray prevRayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseXPrev, mouseYPrev));
     Ray rayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
@@ -100,6 +115,27 @@ void showEditor(EditorState* editor)
             }
         }
     }
+
+    //
+    // Draw convex hull (debug)
+    //
+    {
+        Entity e = editor->selectedEntity;
+
+        if (e.id != 0)
+        {
+            TransformComponent* xfm = getTransformComponent(e);
+
+            for (uint32 i = 0; i < editor->debug_selectedEntityHull.edges.size(); i++)
+            {
+                DebugDraw::instance().drawLine(
+                    xfm->position() + editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index0],
+                    xfm->position() + editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index1]
+                );
+            }
+        }
+    }
+
 
     //
     // Scale and draw 3d translator handles
@@ -216,7 +252,7 @@ void showEditor(EditorState* editor)
         RaycastResult rayResult = castRay(&game->activeScene->ecs, rayThruScreen);
         if (rayResult.hit)
         {
-            editor->selectedEntity = rayResult.hitEntity;
+            selectEntity(editor, rayResult.hitEntity);
         }
     }
     
@@ -661,7 +697,7 @@ void showEditor(EditorState* editor)
                 if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !toggled)
                 {
                     // @Hack: This is the best way I could find to detect if the header was clicked but NOT opened
-                    editor->selectedEntity = e;
+                    selectEntity(editor, e);
                 }
 
                 if (ImGui::BeginDragDropSource())
@@ -716,7 +752,7 @@ void showEditor(EditorState* editor)
             if (ImGui::Selectable("Blank Entity"))
             {
                 Entity e = makeEntity(&game->activeScene->ecs, "New Entity");
-                editor->selectedEntity = e;
+                selectEntity(editor, e);
             }
 
             // TODO: Add new entity "templates" here

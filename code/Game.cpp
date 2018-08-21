@@ -6,6 +6,7 @@
 #include "als/als_types.h"
 #include "als/als_fixed_string.h"
 #include "als/als_bucket_array.h"
+#include "als/als_temp_alloc.h"
 
 #include "Window.h"
 
@@ -563,6 +564,8 @@ void makeCameraActive(Game* game, Entity camera)
 
 int main()
 {    
+    initializeTempAlloc(1024 * 1024); // 1 MiB
+
     // INIT WINDOW
     uint32 windowWidth = 1600;
     uint32 windowHeight = 900;
@@ -756,9 +759,9 @@ int main()
         mouseYPrev = mouseY;
 
         updateLastKeysAndMouseButtons();
-
+        clearTempAlloc();
         
-        std::this_thread::sleep_for(std::chrono::milliseconds(33));
+        std::this_thread::sleep_for(std::chrono::milliseconds(33)); // TODO: proper FPS and timing stuff
     }
 
     ImGui_ImplOpenGL3_Shutdown();

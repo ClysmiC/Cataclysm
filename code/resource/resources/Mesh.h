@@ -19,6 +19,7 @@ struct Mesh
     Aabb bounds;
 };
 
+uint32 meshVerticesCount(Mesh* mesh);
 bool load(Mesh* mesh);
 bool unload(Mesh* mesh);
 

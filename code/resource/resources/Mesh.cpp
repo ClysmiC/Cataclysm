@@ -15,6 +15,19 @@ Mesh::Mesh(FilenameString filename, bool useMaterialsReferencedInObjFile_)
     this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile_;
 }
 
+uint32 meshVerticesCount(Mesh* mesh)
+{
+    if (!mesh) return 0;
+
+    uint32 count = 0;
+    for (uint32 i = 0; i < mesh->submeshes.size(); i++)
+    {
+        count += mesh->submeshes[i].vertices.size();
+    }
+
+    return count;
+}
+
 bool load(Mesh* mesh)
 {
     using namespace std;

@@ -25,6 +25,7 @@ struct RenderComponent : public Component
 };
 
 void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  CameraComponent* camera, ITransform *cameraXfm);
+Mesh* getMesh(Entity e);
 
 template<int BUCKET_SIZE>
 void initRenderComponents(ComponentGroup<RenderComponent, BUCKET_SIZE>* renderComponentGroup, Mesh* mesh)
