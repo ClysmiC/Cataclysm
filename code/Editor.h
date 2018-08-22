@@ -91,4 +91,5 @@ struct EditorState
 };
 
 void showEditor(EditorState* editor);
+
 void selectEntity(EditorState* editor, Entity e);

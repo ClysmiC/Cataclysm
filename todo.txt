@@ -18,9 +18,14 @@
 ======================
 
 [X] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
-[ ] Add quickhull implementation
-    [ ] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
-    [ ] Render the result using DebugDraw drawLine
+[X] Add quickhull implementation
+    [~] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
+    [X] Render the result using DebugDraw drawLine
+
+[ ] Don't have MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY
+    - There are 300+ render components in the airboat mesh (fishy???). The componentgroup probably has to use
+      a vector instead of a flat array
+        [ ] Investigate fishiness
 
 [ ] Port GJK/EPA code
 [ ] Collision when walking

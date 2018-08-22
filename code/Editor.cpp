@@ -78,6 +78,11 @@ void selectEntity(EditorState* editor, Entity e)
 
         quickHull(pointSoup, verticesCount, &editor->debug_selectedEntityHull);
     }
+    else
+    {
+        editor->debug_selectedEntityHull.positions.clear();
+        editor->debug_selectedEntityHull.edges.clear();
+    }
 }
 
 void showEditor(EditorState* editor)
@@ -130,8 +135,8 @@ void showEditor(EditorState* editor)
             for (uint32 i = 0; i < editor->debug_selectedEntityHull.edges.size(); i++)
             {
                 DebugDraw::instance().drawLine(
-                    xfm->position() + editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index0],
-                    xfm->position() + editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index1]
+                    (xfm->matrix() * Vec4(editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index0], 1)).xyz(),
+                    (xfm->matrix() * Vec4(editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index1], 1)).xyz()
                 );
             }
         }

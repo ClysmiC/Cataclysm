@@ -6,7 +6,8 @@ struct TransformComponent;
 struct CameraComponent;
 struct Ecs;
 
-#define MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY 16
+// Note: this SHOULD be enough even for the ones that can be sprawling, like lots of submeshes (render components) or colliders
+#define MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY 128
 
 struct Entity
 {
