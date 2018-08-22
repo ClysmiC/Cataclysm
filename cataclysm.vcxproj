@@ -83,7 +83,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <DisableSpecificWarnings>4100;4201;4244;4267;4305;4189;4456</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4201;4244;4267;4305;4189;4456;4127</DisableSpecificWarnings>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
