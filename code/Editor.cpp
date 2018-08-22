@@ -68,11 +68,12 @@ void selectEntity(EditorState* editor, Entity e)
         Vec3* pointSoup = (Vec3*)tempAllocArray(sizeof(Vec3), verticesCount);
 
         int index = 0;
-
         for (uint32 i = 0; i < mesh->submeshes.size(); i++)
         {
-            memcpy(pointSoup + index, mesh->submeshes[i].vertices.data(), sizeof(Vec3) * mesh->submeshes[i].vertices.size());
-            index += mesh->submeshes[i].vertices.size();
+            for (uint32 j = 0; j < mesh->submeshes[i].vertices.size(); j++)
+            {
+                pointSoup[index++] = mesh->submeshes[i].vertices[j].position;
+            }
         }
 
         quickHull(pointSoup, verticesCount, &editor->debug_selectedEntityHull);
