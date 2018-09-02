@@ -7,7 +7,7 @@ struct CameraComponent;
 struct Ecs;
 
 // Note: this SHOULD be enough even for the ones that can be sprawling, like lots of submeshes (render components) or colliders
-#define MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY 128
+#define MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY 64
 
 struct Entity
 {
