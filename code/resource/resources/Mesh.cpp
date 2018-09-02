@@ -73,7 +73,8 @@ bool load(Mesh* mesh)
             }
         }
 
-        if (tokens.size() == 0 && !eofFlush) { tokens.push_back("#"); } // HACK: we may still want to flush a face, so just treat it like a harmless character
+        if (tokens.size() == 0 && !eofFlush) tokens.push_back("#"); // @Hack: we may still want to flush a face (eof), so just treat it like a harmless character
+        else if (tokens.size() > 0 && tokens[0] == "s") continue;
 
         if (buildingFaces && (eofFlush || tokens[0] != "f"))
         {
