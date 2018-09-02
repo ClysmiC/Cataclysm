@@ -53,6 +53,8 @@ struct EditorState
 
         struct MeshFileSelection
         {
+            bool isLoadingMesh = false;
+            bool finishedLoadingMesh = false;
             int selectedIndex = 0;
             bool isOpen = false; // Only load in the valid mesh files when this toggles to true
             bool refreshFileList = false;

@@ -14,10 +14,10 @@ struct Material;
 
 struct SubmeshOpenGlInfo
 {
-    uint32 indicesSize;
-    uint32 vao;
-    uint32 vbo;
-    uint32 ebo;
+    uint32 indicesSize = 0;
+    uint32 vao = 0;
+    uint32 vbo = 0;
+    uint32 ebo = 0;
 };
 
 // A mesh's data can be broken up into submeshes.
@@ -27,7 +27,7 @@ struct SubmeshOpenGlInfo
 struct Submesh
 {
     Submesh() = default;
-    Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh);
+    Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool uploadToGpu=true);
     
     FilenameString meshFilename;
     string32 submeshName;
@@ -43,6 +43,9 @@ struct Submesh
 };
 
 void recalculateTangentsAndBitangents(Submesh* submesh);
+
+bool isUploadedToGpuOpenGl(Submesh* submesh);
+void uploadToGpuOpenGl(Submesh* submesh);
 
 // Note: only works after MODIFYING vertices... do NOT
 // add/remove vertices and then call this

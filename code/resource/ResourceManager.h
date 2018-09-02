@@ -13,6 +13,13 @@
 
 typedef uint32 RESOURCE_HANDLE;
 
+enum class MeshLoadOptions
+{
+    NONE,
+    CPU,
+    CPU_AND_GPU
+};
+
 struct ResourceManager
 {
     RESOURCE_HANDLE nextHandle;
@@ -45,7 +52,7 @@ struct ResourceManager
     Texture* initTexture(FilenameString relFilename, bool gammaCorrect, bool loadNow);
     Texture* getTexture(ResourceIdString relFilename);
     
-    Mesh* initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow);
+    Mesh* initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, MeshLoadOptions loadNow);
     Mesh* getMesh(ResourceIdString relFilename);
     
     Material* initMaterial(FilenameString relFilename, MaterialNameString materialName, bool loadNow);

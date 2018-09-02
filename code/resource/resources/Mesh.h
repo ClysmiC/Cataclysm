@@ -15,6 +15,7 @@ struct Mesh
     bool isLoaded = false;
     ResourceIdString id;
     std::vector<Submesh> submeshes;
+    std::vector<Material*> materialsReferencedInObjFile;
 
     Aabb bounds;
 };
@@ -22,4 +23,7 @@ struct Mesh
 uint32 meshVerticesCount(Mesh* mesh);
 bool load(Mesh* mesh);
 bool unload(Mesh* mesh);
+
+bool isUploadedToGpuOpenGl(Mesh* mesh);
+void uploadToGpuOpenGl(Mesh* mesh);
 

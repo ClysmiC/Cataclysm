@@ -11,31 +11,30 @@
         [X] Devise a way to list all known obj files and let user select one
            [X] Text box to filter!
         [X] Add it to resource manager if it isn't already
-        [ ] Load it async and maybe spin a wheel for better "loading" feedback?
+        [X] Load it async and maybe spin a wheel for better "loading" feedback?
+
+[X] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
+[X] Add quickhull implementation
+    [X] Render the result using DebugDraw drawLine
+    [~] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
+
+[ ] Don't have MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY
+    - There are 300+ render components in the airboat mesh (fishy???). The componentgroup probably has to use
+      a vector instead of a flat array
+        [ ] Investigate fishiness... should be one submesh per usemtl
+
+[ ] Port GJK/EPA code
+[ ] Collision + resolution when walking
 
 ======================
 ==== MID PRIOIRTY ====
 ======================
 
-[X] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
-[X] Add quickhull implementation
-    [~] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
-    [X] Render the result using DebugDraw drawLine
-
-[ ] Don't have MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY
-    - There are 300+ render components in the airboat mesh (fishy???). The componentgroup probably has to use
-      a vector instead of a flat array
-        [ ] Investigate fishiness
-
-[ ] Port GJK/EPA code
-[ ] Collision when walking
 
 ======================
 ==== LOW PRIORITY ====
 ======================
 
-    
-    - Note: maybe the RenderComponent just has a reference to the mesh id?
 
 ===============
 ==== MAYBE ====
@@ -45,3 +44,11 @@
 [ ] Consider making a global Game* instead of passing the Game* around everywhere
 [ ] Split between engine and game-specific stuff (like portal)
 [ ] Find a better spot to put the getEntity stuff... I'd rather not have every file require to include "Game.h"
+
+
+====================
+==== KNOWN BUGS ====
+====================
+
+[ ] Can sometimes see through UV seams
+[ ] Incorrect lighting when mesh is non-uniformly scaled. Probably not properly handling normals?

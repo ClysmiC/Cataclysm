@@ -45,7 +45,7 @@ bool load(Mesh* mesh)
 
     FilenameString currentMaterialFilename = Material::DEFAULT_MATERIAL_FILENAME;
     MaterialNameString currentMaterialName = Material::DEFAULT_MATERIAL_NAME;
-    vector<Material*> materialsToLoad;
+    mesh->materialsReferencedInObjFile.clear();
 
     FilenameString relFileDirectory = truncateFilenameAfterDirectory(mesh->id);
     
@@ -96,7 +96,8 @@ bool load(Mesh* mesh)
                         (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialFilename : Material::DEFAULT_MATERIAL_FILENAME,
                         (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
                     ),
-                    mesh
+                    mesh,
+                    false
                 )
             );
 
@@ -154,7 +155,7 @@ bool load(Mesh* mesh)
             Material* m = ResourceManager::instance().initMaterial(currentMaterialFilename, currentMaterialName, false);
             assert(m != nullptr);
 
-            materialsToLoad.push_back(m);
+            mesh->materialsReferencedInObjFile.push_back(m);
         }
         else if (tokens[0] == "f")
         {
@@ -288,12 +289,6 @@ bool load(Mesh* mesh)
         }
     }
 
-    // Load all materials that we discovered
-    for (Material* material : materialsToLoad)
-    {
-        load(material);
-    }
-
     //
     // Calculate bounds
     //
@@ -343,3 +338,29 @@ bool unload(Mesh* mesh)
     return false;
 }
 
+bool isUploadedToGpuOpenGl(Mesh* mesh)
+{
+    if (mesh) return false;
+    if (mesh->submeshes.size() == 0) return false;
+
+    return isUploadedToGpuOpenGl(&mesh->submeshes[0]);
+}
+
+void uploadToGpuOpenGl(Mesh* mesh)
+{
+    // Load all materials
+    for (Material* material : mesh->materialsReferencedInObjFile)
+    {
+        load(material);
+    }
+
+    for (uint32 i = 0; i < mesh->submeshes.size(); i++)
+    {
+        uploadToGpuOpenGl(&(mesh->submeshes[i]));
+    }
+
+    if (mesh->useMaterialsReferencedInObjFile)
+    {
+
+    }
+}

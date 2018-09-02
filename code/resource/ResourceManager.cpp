@@ -99,10 +99,17 @@ Shader* ResourceManager::initShader(FilenameString vertFilename, FilenameString 
     return initResource(shader, shaders, loadNow);
 }
 
-Mesh* ResourceManager::initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, bool loadNow)
+Mesh* ResourceManager::initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, MeshLoadOptions loadNow)
 {
     Mesh m(relFilename, useMaterialsRefrencedInObjFile);
-    return initResource(m, meshes, loadNow);
+    Mesh* result = initResource(m, meshes, loadNow == MeshLoadOptions::CPU || loadNow == MeshLoadOptions::CPU_AND_GPU);
+
+    if (loadNow == MeshLoadOptions::CPU_AND_GPU)
+    {
+        uploadToGpuOpenGl(result);
+    }
+
+    return result;
 }
 
 Cubemap*

@@ -26,6 +26,8 @@
 #include "ecs/components/WalkComponent.h"
 #include "ecs/components/TerrainComponent.h"
 
+#include <thread>
+
 const char* EditorState::EntityListUi::DRAG_DROP_ID              = "entity_drag_drop";
 const char* EditorState::EntityListUi::ADD_ENTITY_POPUP_ID       = "add_entity";
 const char* EditorState::ComponentListUi::ADD_COMPONENT_POPUP_ID = "add_component";
@@ -342,70 +344,97 @@ void showEditor(EditorState* editor)
                 if (ImGui::BeginPopupModal(EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID))
                 {
                     auto& meshPopup = editor->componentList.meshFileSelection;
-                    if (!meshPopup.isOpen || meshPopup.refreshFileList)
+
+                    bool closePopup = false;
+                    if (editor->componentList.meshFileSelection.isLoadingMesh)
                     {
-                        if (!meshPopup.isOpen)
+                        ImGui::Text("Loading %c", "|/-\\"[(int)(ImGui::GetTime() / 0.05f) & 3]);
+                        
+                        if (editor->componentList.meshFileSelection.finishedLoadingMesh)
                         {
-                            // Only re-search for file if the popup was just opened. If it was just a filter update,
-                            // only filter the results, don't re-search the OS for files
-                            meshPopup.meshFiles = getAllFileNames(ResourceManager::instance().resourceDirectory.cstr(), true, "obj");
-                        }
+                            editor->componentList.meshFileSelection.isLoadingMesh = false;
+                            editor->componentList.meshFileSelection.finishedLoadingMesh = false;
+                            
+                            Mesh* m = ResourceManager::instance().getMesh(meshPopup.meshFilesPtrs[meshPopup.selectedIndex]);
+                            assert(m->isLoaded);
 
-                        meshPopup.meshFilesCount = 0;
-                        meshPopup.isOpen = true;
-                        meshPopup.refreshFileList = false;
+                            if (!isUploadedToGpuOpenGl(m)) uploadToGpuOpenGl(m);
 
+                            auto rcc = addRenderComponents(e, m->submeshes.size());
+                            initRenderComponents(&rcc, m);
 
-                        for (uint32 i = 0; i < meshPopup.meshFiles.size(); i++)
-                        {
-                            if (i >= ARRAY_LEN(meshPopup.meshFilesPtrs))
-                            {
-                                assert(false);
-                                break;
-                            }
-
-                            if (meshPopup.filter == "" || meshPopup.meshFiles[i].find(meshPopup.filter.cstr(), 0) != std::string::npos)
-                            {
-                                meshPopup.meshFilesPtrs[meshPopup.meshFilesCount] = meshPopup.meshFiles[i].c_str();
-                                meshPopup.meshFilesCount++;
-                            }
+                            closePopup = true;
                         }
                     }
-
-                    ImGui::PushItemWidth(500);
-                    if (ImGui::InputText("Filter", meshPopup.filter.data, 256))
+                    else
                     {
-                        meshPopup.filter.invalidateLength();
-                        meshPopup.refreshFileList = true;
-                    }
+                        if (!meshPopup.isOpen || meshPopup.refreshFileList)
+                        {
+                            if (!meshPopup.isOpen)
+                            {
+                                // Only re-search for file if the popup was just opened. If it was just a filter update,
+                                // only filter the results, don't re-search the OS for files
+                                meshPopup.meshFiles = getAllFileNames(ResourceManager::instance().resourceDirectory.cstr(), true, "obj");
+                            }
 
-                    ImGui::PushItemWidth(500);
-                    ImGui::ListBox("Mesh File", &meshPopup.selectedIndex, meshPopup.meshFilesPtrs, meshPopup.meshFilesCount, 6);
-                    ImGui::PopItemWidth();
+                            meshPopup.meshFilesCount = 0;
+                            meshPopup.isOpen = true;
+                            meshPopup.refreshFileList = false;
 
-                    bool close = false;
-                    if (ImGui::Button("Add (+)"))
-                    {
-                        ResourceManager& rm = ResourceManager::instance();
-                        Mesh* m = rm.initMesh(meshPopup.meshFilesPtrs[meshPopup.selectedIndex], true, true);
-                        auto rcc = addRenderComponents(e, m->submeshes.size());
-                        initRenderComponents(&rcc, m);
-                        close = true;
-                    }
 
-                    ImGui::SameLine();
+                            for (uint32 i = 0; i < meshPopup.meshFiles.size(); i++)
+                            {
+                                if (i >= ARRAY_LEN(meshPopup.meshFilesPtrs))
+                                {
+                                    assert(false);
+                                    break;
+                                }
 
-                    if (ImGui::Button("Close"))
-                    {
-                        close = true;
+                                if (meshPopup.filter == "" || meshPopup.meshFiles[i].find(meshPopup.filter.cstr(), 0) != std::string::npos)
+                                {
+                                    meshPopup.meshFilesPtrs[meshPopup.meshFilesCount] = meshPopup.meshFiles[i].c_str();
+                                    meshPopup.meshFilesCount++;
+                                }
+                            }
+                        }
+
+                        ImGui::PushItemWidth(500);
+                        if (ImGui::InputText("Filter", meshPopup.filter.data, 256))
+                        {
+                            meshPopup.filter.invalidateLength();
+                            meshPopup.refreshFileList = true;
+                        }
+
+                        ImGui::PushItemWidth(500);
+                        ImGui::ListBox("Mesh File", &meshPopup.selectedIndex, meshPopup.meshFilesPtrs, meshPopup.meshFilesCount, 6);
+                        ImGui::PopItemWidth();
+
+                        if (ImGui::Button("Add (+)"))
+                        {
+                            editor->componentList.meshFileSelection.isLoadingMesh = true;
+
+                            // Asynchronously load mesh
+                            std::thread meshLoader([&meshPopup] {
+                                    ResourceManager& rm = ResourceManager::instance();
+                                    rm.initMesh(meshPopup.meshFilesPtrs[meshPopup.selectedIndex], true, MeshLoadOptions::CPU); // CPU only because we need to upload to GPU on the main thread
+                                    meshPopup.finishedLoadingMesh = true;
+                                }
+                            );
+
+                            meshLoader.detach();
+                        }
+
+                        ImGui::SameLine();
+
+                        if (ImGui::Button("Close"))
+                        {
+                            closePopup = true;
+                        }
+                        
                     }
 
                     ImGui::EndPopup();
-
-                    if (close)
-                    {
-                        ImGui::CloseCurrentPopup(); // Closes both mesh and add component popup (see @Hack about why we left this popup open)
-                    }
+                    if (closePopup) ImGui::CloseCurrentPopup(); // Closes both mesh and add component popup (see @Hack about why we left this popup open)
                 }
             }
 
@@ -665,6 +694,10 @@ void showEditor(EditorState* editor)
                         removeRenderComponent(&rc);
                         assert(rc == nullptr);
                     }
+
+                    
+                    editor->debug_selectedEntityHull.positions.clear();
+                    editor->debug_selectedEntityHull.edges.clear();
                 }
             }
     

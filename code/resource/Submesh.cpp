@@ -8,7 +8,7 @@
 #include <algorithm>
 
 
-Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh)
+Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool uploadToGpu)
     :
     vertices(std::move(vertices)),
     indices(std::move(indices)),
@@ -64,37 +64,10 @@ Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vecto
         this->bounds.center = minPoint + this->bounds.halfDim;
     }
 
-    //
-    // Setup OpenGL stuff
-    //
-    this->openGlInfo.indicesSize = this->indices.size();
-    
-    glGenVertexArrays(1, &this->openGlInfo.vao);
-    glGenBuffers(1, &this->openGlInfo.vbo);
-    glGenBuffers(1, &this->openGlInfo.ebo);
-
-    glBindVertexArray(this->openGlInfo.vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->openGlInfo.vbo);
-    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MeshVertex), this->vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->openGlInfo.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(uint32), this->indices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position));
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, texCoords));
-
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, tangent));
-
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
+    if (uploadToGpu)
+    {
+        uploadToGpuOpenGl(this);
+    }
 }
 
 void recalculateTangentsAndBitangents(Submesh* submesh)
@@ -225,10 +198,55 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
     }
 }
 
+bool isUploadedToGpuOpenGl(Submesh* submesh)
+{
+    return submesh->openGlInfo.vao != 0;
+}
+
+void uploadToGpuOpenGl(Submesh* submesh)
+{
+    if (submesh->openGlInfo.vao != 0) return;
+
+    submesh->openGlInfo.indicesSize = submesh->indices.size();
+    
+    glGenVertexArrays(1, &submesh->openGlInfo.vao);
+    auto eeee = glGetError();
+
+    glGenBuffers(1, &submesh->openGlInfo.vbo);
+    eeee = glGetError();
+
+    glGenBuffers(1, &submesh->openGlInfo.ebo);
+    eeee = glGetError();
+
+    glBindVertexArray(submesh->openGlInfo.vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, submesh->openGlInfo.vbo);
+    glBufferData(GL_ARRAY_BUFFER, submesh->vertices.size() * sizeof(MeshVertex), submesh->vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, submesh->openGlInfo.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, submesh->indices.size() * sizeof(uint32), submesh->indices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, texCoords));
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, tangent));
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
+}
+
 void reuploadModifiedVerticesToGpu(Submesh* submesh)
 {
     assert(submesh->openGlInfo.indicesSize == submesh->indices.size());
-    
+    assert(submesh->openGlInfo.vao != 0);
+
     glBindVertexArray(submesh->openGlInfo.vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, submesh->openGlInfo.vbo);

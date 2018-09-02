@@ -299,8 +299,8 @@ void buildTestScene1(Scene* scene)
 
     ResourceManager& rm = ResourceManager::instance();
     
-    Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, true);
-    Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, true);
+    Mesh *hexMesh = rm.initMesh("hex/hex.obj", true, MeshLoadOptions::CPU_AND_GPU);
+    Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, MeshLoadOptions::CPU_AND_GPU);
 
     // Set up directional light
     {
@@ -389,7 +389,7 @@ void buildTestScene2(Scene* scene)
 
     ResourceManager& rm = ResourceManager::instance();
     
-    Mesh *icosahedronMesh = rm.initMesh("icosahedron/icosahedron.obj", true, true);
+    Mesh *icosahedronMesh = rm.initMesh("icosahedron/icosahedron.obj", true, MeshLoadOptions::CPU_AND_GPU);
 
     // Set up directional light
     {
@@ -441,8 +441,8 @@ void buildTestScene3(Scene* scene)
 
     ResourceManager& rm = ResourceManager::instance();
     
-    Mesh *shuttleMesh = rm.initMesh("shuttle/shuttle.obj", true, true);
-    Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, true);
+    Mesh *shuttleMesh = rm.initMesh("shuttle/shuttle.obj", true, MeshLoadOptions::CPU_AND_GPU);
+    Mesh *bulb = rm.initMesh("bulb/bulb.obj", false, MeshLoadOptions::CPU_AND_GPU);
 
     // Set up directional light
     {
