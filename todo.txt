@@ -18,10 +18,7 @@
     [X] Render the result using DebugDraw drawLine
     [~] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
 
-[ ] Don't have MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY
-    - There are 300+ render components in the airboat mesh (fishy???). The componentgroup probably has to use
-      a vector instead of a flat array
-        [ ] Investigate fishiness... should be one submesh per usemtl
+[X] Investigate airboat mesh fishiness... should be one submesh per usemtl
 
 [ ] Port GJK/EPA code
 [ ] Collision + resolution when walking

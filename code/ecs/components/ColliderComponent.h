@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ICollider.h"
 #include "ecs/Component.h"
 #include "als/als_math.h"
 
@@ -15,7 +16,7 @@ enum class ColliderType : uint32
     ENUM_VALUE_COUNT
 };
 
-struct ColliderComponent : public Component
+struct ColliderComponent : public Component, public ICollider
 {
     ColliderComponent();
     ColliderComponent(Entity e, Aabb aabb);
@@ -41,9 +42,11 @@ struct ColliderComponent : public Component
     };
 
     static constexpr bool multipleAllowedPerEntity = true;
+
+    Vec3 center() override;
+    Vec3 support(Vec3 direction) override;
 };
 
-Vec3 colliderCenter(ColliderComponent* collider);
 Vec3 scaledXfmOffset(ColliderComponent* collider);
 float32 scaledLength(ColliderComponent* collider);
 float32 scaledRadius(ColliderComponent* collider);

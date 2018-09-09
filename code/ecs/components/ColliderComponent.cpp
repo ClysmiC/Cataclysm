@@ -25,18 +25,174 @@ ColliderComponent::ColliderComponent(Entity e, Aabb aabb)
     this->rect3Lengths.z = aabb.halfDim.z * 2;
 }
 
+Vec3 ColliderComponent::center()
+{
+    TransformComponent *xfm = getTransformComponent(this->entity);
+    Vec3 unrotatedOffset = scaledXfmOffset(this);
+    Vec3 rotatedOffset = xfm->orientation() * unrotatedOffset;
+    return xfm->position() + rotatedOffset;
+}
+
+Vec3 ColliderComponent::support(Vec3 direction)
+{
+    direction.normalizeInPlace();
+    Vec3 center = this->center();
+    
+    switch (this->type)
+    {
+        case ColliderType::RECT3:
+        {
+            //   a
+            //    |
+            //    |  b
+            //    | /
+            //    |/
+            //    -------- c
+            // corner
+                     
+            Vec3 corner = center -
+                (xLen / 2) * localX -
+                (yLen / 2) * localY -
+                (zLen / 2) * localZ;
+
+            Vec3 a = center +
+                (xLen / 2) * localX -
+                (yLen / 2) * localY -
+                (zLen / 2) * localZ;      
+
+            Vec3 b = center -
+                (xLen / 2) * localX +
+                (yLen / 2) * localY -
+                (zLen / 2) * localZ;
+
+            Vec3 c = center -
+                (xLen / 2) * localX -
+                (yLen / 2) * localY +
+                (zLen / 2) * localZ;
+
+            Vec3 edge1 = a - corner;
+            Vec3 edge2 = b - corner;
+            Vec3 edge3 = c - corner;
+
+            float32 maxDot = dot(corner - center, direction);
+            Vec3 maxDotVec = corner;
+
+            for (int i = 1; i < 8; i++)
+            {
+                Vec3 point = corner;
+                if (i & 1 == 1) point += edge1;
+                if (i & 2 == 1) point += edge2;
+                if (i & 4 == 1) point += edge3;
+
+                Vec3 centeredPoint = point - center;
+
+                float32 dotVal = dot(centeredPoint, direction);
+
+                if (dotVal > maxDot)
+                {
+                    maxDot = dotVal;
+                    maxDotVec = point;
+                }
+            }
+
+            return maxDotVec;
+        } break;
+
+        case ColliderType::SPHERE:
+        {
+            return center + scaledRadius * direction;
+        } break;
+
+        case ColliderType::CYLINDER:
+        {
+            // Consider cylinder in identity position.
+            // Need to rotate direction accordingly
+            
+            Quaternion orientation = getTransformComponent(this->entity)->orientation;
+            Quaternion identity;
+            Quaternion toIdentity = relativeRotation(orientation, identity);
+
+            Vec3 relativeDirection = toIdentity * direction;
+
+            Vec3 result;
+            
+            if (this->axis == Axis3D::X)
+            {
+                result.x = scaledLength(this) / 2 * (relativeDirection.x > 0 ? 1 : -1);
+
+                Vec3 circlePart = normalize(Vec3(0, relativeDirection.y, relativeDirection.z));
+                circlePart *= scaledRadius(this);
+                result.y = circlePart.y;
+                result.z = circlePart.z;
+            }
+            else if (this->axis == Axis3D::Y)
+            {
+                result.y = scaledLength(this) / 2 * (relativeDirection.y > 0 ? 1 : -1);
+
+                Vec3 circlePart = normalize(Vec3(relativeDirection.x, 0, relativeDirection.z));
+                circlePart *= scaledRadius(this);
+                result.x = circlePart.x;
+                result.z = circlePart.z;
+            }
+            else if (this->axis == Axis3D::Z)
+            {
+                result.z = scaledLength(this) / 2 * (relativeDirection.z > 0 ? 1 : -1);
+
+                Vec3 circlePart = normalize(Vec3(relativeDirection.x, relativeDirection.y, 0));
+                circlePart *= scaledRadius(this);
+                result.x = circlePart.x;
+                result.y = circlePart.y;
+            }
+            else assert(false);
+
+            // Re-orient and offset
+            result = orientation * result;
+            result = this->center() + result;
+            return result;
+        } break;
+
+        case ColliderType::CAPSULE:
+        {
+            // Consider capsule in identity orientation.
+            // Need to rotate direction accordingly
+            
+            Quaternion orientation = getTransformComponent(this->entity)->orientation;
+            Quaternion identity;
+            Quaternion toIdentity = relativeRotation(orientation, identity);
+
+            Vec3 relativeDirection = toIdentity * direction;
+
+            Vec3 result;
+            
+            if (this->axis == Axis3D::X)
+            {
+                Vec3 endpointSphereCenter = scaledLength(this) / 2 * Vec3(Axis3D::X) * (relativeDirection.x > 0 ? 1 : -1);
+                result = endpointSphereCenter + normalize(relativeDirection) * scaledRadius(this);
+            }
+            else if (this->axis == Axis3D::Y)
+            {
+                Vec3 endpointSphereCenter = scaledLength(this) / 2 * Vec3(Axis3D::Y) * (relativeDirection.y > 0 ? 1 : -1);
+                result = endpointSphereCenter + normalize(relativeDirection) * scaledRadius(this);
+            }
+            else if (this->axis == Axis3D::Z)
+            {
+                Vec3 endpointSphereCenter = scaledLength(this) / 2 * Vec3(Axis3D::Z) * (relativeDirection.z > 0 ? 1 : -1);
+                result = endpointSphereCenter + normalize(relativeDirection) * scaledRadius(this);
+            }
+            else assert(false);
+
+            // Re-orient and offset
+            result = orientation * result;
+            result = this->center() + result;
+            return result;
+        } break;
+    }
+}
+
 Vec3 scaledXfmOffset(ColliderComponent* collider)
 {
     TransformComponent *xfm = getTransformComponent(collider->entity);
     return hadamard(collider->xfmOffset, xfm->scale());
-}
-
-Vec3 colliderCenter(ColliderComponent* collider)
-{
-    TransformComponent *xfm = getTransformComponent(collider->entity);
-    Vec3 unrotatedOffset = scaledXfmOffset(collider);
-    Vec3 rotatedOffset = xfm->orientation() * unrotatedOffset;
-    return xfm->position() + rotatedOffset;
 }
 
 float32 scaledLength(ColliderComponent* collider)
@@ -117,7 +273,7 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
             //    |/
             //    -------- c
             // corner
-                     
+
             Vec3 corner = center -
                 (xLen / 2) * localX -
                 (yLen / 2) * localY -
@@ -142,7 +298,6 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
             Vec3 edge2 = b - corner;
             Vec3 edge3 = c - corner;
 
-
             if (isBetween(dot(point, edge1), dot(corner, edge1), dot(a, edge1)))
             {
                 if (isBetween(dot(point, edge2), dot(corner, edge2), dot(b, edge2)))
@@ -155,7 +310,6 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
             }
 
             return false;
-            
         } break;
 
         case ColliderType::SPHERE:
