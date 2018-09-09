@@ -37,11 +37,20 @@ Vec3 ColliderComponent::support(Vec3 direction)
 {
     direction.normalizeInPlace();
     Vec3 center = this->center();
+    Quaternion orientation = getTransformComponent(this->entity)->orientation();
     
     switch (this->type)
     {
         case ColliderType::RECT3:
         {
+                // Optimize: this calculation doesn't need to be done for the SPHERE case
+            Vec3 localX = orientation * Vec3(Axis3D::X);
+            Vec3 localY = orientation * Vec3(Axis3D::Y);
+            Vec3 localZ = orientation * Vec3(Axis3D::Z);
+
+            float32 xLen = scaledXLength(this);
+            float32 yLen = scaledYLength(this);
+            float32 zLen = scaledZLength(this);
             //   a
             //    |
             //    |  b
@@ -80,9 +89,9 @@ Vec3 ColliderComponent::support(Vec3 direction)
             for (int i = 1; i < 8; i++)
             {
                 Vec3 point = corner;
-                if (i & 1 == 1) point += edge1;
-                if (i & 2 == 1) point += edge2;
-                if (i & 4 == 1) point += edge3;
+                if ((i & 1) == 1) point += edge1;
+                if ((i & 2) == 1) point += edge2;
+                if ((i & 4) == 1) point += edge3;
 
                 Vec3 centeredPoint = point - center;
 
@@ -100,15 +109,13 @@ Vec3 ColliderComponent::support(Vec3 direction)
 
         case ColliderType::SPHERE:
         {
-            return center + scaledRadius * direction;
+            return center + scaledRadius(this) * direction;
         } break;
 
         case ColliderType::CYLINDER:
         {
             // Consider cylinder in identity position.
             // Need to rotate direction accordingly
-            
-            Quaternion orientation = getTransformComponent(this->entity)->orientation;
             Quaternion identity;
             Quaternion toIdentity = relativeRotation(orientation, identity);
 
@@ -155,8 +162,6 @@ Vec3 ColliderComponent::support(Vec3 direction)
         {
             // Consider capsule in identity orientation.
             // Need to rotate direction accordingly
-            
-            Quaternion orientation = getTransformComponent(this->entity)->orientation;
             Quaternion identity;
             Quaternion toIdentity = relativeRotation(orientation, identity);
 
@@ -187,6 +192,9 @@ Vec3 ColliderComponent::support(Vec3 direction)
             return result;
         } break;
     }
+
+    assert(false);
+    return Vec3();
 }
 
 Vec3 scaledXfmOffset(ColliderComponent* collider)
@@ -251,7 +259,7 @@ bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 {
     Quaternion orientation = getTransformComponent(collider->entity)->orientation();
     
-    Vec3 center = colliderCenter(collider);
+    Vec3 center = collider->center();
 
     // Optimize: this calculation doesn't need to be done for the SPHERE case
     Vec3 localX = orientation * Vec3(Axis3D::X);

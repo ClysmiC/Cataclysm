@@ -730,7 +730,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
         case ColliderType::RECT3:
         {
             drawRect3(
-                colliderCenter(collider),
+                collider->center(),
                 Vec3(
                     scaledXLength(collider),
                     scaledYLength(collider),
@@ -743,7 +743,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
         case ColliderType::SPHERE:
         {
             drawSphere(
-                colliderCenter(collider),
+                collider->center(),
                 scaledRadius(collider)
             );
         } break;
@@ -751,7 +751,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
         case ColliderType::CYLINDER:
         {
             drawCylinder(
-                colliderCenter(collider),
+                collider->center(),
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
@@ -762,7 +762,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
         case ColliderType::CAPSULE:
         {
             drawCapsule(
-                colliderCenter(collider),
+                collider->center(),
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,

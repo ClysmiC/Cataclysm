@@ -146,7 +146,7 @@ float32 rayVsCollider(Ray ray, ColliderComponent* collider)
     Vec3 localX = xfm->right();
     Vec3 localY = xfm->up();
     Vec3 localZ = xfm->back();
-    Vec3 center = colliderCenter(collider);
+    Vec3 center = collider->center();
 
     float32 result = -1;
     
