@@ -119,7 +119,18 @@ void showEditor(EditorState* editor)
             {
                 ColliderComponent* cc = getColliderComponent(e);
 
-                if (cc) DebugDraw::instance().drawCollider(cc);
+                if (cc)
+                {
+                    {
+                        // Debug
+                        Vec3 direction(1, 1, 1);
+                        Vec3 support = cc->support(direction);
+
+                        DebugDraw::instance().drawSphere(support, .2);
+                    }
+                    
+                    DebugDraw::instance().drawCollider(cc);
+                }
             }
         }
     }

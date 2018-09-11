@@ -35,18 +35,24 @@ Vec3 ColliderComponent::center()
 
 Vec3 ColliderComponent::support(Vec3 direction)
 {
+    // Consider collider in identity position/orientation.
+    // Need to rotate direction accordingly
     direction.normalizeInPlace();
-    Vec3 center = this->center();
+
     Quaternion orientation = getTransformComponent(this->entity)->orientation();
+    Quaternion toIdentity = relativeRotation(orientation, Quaternion());
+
+    Vec3 relativeDirection = toIdentity * direction;
+    Vec3 result; // After storing result here, we will rotate it back into the correct orientation
     
     switch (this->type)
     {
         case ColliderType::RECT3:
         {
-                // Optimize: this calculation doesn't need to be done for the SPHERE case
-            Vec3 localX = orientation * Vec3(Axis3D::X);
-            Vec3 localY = orientation * Vec3(Axis3D::Y);
-            Vec3 localZ = orientation * Vec3(Axis3D::Z);
+            // Optimize: this calculation doesn't need to be done for the SPHERE case
+            Vec3 xAxis = Vec3(Axis3D::X);
+            Vec3 yAxis = Vec3(Axis3D::Y);
+            Vec3 zAxis = Vec3(Axis3D::Z);
 
             float32 xLen = scaledXLength(this);
             float32 yLen = scaledYLength(this);
@@ -59,43 +65,41 @@ Vec3 ColliderComponent::support(Vec3 direction)
             //    -------- c
             // corner
                      
-            Vec3 corner = center -
-                (xLen / 2) * localX -
-                (yLen / 2) * localY -
-                (zLen / 2) * localZ;
+            Vec3 corner =
+                - (xLen / 2) * xAxis
+                - (yLen / 2) * yAxis
+                - (zLen / 2) * zAxis;
 
-            Vec3 a = center +
-                (xLen / 2) * localX -
-                (yLen / 2) * localY -
-                (zLen / 2) * localZ;      
+            Vec3 a =
+                + (xLen / 2) * xAxis
+                - (yLen / 2) * yAxis
+                - (zLen / 2) * zAxis;      
 
-            Vec3 b = center -
-                (xLen / 2) * localX +
-                (yLen / 2) * localY -
-                (zLen / 2) * localZ;
+            Vec3 b =
+                - (xLen / 2) * xAxis
+                + (yLen / 2) * yAxis
+                - (zLen / 2) * zAxis;
 
-            Vec3 c = center -
-                (xLen / 2) * localX -
-                (yLen / 2) * localY +
-                (zLen / 2) * localZ;
+            Vec3 c =
+                - (xLen / 2) * xAxis
+                - (yLen / 2) * yAxis
+                + (zLen / 2) * zAxis;
 
             Vec3 edge1 = a - corner;
             Vec3 edge2 = b - corner;
             Vec3 edge3 = c - corner;
 
-            float32 maxDot = dot(corner - center, direction);
+            float32 maxDot = dot(corner, relativeDirection);
             Vec3 maxDotVec = corner;
 
             for (int i = 1; i < 8; i++)
             {
                 Vec3 point = corner;
-                if ((i & 1) == 1) point += edge1;
-                if ((i & 2) == 1) point += edge2;
-                if ((i & 4) == 1) point += edge3;
+                if ((i & 1) > 0) point += edge1;
+                if ((i & 2) > 0) point += edge2;
+                if ((i & 4) > 0) point += edge3;
 
-                Vec3 centeredPoint = point - center;
-
-                float32 dotVal = dot(centeredPoint, direction);
+                float32 dotVal = dot(point, relativeDirection);
 
                 if (dotVal > maxDot)
                 {
@@ -104,25 +108,16 @@ Vec3 ColliderComponent::support(Vec3 direction)
                 }
             }
 
-            return maxDotVec;
+            result = maxDotVec;
         } break;
 
         case ColliderType::SPHERE:
         {
-            return center + scaledRadius(this) * direction;
+            result = scaledRadius(this) * relativeDirection;
         } break;
 
         case ColliderType::CYLINDER:
-        {
-            // Consider cylinder in identity position.
-            // Need to rotate direction accordingly
-            Quaternion identity;
-            Quaternion toIdentity = relativeRotation(orientation, identity);
-
-            Vec3 relativeDirection = toIdentity * direction;
-
-            Vec3 result;
-            
+        {            
             if (this->axis == Axis3D::X)
             {
                 result.x = scaledLength(this) / 2 * (relativeDirection.x > 0 ? 1 : -1);
@@ -152,23 +147,10 @@ Vec3 ColliderComponent::support(Vec3 direction)
             }
             else assert(false);
 
-            // Re-orient and offset
-            result = orientation * result;
-            result = this->center() + result;
-            return result;
         } break;
 
         case ColliderType::CAPSULE:
-        {
-            // Consider capsule in identity orientation.
-            // Need to rotate direction accordingly
-            Quaternion identity;
-            Quaternion toIdentity = relativeRotation(orientation, identity);
-
-            Vec3 relativeDirection = toIdentity * direction;
-
-            Vec3 result;
-            
+        {            
             if (this->axis == Axis3D::X)
             {
                 Vec3 endpointSphereCenter = scaledLength(this) / 2 * Vec3(Axis3D::X) * (relativeDirection.x > 0 ? 1 : -1);
@@ -186,15 +168,18 @@ Vec3 ColliderComponent::support(Vec3 direction)
             }
             else assert(false);
 
-            // Re-orient and offset
-            result = orientation * result;
-            result = this->center() + result;
-            return result;
         } break;
+
+        default:
+        {
+            assert(false);
+        }
     }
 
-    assert(false);
-    return Vec3();
+    // Re-orient and offset
+    result = orientation * result;
+    result = this->center() + result;
+    return result;
 }
 
 Vec3 scaledXfmOffset(ColliderComponent* collider)
