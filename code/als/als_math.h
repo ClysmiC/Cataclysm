@@ -162,6 +162,21 @@ struct Mat4
     Mat4& orthoInPlace(float32 width, float32 aspectRatio, float32 near, float32 far);
 };
 
+union Triangle
+{
+    struct
+    {
+        Vec3 a;
+        Vec3 b;
+        Vec3 c;
+    };
+
+    Vec3 elements[3];
+
+    Triangle();
+    Triangle(Vec3 a, Vec3 b, Vec3 c);
+};
+
 struct Plane
 {
     Plane(Vec3 point, Vec3 normal);
@@ -930,4 +945,55 @@ inline Vec3 barycentricCoordinate(Vec2 a, Vec2 b, Vec2 c, Vec2 point)
     result.x = 1.0f - result.y - result.z;
 
     return result;
+}
+
+inline Vec3 triangleNormal(Triangle& triangle)
+{
+    Vec3 ab = triangle.b - triangle.a;
+    Vec3 ac = triangle.c - triangle.a;
+    Vec3 n = cross(ab, ac);
+
+    if(n.x == 0 && n.y == 0 && n.z == 0)
+    {
+        // This triangle is literally a single point...
+        if(equals(triangle.a, triangle.b) && equals(triangle.a, triangle.c))
+        {
+            assert(false);
+            n = Vec3(1, 0, 0);
+        }
+			
+        // Isn't a true triangle, since ab and ac are parallel...
+        // Simply return a vector that is parallel to bc
+        if(equals(triangle.b, triangle.c))
+        {
+            // AB and AC are same
+            Vec3 nonParallel = ab + Vec3(1, 0, 0);
+
+            n = cross(ab, nonParallel);
+
+            assert(n.x != 0 || n.y != 0 || n.z != 0);
+        }
+        else
+        {
+            // AB and AC are in opposite directions
+            Vec3 bc = triangle.c - triangle.b;
+            Vec3 nonParallel = bc + Vec3(1, 0, 0);
+
+            n = cross(bc, nonParallel);
+
+            assert(n.x != 0 || n.y != 0 || n.z != 0);
+        }
+    }
+		
+    n.normalizeInPlace();
+		
+    return n;
+}
+
+inline void rewind(Triangle* t)
+{
+    Vec3 temp;
+    temp = t->b;
+    t->b = t->c;
+    t->c = temp;
 }

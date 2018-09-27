@@ -86,6 +86,16 @@ Plane::Plane(Vec3 pointA, Vec3 pointB, Vec3 pointC)
     normal = normalize(cross(ab, ac));
 }
 
+Triangle::Triangle()
+    : a(Vec3()), b(Vec3()), c(Vec3())
+{
+}
+
+Triangle::Triangle(Vec3 a, Vec3 b, Vec3 c)
+    : a(a), b(b), c(c)
+{
+}
+
 Vec2& Vec2::normalizeInPlace()
 {
     float32 len = length(*this);

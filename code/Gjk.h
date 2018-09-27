@@ -11,4 +11,4 @@ struct GjkResult
     GjkResult() : collides(false), penetrationVector(0, 0, 0) {}
 };
 
-GjkResult gjk(ICollider* a, ICollider* b);
+GjkResult gjk(ICollider* a, ICollider* b, bool calculatePenetrationVector=true);
