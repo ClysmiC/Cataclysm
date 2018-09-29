@@ -6,6 +6,8 @@
 
 #include "ecs/components/TransformComponent.h"
 
+EntityFlags g_defaultEntityFlags = EntityFlag_Static;
+
 void removeParent(Entity e)
 {
     if (e.id == 0) return;

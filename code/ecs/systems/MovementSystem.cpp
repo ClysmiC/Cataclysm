@@ -14,12 +14,17 @@
 #include "ecs/components/TerrainComponent.h"
 #include "ecs/components/WalkComponent.h"
 
+#include "Gjk.h"
+
 void walkAndCamera(Game* game)
 {
     TransformComponent* xfm = getTransformComponent(game->player);
     TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
     WalkComponent* walk = getWalkComponent(game->player);
     ColliderComponent* collider = getColliderComponent(game->player);
+    EntityDetails* details = getEntityDetails(game->player);
+
+    assert((details->flags & EntityFlag_Static) == 0); // only dynamic object can walk!
     
     TerrainComponent *terrain = getTerrainComponent(walk->terrain);
     
@@ -102,6 +107,31 @@ void walkAndCamera(Game* game)
         }
     }
 
+    //
+    // Resolve collision
+    //
+    if (collider)
+    {
+        FOR_BUCKET_ARRAY (game->activeScene->ecs.colliders.components)
+        {
+            // @Slow. Improve with spatial partitioning
+            ColliderComponent* cc = it.ptr;
+            EntityDetails* debug_details = getEntityDetails(cc->entity);
+
+            if (cc->isTrigger || cc->entity.id == walk->entity.id) continue;
+
+            GjkResult collisionResult = gjk(collider, cc);
+
+            if (collisionResult.collides)
+            {
+                xfm->setPosition(xfm->position() - collisionResult.penetrationVector);
+            }
+        }
+    }
+
+    //
+    // Snap to ground
+    //
     if (terrain)
     {
         float32 height = getTerrainHeight(terrain, xfm->position().x, xfm->position().z);

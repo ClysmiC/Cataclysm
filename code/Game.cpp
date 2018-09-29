@@ -30,6 +30,7 @@
 #include "resource/resources/Mesh.h"
 #include "GL/glew.h"
 #include "Ray.h"
+#include "Gjk.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -339,7 +340,7 @@ void buildTestScene1(Scene* scene)
             addColliderComponent(e);
         }
         tc->setPosition(hexPositions[i]);
-        tc->setScale(Vec3(.25));
+        tc->setScale(Vec3(1));
         
         auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
@@ -635,7 +636,7 @@ int main()
 
     // Set up player
     // @Hack: same as camera hack
-    Entity player = makeEntity(&testScene1->ecs, "player");
+    Entity player = makeEntity(&testScene1->ecs, "player", EntityFlag_None);
     game->player = player;
     {
         TransformComponent* playerXfm = getTransformComponent(player);
@@ -718,6 +719,23 @@ int main()
 
     makeSceneActive(game, testScene1);
     makeCameraActive(game, camera);
+
+    //
+    // DEBUG: test gjk
+    //
+    //{
+    //    TransformComponent* playerXfm = getTransformComponent(player);
+    //    ColliderComponent* playerCC = getColliderComponent(player);
+    //    playerXfm->setPosition(1, 1, 1);
+
+    //    ColliderComponent* hexCC = &testScene1->ecs.colliders[0];
+    //    TransformComponent* hexXfm = getTransformComponent(hexCC->entity);
+    //    hexXfm->setPosition(1.1, 1.1, 1.1);
+
+    //    GjkResult gjkResult = gjk(playerCC, hexCC);
+
+    //    int xx = 0;
+    //}
     
     while(!glfwWindowShouldClose(window.glfwWindow))
     {

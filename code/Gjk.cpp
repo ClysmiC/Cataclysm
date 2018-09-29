@@ -19,7 +19,7 @@ namespace Gjk
 
     Vec3 minkowskiSupport(ICollider* a, ICollider* b, Vec3 direction)
     {
-        Vec3 result = a->support(direction) - b->support(direction);
+        Vec3 result = a->support(direction) - b->support(-direction);
         return result;
     }
 
@@ -231,7 +231,7 @@ namespace Epa
         Vec3 d = gjkSimplex->points[0];
 
         simplex->faceCount = 0;
-		
+        
         addTriangleToSimplex(simplex, Triangle(a, c, b));
         addTriangleToSimplex(simplex, Triangle(a, d, c));
         addTriangleToSimplex(simplex, Triangle(a, b, d));
@@ -387,13 +387,13 @@ namespace Epa
         initSimplexFromGjkSimplex(&simplex, gjkSimplex);
 
         Vec3 result;
-	
+    
         while(true)
         {
             Triangle face;
             uint32 faceIndex;
             float32 dist = closestFaceToOrigin(&simplex, &face, &faceIndex);
-		
+        
             Vec3 faceNormal = triangleNormal(face);
             Vec3 furthestInNormal = Gjk::minkowskiSupport(a, b, faceNormal);
             float32 furthestInNormalDistance = dot(furthestInNormal, faceNormal);
@@ -415,7 +415,7 @@ namespace Epa
                 break;
             }
         }
-	
+    
         return result;
     }
 }

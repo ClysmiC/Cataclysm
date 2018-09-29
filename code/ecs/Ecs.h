@@ -88,7 +88,7 @@ bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* compo
 //
 // Entity functions
 //
-Entity makeEntity(Ecs* ecs, string16 friendlyName="");
+Entity makeEntity(Ecs* ecs, string16 friendlyName="", EntityFlags flags=g_defaultEntityFlags);
 bool   markEntityForDeletion(Entity entity);
 
 EntityDetails* getEntityDetails(Entity entity);

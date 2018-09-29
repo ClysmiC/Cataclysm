@@ -185,6 +185,42 @@ ITransform::setScale(Vec3 scale)
 }
 
 void
+ITransform::setLocalPosition(float32 x, float32 y, float32 z)
+{
+    setLocalPosition(Vec3(x, y, z));
+}
+
+void
+ITransform::setLocalOrientation(float32 x, float32 y, float32 z, float32 w)
+{
+    setLocalOrientation(Quaternion(x, y, z, w));
+}
+
+void
+ITransform::setLocalScale(float32 x, float32 y, float32 z)
+{
+    setLocalScale(Vec3(x, y, z));
+}
+
+void
+ITransform::setPosition(float32 x, float32 y, float32 z)
+{
+    setPosition(Vec3(x, y, z));
+}
+
+void
+ITransform::setOrientation(float32 x, float32 y, float32 z, float32 w)
+{
+    setOrientation(Quaternion(x, y, z, w));
+}
+
+void
+ITransform::setScale(float32 x, float32 y, float32 z)
+{
+    setScale(Vec3(x, y, z));
+}
+
+void
 ITransform::markSelfAndChildrenDirty()
 {
     worldDirty = true;

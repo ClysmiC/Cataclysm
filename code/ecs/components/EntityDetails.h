@@ -7,9 +7,13 @@
 
 enum EntityFlags : uint64
 {
+    EntityFlag_None              = 0,
+        
     EntityFlag_Static            = 1 << 0,
     EntityFlag_MarkedForDeletion = 1 << 1,
 };
+
+extern EntityFlags g_defaultEntityFlags;
 
 struct EntityDetails : public Component
 {

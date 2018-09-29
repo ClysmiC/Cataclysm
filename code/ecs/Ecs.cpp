@@ -151,7 +151,7 @@ bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* toRem
     return false;
 }
 
-Entity makeEntity(Ecs* ecs, string16 friendlyName)
+Entity makeEntity(Ecs* ecs, string16 friendlyName, EntityFlags flags)
 {
     Entity result;
     result.id = Ecs::nextEntityId;
@@ -164,7 +164,7 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName)
     
     details->entity.id = result.id;
     details->entity.ecs = result.ecs;
-    details->flags = 0;
+    details->flags = flags;
     details->parent.id = 0;
     details->friendlyName = friendlyName;
 

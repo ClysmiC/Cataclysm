@@ -43,6 +43,13 @@ struct ITransform
     void setOrientation(Quaternion orientation);
     void setScale(Vec3 scale);
 
+    void setLocalPosition(float32 x, float32 y, float32 z);
+    void setLocalOrientation(float32 x, float32 y, float32 z, float32 w);
+    void setLocalScale(float32 x, float32 y, float32 z);
+    void setPosition(float32 x, float32 y, float32 z);
+    void setOrientation(float32 x, float32 y, float32 z, float32 w);
+    void setScale(float32 x, float32 y, float32 z);
+
     void recalculateWorld();
     
     void markSelfAndChildrenDirty();
