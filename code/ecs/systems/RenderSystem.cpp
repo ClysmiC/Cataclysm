@@ -44,6 +44,20 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
 
 void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
+    // TODO: better way of picking which directional light to use for shadow mapping?
+    bool hasShadowMap = false;
+    if (scene->ecs.directionalLights.count() > 0)
+    {
+        hasShadowMap = true;
+        DirectionalLightComponent dirLight = scene->ecs.directionalLights[0];
+
+        Vec3 veryFarAwayPoint = -dirLight->direction * 1000;
+
+        // TODO: set up ortho camera and render from veryFarAwayPoint to depth buffer
+
+        
+    }
+    
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
     {
         RenderComponent &rc = *it.ptr;

@@ -495,6 +495,7 @@ Vec3 toEuler(Quaternion q);              //
 Quaternion fromEuler(Vec3 euler);        //
 ///////////////////////////////////////////
 
+Mat4 lookAt(Vec3 position, Vec3 target, Vec3 up);
 Quaternion relativeRotation(Vec3 start, Vec3 end);
 Quaternion lookRotation(Vec3 forward, Vec3 up);
 

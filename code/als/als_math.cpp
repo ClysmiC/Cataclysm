@@ -1074,6 +1074,26 @@ Quaternion lookRotation(Vec3 forward, Vec3 up)
     return normalize(quaternion);
 }
 
+Mat4 lookAt(Vec3 position, Vec3 target, Vec3 up)
+{
+    // Center around origin and orthogonalize "up"
+    Vec3 originalPosition = position;
+    position = Vec3(0);
+    target -= originalPosition;
+    up -= originalPosition;
+    up = cross(cross(target, up), target);
+
+    Quaternion rotation = lookRotation(target, up);
+
+    // Calculate as a world matrix and then use worldToView...
+    Mat4 result;
+    result.rotateInPlace(rotation);
+    result.translateInPlace(originalPosition);
+
+    result = worldToView(result);
+    return result;
+}
+
 Quaternion relativeRotation(Vec3 start, Vec3 end)
 {
     Quaternion result;
