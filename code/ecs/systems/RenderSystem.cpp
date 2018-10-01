@@ -46,10 +46,10 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
 {
     // TODO: better way of picking which directional light to use for shadow mapping?
     bool hasShadowMap = false;
-    if (scene->ecs.directionalLights.count() > 0)
+    if (ecs->directionalLights.count() > 0)
     {
         hasShadowMap = true;
-        DirectionalLightComponent dirLight = scene->ecs.directionalLights[0];
+        DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
         Vec3 veryFarAwayPoint = -dirLight->direction * 1000;
 

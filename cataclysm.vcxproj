@@ -136,6 +136,7 @@
     <ClCompile Include="code\Aabb.cpp" />
     <ClCompile Include="code\als\als_math.cpp" />
     <ClCompile Include="code\als\als_temp_alloc.cpp" />
+    <ClCompile Include="code\Camera.cpp" />
     <ClCompile Include="code\DebugDraw.cpp" />
     <ClCompile Include="code\ecs\Component.cpp" />
     <ClCompile Include="code\ecs\components\CameraComponent.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="code\als\als_temp_alloc.h" />
     <ClInclude Include="code\als\als_types.h" />
     <ClInclude Include="code\als\als_util.h" />
+    <ClInclude Include="code\Camera.h" />
     <ClInclude Include="code\ConvexHull.h" />
     <ClInclude Include="code\DebugDraw.h" />
     <ClInclude Include="code\ecs\Component.h" />

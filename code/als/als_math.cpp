@@ -1087,10 +1087,33 @@ Mat4 lookAt(Vec3 position, Vec3 target, Vec3 up)
 
     // Calculate as a world matrix and then use worldToView...
     Mat4 result;
-    result.rotateInPlace(rotation);
-    result.translateInPlace(originalPosition);
 
-    result = worldToView(result);
+    // @CopyPaste with small modifications from worldToView(...) in Transform.cpp
+    {
+        Vec3 back = -target;
+        Vec3 right = cross(up, back);
+
+        // Rotate
+        result[0][0] = right.x;
+        result[1][0] = up.x;
+        result[2][0] = back.x;
+
+        result[0][1] = right.y;
+        result[1][1] = up.y;
+        result[2][1] = back.y;
+
+        result[0][2] = right.z;
+        result[1][2] = up.z;
+        result[2][2] = back.z;
+
+        // Homogeneous
+        result[3][3] = 1;
+
+        // Translate
+        Mat4 translation = translationMatrix(-originalPosition);
+        result = result * translation;
+    }
+
     return result;
 }
 
