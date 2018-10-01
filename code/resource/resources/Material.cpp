@@ -140,7 +140,7 @@ bool bind(Material* material)
     for (auto kvp : material->textureUniforms)
     {
         glActiveTexture(textureUnit);
-        glBindTexture(GL_TEXTURE_2D, kvp.second->openGlHandle);
+        glBindTexture(GL_TEXTURE_2D, kvp.second->textureData.textureId);
         setInt(shader, kvp.first, textureUnitIndex);
         
         textureUnit++;

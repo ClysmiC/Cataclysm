@@ -8,6 +8,36 @@
 
 #include "GL/glew.h"
 
+void load(TextureData* textureData, unsigned char* buffer, GLenum bufferFormat)
+{
+    assert(textureData->textureId == 0);
+    
+    // Upload image to opengl texture and store handle
+    glGenTextures(1, &textureData->textureId);
+    glBindTexture(GL_TEXTURE_2D, textureData->textureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    if (buffer)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, textureData->gpuFormat, textureData->width, textureData->height, 0, bufferFormat, GL_UNSIGNED_BYTE, buffer);
+    }
+    
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void unload(TextureData* textureData)
+{
+    assert(textureData->textureId != 0);
+
+    // Unload texture from OpenGL
+    glDeleteTextures(1, &textureData->textureId);
+
+    textureData->textureId = 0;
+}
+
 Texture::Texture(FilenameString filename, bool gammaCorrect_)
 {
     this->id = filename;
@@ -23,43 +53,38 @@ bool load(Texture* texture)
 
     int w, h, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(filename.cstr(), &w, &h, &channels, 0);
+    unsigned char *buffer = stbi_load(filename.cstr(), &w, &h, &channels, 0);
+    GLenum bufferFormat;
 
-    GLenum internalFormat; // How to interpret data in the GPU
-    GLenum dataFormat;     // How data is stored in-memory
+    texture->textureData.width = w;
+    texture->textureData.height = h;
+    
     if (channels == 1)
     {
-        internalFormat = GL_RED;
-        dataFormat = GL_RED;
+        texture->textureData.gpuFormat = GL_RED;
+        bufferFormat = GL_RED;
     }
     else if (channels == 3)
     {
-        internalFormat = texture->gammaCorrect ? GL_SRGB : GL_RGB;
-        dataFormat = GL_RGB;
+        texture->textureData.gpuFormat = texture->gammaCorrect ? GL_SRGB : GL_RGB;
+        bufferFormat = GL_RGB;
     }
     else if (channels == 4)
     {
-        internalFormat = texture->gammaCorrect ? GL_SRGB_ALPHA : GL_RGBA;
-        dataFormat = GL_RGBA;
+        texture->textureData.gpuFormat = texture->gammaCorrect ? GL_SRGB_ALPHA : GL_RGBA;
+        bufferFormat = GL_RGBA;
     }
     else
     {
         assert(false);
-        stbi_image_free(data);
+        stbi_image_free(buffer);
         return false;
     }
 
     // Upload image to opengl texture and store handle
-    glGenTextures(1, &texture->openGlHandle);
-    glBindTexture(GL_TEXTURE_2D, texture->openGlHandle);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, dataFormat, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    load(&texture->textureData, buffer, bufferFormat);
 
-    stbi_image_free(data);
+    stbi_image_free(buffer);
     texture->isLoaded = true;
     return true;
 }
@@ -68,8 +93,7 @@ bool unload(Texture* texture)
 {
     assert(texture->isLoaded);
 
-    // Unload texture from OpenGL
-    glDeleteTextures(1, &texture->openGlHandle);
+    unload(&texture->textureData);
 
     texture->isLoaded = false;
 

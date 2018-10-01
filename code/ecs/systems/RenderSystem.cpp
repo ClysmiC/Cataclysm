@@ -48,14 +48,34 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
     bool hasShadowMap = false;
     if (ecs->directionalLights.count() > 0)
     {
-        hasShadowMap = true;
-        DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
+        //const uint32 farAway = 1000;
+        //
+        //hasShadowMap = true;
+        //DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
-        Vec3 veryFarAwayPoint = -dirLight->direction * 1000;
+        //Vec3 veryFarAwayPoint = -dirLight->direction * farAway;
 
-        // TODO: set up ortho camera and render from veryFarAwayPoint to depth buffer
+        //// TODO: set up ortho camera and render from veryFarAwayPoint to depth buffer
 
-        
+        //// TODO: cache these on the light itself?
+        //Camera lightCamera;
+        //lightCamera.isOrthographic = true;
+        //lightCamera.near = 1;
+        //lightCamera.far = farAway * 2;
+        //lightCamera.orthoWidth = 20; // TODO: calculate these to fill teh entire view frustrum of the main camera
+        //lightCamera.aspectRatio = 1;
+        //lightCamera.window = nullptr; // This is okay because we won't be casting rays through the screen
+        //recalculateProjectionMatrix(&lightCamera);
+
+        //Vec3 lightUp = Vec3(0, 1, 0);
+        //Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
+        //Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
+
+        //if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
+
+        //Mat4 lightViewMatrix = lookAt(veryFarAwayPoint, lightTarget, lightUp);
+
+        //Mat4 lightMatrix = lightCamera.projectionMatrix * lightViewMatrix;
     }
     
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
