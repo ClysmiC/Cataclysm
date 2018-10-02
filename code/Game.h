@@ -2,6 +2,7 @@
 
 #include "Editor.h"
 #include "Scene.h"
+#include "ecs/systems/RenderSystem.h"
 
 extern float mouseX;
 extern float mouseY;
@@ -31,6 +32,8 @@ struct Game
 
     Scene* activeScene;
     Window* window;
+
+    Renderer renderer;
 
     // @TODO: Should these be PotentiallyStaleEntity ?
     Entity activeCamera;

@@ -1,7 +1,5 @@
 #include "als/als_bucket_array.h"
 
-#include "GL/glew.h"
-
 #include "Quad.h"
 #include "DebugDraw.h"
 #include "RenderSystem.h"
@@ -16,6 +14,17 @@
 #include "resource/resources/Shader.h"
 
 #include <string>
+
+void initRenderer(Renderer* renderer)
+{
+    glGenFramebuffers(1, &renderer->shadowMapFbo);
+    
+    renderer->shadowMap.width = 1024;
+    renderer->shadowMap.height = 1024;
+    renderer->shadowMap.gpuFormat = GL_DEPTH_COMPONENT16;
+
+    load(&renderer->shadowMap);
+}
 
 PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
 {    
@@ -42,40 +51,64 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
     return closest;
 }
 
-void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
+void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
     // TODO: better way of picking which directional light to use for shadow mapping?
     bool hasShadowMap = false;
     if (ecs->directionalLights.count() > 0)
     {
-        //const uint32 farAway = 1000;
-        //
-        //hasShadowMap = true;
-        //DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
+        const uint32 farAway = 1000;
+        
+        hasShadowMap = true;
+        DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
-        //Vec3 veryFarAwayPoint = -dirLight->direction * farAway;
+        Vec3 veryFarAwayPoint = -dirLight->direction * farAway;
 
-        //// TODO: set up ortho camera and render from veryFarAwayPoint to depth buffer
+        // TODO: cache these on the light itself?
+        Camera lightCamera;
+        lightCamera.isOrthographic = true;
+        lightCamera.near = 1;
+        lightCamera.far = farAway * 2;
+        lightCamera.orthoWidth = 20; // TODO: calculate these to fill teh entire view frustrum of the main camera
+        lightCamera.aspectRatio = 1;
+        lightCamera.window = nullptr; // This is okay because we won't be casting rays through the screen
+        recalculateProjectionMatrix(&lightCamera);
 
-        //// TODO: cache these on the light itself?
-        //Camera lightCamera;
-        //lightCamera.isOrthographic = true;
-        //lightCamera.near = 1;
-        //lightCamera.far = farAway * 2;
-        //lightCamera.orthoWidth = 20; // TODO: calculate these to fill teh entire view frustrum of the main camera
-        //lightCamera.aspectRatio = 1;
-        //lightCamera.window = nullptr; // This is okay because we won't be casting rays through the screen
-        //recalculateProjectionMatrix(&lightCamera);
+        Vec3 lightUp = Vec3(0, 1, 0);
+        Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
+        Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
 
-        //Vec3 lightUp = Vec3(0, 1, 0);
-        //Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
-        //Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
+        if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
 
-        //if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
+        Mat4 lightViewMatrix = lookAt(veryFarAwayPoint, lightTarget, lightUp);
 
-        //Mat4 lightViewMatrix = lookAt(veryFarAwayPoint, lightTarget, lightUp);
+        Mat4 lightMatrix = lightCamera.projectionMatrix * lightViewMatrix;
 
-        //Mat4 lightMatrix = lightCamera.projectionMatrix * lightViewMatrix;
+        glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
+
+            FOR_BUCKET_ARRAY (ecs->renderComponents.components)
+            {
+                RenderComponent &rc = *it.ptr;
+                TransformComponent* xfm = getTransformComponent(rc.entity);
+
+                if (!rc.isVisible) continue;
+                if (renderingViaPortal) continue; // TODO: figure out this story
+
+                drawRenderComponent(&rc, xfm, camera, cameraXfm);
+
+                auto v = glGetError();
+                assert(v == 0);
+            }
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, camera->window->width, camera->window->height);
     }
     
     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
@@ -139,7 +172,7 @@ void renderAllRenderComponents(Ecs* ecs, CameraComponent* camera, ITransform* ca
     }
 }
 
-void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
+void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
 {
     if (recursionLevel > 0)
     {
@@ -217,7 +250,7 @@ void renderContentsOfAllPortals(Scene* scene, CameraComponent* camera, ITransfor
             {
                 glStencilFunc(GL_EQUAL, 1, 0xFF);
                 glStencilMask(0x00);
-                renderScene(getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
+                renderScene(renderer, getConnectedScene(pc), camera, &portalViewpointXfm, recursionLevel + 1, destSceneXfm);
             }
         }
         glDisable(GL_STENCIL_TEST);

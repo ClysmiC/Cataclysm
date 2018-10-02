@@ -519,7 +519,7 @@ void updateGame(Game* game)
         CameraComponent* camComponent = getCameraComponent(game->activeCamera);
         TransformComponent* camXfm = getTransformComponent(game->activeCamera);
 
-        renderScene(game->activeScene, camComponent, camXfm);
+        renderScene(&game->renderer, game->activeScene, camComponent, camXfm);
     }
 
     //
@@ -611,10 +611,13 @@ int main()
     float32 lastTimeMs = 0;
 
     Game* game = new Game();
+    
     game->editor.game = game;
     game->editor.pseudoEcs.game = game;
     game->editor.isEnabled = false;
     game->window = &window;
+    
+    initRenderer(&game->renderer);
     
     Scene* testScene1 = makeScene(game);
     buildTestScene1(testScene1);

@@ -24,12 +24,12 @@ void addCubemap(Scene* scene, Cubemap* cubemap)
     scene->cubemap = cubemap;
 }
 
-void renderScene(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel, ITransform* destPortalXfm)
+void renderScene(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel, ITransform* destPortalXfm)
 {
     if (recursionLevel > 3) return;
     
     if (scene->cubemap != nullptr) renderCubemap(scene->cubemap, camera, cameraXfm);
 
-    renderContentsOfAllPortals(scene, camera, cameraXfm, recursionLevel);
-    renderAllRenderComponents(&scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
+    renderContentsOfAllPortals(renderer, scene, camera, cameraXfm, recursionLevel);
+    renderAllRenderComponents(renderer, &scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
 }

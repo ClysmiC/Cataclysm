@@ -1081,6 +1081,10 @@ Mat4 lookAt(Vec3 position, Vec3 target, Vec3 up)
     position = Vec3(0);
     target -= originalPosition;
     up -= originalPosition;
+
+    target.normalizeInPlace();
+    up.normalizeInPlace();
+
     up = cross(cross(target, up), target);
 
     Quaternion rotation = lookRotation(target, up);

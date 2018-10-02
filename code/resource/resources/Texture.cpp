@@ -24,6 +24,10 @@ void load(TextureData* textureData, unsigned char* buffer, GLenum bufferFormat)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, textureData->gpuFormat, textureData->width, textureData->height, 0, bufferFormat, GL_UNSIGNED_BYTE, buffer);
     }
+    else
+    {
+        glTexStorage2D(GL_TEXTURE_2D, 1, textureData->gpuFormat, textureData->width, textureData->height);
+    }
     
     glGenerateMipmap(GL_TEXTURE_2D);
 }

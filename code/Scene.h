@@ -7,6 +7,7 @@
 struct Game;
 struct Cubemap;
 struct ITransform;
+struct Renderer;
 
 struct Scene
 {
@@ -18,5 +19,5 @@ struct Scene
     Scene();
 };
 
-void renderScene(Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel=0, ITransform* destPortalXfm=nullptr);
+void renderScene(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel = 0, ITransform* destPortalXfm = nullptr);
 void addCubemap(Scene* scene, Cubemap* cubemap);
