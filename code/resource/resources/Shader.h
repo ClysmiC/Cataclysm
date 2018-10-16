@@ -7,6 +7,11 @@
 
 struct Shader
 {
+    static const char COMPOSITE_ID_DELIMITER;
+    
+    static const FilenameString SIMPLE_DEPTH_VERT_SHADER;
+    static const FilenameString SIMPLE_DEPTH_FRAG_SHADER;
+    
     Shader() = default;
     Shader(string128 vertFile, string128 fragFile);
 
@@ -17,8 +22,6 @@ struct Shader
     string128 fragFilename;
 
     uint32 openGlHandle;
-
-    static const char COMPOSITE_ID_DELIMITER;
 };
 
 bool load(Shader* shader);

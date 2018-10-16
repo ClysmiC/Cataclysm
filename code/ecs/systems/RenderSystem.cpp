@@ -11,6 +11,7 @@
 #include "ecs/components/PointLightComponent.h"
 #include "ecs/components/DirectionalLightComponent.h"
 #include "ecs/components/TransformComponent.h"
+#include "resource/ResourceManager.h"
 #include "resource/resources/Shader.h"
 
 #include <string>
@@ -80,12 +81,13 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
         if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
 
-        Mat4 lightViewMatrix = lookAt(veryFarAwayPoint, lightTarget, lightUp);
-
-        Mat4 lightMatrix = lightCamera.projectionMatrix * lightViewMatrix;
+        lightCamera.transform.setPosition(veryFarAwayPoint);
+        lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
 
         glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
         {
+            glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
@@ -93,83 +95,86 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
             glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
 
-            FOR_BUCKET_ARRAY (ecs->renderComponents.components)
+            Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
+            assert(simpleDepthShader);
+            
+            
+            if (!renderingViaPortal) // TODO: figure out this story
             {
-                RenderComponent &rc = *it.ptr;
-                TransformComponent* xfm = getTransformComponent(rc.entity);
+                FOR_BUCKET_ARRAY(ecs->renderComponents.components)
+                {
+                    RenderComponent &rc = *it.ptr;
+                    TransformComponent* xfm = getTransformComponent(rc.entity);
 
-                if (!rc.isVisible) continue;
-                if (renderingViaPortal) continue; // TODO: figure out this story
+                    if (!rc.isVisible) continue;
 
-                drawRenderComponent(&rc, xfm, camera, cameraXfm);
-
-                auto v = glGetError();
-                assert(v == 0);
+                    drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
+                }
             }
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, camera->window->width, camera->window->height);
     }
     
-    FOR_BUCKET_ARRAY (ecs->renderComponents.components)
-    {
-        RenderComponent &rc = *it.ptr;
-        if (!rc.isVisible) continue;
+     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
+     {
+         RenderComponent &rc = *it.ptr;
+         if (!rc.isVisible) continue;
         
-        TransformComponent* xfm = getTransformComponent(rc.entity);
+         TransformComponent* xfm = getTransformComponent(rc.entity);
 
-        if (renderingViaPortal)
-        {
-            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
-            if (behindDestPortal) continue;
-        }
+         if (renderingViaPortal)
+         {
+             bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
+             if (behindDestPortal) continue;
+         }
 
-        // TODO: Lighting is a total mess... figure out a better way to do it
-        if (rc.material->receiveLight)
-        {
-            PointLightComponent* pl = closestPointLight(ecs, xfm);
-            Shader* shader = rc.material->shader;
-            bind(shader);
+         // TODO: Lighting is a total mess... figure out a better way to do it
+         if (rc.material->receiveLight)
+         {
+             PointLightComponent* pl = closestPointLight(ecs, xfm);
+             Shader* shader = rc.material->shader;
+             bind(shader);
 
-            if (pl != nullptr)
-            {
-                TransformComponent* plXfm = getTransformComponent(pl->entity);
+             if (pl != nullptr)
+             {
+                 TransformComponent* plXfm = getTransformComponent(pl->entity);
             
-                setVec3(shader, "pointLights[0].posWorld", plXfm->position());
-                setVec3(shader, "pointLights[0].intensity", pl->intensity);
-                setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
-                setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
-                setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
-            }
-            else
-            {
-                setVec3(shader, "pointLights[0].intensity", Vec3(0));
-            }
+                 setVec3(shader, "pointLights[0].posWorld", plXfm->position());
+                 setVec3(shader, "pointLights[0].intensity", pl->intensity);
+                 setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
+                 setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
+                 setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+             }
+             else
+             {
+                 setVec3(shader, "pointLights[0].intensity", Vec3(0));
+             }
 
-            FOR_BUCKET_ARRAY (ecs->directionalLights.components)
-            {
-                // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
-                // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
-                // in the shader? Is that robust when we change the shader?
-                DirectionalLightComponent* dlc = it.ptr;
+             FOR_BUCKET_ARRAY (ecs->directionalLights.components)
+             {
+                 // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
+                 // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
+                 // in the shader? Is that robust when we change the shader?
+                 DirectionalLightComponent* dlc = it.ptr;
 
-                string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
-                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+                 string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
+                 string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
                 
-                setVec3(shader, directionVarName, dlc->direction);
-                setVec3(shader, intensityVarName, dlc->intensity);
+                 setVec3(shader, directionVarName, dlc->direction);
+                 setVec3(shader, intensityVarName, dlc->intensity);
 
-            }
+             }
 
-            if (ecs->directionalLights.count() == 0)
-            {
-                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
-                setVec3(shader, intensityVarName, Vec3(0, 0, 0));
-            }
-        }
+             if (ecs->directionalLights.count() == 0)
+             {
+                 string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+                 setVec3(shader, intensityVarName, Vec3(0, 0, 0));
+             }
+         }
 
-        drawRenderComponent(&rc, xfm, camera, cameraXfm);
-    }
+         drawRenderComponent(&rc, xfm, camera, cameraXfm);
+     }
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)

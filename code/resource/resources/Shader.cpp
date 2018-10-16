@@ -15,6 +15,8 @@
 #include "GL/glew.h"
 
 const char Shader::COMPOSITE_ID_DELIMITER = '|';
+const FilenameString Shader::SIMPLE_DEPTH_VERT_SHADER = "shader/simpleDepth.vert";
+const FilenameString Shader::SIMPLE_DEPTH_FRAG_SHADER = "shader/simpleDepth.frag";
 
 Shader::Shader(string128 vertFilename, string128 fragFilename)
 {
@@ -104,7 +106,8 @@ void setVec4(Shader* shader, UniformNameString name, float32 x, float32 y, float
 void setMat4(Shader* shader, UniformNameString name, Mat4 &value)
 {
     // NOTE: Transpose matrix to make it column order
-    glUniformMatrix4fv(glGetUniformLocation(shader->openGlHandle, name.cstr()), 1, GL_TRUE, value.dataPointer());
+    GLint location = glGetUniformLocation(shader->openGlHandle, name.cstr());
+    glUniformMatrix4fv(location, 1, GL_TRUE, value.dataPointer());
 }
 
 bool load(Shader* shader)

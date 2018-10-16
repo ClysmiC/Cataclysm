@@ -1,6 +1,6 @@
 #include "Transform.h"
 #include "RenderComponent.h"
-#include "CameraComponent.h"
+#include "Camera.h"
 
 #include "GL/glew.h"
 
@@ -27,7 +27,7 @@ Mesh* getMesh(Entity e)
     return r->submesh->mesh;
 }
 
-void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, CameraComponent* camera, ITransform *cameraXfm)
+void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, ICamera* camera, ITransform *cameraXfm)
 {
     Mat4 m2w = xfm->matrix();;
     Mat4 w2v = worldToView(cameraXfm);
@@ -36,6 +36,23 @@ void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, Came
     setMat4(renderComponent->material->shader, "model", m2w);
     setMat4(renderComponent->material->shader, "view", w2v);
     setMat4(renderComponent->material->shader, "projection", camera->projectionMatrix);
+    
+    glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
+    glDrawElements(GL_TRIANGLES, renderComponent->submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void drawRenderComponentWithShader(RenderComponent* renderComponent, Shader* shader, ITransform *xfm, ICamera* camera, ITransform* cameraXfm)
+{
+    // @Cut-n-paste from drawRenderComponent
+    
+    Mat4 m2w = xfm->matrix();;
+    Mat4 w2v = worldToView(cameraXfm);
+
+    bind(shader);
+    setMat4(shader, "model", m2w);
+    setMat4(shader, "view", w2v);
+    setMat4(shader, "projection", camera->projectionMatrix);
     
     glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
     glDrawElements(GL_TRIANGLES, renderComponent->submeshOpenGlInfo.indicesSize, GL_UNSIGNED_INT, 0);

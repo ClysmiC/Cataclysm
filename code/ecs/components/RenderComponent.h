@@ -6,9 +6,9 @@
 
 struct Material;
 struct ITransform;
-struct CameraComponent;
+struct ICamera;
 struct Mesh;
-
+struct Shader;
 
 struct RenderComponent : public Component
 {
@@ -24,7 +24,9 @@ struct RenderComponent : public Component
     static constexpr bool multipleAllowedPerEntity = true;
 };
 
-void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  CameraComponent* camera, ITransform *cameraXfm);
+void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  ICamera* camera, ITransform *cameraXfm);
+void drawRenderComponentWithShader(RenderComponent* renderComponent, Shader* shader, ITransform *xfm, ICamera* camera, ITransform* cameraXfm);
+
 Mesh* getMesh(Entity e);
 
 template<int BUCKET_SIZE>
