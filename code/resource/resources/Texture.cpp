@@ -30,6 +30,9 @@ void load(TextureData* textureData, unsigned char* buffer, GLenum bufferFormat)
     }
     
     glGenerateMipmap(GL_TEXTURE_2D);
+
+	auto v = glGetError();
+	assert(v == GL_NO_ERROR);
 }
 
 void unload(TextureData* textureData)

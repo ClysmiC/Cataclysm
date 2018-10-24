@@ -44,6 +44,7 @@ void ResourceManager::initDefaults()
     initMaterial(Material::ERROR_MATERIAL_FILENAME, Material::ERROR_MATERIAL_NAME, true);
 
     initShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER, true);
+	initShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER, true);
 }
 
 Texture* ResourceManager::getTexture(ResourceIdString id)

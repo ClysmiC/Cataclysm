@@ -17,6 +17,8 @@
 const char Shader::COMPOSITE_ID_DELIMITER = '|';
 const FilenameString Shader::SIMPLE_DEPTH_VERT_SHADER = "shader/simpleDepth.vert";
 const FilenameString Shader::SIMPLE_DEPTH_FRAG_SHADER = "shader/simpleDepth.frag";
+const FilenameString Shader::SIMPLE_SCREEN_VERT_SHADER = "shader/simpleScreen.vert";
+const FilenameString Shader::SIMPLE_SCREEN_FRAG_SHADER = "shader/simpleScreen.frag";
 
 Shader::Shader(string128 vertFilename, string128 fragFilename)
 {

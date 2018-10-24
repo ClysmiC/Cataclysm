@@ -1011,8 +1011,10 @@ Vec3 operator * (Quaternion quaternion, Vec3 vector)
 // Taken from http://answers.unity3d.com/questions/467614/what-is-the-source-code-of-quaternionlookrotation.html
 // Don't really understand how it works......
 Quaternion lookRotation(Vec3 forward, Vec3 up)
-{               
-    forward = normalize(forward);
+{              
+	// Note: Negate because the Unity implementation considers +Z forward.
+	//       We consider -Z forward.
+    forward = -normalize(forward);
  
     Vec3 vector = normalize(forward);
     Vec3 vector2 = normalize(cross(up, vector));

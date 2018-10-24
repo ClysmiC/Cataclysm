@@ -3,11 +3,11 @@
 #include "resource/Submesh.h"
 #include "ecs/Component.h"
 #include "ecs/ComponentGroup.h"
+#include "resource/resources/Mesh.h"
 
 struct Material;
 struct ITransform;
 struct ICamera;
-struct Mesh;
 struct Shader;
 
 struct RenderComponent : public Component

@@ -11,7 +11,10 @@ struct Shader
     
     static const FilenameString SIMPLE_DEPTH_VERT_SHADER;
     static const FilenameString SIMPLE_DEPTH_FRAG_SHADER;
-    
+
+	static const FilenameString SIMPLE_SCREEN_VERT_SHADER;
+	static const FilenameString SIMPLE_SCREEN_FRAG_SHADER;
+
     Shader() = default;
     Shader(string128 vertFile, string128 fragFile);
 

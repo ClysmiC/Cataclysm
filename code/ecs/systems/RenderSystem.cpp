@@ -18,13 +18,19 @@
 
 void initRenderer(Renderer* renderer)
 {
-    glGenFramebuffers(1, &renderer->shadowMapFbo);
-    
     renderer->shadowMap.width = 1024;
     renderer->shadowMap.height = 1024;
     renderer->shadowMap.gpuFormat = GL_DEPTH_COMPONENT16;
-
     load(&renderer->shadowMap);
+
+    glGenFramebuffers(1, &renderer->shadowMapFbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
+		auto debug_glFrameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		assert(debug_glFrameBufferStatus == GL_FRAMEBUFFER_COMPLETE);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
@@ -86,9 +92,6 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
         glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
         {
-            glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
-
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -97,7 +100,6 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
             Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
             assert(simpleDepthShader);
-            
             
             if (!renderingViaPortal) // TODO: figure out this story
             {
@@ -109,7 +111,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
                     if (!rc.isVisible) continue;
 
                     drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
-                }
+				}
             }
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -175,6 +177,36 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
          drawRenderComponent(&rc, xfm, camera, cameraXfm);
      }
+
+	  // DEBUG:
+	  // Draw's shadowmap onto textured quad
+	 glDisable(GL_DEPTH_TEST);
+	 {
+		 auto v = glGetError();
+
+		 Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
+		 bind(screenShader);
+
+		 v = glGetError();
+
+		 glBindVertexArray(screenQuadVao());
+
+		 v = glGetError();
+
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+
+		 v = glGetError();
+
+		 setInt(screenShader, "tex", 0);
+
+		 v = glGetError();
+
+		 glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		 v = glGetError();
+	 }
+	 glEnable(GL_DEPTH_TEST);
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
