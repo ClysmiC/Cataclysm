@@ -60,9 +60,13 @@ float shadowValue()
 	projectedCoords = projectedCoords * 0.5 + 0.5; // [0, 1]
 	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
 
-	if (closestDepth < projectedCoords.z) return 1;
+	return projectedCoords.z;
+	
+	/* return closestDepth; */
+	
+	/* if (closestDepth < projectedCoords.z) return 1; */
 
-	return 0;
+	/* return 0; */
 }
 
 vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
@@ -80,6 +84,7 @@ vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
 	// TODO: this shadow doesn't necessarily correspond to the light in this calculation,
 	// so this can be wrong... for now I am sticking to only 1 directional light per scene,
 	// so I am punting on this.
+	
 	return ambient + (1 - shadowValue()) * (diffuse + specular);
 }
 
@@ -108,6 +113,9 @@ vec3 pointLight(PointLight light, vec3 fragNormal, vec3 viewDir)
 
 void main()
 {
+	color = vec4(shadowValue(), 0, 0, 1);
+	return;
+	
 	vec3 viewDir = normalize(cameraPosWorld - v2f.posWorld);
 
 	vec3 normal = texture(material.normalTex, v2f.texCoords).rgb;

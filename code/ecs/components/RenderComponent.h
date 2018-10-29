@@ -24,7 +24,7 @@ struct RenderComponent : public Component
     static constexpr bool multipleAllowedPerEntity = true;
 };
 
-void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  ICamera* camera, ITransform *cameraXfm, uint32 shadowMapTextureId);
+void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  ICamera* camera, ITransform *cameraXfm, uint32 shadowMapTextureId, Mat4& lightMatrix);
 void drawRenderComponentWithShader(RenderComponent* renderComponent, Shader* shader, ITransform *xfm, ICamera* camera, ITransform* cameraXfm);
 
 Mesh* getMesh(Entity e);

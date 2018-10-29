@@ -61,9 +61,11 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
 void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
     // TODO: better way of picking which directional light to use for shadow mapping?
+	Mat4 lightMatrix;
+
     if (ecs->directionalLights.count() > 0)
     {
-        const uint32 farAway = 1000;
+        const uint32 farAway = 500;
 
         DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
@@ -87,6 +89,8 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
         lightCamera.transform.setPosition(veryFarAwayPoint);
         lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
+
+		lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
 
         glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
         {
@@ -172,7 +176,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
              }
          }
 
-         drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId);
+         drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
      }
 
 	  // DEBUG:

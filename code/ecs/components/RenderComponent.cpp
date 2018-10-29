@@ -27,7 +27,7 @@ Mesh* getMesh(Entity e)
     return r->submesh->mesh;
 }
 
-void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, ICamera* camera, ITransform *cameraXfm, uint32 shadowMapTextureId)
+void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, ICamera* camera, ITransform *cameraXfm, uint32 shadowMapTextureId, Mat4& lightMatrix)
 {
     Mat4 m2w = xfm->matrix();;
     Mat4 w2v = worldToView(cameraXfm);
@@ -36,6 +36,7 @@ void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm, ICam
     setMat4(renderComponent->material->shader, "model", m2w);
     setMat4(renderComponent->material->shader, "view", w2v);
     setMat4(renderComponent->material->shader, "projection", camera->projectionMatrix);
+	setMat4(renderComponent->material->shader, "lightMatrix", lightMatrix);
 	bindShadowMap(renderComponent->material, shadowMapTextureId);
     
     glBindVertexArray(renderComponent->submeshOpenGlInfo.vao);
