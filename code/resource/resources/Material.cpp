@@ -318,3 +318,11 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
     return foundSelfInMtlFile;
 }
 
+void bindShadowMap(Material* material, uint32 shadowMapTextureId)
+{
+	uint32 textureUnitIndex = GL_TEXTURE0 + material->textureUniforms.size();
+	glActiveTexture(textureUnitIndex);
+	glBindTexture(GL_TEXTURE_2D, shadowMapTextureId);
+	setInt(material->shader, "shadowMap", textureUnitIndex);
+}
+

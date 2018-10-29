@@ -53,4 +53,5 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename);
 bool unload(Material* material);
 void clearUniforms(Material* material);
 bool bind(Material* material);
+void bindShadowMap(Material* material, uint32 shadowMapTextureId);
 

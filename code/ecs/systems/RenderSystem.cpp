@@ -61,12 +61,10 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
 void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
     // TODO: better way of picking which directional light to use for shadow mapping?
-    bool hasShadowMap = false;
     if (ecs->directionalLights.count() > 0)
     {
         const uint32 farAway = 1000;
-        
-        hasShadowMap = true;
+
         DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
         Vec3 veryFarAwayPoint = -dirLight->direction * farAway;
@@ -165,7 +163,6 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
                 
                  setVec3(shader, directionVarName, dlc->direction);
                  setVec3(shader, intensityVarName, dlc->intensity);
-
              }
 
              if (ecs->directionalLights.count() == 0)
@@ -175,38 +172,38 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
              }
          }
 
-         drawRenderComponent(&rc, xfm, camera, cameraXfm);
+         drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId);
      }
 
 	  // DEBUG:
 	  // Draw's shadowmap onto textured quad
-	 glDisable(GL_DEPTH_TEST);
-	 {
-		 auto v = glGetError();
+	 //glDisable(GL_DEPTH_TEST);
+	 //{
+		// auto v = glGetError();
 
-		 Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
-		 bind(screenShader);
+		// Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
+		// bind(screenShader);
 
-		 v = glGetError();
+		// v = glGetError();
 
-		 glBindVertexArray(screenQuadVao());
+		// glBindVertexArray(screenQuadVao());
 
-		 v = glGetError();
+		// v = glGetError();
 
-		 glActiveTexture(GL_TEXTURE0);
-		 glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+		// glActiveTexture(GL_TEXTURE0);
+		// glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
 
-		 v = glGetError();
+		// v = glGetError();
 
-		 setInt(screenShader, "tex", 0);
+		// setInt(screenShader, "tex", 0);
 
-		 v = glGetError();
+		// v = glGetError();
 
-		 glDrawArrays(GL_TRIANGLES, 0, 6);
+		// glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		 v = glGetError();
-	 }
-	 glEnable(GL_DEPTH_TEST);
+		// v = glGetError();
+	 //}
+	 //glEnable(GL_DEPTH_TEST);
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)

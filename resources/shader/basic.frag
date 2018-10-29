@@ -7,7 +7,7 @@ in V2F {
 	vec3 bWorld;
 	vec3 nWorld;
 
-	vec3 debugColor;
+	vec4 posLightSpace;
 } v2f;
 
 struct Material
@@ -50,7 +50,20 @@ uniform DirectionalLight directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uniform Material material;
 uniform vec3 cameraPosWorld;
 
+uniform sampler2D shadowMap;
+
 out vec4 color;
+
+float shadowValue()
+{
+	vec3 projectedCoords = v2f.posLightSpace.xyz / v2f.posLightSpace.w;
+	projectedCoords = projectedCoords * 0.5 + 0.5; // [0, 1]
+	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
+
+	if (closestDepth < projectedCoords.z) return 1;
+
+	return 0;
+}
 
 vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
 {
@@ -64,7 +77,10 @@ vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
 	vec3 diffuse = light.intensity * material.diffuse * vec3(texture(material.diffuseTex, v2f.texCoords)) * nDotL;
 	vec3 specular = light.intensity *  material.specular * vec3(texture(material.specularTex, v2f.texCoords)) * pow(nDotH, material.specularExponent);
 
-	return ambient + diffuse + specular;
+	// TODO: this shadow doesn't necessarily correspond to the light in this calculation,
+	// so this can be wrong... for now I am sticking to only 1 directional light per scene,
+	// so I am punting on this.
+	return ambient + (1 - shadowValue()) * (diffuse + specular);
 }
 
 vec3 pointLight(PointLight light, vec3 fragNormal, vec3 viewDir)
@@ -99,9 +115,6 @@ void main()
 
 	mat3 tbnWorld = mat3(v2f.tWorld, v2f.bWorld, v2f.nWorld);
 	normal = tbnWorld * normal;
-
-	/* DEBUG: disable normal mapping */
-	/* normal = v2f.nWorld; */
 	
     vec3 result;
 

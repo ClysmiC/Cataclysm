@@ -10,6 +10,8 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
+uniform mat4 lightMatrix;
+
 out V2F {
 	vec3 posWorld;
 	vec2 texCoords;
@@ -17,18 +19,18 @@ out V2F {
 	vec3 bWorld;
 	vec3 nWorld;
 	
-	vec3 debugColor;
+	vec4 posLightSpace;
 } v2f;
 
 
 void main()
 {
-	v2f.debugColor = bitangent;
-	
     gl_Position = projection * view * model * vec4(position, 1.0);
 	
 	v2f.posWorld = (model * vec4(position, 1.0)).xyz;
 	v2f.texCoords = texCoords;
+
+	v2f.posLightSpace = lightMatrix * vec4(v2f.posWorld, 1.0);
 	
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
 
