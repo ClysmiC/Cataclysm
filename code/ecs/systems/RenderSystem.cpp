@@ -82,105 +82,117 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
         recalculateProjectionMatrix(&lightCamera);
 
         Vec3 lightUp = Vec3(0, 1, 0);
-        Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
-        Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
+		Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
+		Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
 
-        if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
+		if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
 
-        lightCamera.transform.setPosition(veryFarAwayPoint);
-        lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
+		lightCamera.transform.setPosition(veryFarAwayPoint);
+		lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
 
 		lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
 
-        glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
-        {
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
-            glClear(GL_DEPTH_BUFFER_BIT);
+		// glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+		{
+			/*glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+			glClear(GL_DEPTH_BUFFER_BIT);*/
 
-            glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
+			glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
 
-            Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
-            assert(simpleDepthShader);
-            
-            if (!renderingViaPortal) // TODO: figure out this story
-            {
-                FOR_BUCKET_ARRAY(ecs->renderComponents.components)
-                {
-                    RenderComponent &rc = *it.ptr;
-                    TransformComponent* xfm = getTransformComponent(rc.entity);
+			Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
+			assert(simpleDepthShader);
 
-                    if (!rc.isVisible) continue;
+			if (!renderingViaPortal) // TODO: figure out this story
+			{
+				FOR_BUCKET_ARRAY(ecs->renderComponents.components)
+				{
+					RenderComponent &rc = *it.ptr;
+					TransformComponent* xfm = getTransformComponent(rc.entity);
 
-                    drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
+					if (!rc.isVisible) continue;
+
+					drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
 				}
-            }
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, camera->window->width, camera->window->height);
-    }
-    
-     FOR_BUCKET_ARRAY (ecs->renderComponents.components)
-     {
-         RenderComponent &rc = *it.ptr;
-         if (!rc.isVisible) continue;
-        
-         TransformComponent* xfm = getTransformComponent(rc.entity);
 
-         if (renderingViaPortal)
-         {
-             bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
-             if (behindDestPortal) continue;
-         }
+				// DEBUG
+				{
+					/*static bool dumped = false;
+					if (!dumped)
+					{
+						char* bffr = (char*)malloc(renderer->shadowMap.width * renderer->shadowMap.height);
+						glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, bffr);
+					}*/
+				}
+			}
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, camera->window->width, camera->window->height);
+		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
-         // TODO: Lighting is a total mess... figure out a better way to do it
-         if (rc.material->receiveLight)
-         {
-             PointLightComponent* pl = closestPointLight(ecs, xfm);
-             Shader* shader = rc.material->shader;
-             bind(shader);
+	//   FOR_BUCKET_ARRAY (ecs->renderComponents.components)
+	//   {
+	//       RenderComponent &rc = *it.ptr;
+	//       if (!rc.isVisible) continue;
+	//      
+	//       TransformComponent* xfm = getTransformComponent(rc.entity);
 
-             if (pl != nullptr)
-             {
-                 TransformComponent* plXfm = getTransformComponent(pl->entity);
-            
-                 setVec3(shader, "pointLights[0].posWorld", plXfm->position());
-                 setVec3(shader, "pointLights[0].intensity", pl->intensity);
-                 setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
-                 setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
-                 setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
-             }
-             else
-             {
-                 setVec3(shader, "pointLights[0].intensity", Vec3(0));
-             }
+	//       if (renderingViaPortal)
+	//       {
+	//           bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
+	//           if (behindDestPortal) continue;
+	//       }
 
-             FOR_BUCKET_ARRAY (ecs->directionalLights.components)
-             {
-                 // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
-                 // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
-                 // in the shader? Is that robust when we change the shader?
-                 DirectionalLightComponent* dlc = it.ptr;
+	//       // TODO: Lighting is a total mess... figure out a better way to do it
+	//       if (rc.material->receiveLight)
+	//       {
+	//           PointLightComponent* pl = closestPointLight(ecs, xfm);
+	//           Shader* shader = rc.material->shader;
+	//           bind(shader);
 
-                 string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
-                 string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
-                
-                 setVec3(shader, directionVarName, dlc->direction);
-                 setVec3(shader, intensityVarName, dlc->intensity);
-             }
+	//           if (pl != nullptr)
+	//           {
+	//               TransformComponent* plXfm = getTransformComponent(pl->entity);
+	//          
+	//               setVec3(shader, "pointLights[0].posWorld", plXfm->position());
+	//               setVec3(shader, "pointLights[0].intensity", pl->intensity);
+	//               setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
+	//               setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
+	//               setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+	//           }
+	//           else
+	//           {
+	//               setVec3(shader, "pointLights[0].intensity", Vec3(0));
+	//           }
 
-             if (ecs->directionalLights.count() == 0)
-             {
-                 string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
-                 setVec3(shader, intensityVarName, Vec3(0, 0, 0));
-             }
-         }
+	//           FOR_BUCKET_ARRAY (ecs->directionalLights.components)
+	//           {
+	//               // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
+	//               // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
+	//               // in the shader? Is that robust when we change the shader?
+	//               DirectionalLightComponent* dlc = it.ptr;
 
-         drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
-     }
+	//               string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
+	//               string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+	//              
+	//               setVec3(shader, directionVarName, dlc->direction);
+	//               setVec3(shader, intensityVarName, dlc->intensity);
+	//           }
 
-	  // DEBUG:
-	  // Draw's shadowmap onto textured quad
+	//           if (ecs->directionalLights.count() == 0)
+	//           {
+	//               string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+	//               setVec3(shader, intensityVarName, Vec3(0, 0, 0));
+	//           }
+	//       }
+
+	//       drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
+	//   }
+
+	   // DEBUG:
+	   // Draw's shadowmap onto textured quad
+
 	 //glDisable(GL_DEPTH_TEST);
 	 //{
 		// auto v = glGetError();

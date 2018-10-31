@@ -6,6 +6,6 @@ in vec2 uv;
 uniform sampler2D tex;
 
 void main()
-{ 
-    color = texture(tex, uv);
+{
+    color = vec4(vec3(texture(tex, uv).r), 1);
 }
