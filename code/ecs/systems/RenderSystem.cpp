@@ -92,11 +92,11 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
 		lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
 
-		// glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
 		{
-			/*glDrawBuffer(GL_NONE);
+			glDrawBuffer(GL_NONE);
 			glReadBuffer(GL_NONE);
-			glClear(GL_DEPTH_BUFFER_BIT);*/
+			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
 
@@ -193,33 +193,34 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 	   // DEBUG:
 	   // Draw's shadowmap onto textured quad
 
-	 //glDisable(GL_DEPTH_TEST);
-	 //{
-		// auto v = glGetError();
+	 glDisable(GL_DEPTH_TEST);
+	 {
+		 auto v = glGetError();
 
-		// Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
-		// bind(screenShader);
+		 Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
+		 bind(screenShader);
 
-		// v = glGetError();
+		 v = glGetError();
 
-		// glBindVertexArray(screenQuadVao());
+		 glBindVertexArray(screenQuadVao());
 
-		// v = glGetError();
+		 v = glGetError();
 
-		// glActiveTexture(GL_TEXTURE0);
-		// glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+		 //glBindTexture(GL_TEXTURE_2D, ResourceManager::instance().getTexture("hex/grass.jpg")->textureData.textureId);
 
-		// v = glGetError();
+		 v = glGetError();
 
-		// setInt(screenShader, "tex", 0);
+		 setInt(screenShader, "tex", 0);
 
-		// v = glGetError();
+		 v = glGetError();
 
-		// glDrawArrays(GL_TRIANGLES, 0, 6);
+		 glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// v = glGetError();
-	 //}
-	 //glEnable(GL_DEPTH_TEST);
+		 v = glGetError();
+	 }
+	 glEnable(GL_DEPTH_TEST);
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)
