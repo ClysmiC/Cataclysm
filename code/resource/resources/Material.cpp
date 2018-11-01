@@ -320,9 +320,9 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
 
 void bindShadowMap(Material* material, uint32 shadowMapTextureId)
 {
-	uint32 textureUnitIndex = GL_TEXTURE0 + material->textureUniforms.size();
-	glActiveTexture(textureUnitIndex);
-	glBindTexture(GL_TEXTURE_2D, shadowMapTextureId);
-	setInt(material->shader, "shadowMap", textureUnitIndex);
+    uint32 textureUnitIndex = material->textureUniforms.size();
+    glActiveTexture(GL_TEXTURE0 + textureUnitIndex);
+    glBindTexture(GL_TEXTURE_2D, shadowMapTextureId);
+    setInt(material->shader, "shadowMap", textureUnitIndex);
 }
 

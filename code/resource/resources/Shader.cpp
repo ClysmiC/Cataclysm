@@ -59,7 +59,8 @@ void setBool(Shader* shader, UniformNameString name, bool value)
 void setInt(Shader* shader, UniformNameString name, int value)
 {
     assert(shader->isLoaded); if (!shader->isLoaded) return;
-    glUniform1i(glGetUniformLocation(shader->openGlHandle, name.cstr()), value);
+    auto location = glGetUniformLocation(shader->openGlHandle, name.cstr());
+    glUniform1i(location, value);
 }
 
 void setFloat(Shader* shader, UniformNameString name, float32 value)

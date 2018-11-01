@@ -24,13 +24,13 @@ void initRenderer(Renderer* renderer)
     load(&renderer->shadowMap);
 
     glGenFramebuffers(1, &renderer->shadowMapFbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
-	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
-		auto debug_glFrameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		assert(debug_glFrameBufferStatus == GL_FRAMEBUFFER_COMPLETE);
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+    {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer->shadowMap.textureId, 0);
+        auto debug_glFrameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        assert(debug_glFrameBufferStatus == GL_FRAMEBUFFER_COMPLETE);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
@@ -61,7 +61,7 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
 void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* camera, ITransform* cameraXfm, bool renderingViaPortal, ITransform* destPortalXfm)
 {
     // TODO: better way of picking which directional light to use for shadow mapping?
-	Mat4 lightMatrix;
+    Mat4 lightMatrix;
 
     if (ecs->directionalLights.count() > 0)
     {
@@ -82,145 +82,144 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
         recalculateProjectionMatrix(&lightCamera);
 
         Vec3 lightUp = Vec3(0, 1, 0);
-		Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
-		Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
+        Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
+        Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
 
-		if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
+        if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
 
-		lightCamera.transform.setPosition(veryFarAwayPoint);
-		lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
+        lightCamera.transform.setPosition(veryFarAwayPoint);
+        lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
 
-		lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
+        lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
 
-		glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
-		{
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
-			glClear(GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
+        {
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glClear(GL_DEPTH_BUFFER_BIT);
 
-			glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
+            glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
 
-			Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
-			assert(simpleDepthShader);
+            Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
+            assert(simpleDepthShader);
 
-			if (!renderingViaPortal) // TODO: figure out this story
-			{
-				FOR_BUCKET_ARRAY(ecs->renderComponents.components)
-				{
-					RenderComponent &rc = *it.ptr;
-					TransformComponent* xfm = getTransformComponent(rc.entity);
+            if (!renderingViaPortal) // TODO: figure out this story
+            {
+                FOR_BUCKET_ARRAY(ecs->renderComponents.components)
+                {
+                    RenderComponent &rc = *it.ptr;
+                    TransformComponent* xfm = getTransformComponent(rc.entity);
 
-					if (!rc.isVisible) continue;
+                    if (!rc.isVisible) continue;
 
-					drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
-				}
+                    drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
+                }
 
-				// DEBUG
-				{
-					/*static bool dumped = false;
-					if (!dumped)
-					{
-						char* bffr = (char*)malloc(renderer->shadowMap.width * renderer->shadowMap.height);
-						glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, bffr);
-					}*/
-				}
-			}
-		}
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, camera->window->width, camera->window->height);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
+                // DEBUG
+                {
+                    /*static bool dumped = false;
+                    if (!dumped)
+                    {
+                        char* bffr = (char*)malloc(renderer->shadowMap.width * renderer->shadowMap.height);
+                        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, bffr);
+                    }*/
+                }
+            }
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, camera->window->width, camera->window->height);
+    }
 
-	//   FOR_BUCKET_ARRAY (ecs->renderComponents.components)
-	//   {
-	//       RenderComponent &rc = *it.ptr;
-	//       if (!rc.isVisible) continue;
-	//      
-	//       TransformComponent* xfm = getTransformComponent(rc.entity);
+    FOR_BUCKET_ARRAY (ecs->renderComponents.components)
+    {
+        RenderComponent &rc = *it.ptr;
+        if (!rc.isVisible) continue;
+          
+        TransformComponent* xfm = getTransformComponent(rc.entity);
 
-	//       if (renderingViaPortal)
-	//       {
-	//           bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
-	//           if (behindDestPortal) continue;
-	//       }
+        if (renderingViaPortal)
+        {
+            bool behindDestPortal = dot(destPortalXfm->forward(), destPortalXfm->position() - xfm->position()) > 0;
+            if (behindDestPortal) continue;
+        }
 
-	//       // TODO: Lighting is a total mess... figure out a better way to do it
-	//       if (rc.material->receiveLight)
-	//       {
-	//           PointLightComponent* pl = closestPointLight(ecs, xfm);
-	//           Shader* shader = rc.material->shader;
-	//           bind(shader);
+        // TODO: Lighting is a total mess... figure out a better way to do it
+        if (rc.material->receiveLight)
+        {
+            PointLightComponent* pl = closestPointLight(ecs, xfm);
+            Shader* shader = rc.material->shader;
+            bind(shader);
 
-	//           if (pl != nullptr)
-	//           {
-	//               TransformComponent* plXfm = getTransformComponent(pl->entity);
-	//          
-	//               setVec3(shader, "pointLights[0].posWorld", plXfm->position());
-	//               setVec3(shader, "pointLights[0].intensity", pl->intensity);
-	//               setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
-	//               setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
-	//               setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
-	//           }
-	//           else
-	//           {
-	//               setVec3(shader, "pointLights[0].intensity", Vec3(0));
-	//           }
+            if (pl != nullptr)
+            {
+                TransformComponent* plXfm = getTransformComponent(pl->entity);
+              
+                setVec3(shader, "pointLights[0].posWorld", plXfm->position());
+                setVec3(shader, "pointLights[0].intensity", pl->intensity);
+                setFloat(shader, "pointLights[0].attenuationConstant", pl->attenuationConstant);
+                setFloat(shader, "pointLights[0].attenuationLinear", pl->attenuationLinear);
+                setFloat(shader, "pointLights[0].attenuationQuadratic", pl->attenuationQuadratic);
+            }
+            else
+            {
+                setVec3(shader, "pointLights[0].intensity", Vec3(0));
+            }
 
-	//           FOR_BUCKET_ARRAY (ecs->directionalLights.components)
-	//           {
-	//               // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
-	//               // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
-	//               // in the shader? Is that robust when we change the shader?
-	//               DirectionalLightComponent* dlc = it.ptr;
+            FOR_BUCKET_ARRAY (ecs->directionalLights.components)
+            {
+                // TODO: what happens if the number of directional lights exceeds the number allowed in the shader?
+                // How can we guarantee it doesnt? Should we just hard code a limit that is the same as the limit
+                // in the shader? Is that robust when we change the shader?
+                DirectionalLightComponent* dlc = it.ptr;
 
-	//               string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
-	//               string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
-	//              
-	//               setVec3(shader, directionVarName, dlc->direction);
-	//               setVec3(shader, intensityVarName, dlc->intensity);
-	//           }
+                string64 directionVarName = ("directionalLights[" + std::to_string(it.index) + "].direction").c_str();
+                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+                  
+                setVec3(shader, directionVarName, dlc->direction);
+                setVec3(shader, intensityVarName, dlc->intensity);
+            }
 
-	//           if (ecs->directionalLights.count() == 0)
-	//           {
-	//               string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
-	//               setVec3(shader, intensityVarName, Vec3(0, 0, 0));
-	//           }
-	//       }
+            if (ecs->directionalLights.count() == 0)
+            {
+                string64 intensityVarName = ("directionalLights[" + std::to_string(it.index) + "].intensity").c_str();
+                setVec3(shader, intensityVarName, Vec3(0, 0, 0));
+            }
+        }
 
-	//       drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
-	//   }
+        drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
+    }
 
-	   // DEBUG:
-	   // Draw's shadowmap onto textured quad
+       // DEBUG:
+       // Draw's shadowmap onto textured quad
 
-	 glDisable(GL_DEPTH_TEST);
-	 {
-		 auto v = glGetError();
+     //glDisable(GL_DEPTH_TEST);
+     //{
+     //    auto v = glGetError();
 
-		 Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
-		 bind(screenShader);
+     //    Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
+     //    bind(screenShader);
 
-		 v = glGetError();
+     //    v = glGetError();
 
-		 glBindVertexArray(screenQuadVao());
+     //    glBindVertexArray(screenQuadVao());
 
-		 v = glGetError();
+     //    v = glGetError();
 
-		 glActiveTexture(GL_TEXTURE0);
-		 glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
-		 //glBindTexture(GL_TEXTURE_2D, ResourceManager::instance().getTexture("hex/grass.jpg")->textureData.textureId);
+     //    glActiveTexture(GL_TEXTURE0);
+     //    glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+     //    //glBindTexture(GL_TEXTURE_2D, ResourceManager::instance().getTexture("hex/grass.jpg")->textureData.textureId);
 
-		 v = glGetError();
+     //    v = glGetError();
 
-		 setInt(screenShader, "tex", 0);
+     //    setInt(screenShader, "tex", 0);
 
-		 v = glGetError();
+     //    v = glGetError();
 
-		 glDrawArrays(GL_TRIANGLES, 0, 6);
+     //    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		 v = glGetError();
-	 }
-	 glEnable(GL_DEPTH_TEST);
+     //    v = glGetError();
+     //}
+     //glEnable(GL_DEPTH_TEST);
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)

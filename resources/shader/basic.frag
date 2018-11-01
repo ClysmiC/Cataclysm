@@ -60,9 +60,9 @@ float shadowValue()
 	projectedCoords = projectedCoords * 0.5 + 0.5; // [0, 1]
 	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
 
-	return projectedCoords.z;
+	/* return projectedCoords.z; */
 	
-	/* return closestDepth; */
+	return closestDepth;
 	
 	/* if (closestDepth < projectedCoords.z) return 1; */
 
