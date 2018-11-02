@@ -69,25 +69,24 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
         DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
-        Vec3 veryFarAwayPoint = -dirLight->direction * farAway;
-
         // TODO: cache these on the light itself?
         Camera lightCamera;
         lightCamera.isOrthographic = true;
         lightCamera.near = 1;
         lightCamera.far = farAway * 2;
-        lightCamera.orthoWidth = 20; // TODO: calculate these to fill teh entire view frustrum of the main camera
+        lightCamera.orthoWidth = 60; // TODO: calculate these to fill the entire view frustrum of the main camera
         lightCamera.aspectRatio = 1;
         lightCamera.window = nullptr; // This is okay because we won't be casting rays through the screen
         recalculateProjectionMatrix(&lightCamera);
 
         Vec3 lightUp = Vec3(0, 1, 0);
         Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
-        Vec3 toLightTarget = lightTarget - veryFarAwayPoint;
+        Vec3 lightPosition = lightTarget - dirLight->direction * farAway; // it's position with regards to rendering the shadow map
+        Vec3 toLightTarget = lightTarget - lightPosition;
 
         if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
 
-        lightCamera.transform.setPosition(veryFarAwayPoint);
+        lightCamera.transform.setPosition(lightPosition);
         lightCamera.transform.setOrientation(lookRotation(toLightTarget, lightUp));
 
         lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());

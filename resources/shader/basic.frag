@@ -56,17 +56,16 @@ out vec4 color;
 
 float shadowValue()
 {
+    float bias = 0.005;
+    
 	vec3 projectedCoords = v2f.posLightSpace.xyz / v2f.posLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5; // [0, 1]
 	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
-
-	/* return projectedCoords.z; */
+    float currentDepth = projectedCoords.z;
 	
-	return closestDepth;
-	
-	/* if (closestDepth < projectedCoords.z) return 1; */
+	if (closestDepth < currentDepth - bias) return 1;
 
-	/* return 0; */
+	return 0;
 }
 
 vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
@@ -113,8 +112,8 @@ vec3 pointLight(PointLight light, vec3 fragNormal, vec3 viewDir)
 
 void main()
 {
-	color = vec4(shadowValue(), 0, 0, 1);
-	return;
+	/* color = vec4(shadowValue(), 0, 0, 1); */
+	/* return; */
 	
 	vec3 viewDir = normalize(cameraPosWorld - v2f.posWorld);
 
