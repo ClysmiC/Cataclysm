@@ -30,7 +30,8 @@ void main()
 	v2f.posWorld = (model * vec4(position, 1.0)).xyz;
 	v2f.texCoords = texCoords;
 
-	v2f.posLightSpace = lightMatrix * vec4(v2f.posWorld, 1.0);
+	v2f.posLightSpace = lightMatrix * model * vec4(position, 1.0);
+    v2f.posLightSpace /= v2f.posLightSpace.w;
 	
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
 

@@ -15,10 +15,10 @@ void load(TextureData* textureData, unsigned char* buffer, GLenum bufferFormat)
     // Upload image to opengl texture and store handle
     glGenTextures(1, &textureData->textureId);
     glBindTexture(GL_TEXTURE_2D, textureData->textureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureData->wrapS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureData->wrapT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureData->magFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureData->minFilter);
 
     if (buffer)
     {
@@ -29,7 +29,7 @@ void load(TextureData* textureData, unsigned char* buffer, GLenum bufferFormat)
 		glTexImage2D(GL_TEXTURE_2D, 0, textureData->gpuFormat, textureData->width, textureData->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT	, (void*)0);
     }
     
-    glGenerateMipmap(GL_TEXTURE_2D);
+    if (textureData->minFilter == GL_LINEAR_MIPMAP_LINEAR || textureData->minFilter == GL_LINEAR_MIPMAP_NEAREST || textureData->minFilter == GL_NEAREST_MIPMAP_LINEAR || textureData->minFilter == GL_NEAREST_MIPMAP_NEAREST) glGenerateMipmap(GL_TEXTURE_2D);
 
 	auto v = glGetError();
 	assert(v == GL_NO_ERROR);

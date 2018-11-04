@@ -18,6 +18,8 @@ extern bool lastKeys[1024];
 extern bool mouseButtons[8];
 extern bool lastMouseButtons[8];
 
+extern int debug_shadowMapState;
+
 #define MAX_SCENES 8
 
 struct Window;

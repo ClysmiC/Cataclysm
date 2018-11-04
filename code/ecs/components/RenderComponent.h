@@ -25,7 +25,7 @@ struct RenderComponent : public Component
 };
 
 void drawRenderComponent(RenderComponent* renderComponent, ITransform *xfm,  ICamera* camera, ITransform *cameraXfm, uint32 shadowMapTextureId, Mat4& lightMatrix);
-void drawRenderComponentWithShader(RenderComponent* renderComponent, Shader* shader, ITransform *xfm, ICamera* camera, ITransform* cameraXfm);
+void drawRenderComponentWithBoundShader(RenderComponent* renderComponent);
 
 Mesh* getMesh(Entity e);
 

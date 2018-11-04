@@ -13,14 +13,20 @@
 #include "ecs/components/TransformComponent.h"
 #include "resource/ResourceManager.h"
 #include "resource/resources/Shader.h"
+#include "Game.h"
 
 #include <string>
 
-void initRenderer(Renderer* renderer)
+void initRenderer(Renderer* renderer, Window* window)
 {
+    renderer->window = window;
     renderer->shadowMap.width = 1024;
     renderer->shadowMap.height = 1024;
-    renderer->shadowMap.gpuFormat = GL_DEPTH_COMPONENT16;
+    renderer->shadowMap.gpuFormat = GL_DEPTH_COMPONENT;
+    renderer->shadowMap.wrapS = GL_CLAMP_TO_BORDER;
+    renderer->shadowMap.wrapT = GL_CLAMP_TO_BORDER;
+    renderer->shadowMap.minFilter = GL_NEAREST;
+    renderer->shadowMap.magFilter = GL_NEAREST;
     load(&renderer->shadowMap);
 
     glGenFramebuffers(1, &renderer->shadowMapFbo);
@@ -65,7 +71,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
     if (ecs->directionalLights.count() > 0)
     {
-        const uint32 farAway = 500;
+        const uint32 farAway = 40;
 
         DirectionalLightComponent* dirLight = &ecs->directionalLights[0];
 
@@ -74,14 +80,14 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
         lightCamera.isOrthographic = true;
         lightCamera.near = 1;
         lightCamera.far = farAway * 2;
-        lightCamera.orthoWidth = 60; // TODO: calculate these to fill the entire view frustrum of the main camera
+        lightCamera.orthoWidth = 40; // TODO: calculate these to fill the entire view frustrum of the main camera
         lightCamera.aspectRatio = 1;
         lightCamera.window = nullptr; // This is okay because we won't be casting rays through the screen
         recalculateProjectionMatrix(&lightCamera);
 
         Vec3 lightUp = Vec3(0, 1, 0);
-        Vec3 lightTarget = cameraXfm->position() + 10 * cameraXfm->forward(); // TODO: calculate the ideal target to look at
-        Vec3 lightPosition = lightTarget - dirLight->direction * farAway; // it's position with regards to rendering the shadow map
+        Vec3 lightTarget = Vec3(cameraXfm->position().x, 0, cameraXfm->position().z) + 25 * project(cameraXfm->forward(), Plane(Vec3(0), Vec3(0, 1, 0))); // TODO: calculate the ideal target to look at
+        Vec3 lightPosition = lightTarget - dirLight->direction * farAway; // its position with regards to rendering the shadow map
         Vec3 toLightTarget = lightTarget - lightPosition;
 
         if (toLightTarget.x == 0 && toLightTarget.z == 0) lightUp = Vec3(1, 0, 0);
@@ -91,41 +97,46 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
         lightMatrix = lightCamera.projectionMatrix * worldToView(lightCamera.getTransform());
 
+        /*DebugDraw::instance().drawSphere(lightTarget, 1);
+        DebugDraw::instance().drawLine(lightPosition, lightTarget);*/
+
         glBindFramebuffer(GL_FRAMEBUFFER, renderer->shadowMapFbo);
         {
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glClear(GL_DEPTH_BUFFER_BIT);
+            // glCullFace(GL_FRONT);
 
             glViewport(0, 0, renderer->shadowMap.width, renderer->shadowMap.height);
 
             Shader* simpleDepthShader = ResourceManager::instance().getShader(Shader::SIMPLE_DEPTH_VERT_SHADER, Shader::SIMPLE_DEPTH_FRAG_SHADER);
             assert(simpleDepthShader);
+            bind(simpleDepthShader);
+            setInt(simpleDepthShader, "windowWidth", renderer->shadowMap.width);
+            setInt(simpleDepthShader, "windowHeight", renderer->shadowMap.height);
+
+                // @Cut-n-paste from drawRenderComponent
+    
+
+            setMat4(simpleDepthShader, "lightMatrix", lightMatrix);
 
             if (!renderingViaPortal) // TODO: figure out this story
             {
                 FOR_BUCKET_ARRAY(ecs->renderComponents.components)
                 {
                     RenderComponent &rc = *it.ptr;
-                    TransformComponent* xfm = getTransformComponent(rc.entity);
-
                     if (!rc.isVisible) continue;
 
-                    drawRenderComponentWithShader(&rc, simpleDepthShader, xfm, &lightCamera, lightCamera.getTransform());
-                }
+                    TransformComponent* xfm = getTransformComponent(rc.entity);
+                    Mat4 m2w = xfm->matrix();;
+                    setMat4(simpleDepthShader, "model", m2w);
 
-                // DEBUG
-                {
-                    /*static bool dumped = false;
-                    if (!dumped)
-                    {
-                        char* bffr = (char*)malloc(renderer->shadowMap.width * renderer->shadowMap.height);
-                        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, bffr);
-                    }*/
+                    drawRenderComponentWithBoundShader(&rc);
                 }
             }
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCullFace(GL_BACK);
         glViewport(0, 0, camera->window->width, camera->window->height);
     }
 
@@ -185,40 +196,47 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
             }
         }
 
+        if (debug_shadowMapState == 0) setInt(rc.material->shader, "debug", 0);
+        if (debug_shadowMapState == 2) setInt(rc.material->shader, "debug", 1);
+        if (debug_shadowMapState == 3) setInt(rc.material->shader, "debug", 2);
+        if (debug_shadowMapState == 4) setInt(rc.material->shader, "debug", 3);
+
         drawRenderComponent(&rc, xfm, camera, cameraXfm, renderer->shadowMap.textureId, lightMatrix);
     }
-
+    
        // DEBUG:
        // Draw's shadowmap onto textured quad
+    if (debug_shadowMapState == 1)
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            auto v = glGetError();
 
-     //glDisable(GL_DEPTH_TEST);
-     //{
-     //    auto v = glGetError();
+            Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
+            bind(screenShader);
 
-     //    Shader* screenShader = ResourceManager::instance().getShader(Shader::SIMPLE_SCREEN_VERT_SHADER, Shader::SIMPLE_SCREEN_FRAG_SHADER);
-     //    bind(screenShader);
+            v = glGetError();
 
-     //    v = glGetError();
+            glBindVertexArray(screenQuadVao());
 
-     //    glBindVertexArray(screenQuadVao());
+            v = glGetError();
 
-     //    v = glGetError();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
+            // glBindTexture(GL_TEXTURE_2D, ResourceManager::instance().getTexture("hex/grass.jpg")->textureData.textureId);
 
-     //    glActiveTexture(GL_TEXTURE0);
-     //    glBindTexture(GL_TEXTURE_2D, renderer->shadowMap.textureId);
-     //    //glBindTexture(GL_TEXTURE_2D, ResourceManager::instance().getTexture("hex/grass.jpg")->textureData.textureId);
+            v = glGetError();
 
-     //    v = glGetError();
+            setInt(screenShader, "tex", 0);
 
-     //    setInt(screenShader, "tex", 0);
+            v = glGetError();
 
-     //    v = glGetError();
+            glDrawArrays(GL_TRIANGLES, 0, 6);
 
-     //    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-     //    v = glGetError();
-     //}
-     //glEnable(GL_DEPTH_TEST);
+            v = glGetError();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel)

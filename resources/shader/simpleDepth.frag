@@ -1,8 +1,10 @@
 #version 330 core
 
-out vec4 color; // debug
+uniform int windowWidth;
+uniform int windowHeight;
+
 void main()
 {
-	gl_FragDepth = gl_FragCoord.z;
-	color = vec4(vec3(gl_FragCoord.z), 1); // debug
+    if (gl_FragCoord.x <= 1 || gl_FragCoord.y <= 1 || gl_FragCoord.x >= windowWidth - 1 || gl_FragCoord.y >= windowHeight - 1) gl_FragDepth = 1;
+    else gl_FragDepth = gl_FragCoord.z;
 }

@@ -51,18 +51,34 @@ uniform Material material;
 uniform vec3 cameraPosWorld;
 
 uniform sampler2D shadowMap;
+uniform int debug;
 
 out vec4 color;
 
 float shadowValue()
 {
+    /* float bias = max(0.05 * (1 - dot(v2f.nWorld, directionalLights[0].direction)), 0.005); */
     float bias = 0.005;
     
-	vec3 projectedCoords = v2f.posLightSpace.xyz / v2f.posLightSpace.w;
+	vec3 projectedCoords = v2f.posLightSpace.xyz; // / v2f.posLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5; // [0, 1]
+
+    if (projectedCoords.x < 0 || projectedCoords.x > 1) return 0;
+    if (projectedCoords.y < 0 || projectedCoords.y > 1) return 0;
+    if (projectedCoords.z > 1) return 0;
+
+    if (debug == 2)
+        return projectedCoords.x;
+
+    if (debug == 3)
+        return projectedCoords.y;
+
+    
 	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
+    if (debug == 1) return closestDepth;
+    
     float currentDepth = projectedCoords.z;
-	
+    
 	if (closestDepth < currentDepth - bias) return 1;
 
 	return 0;
@@ -112,9 +128,12 @@ vec3 pointLight(PointLight light, vec3 fragNormal, vec3 viewDir)
 
 void main()
 {
-	/* color = vec4(shadowValue(), 0, 0, 1); */
-	/* return; */
-	
+    if (debug != 0)
+    {
+        color = vec4(vec3(shadowValue()), 1);
+        return;
+    }
+    
 	vec3 viewDir = normalize(cameraPosWorld - v2f.posWorld);
 
 	vec3 normal = texture(material.normalTex, v2f.texCoords).rgb;
