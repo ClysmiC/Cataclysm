@@ -57,8 +57,6 @@ float mouseY;
 float mouseXPrev;
 float mouseYPrev;
 
-int debug_shadowMapState = 0;
-
 float32 timeMs;
 float32 deltaTMs;
 
@@ -513,13 +511,6 @@ void updateGame(Game* game)
             glfwSetInputMode(game->window->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
-
-    // Debug
-    if (keys[GLFW_KEY_1]) debug_shadowMapState = 0;
-    if (keys[GLFW_KEY_2]) debug_shadowMapState = 1;
-    if (keys[GLFW_KEY_3]) debug_shadowMapState = 2;
-    if (keys[GLFW_KEY_4]) debug_shadowMapState = 3;
-    if (keys[GLFW_KEY_5]) debug_shadowMapState = 4;
 
     //
     // Render

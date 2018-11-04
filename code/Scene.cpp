@@ -28,8 +28,8 @@ void renderScene(Renderer* renderer, Scene* scene, CameraComponent* camera, ITra
 {
     if (recursionLevel > 3) return;
     
-    //if (scene->cubemap != nullptr) renderCubemap(scene->cubemap, camera, cameraXfm);
+    if (scene->cubemap != nullptr) renderCubemap(scene->cubemap, camera, cameraXfm);
 
-    //renderContentsOfAllPortals(renderer, scene, camera, cameraXfm, recursionLevel);
+    renderContentsOfAllPortals(renderer, scene, camera, cameraXfm, recursionLevel);
     renderAllRenderComponents(renderer, &scene->ecs, camera, cameraXfm, recursionLevel > 0, destPortalXfm);
 }
