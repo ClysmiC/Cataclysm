@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "als/als_bucket_array.h"
 #include "Entity.h"
 #include "ecs/components/EntityDetails.h"
@@ -21,6 +20,7 @@ struct PointLightComponent;
 struct DirectionalLightComponent;
 struct RenderComponent;
 struct ColliderComponent;
+struct ConvexHullColliderComponent;
 struct TerrainComponent;
 struct WalkComponent;
 
@@ -53,21 +53,23 @@ struct Ecs
     static constexpr uint32 POINT_LIGHT_BUCKET_SIZE = 32;
     static constexpr uint32 RENDER_COMPONENT_BUCKET_SIZE = 512;
     static constexpr uint32 PORTAL_BUCKET_SIZE = 16;
+    static constexpr uint32 CONVEX_HULL_COLLIDER_BUCKET_SIZE = 512;
     static constexpr uint32 COLLIDER_BUCKET_SIZE = 512;
     static constexpr uint32 WALK_COMPONENT_BUCKET_SIZE = 8;
 
     std::vector<Entity> entities;
-    ComponentList<EntityDetails,             ENTITY_DETAILS_BUCKET_SIZE>      entityDetails;
+    ComponentList<EntityDetails,               ENTITY_DETAILS_BUCKET_SIZE>         entityDetails;
 
-    ComponentList<TransformComponent,        TRANSFORM_BUCKET_SIZE>           transforms;
-    ComponentList<CameraComponent,           CAMERA_BUCKET_SIZE>              cameras;
-    ComponentList<DirectionalLightComponent, DIRECTIONAL_LIGHT_BUCKET_SIZE>   directionalLights;
-    ComponentList<TerrainComponent,          TERRAIN_BUCKET_SIZE>             terrains;
-    ComponentList<PointLightComponent,       POINT_LIGHT_BUCKET_SIZE>         pointLights;
-    ComponentList<RenderComponent,           RENDER_COMPONENT_BUCKET_SIZE>    renderComponents;
-    ComponentList<PortalComponent,           PORTAL_BUCKET_SIZE>              portals;
-    ComponentList<ColliderComponent,         COLLIDER_BUCKET_SIZE>            colliders;
-    ComponentList<WalkComponent,             WALK_COMPONENT_BUCKET_SIZE>      walkComponents;
+    ComponentList<TransformComponent,          TRANSFORM_BUCKET_SIZE>              transforms;
+    ComponentList<CameraComponent,             CAMERA_BUCKET_SIZE>                 cameras;
+    ComponentList<DirectionalLightComponent,   DIRECTIONAL_LIGHT_BUCKET_SIZE>      directionalLights;
+    ComponentList<TerrainComponent,            TERRAIN_BUCKET_SIZE>                terrains;
+    ComponentList<PointLightComponent,         POINT_LIGHT_BUCKET_SIZE>            pointLights;
+    ComponentList<RenderComponent,             RENDER_COMPONENT_BUCKET_SIZE>       renderComponents;
+    ComponentList<PortalComponent,             PORTAL_BUCKET_SIZE>                 portals;
+    ComponentList<ColliderComponent,           COLLIDER_BUCKET_SIZE>               colliders;
+    ComponentList<ConvexHullColliderComponent, CONVEX_HULL_COLLIDER_BUCKET_SIZE>   convexHullColliders;
+    ComponentList<WalkComponent,               WALK_COMPONENT_BUCKET_SIZE>         walkComponents;
 };
 
 //
@@ -130,6 +132,12 @@ ColliderComponent* getColliderComponent(Entity e);
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addColliderComponents(Entity e, uint32 numComponents);
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponents(Entity e);
 bool                                                         removeColliderComponent(ColliderComponent** ppComponent);
+
+ConvexHullColliderComponent* addConvexHullColliderComponent(Entity e);
+ConvexHullColliderComponent* getConvexHullColliderComponent(Entity e);
+ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> addConvexHullColliderComponents(Entity e, uint32 numComponents);
+ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> getConvexHullColliderComponents(Entity e);
+bool                                                         removeConvexHullColliderComponent(ConvexHullColliderComponent** ppComponent);
 
 PointLightComponent* addPointLightComponent(Entity e);
 PointLightComponent* getPointLightComponent(Entity e);

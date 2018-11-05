@@ -17,6 +17,7 @@
 #include "resource/resources/Mesh.h"
 
 #include "ecs/components/TransformComponent.h"
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/CameraComponent.h"
 #include "ecs/components/PortalComponent.h"

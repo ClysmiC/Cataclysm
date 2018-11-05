@@ -9,10 +9,19 @@
 #include "resource/ResourceManager.h"
 #include <algorithm>
 
-Mesh::Mesh(FilenameString filename, bool useMaterialsReferencedInObjFile_)
+Mesh::Mesh(FilenameString filename, bool useMaterialsReferencedInObjFile)
 {
     this->id = filename;
-    this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile_;
+    this->filename = filename;
+    this->useMaterialsReferencedInObjFile = useMaterialsReferencedInObjFile;
+}
+
+Mesh::Mesh(FilenameString filename, string64 subObjectName)
+{
+    this->id = filename + "|" + subObjectName;
+    this->filename = filename;
+    this->subObjectName = subObjectName;
+    this->useMaterialsReferencedInObjFile = false;
 }
 
 uint32 meshVerticesCount(Mesh* mesh)
@@ -28,16 +37,28 @@ uint32 meshVerticesCount(Mesh* mesh)
     return count;
 }
 
-bool load(Mesh* mesh)
+bool load(Mesh* mesh, std::ifstream* filestream)
 {
     using namespace std;
 
     if (mesh->isLoaded) return true;
 
-    FilenameString filename = ResourceManager::instance().toFullPath(mesh->id);
+    FilenameString filename = ResourceManager::instance().toFullPath(mesh->filename);
     assert(filename.substring(filename.length - 4) == ".obj");
 
+    bool isSubObject = !mesh->subObjectName.isEmpty();
+    
     ifstream objFile(filename.cstr());
+    if (!filestream)
+    {
+        if (isSubObject)
+        {
+            assert(false); // You must pass the open filestream pointer when parsing a sub-object
+            return false;
+        }
+        
+        filestream = &objFile;
+    }
 
     vector<Vec3> v;    // vertices
     vector<Vec2> vt;   // uvs
@@ -48,22 +69,22 @@ bool load(Mesh* mesh)
     mesh->materialsReferencedInObjFile.clear();
 
     FilenameString relFileDirectory = truncateFilenameAfterDirectory(mesh->id);
-    
-    string currentSubmeshName = "[unnamed]";
+
+    string64 currentSubmeshName = isSubObject ? "[unnamed]" : mesh->subObjectName;
     vector<MeshVertex> currentSubmeshVertices;
     vector<uint32> currentSubmeshIndices;
 
-    uint32 unnamedSubmeshNameCount = 0; // if submeshes aren't named, name them "submesh0", "submesh1", etc.
+    uint32 unnamedSubmeshNameCount = 0;
     bool buildingFaces = false;
 
     bool eofFlush = false;
     string line;
-    while (eofFlush || getline(objFile, line))
+    while (eofFlush || getline(*filestream, line))
     {
         if (eofFlush) line = "";
 
         istringstream ss(line);
-
+        
         vector<string> tokens;
         {
             string item;
@@ -90,7 +111,7 @@ bool load(Mesh* mesh)
             mesh->submeshes.push_back(
                 Submesh(
                     mesh->id,
-                    currentSubmeshName.c_str(),
+                    currentSubmeshName,
                     currentSubmeshVertices,
                     currentSubmeshIndices,
                     ResourceManager::instance().getMaterial(
@@ -110,7 +131,7 @@ bool load(Mesh* mesh)
 
         if (eofFlush)
         {
-            // We finished flushing the final material after reaching end of file.
+            // We finished flushing the final face after reaching end of file.
             break;
         }
 
@@ -122,7 +143,7 @@ bool load(Mesh* mesh)
         }
         else if (tokens[0] == "o")
         {
-            currentSubmeshName = tokens[1];
+            currentSubmeshName = tokens[1].c_str();
         }
         else if (tokens[0] == "v")
         {
@@ -286,7 +307,9 @@ bool load(Mesh* mesh)
 
         if (!eofFlush)
         {
-            eofFlush = (objFile.peek() == EOF);
+            char peek = filestream->peek();
+            if (peek == EOF) eofFlush = true;
+            if (isSubObject && peek == 'o') eofFlush = true; // the sub-object we were parsing is finished. treat it like end of file
         }
     }
 
@@ -329,6 +352,8 @@ bool load(Mesh* mesh)
     }
 
     mesh->isLoaded = true;
+
+    if (isSubObject) assert(mesh->submeshes.size() == 1); // if this trips, it is probably due to us flushing faces on non-f characters
 
     return true;
 }

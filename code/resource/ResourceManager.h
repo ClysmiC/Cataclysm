@@ -53,6 +53,7 @@ struct ResourceManager
     Texture* getTexture(ResourceIdString relFilename);
     
     Mesh* initMesh(FilenameString relFilename, bool useMaterialsRefrencedInObjFile, MeshLoadOptions loadNow);
+    Mesh* initMesh(FilenameString filename, string64 subObjectName);
     Mesh* getMesh(ResourceIdString relFilename);
     
     Material* initMaterial(FilenameString relFilename, MaterialNameString materialName, bool loadNow);

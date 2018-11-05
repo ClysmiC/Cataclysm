@@ -194,6 +194,11 @@ template <uint16 SIZE> struct _als_fixed_string
     {
         return this->substring(startIndex, this->length);
     }
+
+    bool isEmpty()
+    {
+        return this->length == 0;
+    }
     
     _als_fixed_string substring(uint16 startIndex, uint16 endIndex)
     {

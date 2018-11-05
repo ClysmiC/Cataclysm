@@ -24,6 +24,7 @@
 #include "components/DirectionalLightComponent.h"
 #include "components/RenderComponent.h"
 #include "components/ColliderComponent.h"
+#include "components/ConvexHullColliderComponent.h"
 #include "components/TerrainComponent.h"
 #include "components/WalkComponent.h"
 
@@ -472,6 +473,38 @@ bool removeColliderComponent(ColliderComponent** ppComponent)
     return success;
 }
 
+
+ConvexHullColliderComponent* addConvexHullColliderComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return addComponent(&e.ecs->convexHullColliders, e);
+}
+
+ConvexHullColliderComponent* getConvexHullColliderComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->convexHullColliders, e);
+}
+
+ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> addConvexHullColliderComponents(Entity e, uint32 numComponents)
+{
+    if (e.id == 0) return ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE>();
+    return addComponents(&e.ecs->convexHullColliders, e, numComponents);
+}
+
+ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> getConvexHullColliderComponents(Entity e)
+{
+    if (e.id == 0) return ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE>();
+    return getComponents(&e.ecs->convexHullColliders, e);
+}
+
+bool removeConvexHullColliderComponent(ConvexHullColliderComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->convexHullColliders), *ppComponent);
+    if (success) *ppComponent = nullptr;
+    return success;
+}
 
 
 RaycastResult castRay(Ecs* ecs, Ray ray)

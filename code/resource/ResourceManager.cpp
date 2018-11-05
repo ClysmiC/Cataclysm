@@ -115,6 +115,16 @@ Mesh* ResourceManager::initMesh(FilenameString relFilename, bool useMaterialsRef
     return result;
 }
 
+Mesh*
+ResourceManager::initMesh(FilenameString filename, string64 subObjectName)
+{
+    // Cannot be loaded during init, as this type of mesh requires an filestream to the specific sub-object in the obj file to load
+    Mesh m(filename, subObjectName);
+    Mesh* result = initResource(m, meshes, false);
+
+    return result;
+}
+
 Cubemap*
 ResourceManager::initCubemap(FilenameString directoryName, FileExtensionString extension, bool loadNow)
 {

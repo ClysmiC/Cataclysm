@@ -20,6 +20,7 @@
 #include "ecs/components/PointLightComponent.h"
 #include "ecs/components/DirectionalLightComponent.h"
 #include "ecs/components/RenderComponent.h"
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/TerrainComponent.h"
 #include "ecs/components/WalkComponent.h"
@@ -44,6 +45,11 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
+#include <sstream>
+
+#include "Quickhull.h"
+#include "resource/ResourceManager.h"
 
 
 bool keys[1024];
@@ -59,6 +65,55 @@ float mouseYPrev;
 
 float32 timeMs;
 float32 deltaTMs;
+
+void loadLevel(Scene* scene, FilenameString levelFilename)
+{
+    FilenameString fullFilename = ResourceManager::instance().toFullPath(levelFilename);
+    assert(fullFilename.substring(fullFilename.length - 4) == ".obj");
+
+    std::ifstream lvlFilestream(fullFilename.cstr());
+
+    std::string line;
+    while (std::getline(lvlFilestream, line))
+    {
+        std::istringstream ss(line);
+        
+        std::vector<std::string> tokens;
+        {
+            std::string item;
+            while (std::getline(ss, item, ' '))
+            {
+                tokens.push_back(item);
+            }
+        }
+
+        if (tokens.size() > 0)
+        {
+            if (tokens[0] == "o")
+            {
+                assert(tokens.size() == 2); // o [object_name]
+                Mesh* mesh = ResourceManager::instance().initMesh(levelFilename, tokens[1].c_str());
+                load(mesh, &lvlFilestream);
+
+                Entity levelObjectEntity = makeEntity(&scene->ecs, mesh->subObjectName);
+                RenderComponent* rc = addRenderComponent(levelObjectEntity);
+                new (rc) RenderComponent(levelObjectEntity, &(mesh->submeshes[0]));
+
+                ConvexHull convHull;
+                std::vector<Vec3> vertices;
+
+                for (MeshVertex mv: mesh->submeshes[0].vertices)
+                {
+                    vertices.push_back(mv.position);
+                }
+
+                quickHull(vertices.data(), vertices.size(), &convHull, true); // if slow, try changing true to false
+                ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(levelObjectEntity);
+                stdmoveConvexHullIntoComponent(chcc, &convHull);
+            }
+        }
+    }
+}
 
 EntityDetails* getEntityDetails(Game* game, uint32 entityId)
 {

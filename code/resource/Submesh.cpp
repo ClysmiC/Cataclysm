@@ -8,7 +8,7 @@
 #include <algorithm>
 
 
-Submesh::Submesh(FilenameString filename, string32 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool uploadToGpu)
+Submesh::Submesh(FilenameString filename, string64 submeshName, const std::vector<MeshVertex> &vertices, const std::vector<uint32> &indices, Material* material, Mesh* mesh, bool uploadToGpu)
     :
     vertices(std::move(vertices)),
     indices(std::move(indices)),

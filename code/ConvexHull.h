@@ -1,3 +1,5 @@
+#pragma once
+
 #include "als/als_math.h"
 #include <vector>
 

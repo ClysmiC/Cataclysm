@@ -7,6 +7,7 @@
 #include "ecs/components/PointLightComponent.h"
 #include "ecs/components/DirectionalLightComponent.h"
 #include "ecs/components/RenderComponent.h"
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/TerrainComponent.h"
 #include "ecs/components/WalkComponent.h"
