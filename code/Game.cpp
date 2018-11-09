@@ -672,7 +672,7 @@ int main()
         WalkComponent* playerWalk = addWalkComponent(player);
         playerWalk->isGrounded = true;
         assert(testScene1->ecs.walkComponents.count() > 0);
-        playerWalk->terrain = testScene1->ecs.terrains[0].entity;
+        //playerWalk->terrain = testScene1->ecs.terrains[0].entity;
     }
 
     //

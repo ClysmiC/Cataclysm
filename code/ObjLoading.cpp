@@ -22,7 +22,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
     assert((mesh != nullptr) != loadSubobjectsAsEntities);
     assert(objFilename.substring(objFilename.length - 4) == ".obj");
     
-    ifstream filestream(objFilename.cstr());
+    ifstream filestream(ResourceManager::instance().toFullPath(objFilename).cstr());
 
     vector<Vec3> v;    // vertices
     vector<Vec2> vt;   // uvs
