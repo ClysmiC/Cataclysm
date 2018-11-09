@@ -219,7 +219,7 @@ template <uint16 SIZE> struct _als_fixed_string
 
     int32 lastIndexOf(char c)
     {
-        for (uint16 i = this->length - 1; i >= 0; i--)
+        for (int32 i = this->length - 1; i >= 0; i--)
         {
             if(this->data[i] == c) return i;
         }

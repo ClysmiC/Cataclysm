@@ -51,6 +51,8 @@
 #include "Quickhull.h"
 #include "resource/ResourceManager.h"
 
+#include "ObjLoading.h"
+
 
 bool keys[1024];
 bool lastKeys[1024];
@@ -71,48 +73,7 @@ void loadLevel(Scene* scene, FilenameString levelFilename)
     FilenameString fullFilename = ResourceManager::instance().toFullPath(levelFilename);
     assert(fullFilename.substring(fullFilename.length - 4) == ".obj");
 
-    std::ifstream lvlFilestream(fullFilename.cstr());
-
-    std::string line;
-    while (std::getline(lvlFilestream, line))
-    {
-        std::istringstream ss(line);
-        
-        std::vector<std::string> tokens;
-        {
-            std::string item;
-            while (std::getline(ss, item, ' '))
-            {
-                tokens.push_back(item);
-            }
-        }
-
-        if (tokens.size() > 0)
-        {
-            if (tokens[0] == "o")
-            {
-                assert(tokens.size() == 2); // o [object_name]
-                Mesh* mesh = ResourceManager::instance().initMesh(levelFilename, tokens[1].c_str());
-                load(mesh, &lvlFilestream);
-
-                Entity levelObjectEntity = makeEntity(&scene->ecs, mesh->subObjectName);
-                RenderComponent* rc = addRenderComponent(levelObjectEntity);
-                new (rc) RenderComponent(levelObjectEntity, &(mesh->submeshes[0]));
-
-                ConvexHull convHull;
-                std::vector<Vec3> vertices;
-
-                for (MeshVertex mv: mesh->submeshes[0].vertices)
-                {
-                    vertices.push_back(mv.position);
-                }
-
-                quickHull(vertices.data(), vertices.size(), &convHull, true); // if slow, try changing true to false
-                ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(levelObjectEntity);
-                stdmoveConvexHullIntoComponent(chcc, &convHull);
-            }
-        }
-    }
+    loadObjSubobjectsAsEntities(levelFilename, &scene->ecs, true, true);
 }
 
 EntityDetails* getEntityDetails(Game* game, uint32 entityId)
@@ -376,67 +337,69 @@ void buildTestScene1(Scene* scene)
     //
     // Set up hex meshes
     //
-    const uint32 hexCount = 2;
-    Vec3 hexPositions[hexCount];
-    hexPositions[0] = Vec3(-18, 0, -40);
-    hexPositions[1] = Vec3(6, 0, -4);
+    //const uint32 hexCount = 2;
+    //Vec3 hexPositions[hexCount];
+    //hexPositions[0] = Vec3(-18, 0, -40);
+    //hexPositions[1] = Vec3(6, 0, -4);
 
-    for (uint32 i = 0; i < hexCount; i++)
-    {
-        Entity e = makeEntity(&scene->ecs, "hex");
-        
-        TransformComponent *tc = getTransformComponent(e);
-        ColliderComponent* cc = addColliderComponent(e);
+    //for (uint32 i = 0; i < hexCount; i++)
+    //{
+    //    Entity e = makeEntity(&scene->ecs, "hex");
+    //    
+    //    TransformComponent *tc = getTransformComponent(e);
+    //    ColliderComponent* cc = addColliderComponent(e);
 
-        if (i == 0)
-        {
-            // add some more collider components to test having multiple components on an entity
-            addColliderComponent(e);
-            addColliderComponent(e);
-        }
-        tc->setPosition(hexPositions[i]);
-        tc->setScale(Vec3(1));
-        
-        auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
+    //    if (i == 0)
+    //    {
+    //        // add some more collider components to test having multiple components on an entity
+    //        addColliderComponent(e);
+    //        addColliderComponent(e);
+    //    }
+    //    tc->setPosition(hexPositions[i]);
+    //    tc->setScale(Vec3(1));
+    //    
+    //    auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
 
-        for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
-        {
-            RenderComponent *rc = &rcc[j];
-            new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
-        }
-    }
+    //    for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
+    //    {
+    //        RenderComponent *rc = &rcc[j];
+    //        new (rc) RenderComponent(e, &(hexMesh->submeshes[j]));
+    //    }
+    //}
 
     //
     // Set up terrain
     //
-    {
-        Entity e = makeEntity(&scene->ecs, "terrain");
+    //{
+    //    Entity e = makeEntity(&scene->ecs, "terrain");
 
-        // TODO: rendering code expects entities with rendercomponents to also have transforms.
-        //       we could assume the origin at this case, or maybe set a flag on the entity that explicitly
-        //       says we don't store a transform so we can have the robustness of that check without the memory
-        //       overhead
-        TransformComponent *xfm = getTransformComponent(e);
-        xfm->setPosition(Vec3(0, 0, 0));
-        
-        TerrainComponent* tc = addTerrainComponent(e);
-        new (tc) TerrainComponent(e, "heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
+    //    // TODO: rendering code expects entities with rendercomponents to also have transforms.
+    //    //       we could assume the origin at this case, or maybe set a flag on the entity that explicitly
+    //    //       says we don't store a transform so we can have the robustness of that check without the memory
+    //    //       overhead
+    //    TransformComponent *xfm = getTransformComponent(e);
+    //    xfm->setPosition(Vec3(0, 0, 0));
+    //    
+    //    TerrainComponent* tc = addTerrainComponent(e);
+    //    new (tc) TerrainComponent(e, "heightmap.bmp", Vec3(-200, 0, -200), 400, 400, -10, 8);
 
-        uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
+    //    uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 
-        auto rcList = addRenderComponents(e, numChunks);
+    //    auto rcList = addRenderComponents(e, numChunks);
 
-        for (uint32 i = 0; i < tc->zChunkCount; i++)
-        {
-            for (uint32 j = 0; j < tc->xChunkCount; j++)
-            {
-                RenderComponent* rc = &rcList[i * tc->xChunkCount + j];
+    //    for (uint32 i = 0; i < tc->zChunkCount; i++)
+    //    {
+    //        for (uint32 j = 0; j < tc->xChunkCount; j++)
+    //        {
+    //            RenderComponent* rc = &rcList[i * tc->xChunkCount + j];
 
-                TerrainChunk* chunk = &tc->chunks[i][j];
-                new (rc) RenderComponent(e, &chunk->mesh.submeshes[0]);
-            }
-        }
-    }
+    //            TerrainChunk* chunk = &tc->chunks[i][j];
+    //            new (rc) RenderComponent(e, &chunk->mesh.submeshes[0]);
+    //        }
+    //    }
+    //}
+
+    loadLevel(scene, "test_level.obj");
 }
 
 void buildTestScene2(Scene* scene)
@@ -677,12 +640,12 @@ int main()
     Scene* testScene1 = makeScene(game);
     buildTestScene1(testScene1);
     
-    Scene* testScene2 = makeScene(game);
-    buildTestScene2(testScene2);
+    //Scene* testScene2 = makeScene(game);
+    //buildTestScene2(testScene2);
 
-    Scene* testScene3 = makeScene(game);
-    buildTestScene3(testScene3);
-    
+    //Scene* testScene3 = makeScene(game);
+    //buildTestScene3(testScene3);
+    //
     // Set up camera
     // @Hack: camera is owned by test scene 1. Make some entities (player, camera, etc.) independent of
     // scene. Maybe the game has its own ECS outside of scenes or maybe make system to transfer ownership
@@ -735,45 +698,45 @@ int main()
     DebugDraw::instance().cameraXfm = cameraXfm;
     DebugDraw::instance().window = &window;
     
-    //
-    // Set up portal from scene 1<->2
-    //
-    {
-        Entity portal1 = makeEntity(&testScene1->ecs, "portalA1");
-        Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
+    ////
+    //// Set up portal from scene 1<->2
+    ////
+    //{
+    //    Entity portal1 = makeEntity(&testScene1->ecs, "portalA1");
+    //    Entity portal2 = makeEntity(&testScene2->ecs, "portalA2");
 
-        Transform portal1Xfm;
-        portal1Xfm.setPosition(Vec3(0, 0, -10));
-        portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
-        
-        Transform portal2Xfm;
-        portal2Xfm.setPosition(Vec3(1, 2, 3));
-        portal2Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 45));
+    //    Transform portal1Xfm;
+    //    portal1Xfm.setPosition(Vec3(0, 0, -10));
+    //    portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 180));
+    //    
+    //    Transform portal2Xfm;
+    //    portal2Xfm.setPosition(Vec3(1, 2, 3));
+    //    portal2Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 45));
 
-        Vec2 dimensions(2, 3);
-        
-        createPortalFromTwoBlankEntities(portal1, portal2, &portal1Xfm, &portal2Xfm, dimensions);
-    }
+    //    Vec2 dimensions(2, 3);
+    //    
+    //    createPortalFromTwoBlankEntities(portal1, portal2, &portal1Xfm, &portal2Xfm, dimensions);
+    //}
 
-    //
-    // Set up portal from scene 1<->3
-    //
-    {
-        Entity portal1 = makeEntity(&testScene1->ecs, "portalB1");
-        Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
+    ////
+    //// Set up portal from scene 1<->3
+    ////
+    //{
+    //    Entity portal1 = makeEntity(&testScene1->ecs, "portalB1");
+    //    Entity portal3 = makeEntity(&testScene3->ecs, "portalB3");
 
-        Transform portal1Xfm;
-        portal1Xfm.setPosition(Vec3(0, 0, -10));
-        portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
-        
-        Transform portal3Xfm;
-        portal3Xfm.setPosition(Vec3(0, 0, 0));
-        portal3Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
+    //    Transform portal1Xfm;
+    //    portal1Xfm.setPosition(Vec3(0, 0, -10));
+    //    portal1Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
+    //    
+    //    Transform portal3Xfm;
+    //    portal3Xfm.setPosition(Vec3(0, 0, 0));
+    //    portal3Xfm.setOrientation(axisAngle(Vec3(0, 1, 0), 0));
 
-        Vec2 dimensions(2, 3);
-        
-        createPortalFromTwoBlankEntities(portal1, portal3, &portal1Xfm, &portal3Xfm, dimensions);
-    }
+    //    Vec2 dimensions(2, 3);
+    //    
+    //    createPortalFromTwoBlankEntities(portal1, portal3, &portal1Xfm, &portal3Xfm, dimensions);
+    //}
 
     makeSceneActive(game, testScene1);
     makeCameraActive(game, camera);

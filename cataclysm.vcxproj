@@ -153,6 +153,7 @@
     <ClCompile Include="code\Editor.cpp" />
     <ClCompile Include="code\Game.cpp" />
     <ClCompile Include="code\Gjk.cpp" />
+    <ClCompile Include="code\ObjLoading.cpp" />
     <ClCompile Include="code\platform\win.cpp" />
     <ClCompile Include="code\Quad.cpp" />
     <ClCompile Include="code\Quickhull.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="code\Editor.h" />
     <ClInclude Include="code\Game.h" />
     <ClInclude Include="code\Gjk.h" />
+    <ClInclude Include="code\ObjLoading.h" />
     <ClInclude Include="code\platform\platform.h" />
     <ClInclude Include="code\platform\win.h" />
     <ClInclude Include="code\Quad.h" />

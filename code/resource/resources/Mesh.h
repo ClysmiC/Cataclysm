@@ -5,7 +5,6 @@
 #include "Aabb.h"
 
 #include "resource/Resource.h"
-#include <fstream>
 
 struct Mesh
 {
@@ -25,7 +24,7 @@ struct Mesh
 };
 
 uint32 meshVerticesCount(Mesh* mesh);
-bool load(Mesh* mesh, std::ifstream* filestream = nullptr);
+bool load(Mesh* mesh);
 bool unload(Mesh* mesh);
 
 bool isUploadedToGpuOpenGl(Mesh* mesh);
