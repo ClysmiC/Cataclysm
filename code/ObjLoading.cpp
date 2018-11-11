@@ -95,7 +95,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                             (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
                         ),
                         meshToPush,
-                        false
+                        true
                     )
                 );
             }
@@ -107,6 +107,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 {
                     RenderComponent* rc = addRenderComponent(e);
                     new (rc) RenderComponent(e, &meshToPush->submeshes[0]);
+                    //uploadToGpuOpenGl(meshToPush);
                 }
 
                 if (createColliders)
