@@ -62,30 +62,6 @@ EditorState::EditorState()
 void selectEntity(EditorState* editor, Entity e)
 {
     editor->selectedEntity = e;
-
-    Mesh* mesh = getMesh(e);
-
-    if (mesh)
-    {
-        uint32 verticesCount = meshVerticesCount(mesh);
-        Vec3* pointSoup = (Vec3*)tempAllocArray(sizeof(Vec3), verticesCount);
-
-        int index = 0;
-        for (uint32 i = 0; i < mesh->submeshes.size(); i++)
-        {
-            for (uint32 j = 0; j < mesh->submeshes[i].vertices.size(); j++)
-            {
-                pointSoup[index++] = mesh->submeshes[i].vertices[j].position;
-            }
-        }
-
-        quickHull(pointSoup, verticesCount, &editor->debug_selectedEntityHull);
-    }
-    else
-    {
-        editor->debug_selectedEntityHull.positions.clear();
-        editor->debug_selectedEntityHull.edges.clear();
-    }
 }
 
 void showEditor(EditorState* editor)
@@ -144,14 +120,19 @@ void showEditor(EditorState* editor)
 
         if (e.id != 0)
         {
-            TransformComponent* xfm = getTransformComponent(e);
+            ConvexHullColliderComponent* chcc = getConvexHullColliderComponent(e);
 
-            for (uint32 i = 0; i < editor->debug_selectedEntityHull.edges.size(); i++)
+            if (chcc)
             {
-                DebugDraw::instance().drawLine(
-                    (xfm->matrix() * Vec4(editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index0], 1)).xyz(),
-                    (xfm->matrix() * Vec4(editor->debug_selectedEntityHull.positions[editor->debug_selectedEntityHull.edges[i].index1], 1)).xyz()
-                );
+                TransformComponent* xfm = getTransformComponent(e);
+
+                for (uint32 i = 0; i < chcc->edges.size(); i++)
+                {
+                    DebugDraw::instance().drawLine(
+                        (xfm->matrix() * Vec4(chcc->positions[chcc->edges[i].index0], 1)).xyz(),
+                        (xfm->matrix() * Vec4(chcc->positions[chcc->edges[i].index1], 1)).xyz()
+                    );
+                }
             }
         }
     }
@@ -706,10 +687,6 @@ void showEditor(EditorState* editor)
                         removeRenderComponent(&rc);
                         assert(rc == nullptr);
                     }
-
-                    
-                    editor->debug_selectedEntityHull.positions.clear();
-                    editor->debug_selectedEntityHull.edges.clear();
                 }
             }
     

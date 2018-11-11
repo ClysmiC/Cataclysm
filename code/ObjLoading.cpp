@@ -134,6 +134,8 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                     recalculatePositionsRelativeToCentroid(&convHull, centroid);
                     ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(e);
                     stdmoveConvexHullIntoComponent(chcc, &convHull);
+
+                    int debuggggg = 0;
                 }
             }
 
