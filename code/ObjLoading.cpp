@@ -96,7 +96,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                             (currentMaterialFilename != "" && currentMaterialName != "") ? currentMaterialName : Material::DEFAULT_MATERIAL_NAME
                         ),
                         meshToPush,
-                        true
+                        !loadSubobjectsAsEntities
                     )
                 );
             }
@@ -124,9 +124,10 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
 
                 if (createMeshes)
                 {
+                    recalculatePositionsRelativeToCentroid(meshToPush, centroid);
+                    uploadToGpuOpenGl(meshToPush);
                     RenderComponent* rc = addRenderComponent(e);
                     new (rc) RenderComponent(e, &meshToPush->submeshes[0]);
-                    //uploadToGpuOpenGl(meshToPush);
                 }
 
                 if (createColliders)
@@ -134,8 +135,6 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                     recalculatePositionsRelativeToCentroid(&convHull, centroid);
                     ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(e);
                     stdmoveConvexHullIntoComponent(chcc, &convHull);
-
-                    int debuggggg = 0;
                 }
             }
 

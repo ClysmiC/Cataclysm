@@ -96,6 +96,14 @@ bool unload(Mesh* mesh)
     return false;
 }
 
+void recalculatePositionsRelativeToCentroid(Mesh * mesh, Vec3 centroid)
+{
+    for (Submesh& sub : mesh->submeshes)
+    {
+        recalculatePositionsRelativeToCentroid(&sub, centroid);
+    }
+}
+
 bool isUploadedToGpuOpenGl(Mesh* mesh)
 {
     if (mesh) return false;

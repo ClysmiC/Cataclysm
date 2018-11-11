@@ -242,6 +242,14 @@ void uploadToGpuOpenGl(Submesh* submesh)
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
 }
 
+void recalculatePositionsRelativeToCentroid(Submesh * submesh, Vec3 centroid)
+{
+    for (MeshVertex& mv : submesh->vertices)
+    {
+        mv.position -= centroid;
+    }
+}
+
 void reuploadModifiedVerticesToGpu(Submesh* submesh)
 {
     assert(submesh->openGlInfo.indicesSize == submesh->indices.size());
