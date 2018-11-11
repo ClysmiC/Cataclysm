@@ -19,3 +19,6 @@ struct ConvexHull
     std::vector<Vec3> positions;
     std::vector<ConvexHullEdge> edges;
 };
+
+Vec3 approximateHullCentroid(ConvexHull* hull);
+void recalculatePositionsRelativeToCentroid(ConvexHull* hull, Vec3 centroid);

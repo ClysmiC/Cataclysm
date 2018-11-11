@@ -117,8 +117,8 @@ void uploadToGpuOpenGl(Mesh* mesh)
         uploadToGpuOpenGl(&(mesh->submeshes[i]));
     }
 
-    if (mesh->useMaterialsReferencedInObjFile)
-    {
+    //if (mesh->useMaterialsReferencedInObjFile)
+    //{
 
-    }
+    //}
 }

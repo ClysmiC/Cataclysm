@@ -5,6 +5,7 @@
 #include "resource/resources/Material.h"
 
 #include "ecs/Ecs.h"
+#include "ecs/components/TransformComponent.h"
 #include "ecs/components/RenderComponent.h"
 #include "ecs/components/ConvexHullColliderComponent.h"
 
@@ -103,6 +104,24 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             if (loadSubobjectsAsEntities)
             {
                 Entity e = makeEntity(ecs, currentSubmeshName);
+
+                // @Slow: constructing a convex hull only really needs to be done if we are creating colliders.
+                //        Do it anyway to have a convenient way to approximate a centroid. A faster version would
+                //        be to track positions of face centroids (and areas) as the faces are being built and then
+                //        compute it.
+                std::vector<Vec3> qhVertices;
+                for (MeshVertex mv: currentSubmeshVertices)
+                {
+                    qhVertices.push_back(mv.position);
+                }
+
+                ConvexHull convHull;
+                quickHull(qhVertices.data(), qhVertices.size(), &convHull, true); // if slow, try changing true to false
+
+                Vec3 centroid = approximateHullCentroid(&convHull);
+                TransformComponent* xfm = getTransformComponent(e);
+                xfm->setPosition(centroid);
+
                 if (createMeshes)
                 {
                     RenderComponent* rc = addRenderComponent(e);
@@ -112,14 +131,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
 
                 if (createColliders)
                 {
-                    std::vector<Vec3> qhVertices;
-                    for (MeshVertex mv: currentSubmeshVertices)
-                    {
-                        qhVertices.push_back(mv.position);
-                    }
-
-                    ConvexHull convHull;
-                    quickHull(qhVertices.data(), qhVertices.size(), &convHull, true); // if slow, try changing true to false
+                    recalculatePositionsRelativeToCentroid(&convHull, centroid);
                     ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(e);
                     stdmoveConvexHullIntoComponent(chcc, &convHull);
                 }

@@ -137,6 +137,7 @@
     <ClCompile Include="code\als\als_math.cpp" />
     <ClCompile Include="code\als\als_temp_alloc.cpp" />
     <ClCompile Include="code\Camera.cpp" />
+    <ClCompile Include="code\ConvexHull.cpp" />
     <ClCompile Include="code\DebugDraw.cpp" />
     <ClCompile Include="code\ecs\Component.cpp" />
     <ClCompile Include="code\ecs\components\CameraComponent.cpp" />

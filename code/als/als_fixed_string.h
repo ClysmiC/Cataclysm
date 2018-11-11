@@ -170,7 +170,7 @@ template <uint16 SIZE> struct _als_fixed_string
 
         for (uint16 i = 0; i < this->length; i++)
         {
-            if (i >= SIZE)
+            if (i >= TARGET_SIZE)
             {
                 result.isTruncated = true;
                 break;
