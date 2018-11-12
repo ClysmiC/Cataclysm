@@ -8,6 +8,7 @@
 #include "GLFW/glfw3.h"
 #include "imgui/imgui.h"
 
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/PortalComponent.h"
 #include "ecs/components/TransformComponent.h"
@@ -116,6 +117,22 @@ void walkAndCamera(Game* game)
         {
             // @Slow. Improve with spatial partitioning
             ColliderComponent* cc = it.ptr;
+            EntityDetails* debug_details = getEntityDetails(cc->entity);
+
+            if (cc->isTrigger || cc->entity.id == walk->entity.id) continue;
+
+            GjkResult collisionResult = gjk(collider, cc);
+
+            if (collisionResult.collides)
+            {
+                xfm->setPosition(xfm->position() - collisionResult.penetrationVector);
+            }
+        }
+
+        FOR_BUCKET_ARRAY (game->activeScene->ecs.convexHullColliders.components)
+        {
+            // @Slow. Improve with spatial partitioning
+            ConvexHullColliderComponent* cc = it.ptr;
             EntityDetails* debug_details = getEntityDetails(cc->entity);
 
             if (cc->isTrigger || cc->entity.id == walk->entity.id) continue;

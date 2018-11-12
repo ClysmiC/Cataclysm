@@ -142,6 +142,7 @@
     <ClCompile Include="code\ecs\Component.cpp" />
     <ClCompile Include="code\ecs\components\CameraComponent.cpp" />
     <ClCompile Include="code\ecs\components\ColliderComponent.cpp" />
+    <ClCompile Include="code\ecs\components\ConvexHullColliderComponent.cpp" />
     <ClCompile Include="code\ecs\components\EntityDetails.cpp" />
     <ClCompile Include="code\ecs\components\PortalComponent.cpp" />
     <ClCompile Include="code\ecs\components\RenderComponent.cpp" />

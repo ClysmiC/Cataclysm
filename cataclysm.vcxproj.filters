@@ -983,6 +983,9 @@
     <ClCompile Include="code\ConvexHull.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="code\ecs\components\ConvexHullColliderComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\DebugDraw.h">

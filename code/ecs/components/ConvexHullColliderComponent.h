@@ -2,13 +2,19 @@
 
 #include "ecs/Component.h"
 #include "ConvexHull.h"
+#include "ICollider.h"
 #include <utility>
 
-struct ConvexHullColliderComponent : public Component, public ConvexHull
+struct ConvexHullColliderComponent : public Component, public ConvexHull, public ICollider
 {
     ConvexHullColliderComponent() = default;
 
     static constexpr bool multipleAllowedPerEntity = true;
+
+    Vec3 _colliderCenter;
+
+    Vec3 center() override;
+    Vec3 support(Vec3 direction) override;
 };
 
 inline void stdmoveConvexHullIntoComponent(ConvexHullColliderComponent* component, ConvexHull* hull)
