@@ -30,4 +30,20 @@ void recalculatePositionsRelativeToCentroid(ConvexHull* hull, Vec3 centroid)
     {
         position -= centroid;
     }
+
+    recalculateBounds(hull);
+}
+
+void recalculateBounds(ConvexHull * hull)
+{
+    Vec3 minPoint = Vec3(FLT_MAX);
+    Vec3 maxPoint = Vec3(-FLT_MAX);
+
+    for (Vec3 position: hull->positions)
+    {
+        minPoint = componentwiseMin(minPoint, position);
+        maxPoint = componentwiseMax(maxPoint, position);
+    }
+
+    hull->bounds = aabbFromMinMax(minPoint, maxPoint);
 }

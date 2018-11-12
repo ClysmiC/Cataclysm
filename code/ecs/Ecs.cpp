@@ -514,14 +514,18 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
     result.t = -1;
 
     for (Entity& e : ecs->entities)
-    {       
+    {
+#if 1
+        EntityDetails* debug_entity_name = getEntityDetails(e);
+#endif
         TransformComponent* xfm = getTransformComponent(e);
         
         auto rcs = getRenderComponents(e);
         auto colliders = getColliderComponents(e);
+        auto convexColliders = getConvexHullColliderComponents(e);
 
         // @Slow: maybe cache this on the entity somehow?
-        if (rcs.numComponents > 0 || colliders.numComponents > 0)
+        if (rcs.numComponents > 0 || colliders.numComponents > 0 || convexColliders.numComponents > 0)
         {
             Aabb bounds = aabbFromMinMax(Vec3(FLT_MAX), Vec3(-FLT_MAX));
 
@@ -538,6 +542,16 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
             if (colliders.numComponents > 0)
             {
                 Aabb colliderAabb = aabbFromColliders(colliders);
+
+                Vec3 minPoint = componentwiseMin(colliderAabb.minPoint(), bounds.minPoint());
+                Vec3 maxPoint = componentwiseMax(colliderAabb.maxPoint(), bounds.maxPoint());
+
+                bounds = aabbFromMinMax(minPoint, maxPoint);
+            }
+
+            if (convexColliders.numComponents > 0)
+            {
+                Aabb colliderAabb = aabbFromConvexColliders(convexColliders);
 
                 Vec3 minPoint = componentwiseMin(colliderAabb.minPoint(), bounds.minPoint());
                 Vec3 maxPoint = componentwiseMax(colliderAabb.maxPoint(), bounds.maxPoint());

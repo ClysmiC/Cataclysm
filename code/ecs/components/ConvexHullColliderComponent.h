@@ -15,4 +15,5 @@ inline void stdmoveConvexHullIntoComponent(ConvexHullColliderComponent* componen
 {
     component->positions = std::move(hull->positions);
     component->edges = std::move(hull->edges);
+    component->bounds = hull->bounds;
 };

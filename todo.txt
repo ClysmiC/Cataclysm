@@ -16,12 +16,22 @@
 [X] Change component ComponentGroup parameters to pointers (i.e., in aabbFromRenderComponents)
 [X] Add quickhull implementation
     [X] Render the result using DebugDraw drawLine
-    [~] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
+    [X] Change ColliderComponent to PrimitiveColliderComponent and add ConvexHullColliderComponent
 
 [X] Investigate airboat mesh fishiness... should be one submesh per usemtl
 
-[ ] Port GJK/EPA code
-[ ] Collision + resolution when walking
+[X] Port GJK/EPA code
+[X] Collision + resolution when walking
+
+[X] Select entity in editor based on primitive collider + convex hull collider + render aabb
+[ ] Test GJK against convex hull colliders
+[ ] Create 3rd person entity (player)
+   [ ] Attach camera offset from it
+   [ ] Render a cylinder + arrow for the player hitbox
+   [ ] Move and resolve collisions
+   [ ] Walljump?
+[ ]
+[ ]
 
 ======================
 ==== MID PRIOIRTY ====

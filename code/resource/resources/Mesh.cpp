@@ -45,46 +45,7 @@ bool load(Mesh* mesh)
     if (mesh->isLoaded) return true;
 
     loadObjIntoMesh(mesh->filename, mesh);
-
-    // @Think: should calculating bounds be done here or in the obj loading function
-    //
-    // Calculate bounds
-    //
-    {
-        float32 minX = FLT_MAX;
-        float32 minY = FLT_MAX;
-        float32 minZ = FLT_MAX;
-
-        float32 maxX = -FLT_MAX;
-        float32 maxY = -FLT_MAX;
-        float32 maxZ = -FLT_MAX;
-
-        for (Submesh& submesh : mesh->submeshes)
-        {
-            Vec3 minPoint = submesh.bounds.center - submesh.bounds.halfDim;
-            Vec3 maxPoint = submesh.bounds.center + submesh.bounds.halfDim;
-            
-            minX = std::min(minX, minPoint.x);
-            minY = std::min(minY, minPoint.y);
-            minZ = std::min(minZ, minPoint.z);
-        
-            maxX = std::max(maxX, maxPoint.x);
-            maxY = std::max(maxY, maxPoint.y);
-            maxZ = std::max(maxZ, maxPoint.z);
-        }
-
-        Vec3 minPoint = Vec3(minX, minY, minZ);
-        Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
-        
-        mesh->bounds.halfDim = Vec3(
-            (maxPoint.x - minPoint.x) / 2.0f,
-            (maxPoint.y - minPoint.y) / 2.0f,
-            (maxPoint.z - minPoint.z) / 2.0f
-        );
-    
-        mesh->bounds.center = minPoint + mesh->bounds.halfDim;
-    }
-
+    recalculateBounds(mesh);
     mesh->isLoaded = true;
 
     return true;
@@ -102,6 +63,44 @@ void recalculatePositionsRelativeToCentroid(Mesh * mesh, Vec3 centroid)
     {
         recalculatePositionsRelativeToCentroid(&sub, centroid);
     }
+}
+
+void recalculateBounds(Mesh* mesh)
+{
+    float32 minX = FLT_MAX;
+    float32 minY = FLT_MAX;
+    float32 minZ = FLT_MAX;
+
+    float32 maxX = -FLT_MAX;
+    float32 maxY = -FLT_MAX;
+    float32 maxZ = -FLT_MAX;
+
+    for (Submesh& submesh : mesh->submeshes)
+    {
+        recalculateBounds(&submesh);
+
+        Vec3 minPoint = submesh.bounds.center - submesh.bounds.halfDim;
+        Vec3 maxPoint = submesh.bounds.center + submesh.bounds.halfDim;
+            
+        minX = std::min(minX, minPoint.x);
+        minY = std::min(minY, minPoint.y);
+        minZ = std::min(minZ, minPoint.z);
+        
+        maxX = std::max(maxX, maxPoint.x);
+        maxY = std::max(maxY, maxPoint.y);
+        maxZ = std::max(maxZ, maxPoint.z);
+    }
+
+    Vec3 minPoint = Vec3(minX, minY, minZ);
+    Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
+        
+    mesh->bounds.halfDim = Vec3(
+        (maxPoint.x - minPoint.x) / 2.0f,
+        (maxPoint.y - minPoint.y) / 2.0f,
+        (maxPoint.z - minPoint.z) / 2.0f
+    );
+    
+    mesh->bounds.center = minPoint + mesh->bounds.halfDim;
 }
 
 bool isUploadedToGpuOpenGl(Mesh* mesh)

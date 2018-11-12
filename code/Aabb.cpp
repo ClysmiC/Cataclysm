@@ -7,6 +7,7 @@
 #include "ecs/Ecs.h"
 #include "ecs/components/RenderComponent.h"
 #include "ecs/components/ColliderComponent.h"
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/TransformComponent.h"
 #include "resource/Submesh.h"
 #include "resource/resources/Mesh.h"
@@ -179,6 +180,13 @@ Aabb aabbFromCollider(ColliderComponent* collider)
     
 
     Aabb result = aabbFromMinMax(Vec3(0), Vec3(0));
+    return result;
+}
+
+Aabb aabbFromConvexCollider(ConvexHullColliderComponent* collider)
+{
+    TransformComponent* xfm = getTransformComponent(collider->entity);
+    Aabb result = transformedAabb(collider->bounds, xfm); // @Think: should we call recalculate bounds here? It would be slower, but could avoid bugs if the bounds were never calculated
     return result;
 }
 

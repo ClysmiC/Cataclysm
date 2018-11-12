@@ -48,6 +48,7 @@ bool isUploadedToGpuOpenGl(Submesh* submesh);
 void uploadToGpuOpenGl(Submesh* submesh);
 
 void recalculatePositionsRelativeToCentroid(Submesh* submesh, Vec3 centroid);
+void recalculateBounds(Submesh* submesh);
 
 // Note: only works after MODIFYING vertices... do NOT
 // add/remove vertices and then call this

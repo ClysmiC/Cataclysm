@@ -21,48 +21,8 @@ Submesh::Submesh(FilenameString filename, string64 submeshName, const std::vecto
     assert(vertices.size() > 0);
     assert(indices.size() % 3 == 0);
 
-    //
-    // Recalculate tangents and bitangents
-    //
-    // if (recalculateTBN)
-    {
-        recalculateTangentsAndBitangents(this);
-    }
-
-    //
-    // Calculate bounds
-    //
-    {
-        float32 minX = FLT_MAX;
-        float32 minY = FLT_MAX;
-        float32 minZ = FLT_MAX;
-
-        float32 maxX = -FLT_MAX;
-        float32 maxY = -FLT_MAX;
-        float32 maxZ = -FLT_MAX;
-
-        for (const MeshVertex& vertex : vertices)
-        {
-            minX = std::min(minX, vertex.position.x);
-            minY = std::min(minY, vertex.position.y);
-            minZ = std::min(minZ, vertex.position.z);
-        
-            maxX = std::max(maxX, vertex.position.x);
-            maxY = std::max(maxY, vertex.position.y);
-            maxZ = std::max(maxZ, vertex.position.z);
-        }
-
-        Vec3 minPoint = Vec3(minX, minY, minZ);
-        Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
-
-        this->bounds.halfDim = Vec3(
-            (maxPoint.x - minPoint.x) / 2.0f,
-            (maxPoint.y - minPoint.y) / 2.0f,
-            (maxPoint.z - minPoint.z) / 2.0f
-        );
-    
-        this->bounds.center = minPoint + this->bounds.halfDim;
-    }
+    recalculateTangentsAndBitangents(this);
+    recalculateBounds(this);
 
     if (uploadToGpu)
     {
@@ -198,6 +158,39 @@ void recalculateTangentsAndBitangents(Submesh* submesh)
     }
 }
 
+void recalculateBounds(Submesh* submesh)
+{
+    float32 minX = FLT_MAX;
+        float32 minY = FLT_MAX;
+        float32 minZ = FLT_MAX;
+
+        float32 maxX = -FLT_MAX;
+        float32 maxY = -FLT_MAX;
+        float32 maxZ = -FLT_MAX;
+
+        for (const MeshVertex& vertex : submesh->vertices)
+        {
+            minX = std::min(minX, vertex.position.x);
+            minY = std::min(minY, vertex.position.y);
+            minZ = std::min(minZ, vertex.position.z);
+        
+            maxX = std::max(maxX, vertex.position.x);
+            maxY = std::max(maxY, vertex.position.y);
+            maxZ = std::max(maxZ, vertex.position.z);
+        }
+
+        Vec3 minPoint = Vec3(minX, minY, minZ);
+        Vec3 maxPoint = Vec3(maxX, maxY, maxZ);
+
+        submesh->bounds.halfDim = Vec3(
+            (maxPoint.x - minPoint.x) / 2.0f,
+            (maxPoint.y - minPoint.y) / 2.0f,
+            (maxPoint.z - minPoint.z) / 2.0f
+        );
+    
+        submesh->bounds.center = minPoint + submesh->bounds.halfDim;
+}
+
 bool isUploadedToGpuOpenGl(Submesh* submesh)
 {
     return submesh->openGlInfo.vao != 0;
@@ -242,12 +235,14 @@ void uploadToGpuOpenGl(Submesh* submesh)
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, bitangent));
 }
 
-void recalculatePositionsRelativeToCentroid(Submesh * submesh, Vec3 centroid)
+void recalculatePositionsRelativeToCentroid(Submesh* submesh, Vec3 centroid)
 {
     for (MeshVertex& mv : submesh->vertices)
     {
         mv.position -= centroid;
     }
+
+    recalculateBounds(submesh);
 }
 
 void reuploadModifiedVerticesToGpu(Submesh* submesh)

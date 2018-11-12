@@ -125,7 +125,9 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 if (createMeshes)
                 {
                     recalculatePositionsRelativeToCentroid(meshToPush, centroid);
+                    recalculateBounds(meshToPush);
                     uploadToGpuOpenGl(meshToPush);
+                    meshToPush->isLoaded = true;
                     RenderComponent* rc = addRenderComponent(e);
                     new (rc) RenderComponent(e, &meshToPush->submeshes[0]);
                 }

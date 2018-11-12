@@ -28,6 +28,7 @@ bool load(Mesh* mesh);
 bool unload(Mesh* mesh);
 
 void recalculatePositionsRelativeToCentroid(Mesh* mesh, Vec3 centroid);
+void recalculateBounds(Mesh* mesh);
 
 bool isUploadedToGpuOpenGl(Mesh* mesh);
 void uploadToGpuOpenGl(Mesh* mesh);
