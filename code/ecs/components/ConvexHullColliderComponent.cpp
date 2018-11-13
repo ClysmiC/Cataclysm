@@ -1,5 +1,8 @@
 #include "ConvexHullColliderComponent.h"
 
+#include "ecs/Ecs.h"
+#include "ecs/components/TransformComponent.h"
+
 Vec3 ConvexHullColliderComponent::center()
 {
     static bool set = false;
@@ -14,15 +17,18 @@ Vec3 ConvexHullColliderComponent::center()
 
 Vec3 ConvexHullColliderComponent::support(Vec3 direction)
 {
+    TransformComponent* xfm = getTransformComponent(this->entity);
     Vec3 result;
     float32 biggestDot = -FLT_MAX;
 
     for (Vec3 position: this->positions)
     {
-        float32 dotp = dot(position, direction);
+        Vec3 worldPosition = xfm->position() + position;
+
+        float32 dotp = dot(worldPosition, direction);
         if (dotp > biggestDot)
         {
-            result = position;
+            result = worldPosition;
             biggestDot = dotp;
         }
     }
