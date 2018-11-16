@@ -5,10 +5,9 @@
 
 Vec3 ConvexHullColliderComponent::center()
 {
-    static bool set = false;
-
-    if (!set)
+    if (!_centerCalculated)
     {
+        this->_centerCalculated = true;
         this->_colliderCenter = approximateHullCentroid(this); // Note: this assumes the hull never changes (it shouldn't)
     }
     

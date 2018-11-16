@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include "resource/Submesh.h"
 #include "Aabb.h"
 
@@ -18,7 +19,7 @@ struct Mesh
     FilenameString filename;
     string64 subObjectName = "";
     std::vector<Submesh> submeshes;
-    std::vector<Material*> materialsReferencedInObjFile;
+    std::unordered_map<std::string, Material*> materialsReferencedInObjFile;
 
     Aabb bounds;
 };

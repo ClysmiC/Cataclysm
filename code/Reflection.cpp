@@ -2,6 +2,7 @@
 #include "imgui/imgui.h"
 
 #include "ecs/components/TransformComponent.h"
+#include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/CameraComponent.h"
 #include "ecs/components/DirectionalLightComponent.h"
@@ -190,6 +191,12 @@ void reflectTransformComponent(IReflector* reflector, uint32 startingOffset)
         //    reflector->popStruct();
         //}
     }
+}
+
+void reflectConvexHullColliderComponent(IReflector * reflector, uint32 startingOffset)
+{
+    ConvexHullColliderComponent* chcc = (ConvexHullColliderComponent*)((char*)reflector->reflectionTarget() + startingOffset);
+    reflector->consumeBool("Show in editor?", startingOffset + offsetof(ConvexHullColliderComponent, showInEditor));
 }
 
 void reflectColliderComponent(IReflector* reflector, uint32 startingOffset)

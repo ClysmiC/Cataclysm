@@ -93,7 +93,8 @@ vec3 directionalLight(DirectionalLight light, vec3 fragNormal, vec3 viewDir)
 	vec3 halfwayDir = normalize(toLightDir + viewDir);
 	float nDotH = max(dot(fragNormal, halfwayDir), 0);
 
-	vec3 ambient = light.intensity * material.ambient * vec3(texture(material.ambientTex, v2f.texCoords));
+	vec3 ambient = light.intensity * 0.1 * material.ambient * vec3(texture(material.ambientTex, v2f.texCoords));
+    // ambient = vec3(0);
 	vec3 diffuse = light.intensity * material.diffuse * vec3(texture(material.diffuseTex, v2f.texCoords)) * nDotL;
 	vec3 specular = light.intensity *  material.specular * vec3(texture(material.specularTex, v2f.texCoords)) * pow(nDotH, material.specularExponent);
 
@@ -120,7 +121,7 @@ vec3 pointLight(PointLight light, vec3 fragNormal, vec3 viewDir)
 	float lightDistance = length(light.posWorld - v2f.posWorld);
 	float attenuation = 1.0 / (light.attenuationConstant + light.attenuationLinear * lightDistance + light.attenuationQuadratic * lightDistance * lightDistance);
 
-	vec3 ambient = light.intensity * material.ambient * vec3(texture(material.ambientTex, v2f.texCoords));
+	vec3 ambient = light.intensity * 0.1 * material.ambient * vec3(texture(material.ambientTex, v2f.texCoords));
 	vec3 diffuse = light.intensity * material.diffuse * vec3(texture(material.diffuseTex, v2f.texCoords)) * nDotL;
 	vec3 specular = light.intensity * material.specular * vec3(texture(material.specularTex, v2f.texCoords)) * pow(nDotH, material.specularExponent);
 

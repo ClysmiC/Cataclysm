@@ -43,9 +43,9 @@ Material::Material(FilenameString filename_, MaterialNameString materialName)
     );
 
     this->textureUniforms.emplace("material.normalTex", Texture::defaultNormal());
-    this->textureUniforms.emplace("material.ambientTex", Texture::gray());
-    this->textureUniforms.emplace("material.diffuseTex", Texture::gray());
-    this->textureUniforms.emplace("material.specularTex", Texture::black());
+    this->textureUniforms.emplace("material.ambientTex", Texture::white());
+    this->textureUniforms.emplace("material.diffuseTex", Texture::white());
+    this->textureUniforms.emplace("material.specularTex", Texture::white());
 }
 
 bool load(Material* material)
@@ -174,6 +174,7 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
             FilenameString texRelFilename = relFileDirectory + texFilename;
 
             bool gammaCorrect = texType == "material.diffuseTex";
+            gammaCorrect = false;
             Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
 
             assert(tex != nullptr);
@@ -289,14 +290,17 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
         else if (tokens[0] == "map_Ka")
         {
             handleTexture(currentMaterial, "material.ambientTex", tokens[1].c_str());
+            currentMaterial->vec3Uniforms["material.ambient"] = Vec3(1); // The obj spec says that map values get multiplied by constant values (i.e. Ka), but that consistently leads to wrong results, so I use EITHER the map or the constant
         }
         else if (tokens[0] == "map_Kd")
         {
             handleTexture(currentMaterial, "material.diffuseTex", tokens[1].c_str());
+            currentMaterial->vec3Uniforms["material.diffuse"] = Vec3(1);
         }
         else if (tokens[0] == "map_Ks")
         {
             handleTexture(currentMaterial, "material.specularTex", tokens[1].c_str());
+            currentMaterial->vec3Uniforms["material.specular"] = Vec3(1);
         }
         else if (tokens[0] == "map_Ns")
         {

@@ -138,14 +138,15 @@ void reflectVec4(IReflector* reflector, uint32 startingOffset);
 void reflectQuaternion(IReflector* reflector, uint32 startingOffset);
 void reflectVec3Normalized(IReflector* reflector, uint32 startingOffset); // renormalize value when changed
 
-void reflectEntityDetailsComponent   (IReflector* reflector, uint32 startingOffset);
-void reflectTransformComponent       (IReflector* reflector, uint32 startingOffset);
-void reflectColliderComponent        (IReflector* reflector, uint32 startingOffset);
-void reflectCameraComponent          (IReflector* reflector, uint32 startingOffset);
-void reflectDirectionalLightComponent(IReflector* reflector, uint32 startingOffset);
-void reflectPointLightComponent      (IReflector* reflector, uint32 startingOffset);
-void reflectPortalComponent          (IReflector* reflector, uint32 startingOffset);
-void reflectRenderComponent          (IReflector* reflector, uint32 startingOffset);
+void reflectEntityDetailsComponent     (IReflector* reflector, uint32 startingOffset);
+void reflectTransformComponent         (IReflector* reflector, uint32 startingOffset);
+void reflectConvexHullColliderComponent(IReflector* reflector, uint32 startingOffset);
+void reflectColliderComponent          (IReflector* reflector, uint32 startingOffset);
+void reflectCameraComponent            (IReflector* reflector, uint32 startingOffset);
+void reflectDirectionalLightComponent  (IReflector* reflector, uint32 startingOffset);
+void reflectPointLightComponent        (IReflector* reflector, uint32 startingOffset);
+void reflectPortalComponent            (IReflector* reflector, uint32 startingOffset);
+void reflectRenderComponent            (IReflector* reflector, uint32 startingOffset);
 
 //
 // Enums whose names are exposed via reflection

@@ -11,6 +11,9 @@ struct ConvexHullColliderComponent : public Component, public ConvexHull, public
 
     static constexpr bool multipleAllowedPerEntity = true;
 
+    bool showInEditor = true;
+
+    bool _centerCalculated;
     Vec3 _colliderCenter;
 
     Vec3 center() override;

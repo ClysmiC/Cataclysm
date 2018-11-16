@@ -24,8 +24,8 @@
 [X] Collision + resolution when walking
 
 [X] Select entity in editor based on primitive collider + convex hull collider + render aabb
-[ ] Test GJK against convex hull colliders
-[ ] Add/inspect convex hull collider in editor
+[X] Test GJK against convex hull colliders
+[X] Add/inspect convex hull collider in editor
 [ ] Create 3rd person entity (player)
    [ ] Attach camera offset from it
    [ ] Render a cylinder + arrow for the player hitbox

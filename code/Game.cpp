@@ -661,7 +661,14 @@ int main()
     game->player = player;
     {
         TransformComponent* playerXfm = getTransformComponent(player);
-        
+        Mesh* marioMesh = ResourceManager::instance().initMesh("sm64/mario.obj", true, MeshLoadOptions::CPU_AND_GPU);
+
+        for (uint32 i = 0; i < marioMesh->submeshes.size(); i++)
+        {
+            RenderComponent* rc = addRenderComponent(game->player);
+            new (rc) RenderComponent(game->player, &marioMesh->submeshes[i]);
+        }
+
         ColliderComponent* playerCollider = addColliderComponent(player);
         playerCollider->type = ColliderType::RECT3;
         float32 playerHeight = 2;
@@ -679,7 +686,8 @@ int main()
     // Parent player to camera
     //
     setParent(camera, player);
-    cameraXfm->setLocalPosition(Vec3(0, 2, 0));
+    cameraXfm->setLocalPosition(Vec3(0, 2, -10));
+    cameraXfm->setLocalOrientation(axisAngle(Vec3(Axis3D::Y), 180));
     
 #if 1
     cameraComponent->isOrthographic = false;

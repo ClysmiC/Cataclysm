@@ -114,8 +114,9 @@ bool isUploadedToGpuOpenGl(Mesh* mesh)
 void uploadToGpuOpenGl(Mesh* mesh)
 {
     // Load all materials
-    for (Material* material : mesh->materialsReferencedInObjFile)
+    for (auto kvp : mesh->materialsReferencedInObjFile)
     {
+        Material* material = kvp.second;
         load(material);
     }
 

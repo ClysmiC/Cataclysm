@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool createMeshes, bool createColliders)
 {
@@ -56,6 +57,28 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             while (getline(ss, item, ' '))
             {
                 tokens.push_back(item);
+            }
+        }
+
+        for (uint32 i = 0; i < tokens.size(); i++)
+        {
+            // If there were multiple spaces in a row, using the ' ' tokenizer might still give us tokens with a whitespace value
+            string token = tokens[i];
+            bool isSpace = true;
+            for (uint32 j = 0; j < token.length(); j++)
+            {
+                if (!std::isspace(token[j]))
+                {
+                    isSpace = false;
+                    break;
+                }
+            }
+
+            if (isSpace)
+            {
+                // ordered remove, fix up iteration
+                tokens.erase(tokens.begin() + i);
+                i--;
             }
         }
 
@@ -194,7 +217,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             Material* m = ResourceManager::instance().initMaterial(currentMaterialFilename, currentMaterialName, false);
             assert(m != nullptr);
 
-            mesh->materialsReferencedInObjFile.push_back(m);
+            mesh->materialsReferencedInObjFile[m->id.cstr()] = m;
         }
         else if (tokens[0] == "f")
         {

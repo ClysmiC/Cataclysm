@@ -91,24 +91,6 @@ void showEditor(EditorState* editor)
             {
                 DebugDraw::instance().drawAabb(e);
             }
-                
-            if (editor->drawCollider)
-            {
-                ColliderComponent* cc = getColliderComponent(e);
-
-                if (cc)
-                {
-                    {
-                        // Debug
-                        Vec3 direction(1, 1, 1);
-                        Vec3 support = cc->support(direction);
-
-                        DebugDraw::instance().drawSphere(support, .2);
-                    }
-                    
-                    DebugDraw::instance().drawCollider(cc);
-                }
-            }
         }
     }
 
@@ -122,7 +104,7 @@ void showEditor(EditorState* editor)
         {
             ConvexHullColliderComponent* chcc = getConvexHullColliderComponent(e);
 
-            if (chcc)
+            if (chcc && chcc->showInEditor)
             {
                 TransformComponent* xfm = getTransformComponent(e);
 
@@ -287,6 +269,7 @@ void showEditor(EditorState* editor)
         auto directionalLights = getDirectionalLightComponents(e);
         auto pointLights = getPointLightComponents(e);
         auto renderComponents = getRenderComponents(e);
+        auto convexHullColliders = getConvexHullColliderComponents(e);
 
         //
         // Docked buttons
@@ -477,7 +460,7 @@ void showEditor(EditorState* editor)
                 if (multipleColliders)
                 {
                     char buffer[32];
-                    sprintf_s(buffer, 32, "Colliders (%d)", colliders.numComponents);
+                    sprintf_s(buffer, 32, "Prim. Colliders (%d)", colliders.numComponents);
                     multipleColliderHeaderOpen = ImGui::Als_CollapsingHeaderTreeNode(buffer);
                 }
 
@@ -489,7 +472,7 @@ void showEditor(EditorState* editor)
                         
                         bool xNotClicked = true;
                         char labelBuffer[32];
-                        sprintf_s(labelBuffer, 32, "Collider##%d", i);
+                        sprintf_s(labelBuffer, 32, "Prim. Collider##%d", i);
                         if (ImGui::Als_CollapsingHeaderTreeNode(labelBuffer, &xNotClicked))
                         {
                             reflector.setPrimaryReflectionTarget(cc);
@@ -499,6 +482,45 @@ void showEditor(EditorState* editor)
                         }
 
                         if (!xNotClicked) removeColliderComponent(&cc);
+                    }
+                }
+
+                if (multipleColliderHeaderOpen)
+                {
+                    ImGui::TreePop();
+                }
+            }
+
+            if (convexHullColliders.numComponents > 0)
+            {
+                bool multipleColliders = convexHullColliders.numComponents > 1;
+                bool multipleColliderHeaderOpen = false;
+                
+                if (multipleColliders)
+                {
+                    char buffer[32];
+                    sprintf_s(buffer, 32, "Conv. Colliders (%d)", convexHullColliders.numComponents);
+                    multipleColliderHeaderOpen = ImGui::Als_CollapsingHeaderTreeNode(buffer);
+                }
+
+                if (!multipleColliders || multipleColliderHeaderOpen)
+                {
+                    for (uint32 i = 0; i < convexHullColliders.numComponents; i++)
+                    {
+                        ConvexHullColliderComponent* chcc = &convexHullColliders[i];
+                        
+                        bool xNotClicked = true;
+                        char labelBuffer[32];
+                        sprintf_s(labelBuffer, 32, "Conv. Collider##%d", i);
+                        if (ImGui::Als_CollapsingHeaderTreeNode(labelBuffer, &xNotClicked))
+                        {
+                            reflector.setPrimaryReflectionTarget(chcc);
+                            reflectConvexHullColliderComponent(&reflector, 0);
+
+                            ImGui::TreePop();
+                        }
+
+                        if (!xNotClicked) removeConvexHullColliderComponent(&chcc);
                     }
                 }
 
