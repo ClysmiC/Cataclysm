@@ -4,6 +4,11 @@
 #include "Scene.h"
 #include "ecs/systems/RenderSystem.h"
 
+#define MAX_SCENES 8
+#define MOUSE_BUTTON_COUNT 8
+#define JOYSTICK_BUTTON_COUNT 32
+#define KEY_COUNT 1024
+
 extern float mouseX;
 extern float mouseY;
 extern float mouseXPrev;
@@ -12,13 +17,35 @@ extern float mouseYPrev;
 extern float32 timeMs;
 extern float32 deltaTMs;
 
-extern bool keys[1024];
-extern bool lastKeys[1024];
+extern bool keys[KEY_COUNT];
+extern bool lastKeys[KEY_COUNT];
 
-extern bool mouseButtons[8];
-extern bool lastMouseButtons[8];
+extern bool joystickButtons[JOYSTICK_BUTTON_COUNT];
+extern bool lastJoystickButtons[JOYSTICK_BUTTON_COUNT];
 
-#define MAX_SCENES 8
+extern float32 leftJoyX;
+extern float32 leftJoyY;
+extern float32 rightJoyX;
+extern float32 rightJoyY;
+
+extern bool mouseButtons[MOUSE_BUTTON_COUNT];
+extern bool lastMouseButtons[MOUSE_BUTTON_COUNT];
+
+// TODO: put this away in controller specific file
+#define XBOX_GLFW_BUTTON_A                 0
+#define XBOX_GLFW_BUTTON_B                 1
+#define XBOX_GLFW_BUTTON_X                 2
+#define XBOX_GLFW_BUTTON_Y                 3
+#define XBOX_GLFW_BUTTON_LB                4
+#define XBOX_GLFW_BUTTON_RB                5
+#define XBOX_GLFW_BUTTON_SELECT            6
+#define XBOX_GLFW_BUTTON_START             7
+#define XBOX_GLFW_BUTTON_LEFT_JOY_CLICK    8
+#define XBOX_GLFW_BUTTON_RIGHT_JOY_CLICK   9
+#define XBOX_GLFW_BUTTON_DPAD_UP          10
+#define XBOX_GLFW_BUTTON_DPAD_RIGHT       11
+#define XBOX_GLFW_BUTTON_DPAD_DOWN        12
+#define XBOX_GLFW_BUTTON_DPAD_LEFT        13
 
 struct Window;
 

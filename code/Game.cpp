@@ -60,6 +60,14 @@ bool lastKeys[1024];
 bool mouseButtons[8];
 bool lastMouseButtons[8];
 
+float32 leftJoyX;
+float32 leftJoyY;
+float32 rightJoyX;
+float32 rightJoyY;
+
+bool joystickButtons[32];
+bool lastJoystickButtons[32];
+
 float mouseX;
 float mouseY;
 float mouseXPrev;
@@ -297,16 +305,60 @@ void debug_testBucketArray()
     }
 }
 
-void updateLastKeysAndMouseButtons()
+void updateJoystickInput()
 {
-    for (uint32 i = 0; i < 1024; i++)
+    if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+    {
+        int count;
+        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+
+        if (count >= 2)
+        {
+            leftJoyX = axes[0];
+            leftJoyY = axes[1];
+        }
+
+        if (count >= 4)
+        {
+            rightJoyX = axes[2];
+            rightJoyY = axes[3];
+        }
+
+        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &count);
+        for (int i = 0; i < min(JOYSTICK_BUTTON_COUNT, count); i++)
+        {
+            joystickButtons[i] = (buttons[i] == GLFW_PRESS);
+        }
+    }
+    else
+    {
+        leftJoyX = 0;
+        leftJoyY = 0;
+        rightJoyX = 0;
+        rightJoyY = 0;
+
+        for (int i = 0; i < JOYSTICK_BUTTON_COUNT; i++)
+        {
+            joystickButtons[i] = false;
+        }
+    }
+}
+
+void updateLastKeysAndMouseButtonsAndJoystickButtons()
+{
+    for (uint32 i = 0; i < KEY_COUNT; i++)
     {
         lastKeys[i] = keys[i];
     }
 
-    for (uint32 i = 0; i < 8; i++)
+    for (uint32 i = 0; i < MOUSE_BUTTON_COUNT; i++)
     {
         lastMouseButtons[i] = mouseButtons[i];
+    }
+
+    for (uint32 i = 0; i < JOYSTICK_BUTTON_COUNT; i++)
+    {
+        lastJoystickButtons[i] = joystickButtons[i];
     }
 }
 
@@ -512,6 +564,19 @@ void updateGame(Game* game)
     // Update camera and position
     //
     walkAndCamera(game);
+
+    //
+    // Update camera
+    //
+    {
+        Vec3 playerPos = getTransformComponent(game->player)->position();
+        Vec3 camPos = playerPos + Vec3(0, 12, 20);
+        Quaternion camRot = lookRotation(playerPos - camPos, Vec3(0, 1, 0));
+
+        TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+        camXfm->setPosition(camPos);
+        camXfm->setOrientation(camRot);
+    }
     
     //
     // Enable/disable editor
@@ -676,18 +741,11 @@ int main()
         playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
         playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
         
-        WalkComponent* playerWalk = addWalkComponent(player);
-        playerWalk->isGrounded = true;
-        assert(testScene1->ecs.walkComponents.count() > 0);
+        //WalkComponent* playerWalk = addWalkComponent(player);
+        //playerWalk->isGrounded = true;
+        //assert(testScene1->ecs.walkComponents.count() > 0);
         //playerWalk->terrain = testScene1->ecs.terrains[0].entity;
     }
-
-    //
-    // Parent player to camera
-    //
-    setParent(camera, player);
-    cameraXfm->setLocalPosition(Vec3(0, 2, -10));
-    cameraXfm->setLocalOrientation(axisAngle(Vec3(Axis3D::Y), 180));
     
 #if 1
     cameraComponent->isOrthographic = false;
@@ -788,6 +846,24 @@ int main()
         updateGame(game);
         deleteMarkedEntities(game);
 
+        bool foo;
+        ImGui::Begin("Joystick values", &foo);
+        ImGui::InputFloat("Joy 0", &leftJoyX);
+        ImGui::InputFloat("Joy 1", &leftJoyY);
+        ImGui::InputFloat("Joy 2", &rightJoyX);
+        ImGui::InputFloat("Joy 3", &rightJoyY);
+        ImGui::Separator();
+
+        for (int i = 0; i < 14; i++)
+        {
+            char buffer[32];
+            sprintf_s(buffer, "Button %d", i);
+            int value = joystickButtons[i] == true ? 1 : 0;
+            ImGui::InputInt(buffer, &value);
+        }
+
+        ImGui::End();
+
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -805,7 +881,8 @@ int main()
         mouseXPrev = mouseX;
         mouseYPrev = mouseY;
 
-        updateLastKeysAndMouseButtons();
+        updateJoystickInput();
+        updateLastKeysAndMouseButtonsAndJoystickButtons();
         clearTempAlloc();
         
         std::this_thread::sleep_for(std::chrono::milliseconds(33)); // TODO: proper FPS and timing stuff

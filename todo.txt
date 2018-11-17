@@ -26,12 +26,13 @@
 [X] Select entity in editor based on primitive collider + convex hull collider + render aabb
 [X] Test GJK against convex hull colliders
 [X] Add/inspect convex hull collider in editor
+[X] Controller input
 [ ] Create 3rd person entity (player)
-   [ ] Attach camera offset from it
-   [ ] Render a cylinder + arrow for the player hitbox
-   [ ] Move and resolve collisions
+   [~] Attach camera offset from it
+   [X] Render a mesh
+   [~] Move and resolve collisions
    [ ] Walljump?
-[ ]
+[ ] Design better level w/ some cool textures
 [ ]
 
 ======================

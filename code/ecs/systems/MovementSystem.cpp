@@ -20,15 +20,11 @@
 void walkAndCamera(Game* game)
 {
     TransformComponent* xfm = getTransformComponent(game->player);
-    TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
-    WalkComponent* walk = getWalkComponent(game->player);
     ColliderComponent* collider = getColliderComponent(game->player);
     EntityDetails* details = getEntityDetails(game->player);
 
     assert((details->flags & EntityFlag_Static) == 0); // only dynamic object can walk!
-    
-    TerrainComponent *terrain = getTerrainComponent(walk->terrain);
-    
+
     Vec3 posBeforeMove = xfm->position();
     
     Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -85,8 +81,6 @@ void walkAndCamera(Game* game)
             // "Player" just yaws.
             // Camera yaws and pitches
             xfm->setOrientation(deltaYaw * xfm->orientation());
-
-            cameraXfm->setLocalOrientation(deltaPitch * cameraXfm->localOrientation());
         }
 
         if (keys[GLFW_KEY_W])
@@ -119,7 +113,7 @@ void walkAndCamera(Game* game)
             ColliderComponent* cc = it.ptr;
             EntityDetails* debug_details = getEntityDetails(cc->entity);
 
-            if (cc->isTrigger || cc->entity.id == walk->entity.id) continue;
+            if (cc->isTrigger || cc->entity.id == game->player.id) continue;
 
             GjkResult collisionResult = gjk(collider, cc);
 
@@ -135,7 +129,7 @@ void walkAndCamera(Game* game)
             ConvexHullColliderComponent* cc = it.ptr;
             EntityDetails* debug_details = getEntityDetails(cc->entity);
 
-            if (cc->isTrigger || cc->entity.id == walk->entity.id) continue;
+            if (cc->isTrigger || cc->entity.id == game->player.id) continue;
 
             GjkResult collisionResult = gjk(collider, cc);
 
@@ -149,18 +143,18 @@ void walkAndCamera(Game* game)
     //
     // Snap to ground
     //
-    if (terrain)
-    {
-        float32 height = getTerrainHeight(terrain, xfm->position().x, xfm->position().z);
+    //if (terrain)
+    //{
+    //    float32 height = getTerrainHeight(terrain, xfm->position().x, xfm->position().z);
 
-        xfm->setPosition(
-            Vec3(
-                xfm->position().x,
-                height,
-                xfm->position().z
-            )
-        );
-    }
+    //    xfm->setPosition(
+    //        Vec3(
+    //            xfm->position().x,
+    //            height,
+    //            xfm->position().z
+    //        )
+    //    );
+    //}
 
     //
     // Go thru portal
