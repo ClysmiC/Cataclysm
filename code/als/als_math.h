@@ -42,6 +42,7 @@ union Vec2
     };
     float32 element[2];
 
+    Vec2& normalizeOrZeroInPlace();
     Vec2& normalizeOrXAxisInPlace();
     Vec2& normalizeInPlace();
 };
@@ -64,6 +65,7 @@ union Vec3
     };
     float32 element[3];
 
+    Vec3& normalizeOrZeroInPlace();
     Vec3& normalizeOrXAxisInPlace();
     Vec3& normalizeInPlace();
 
@@ -91,6 +93,9 @@ union Vec4
     };
     float32 element[4];
 
+    
+    Vec4& normalizeOrZeroInPlace();
+    Vec4& normalizeOrXAxisInPlace();
     Vec4& normalizeInPlace();
 
     inline Vec3 xyz() { return Vec3(x, y, z); }

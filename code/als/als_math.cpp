@@ -105,6 +105,24 @@ Vec2& Vec2::normalizeInPlace()
     return *this;
 }
 
+Vec2 & Vec2::normalizeOrZeroInPlace()
+{
+    float32 len = length(*this);
+
+    if (len < EPSILON)
+    {
+        x = 0;
+        y = 0;
+    }
+    else
+    {
+        x /= len;
+        y /= len;
+    }
+
+    return *this;
+}
+
 Vec2& Vec2::normalizeOrXAxisInPlace()
 {
     float32 len = length(*this);
@@ -129,6 +147,26 @@ Vec3& Vec3::normalizeInPlace()
     x /= len;
     y /= len;
     z /= len;
+
+    return *this;
+}
+
+Vec3& Vec3::normalizeOrZeroInPlace()
+{
+    float32 len = length(*this);
+
+    if (len < EPSILON)
+    {
+        x = 0;
+        y = 0;
+        z = 0;
+    }
+    else
+    {
+        x /= len;
+        y /= len;
+        z /= len;
+    }
 
     return *this;
 }
@@ -160,6 +198,50 @@ Vec4& Vec4::normalizeInPlace()
     y /= len;
     z /= len;
     w /= len;
+
+    return *this;
+}
+
+Vec4& Vec4::normalizeOrZeroInPlace()
+{
+    float32 len = length(*this);
+
+    if (len < EPSILON)
+    {
+        x = 0;
+        y = 0;
+        z = 0;
+        w = 0;
+    }
+    else
+    {
+        x /= len;
+        y /= len;
+        z /= len;
+        w /= len;
+    }
+
+    return *this;
+}
+
+Vec4& Vec4::normalizeOrXAxisInPlace()
+{
+    float32 len = length(*this);
+
+    if (len < EPSILON)
+    {
+        x = 1;
+        y = 0;
+        z = 0;
+        w = 0;
+    }
+    else
+    {
+        x /= len;
+        y /= len;
+        z /= len;
+        w /= len;
+    }
 
     return *this;
 }

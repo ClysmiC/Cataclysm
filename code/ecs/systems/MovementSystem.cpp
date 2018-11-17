@@ -25,82 +25,81 @@ void walkAndCamera(Game* game)
 
     assert((details->flags & EntityFlag_Static) == 0); // only dynamic object can walk!
 
-    Vec3 posBeforeMove = xfm->position();
-    
-    Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
-    
-    float32 cameraTurnSpeed = 1.5; // Deg / pixel / Sec
-    float32 cameraSpeed = 5;
+    TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+
     float32 deltaTS = deltaTMs / 1000.0f;
 
-    if (keys[GLFW_KEY_LEFT_SHIFT])
-    {
-        cameraSpeed *= 2;
-    }
+    //Vec3 posBeforeMove = xfm->position();
+    
+    Plane movementPlane(Vec3(0, 0, 0), Vec3(0, 1, 0));
 
-    Vec3 moveRight   = normalize( project(xfm->right(), movementPlane) );
-    Vec3 moveLeft    = normalize( -moveRight );
-    Vec3 moveForward = normalize( project(xfm->forward(), movementPlane) );
-    Vec3 moveBack    = normalize( -moveForward );
+    Vec3 moveRight   = normalize(project(camXfm->right(), movementPlane));
+    Vec3 moveLeft    = -moveRight;
+    Vec3 moveForward = normalize(project(camXfm->forward(), movementPlane));
+    Vec3 moveBack    = -moveForward;
 
-    // Uncomment this (and the asserts) to follow the pitch of the camera when
-    // moving forward or backward.
-    // moveForward = normalize(xfm->forward());
+    const float32 stickDeadzone = 0.05;
+    const float32 playerSpeed = 5;
 
-    assert(FLOAT_EQ(moveRight.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveLeft.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveForward.y, 0, EPSILON));
-    assert(FLOAT_EQ(moveBack.y, 0, EPSILON));
+    Vec3 movement = moveRight * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
+                    moveForward * (abs(leftJoyY) >= stickDeadzone ? leftJoyY : 0);
 
-    bool draggingCameraInEditMode =
-        game->editor.isEnabled &&
-        !game->editor.translator.isHandleSelected &&
-        mouseButtons[GLFW_MOUSE_BUTTON_1] &&
-        !ImGui::GetIO().WantCaptureMouse;
+    if (length(movement) > 1) movement.normalizeInPlace();
 
-    if (!game->editor.isEnabled || draggingCameraInEditMode)
-    {
-        if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
-        {
-            // Rotate
-            float32 deltaMouseX = mouseX - mouseXPrev;
-            float32 deltaMouseY = mouseY - mouseYPrev;
+    float32 yaw = TO_DEG(atan2(-movement.z, movement.x));
 
-            if (draggingCameraInEditMode)
-            {
-                // Drag gesture moves in opposite direction
-                deltaMouseX = -deltaMouseX;
-                deltaMouseY = -deltaMouseY;
-            }
+    xfm->setOrientation(axisAngle(Vec3(0, 1, 0), yaw - 90));
+    xfm->setPosition(xfm->position() + movement * playerSpeed * deltaTS);
 
-            Quaternion deltaYaw;
-            Quaternion deltaPitch;
-            deltaYaw = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
-            deltaPitch = axisAngle(Vec3(1, 0, 0), cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+    
 
-            // "Player" just yaws.
-            // Camera yaws and pitches
-            xfm->setOrientation(deltaYaw * xfm->orientation());
-        }
+    //bool draggingCameraInEditMode =
+    //    game->editor.isEnabled &&
+    //    !game->editor.translator.isHandleSelected &&
+    //    mouseButtons[GLFW_MOUSE_BUTTON_1] &&
+    //    !ImGui::GetIO().WantCaptureMouse;
 
-        if (keys[GLFW_KEY_W])
-        {
-            xfm->setLocalPosition(xfm->localPosition() + moveForward * cameraSpeed * deltaTS);
-        }
-        else if (keys[GLFW_KEY_S])
-        {
-            xfm->setLocalPosition(xfm->localPosition() + moveBack * cameraSpeed * deltaTS);
-        }
-        
-        if (keys[GLFW_KEY_A])
-        {
-            xfm->setLocalPosition(xfm->localPosition() + moveLeft * cameraSpeed * deltaTS);
-        }
-        else if (keys[GLFW_KEY_D])
-        {
-            xfm->setLocalPosition(xfm->localPosition() + moveRight * cameraSpeed * deltaTS);
-        }
-    }
+    // TODO: guard this if in editor mode?
+    //if (mouseXPrev != FLT_MAX && mouseYPrev != FLT_MAX)
+    //{
+    //    // Rotate
+    //    float32 deltaMouseX = mouseX - mouseXPrev;
+    //    float32 deltaMouseY = mouseY - mouseYPrev;
+
+    //    if (draggingCameraInEditMode)
+    //    {
+    //        // Drag gesture moves in opposite direction
+    //        deltaMouseX = -deltaMouseX;
+    //        deltaMouseY = -deltaMouseY;
+    //    }
+
+    //    Quaternion deltaYaw;
+    //    Quaternion deltaPitch;
+    //    deltaYaw = axisAngle(Vec3(0, 1, 0), cameraTurnSpeed * -deltaMouseX * deltaTS); // yaw
+    //    deltaPitch = axisAngle(Vec3(1, 0, 0), cameraTurnSpeed * deltaMouseY * deltaTS); // pitch
+
+    //    // "Player" just yaws.
+    //    // Camera yaws and pitches
+    //    xfm->setOrientation(deltaYaw * xfm->orientation());
+    //}
+
+    //if (keys[GLFW_KEY_W])
+    //{
+    //    xfm->setLocalPosition(xfm->localPosition() + moveForward * cameraSpeed * deltaTS);
+    //}
+    //else if (keys[GLFW_KEY_S])
+    //{
+    //    xfm->setLocalPosition(xfm->localPosition() + moveBack * cameraSpeed * deltaTS);
+    //}
+    //    
+    //if (keys[GLFW_KEY_A])
+    //{
+    //    xfm->setLocalPosition(xfm->localPosition() + moveLeft * cameraSpeed * deltaTS);
+    //}
+    //else if (keys[GLFW_KEY_D])
+    //{
+    //    xfm->setLocalPosition(xfm->localPosition() + moveRight * cameraSpeed * deltaTS);
+    //}
 
     //
     // Resolve collision
@@ -159,25 +158,25 @@ void walkAndCamera(Game* game)
     //
     // Go thru portal
     //
-    FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
-    {
-        PortalComponent* pc = it.ptr;
-        if (pc->connectedPortal.id == 0) continue;
-        
-        ColliderComponent* cc = getColliderComponent(pc->entity);
+    //FOR_BUCKET_ARRAY (game->activeScene->ecs.portals.components)
+    //{
+    //    PortalComponent* pc = it.ptr;
+    //    if (pc->connectedPortal.id == 0) continue;
+    //    
+    //    ColliderComponent* cc = getColliderComponent(pc->entity);
 
-        if (pointInsideCollider(cc, xfm->position()))
-        {
-            Vec3 portalPos = getTransformComponent(pc->entity)->position();
-            Vec3 portalToOldPos = posBeforeMove - portalPos;
-            Vec3 portalToPos = xfm->position() - portalPos;
-            
-            if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
-            {
-                rebaseTransformInPlace(pc, xfm);
-                EntityDetails* connectedPortal = getEntityDetails(getEntity(getGame(pc->entity), &pc->connectedPortal));
-                game->activeScene = connectedPortal->entity.ecs->scene;
-            }
-        }
-    }
+    //    if (pointInsideCollider(cc, xfm->position()))
+    //    {
+    //        Vec3 portalPos = getTransformComponent(pc->entity)->position();
+    //        Vec3 portalToOldPos = posBeforeMove - portalPos;
+    //        Vec3 portalToPos = xfm->position() - portalPos;
+    //        
+    //        if (dot(portalToOldPos, outOfPortalNormal(pc)) >= 0)
+    //        {
+    //            rebaseTransformInPlace(pc, xfm);
+    //            EntityDetails* connectedPortal = getEntityDetails(getEntity(getGame(pc->entity), &pc->connectedPortal));
+    //            game->activeScene = connectedPortal->entity.ecs->scene;
+    //        }
+    //    }
+    //}
 }
