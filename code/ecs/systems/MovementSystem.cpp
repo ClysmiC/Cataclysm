@@ -41,32 +41,32 @@ void walkAndCamera(Game* game)
     Vec3 moveBack    = -moveForward;
 
     const float32 stickDeadzone = 0.05;
-    const float32 maxPlayerSpeed = 10;
-    const float32 playerAccel = 8.5;
-    const float32 friction = 7.0;
+    const float32 playerAccel = 35;
 
-    Vec3 movement = moveRight * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
+    Vec3 movementInput = moveRight * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
                     moveForward * (abs(leftJoyY) >= stickDeadzone ? leftJoyY : 0);
 
-    if (length(movement) > 1) movement.normalizeInPlace();
+    if (length(movementInput) > 1) movementInput.normalizeInPlace();
 
-    physics->velocity += movement * playerAccel * deltaTS;
+    Vec3 acceleration = playerAccel * movementInput;
+    acceleration -= 4 * physics->velocity;
 
-    float32 playerSpeed = length(physics->velocity);
-    if (playerSpeed > maxPlayerSpeed)
-    {
-        physics->velocity /= playerSpeed;    // normalize
-        physics->velocity *= maxPlayerSpeed; // set to max
-    }
+    xfm->setPosition(xfm->position() + 0.5 * acceleration * deltaTS * deltaTS + physics->velocity * deltaTS);
 
     float32 yaw = TO_DEG(atan2(-physics->velocity.z, physics->velocity.x));
-
     xfm->setOrientation(axisAngle(Vec3(0, 1, 0), yaw - 90));
-    xfm->setPosition(xfm->position() + physics->velocity * deltaTS);
 
+    physics->velocity += acceleration * deltaTS;
+
+    // float32 playerSpeed = length(physics->velocity);
+    //if (playerSpeed > maxPlayerSpeed)
+    //{
+    //    physics->velocity /= playerSpeed;    // normalize
+    //    physics->velocity *= maxPlayerSpeed; // set to max
+    //}
 
     // Friction
-    physics->velocity -= normalizeOrZero(physics->velocity) * friction * deltaTS;
+    //physics->velocity -= normalizeOrZero(physics->velocity) * friction * deltaTS;
     
 
     //bool draggingCameraInEditMode =
