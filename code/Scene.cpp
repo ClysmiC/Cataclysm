@@ -10,6 +10,7 @@
 #include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/TerrainComponent.h"
+#include "ecs/components/PhysicsComponent.h"
 #include "ecs/components/WalkComponent.h"
 
 #include "ecs/systems/RenderSystem.h"

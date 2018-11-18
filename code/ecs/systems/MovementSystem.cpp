@@ -13,6 +13,7 @@
 #include "ecs/components/PortalComponent.h"
 #include "ecs/components/TransformComponent.h"
 #include "ecs/components/TerrainComponent.h"
+#include "ecs/components/PhysicsComponent.h"
 #include "ecs/components/WalkComponent.h"
 
 #include "Gjk.h"
@@ -22,6 +23,7 @@ void walkAndCamera(Game* game)
     TransformComponent* xfm = getTransformComponent(game->player);
     ColliderComponent* collider = getColliderComponent(game->player);
     EntityDetails* details = getEntityDetails(game->player);
+    PhysicsComponent* physics = getPhysicsComponent(game->player);
 
     assert((details->flags & EntityFlag_Static) == 0); // only dynamic object can walk!
 
@@ -39,18 +41,32 @@ void walkAndCamera(Game* game)
     Vec3 moveBack    = -moveForward;
 
     const float32 stickDeadzone = 0.05;
-    const float32 playerSpeed = 5;
+    const float32 maxPlayerSpeed = 10;
+    const float32 playerAccel = 8.5;
+    const float32 friction = 7.0;
 
     Vec3 movement = moveRight * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
                     moveForward * (abs(leftJoyY) >= stickDeadzone ? leftJoyY : 0);
 
     if (length(movement) > 1) movement.normalizeInPlace();
 
-    float32 yaw = TO_DEG(atan2(-movement.z, movement.x));
+    physics->velocity += movement * playerAccel * deltaTS;
+
+    float32 playerSpeed = length(physics->velocity);
+    if (playerSpeed > maxPlayerSpeed)
+    {
+        physics->velocity /= playerSpeed;    // normalize
+        physics->velocity *= maxPlayerSpeed; // set to max
+    }
+
+    float32 yaw = TO_DEG(atan2(-physics->velocity.z, physics->velocity.x));
 
     xfm->setOrientation(axisAngle(Vec3(0, 1, 0), yaw - 90));
-    xfm->setPosition(xfm->position() + movement * playerSpeed * deltaTS);
+    xfm->setPosition(xfm->position() + physics->velocity * deltaTS);
 
+
+    // Friction
+    physics->velocity -= normalizeOrZero(physics->velocity) * friction * deltaTS;
     
 
     //bool draggingCameraInEditMode =

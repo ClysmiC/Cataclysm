@@ -26,6 +26,7 @@
 #include "components/ColliderComponent.h"
 #include "components/ConvexHullColliderComponent.h"
 #include "components/TerrainComponent.h"
+#include "components/PhysicsComponent.h"
 #include "components/WalkComponent.h"
 
 // ID 0 is a null entity
@@ -286,6 +287,28 @@ bool removeTerrainComponent(TerrainComponent** ppComponent)
 {
     if (!ppComponent) return false;
     bool success = removeComponent(&((*ppComponent)->entity.ecs->terrains), *ppComponent);
+
+    if (success) *ppComponent = nullptr;
+
+    return success;
+}
+
+PhysicsComponent* addPhysicsComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return addComponent(&e.ecs->physicsComponents, e);
+}
+
+PhysicsComponent* getPhysicsComponent(Entity e)
+{
+    if (e.id == 0) return nullptr;
+    return getComponent(&e.ecs->physicsComponents, e);
+}
+
+bool removePhysicsComponent(PhysicsComponent** ppComponent)
+{
+    if (!ppComponent) return false;
+    bool success = removeComponent(&((*ppComponent)->entity.ecs->physicsComponents), *ppComponent);
 
     if (success) *ppComponent = nullptr;
 

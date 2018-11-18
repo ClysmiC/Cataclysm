@@ -318,6 +318,12 @@ inline Vec2 normalize(Vec2 v)
     Vec2 result = v / length(v);
     return result;
 }
+inline Vec2 normalizeOrZero(Vec2 v)
+{
+    Vec2 result = Vec2(0);
+    if (v.x != 0 || v.y != 0) result = v / length(v);
+    return result;
+}
 inline bool equals(Vec2 vectorA, Vec2 vectorB)
 {
     float32 deltaX = fabs(vectorA.x - vectorB.x);
@@ -382,6 +388,12 @@ inline Vec3 normalize(Vec3 v)
     Vec3 result = v / length(v);
     return result;
 }
+inline Vec3 normalizeOrZero(Vec3 v)
+{
+    Vec3 result = Vec3(0);
+    if (v.x != 0 || v.y != 0 || v.z != 0) result = v / length(v);
+    return result;
+}
 inline bool equals(Vec3 vectorA, Vec3 vectorB)
 {
     float32 deltaX = fabs(vectorA.x - vectorB.x);
@@ -435,6 +447,12 @@ inline float32 length(Vec4 v)
 inline Vec4 normalize(Vec4 v)
 {
     Vec4 result = v / length(v);
+    return result;
+}
+inline Vec4 normalizeOrZero(Vec4 v)
+{
+    Vec4 result = Vec4(0);
+    if (v.x != 0 || v.y != 0 || v.z != 0 || v.w != 0) result = v / length(v);
     return result;
 }
 inline bool equals(Vec4 vectorA, Vec4 vectorB)

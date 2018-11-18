@@ -23,6 +23,7 @@
 #include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/TerrainComponent.h"
+#include "ecs/components/PhysicsComponent.h"
 #include "ecs/components/WalkComponent.h"
 
 #include "resource/ResourceManager.h"
@@ -740,6 +741,8 @@ int main()
         float32 playerWidth = .5;
         playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
         playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
+
+        addPhysicsComponent(player);
         
         //WalkComponent* playerWalk = addWalkComponent(player);
         //playerWalk->isGrounded = true;

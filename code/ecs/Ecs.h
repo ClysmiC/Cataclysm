@@ -22,6 +22,7 @@ struct RenderComponent;
 struct ColliderComponent;
 struct ConvexHullColliderComponent;
 struct TerrainComponent;
+struct PhysicsComponent;
 struct WalkComponent;
 
 struct Ecs
@@ -55,6 +56,7 @@ struct Ecs
     static constexpr uint32 PORTAL_BUCKET_SIZE = 16;
     static constexpr uint32 CONVEX_HULL_COLLIDER_BUCKET_SIZE = 512;
     static constexpr uint32 COLLIDER_BUCKET_SIZE = 512;
+    static constexpr uint32 PHYSICS_BUCKET_SIZE = 512;
     static constexpr uint32 WALK_COMPONENT_BUCKET_SIZE = 8;
 
     std::vector<Entity> entities;
@@ -69,6 +71,7 @@ struct Ecs
     ComponentList<PortalComponent,             PORTAL_BUCKET_SIZE>                 portals;
     ComponentList<ColliderComponent,           COLLIDER_BUCKET_SIZE>               colliders;
     ComponentList<ConvexHullColliderComponent, CONVEX_HULL_COLLIDER_BUCKET_SIZE>   convexHullColliders;
+    ComponentList<PhysicsComponent,            PHYSICS_BUCKET_SIZE>                physicsComponents;
     ComponentList<WalkComponent,               WALK_COMPONENT_BUCKET_SIZE>         walkComponents;
 };
 
@@ -116,6 +119,10 @@ bool                       removeDirectionalLightComponent(DirectionalLightCompo
 TerrainComponent* addTerrainComponent(Entity e);
 TerrainComponent* getTerrainComponent(Entity e);
 bool              removeTerrainComponent(TerrainComponent** ppComponent);
+
+PhysicsComponent* addPhysicsComponent(Entity e);
+PhysicsComponent* getPhysicsComponent(Entity e);
+bool              removePhysicsComponent(PhysicsComponent** ppComponent);
 
 WalkComponent* addWalkComponent(Entity e);
 WalkComponent* getWalkComponent(Entity e);
