@@ -23,7 +23,7 @@
 #include "ecs/components/ConvexHullColliderComponent.h"
 #include "ecs/components/ColliderComponent.h"
 #include "ecs/components/TerrainComponent.h"
-#include "ecs/components/PhysicsComponent.h"
+#include "ecs/components/AgentComponent.h"
 #include "ecs/components/WalkComponent.h"
 
 #include "resource/ResourceManager.h"
@@ -727,6 +727,7 @@ int main()
     game->player = player;
     {
         TransformComponent* playerXfm = getTransformComponent(player);
+        playerXfm->setPosition(Vec3(0, 1, 0)); // @Hack: start "above" ground and fall onto it so I don't have to worry about precisely lining stuff up
         Mesh* marioMesh = ResourceManager::instance().initMesh("sm64/mario.obj", true, MeshLoadOptions::CPU_AND_GPU);
 
         for (uint32 i = 0; i < marioMesh->submeshes.size(); i++)
@@ -742,7 +743,7 @@ int main()
         playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
         playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
 
-        addPhysicsComponent(player);
+        addAgentComponent(player);
         
         //WalkComponent* playerWalk = addWalkComponent(player);
         //playerWalk->isGrounded = true;
@@ -809,23 +810,6 @@ int main()
 
     makeSceneActive(game, testScene1);
     makeCameraActive(game, camera);
-
-    //
-    // DEBUG: test gjk
-    //
-    //{
-    //    TransformComponent* playerXfm = getTransformComponent(player);
-    //    ColliderComponent* playerCC = getColliderComponent(player);
-    //    playerXfm->setPosition(1, 1, 1);
-
-    //    ColliderComponent* hexCC = &testScene1->ecs.colliders[0];
-    //    TransformComponent* hexXfm = getTransformComponent(hexCC->entity);
-    //    hexXfm->setPosition(1.1, 1.1, 1.1);
-
-    //    GjkResult gjkResult = gjk(playerCC, hexCC);
-
-    //    int xx = 0;
-    //}
     
     while(!glfwWindowShouldClose(window.glfwWindow))
     {
@@ -844,6 +828,8 @@ int main()
         float32 timeS = glfwGetTime();
         timeMs = timeS * 1000.0f;
         deltaTMs = timeMs - lastTimeMs;
+
+        if (deltaTMs > 100) deltaTMs = 100; // prevent huge time skips between frames (such as the first frame which has to load obj models, etc. and can take a second or two)
         lastTimeMs = timeMs;
 
         updateGame(game);

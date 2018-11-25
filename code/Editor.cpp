@@ -24,7 +24,7 @@
 #include "ecs/components/DirectionalLightComponent.h"
 #include "ecs/components/PointLightComponent.h"
 #include "ecs/components/RenderComponent.h"
-#include "ecs/components/PhysicsComponent.h"
+#include "ecs/components/AgentComponent.h"
 #include "ecs/components/WalkComponent.h"
 #include "ecs/components/TerrainComponent.h"
 

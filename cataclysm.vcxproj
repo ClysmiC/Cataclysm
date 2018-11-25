@@ -197,6 +197,7 @@
     <ClInclude Include="code\ecs\components\ConvexHullColliderComponent.h" />
     <ClInclude Include="code\ecs\components\DirectionalLightComponent.h" />
     <ClInclude Include="code\ecs\components\EntityDetails.h" />
+    <ClInclude Include="code\ecs\components\AgentComponent.h" />
     <ClInclude Include="code\ecs\components\PointLightComponent.h" />
     <ClInclude Include="code\ecs\components\PortalComponent.h" />
     <ClInclude Include="code\ecs\components\RenderComponent.h" />

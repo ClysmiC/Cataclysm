@@ -13,7 +13,7 @@
 #include "ecs/components/PortalComponent.h"
 #include "ecs/components/TransformComponent.h"
 #include "ecs/components/TerrainComponent.h"
-#include "ecs/components/PhysicsComponent.h"
+#include "ecs/components/AgentComponent.h"
 #include "ecs/components/WalkComponent.h"
 
 #include "Gjk.h"
@@ -23,7 +23,7 @@ void walkAndCamera(Game* game)
     TransformComponent* xfm = getTransformComponent(game->player);
     ColliderComponent* collider = getColliderComponent(game->player);
     EntityDetails* details = getEntityDetails(game->player);
-    PhysicsComponent* physics = getPhysicsComponent(game->player);
+    AgentComponent* agent = getAgentComponent(game->player);
 
     assert((details->flags & EntityFlag_Static) == 0); // only dynamic object can walk!
 
@@ -40,23 +40,30 @@ void walkAndCamera(Game* game)
     Vec3 moveForward = normalize(project(camXfm->forward(), movementPlane));
     Vec3 moveBack    = -moveForward;
 
+    assert(FLOAT_EQ(moveRight.y, 0, 0.001));
+    assert(FLOAT_EQ(moveForward.y, 0, 0.001));
+
     const float32 stickDeadzone = 0.05;
     const float32 playerAccel = 35;
+    const float32 friction = 4;
+    const float gravity = 9.8;
 
-    Vec3 movementInput = moveRight * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
-                    moveForward * (abs(leftJoyY) >= stickDeadzone ? leftJoyY : 0);
+    Vec2 movementInput = moveRight.xz() * (abs(leftJoyX) >= stickDeadzone ? leftJoyX : 0) + 
+                    moveForward.xz() * (abs(leftJoyY) >= stickDeadzone ? leftJoyY : 0);
 
     if (length(movementInput) > 1) movementInput.normalizeInPlace();
 
-    Vec3 acceleration = playerAccel * movementInput;
-    acceleration -= 4 * physics->velocity;
+    Vec2 acceleration = playerAccel * movementInput;
+    acceleration -= friction * agent->velocity;
 
-    xfm->setPosition(xfm->position() + 0.5 * acceleration * deltaTS * deltaTS + physics->velocity * deltaTS);
+    Vec3 accelVec3 = Vec3(acceleration.x, 0, acceleration.y);
+    Vec3 velocityVec3 = Vec3(agent->velocity.x, 0, agent->velocity.y);
+    xfm->setPosition(xfm->position() + 0.5 * accelVec3 * deltaTS * deltaTS + velocityVec3 * deltaTS);
 
-    float32 yaw = TO_DEG(atan2(-physics->velocity.z, physics->velocity.x));
+    float32 yaw = TO_DEG(atan2(-agent->velocity.y, agent->velocity.x));
     xfm->setOrientation(axisAngle(Vec3(0, 1, 0), yaw - 90));
 
-    physics->velocity += acceleration * deltaTS;
+    agent->velocity += acceleration * deltaTS;
 
     // float32 playerSpeed = length(physics->velocity);
     //if (playerSpeed > maxPlayerSpeed)
@@ -135,6 +142,7 @@ void walkAndCamera(Game* game)
             if (collisionResult.collides)
             {
                 xfm->setPosition(xfm->position() - collisionResult.penetrationVector);
+                //physics->velocity -= project(physics->velocity, normalize(collisionResult.penetrationVector));
             }
         }
 
