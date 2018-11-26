@@ -832,6 +832,8 @@ int main()
         if (deltaTMs > 100) deltaTMs = 100; // prevent huge time skips between frames (such as the first frame which has to load obj models, etc. and can take a second or two)
         lastTimeMs = timeMs;
 
+        updateJoystickInput();
+
         updateGame(game);
         deleteMarkedEntities(game);
 
@@ -870,7 +872,6 @@ int main()
         mouseXPrev = mouseX;
         mouseYPrev = mouseY;
 
-        updateJoystickInput();
         updateLastKeysAndMouseButtonsAndJoystickButtons();
         clearTempAlloc();
         
