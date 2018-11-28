@@ -72,6 +72,8 @@ union Vec3
     inline Vec2 xy() { return Vec2(x, y); }
     inline Vec2 xz() { return Vec2(x, z); }
     inline Vec2 yz() { return Vec2(y, z); }
+
+    bool operator== (Vec3 other);
 };
 
 union Vec4

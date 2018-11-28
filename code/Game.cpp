@@ -837,6 +837,7 @@ int main()
         updateGame(game);
         deleteMarkedEntities(game);
 
+#if 0
         bool foo;
         ImGui::Begin("Joystick values", &foo);
         ImGui::InputFloat("Joy 0", &leftJoyX);
@@ -854,6 +855,7 @@ int main()
         }
 
         ImGui::End();
+#endif
 
         // Rendering
         ImGui::Render();

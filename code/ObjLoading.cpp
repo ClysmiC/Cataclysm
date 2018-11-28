@@ -21,6 +21,8 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
     using namespace std;
     
     bool loadSubobjectsAsEntities = createMeshes || createColliders;
+    bool considerMaterials = createMeshes || (!loadSubobjectsAsEntities && mesh->useMaterialsReferencedInObjFile);
+
     assert((mesh != nullptr) != loadSubobjectsAsEntities);
     assert(objFilename.substring(objFilename.length - 4) == ".obj");
     
@@ -32,13 +34,17 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
 
     FilenameString currentMaterialFilename = Material::DEFAULT_MATERIAL_FILENAME;
     MaterialNameString currentMaterialName = Material::DEFAULT_MATERIAL_NAME;
+    unordered_map<string, Material*> materialsReferencedInObj;
+
     if (mesh) mesh->materialsReferencedInObjFile.clear();
 
     FilenameString relFileDirectory = truncateFilenameAfterDirectory(objFilename);
 
     string64 currentSubmeshName = "[unnamed]";
-    vector<MeshVertex> currentSubmeshVertices;
+    vector<MeshVertex> currentSubmeshVertices; // @Slow. Can replace with hashset?
     vector<uint32> currentSubmeshIndices;
+
+    vector<Vec3> currentHullVertices;
 
     uint32 unnamedSubmeshNameCount = 0;
     bool buildingFaces = false;
@@ -92,7 +98,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             // Flush current mesh
             if (currentSubmeshName == "[unnamed]")
             {
-                currentSubmeshName += unnamedSubmeshNameCount++;
+                currentSubmeshName += std::to_string(unnamedSubmeshNameCount++).c_str();
             }
 
             Mesh* meshToPush = nullptr;
@@ -122,9 +128,16 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                         !loadSubobjectsAsEntities
                     )
                 );
+
+                if (loadSubobjectsAsEntities)
+                {
+                    meshToPush->useMaterialsReferencedInObjFile = true;
+                    meshToPush->materialsReferencedInObjFile = std::move(materialsReferencedInObj);
+                    materialsReferencedInObj.clear();
+                }
             }
             
-            if (loadSubobjectsAsEntities)
+            if (loadSubobjectsAsEntities && (tokens.size() == 0 || tokens[0] != "usemtl")) // don't create the entity yet if it was just a material switch
             {
                 Entity e = makeEntity(ecs, currentSubmeshName);
 
@@ -132,14 +145,9 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 //        Do it anyway to have a convenient way to approximate a centroid. A faster version would
                 //        be to track positions of face centroids (and areas) as the faces are being built and then
                 //        compute it.
-                std::vector<Vec3> qhVertices;
-                for (MeshVertex mv: currentSubmeshVertices)
-                {
-                    qhVertices.push_back(mv.position);
-                }
 
                 ConvexHull convHull;
-                quickHull(qhVertices.data(), qhVertices.size(), &convHull, true); // if slow, try changing true to false
+                quickHull(currentHullVertices.data(), currentHullVertices.size(), &convHull, true); // if slow, try changing true to false
 
                 Vec3 centroid = approximateHullCentroid(&convHull);
                 TransformComponent* xfm = getTransformComponent(e);
@@ -151,8 +159,12 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                     recalculateBounds(meshToPush);
                     uploadToGpuOpenGl(meshToPush);
                     meshToPush->isLoaded = true;
-                    RenderComponent* rc = addRenderComponent(e);
-                    new (rc) RenderComponent(e, &meshToPush->submeshes[0]);
+
+                    for (uint32 i = 0; i < meshToPush->submeshes.size(); i++)
+                    {
+                        RenderComponent* rc = addRenderComponent(e);
+                        new (rc) RenderComponent(e, &meshToPush->submeshes[i]);
+                    }
                 }
 
                 if (createColliders)
@@ -161,12 +173,12 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                     ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(e);
                     stdmoveConvexHullIntoComponent(chcc, &convHull);
                 }
+
+                currentHullVertices.clear();
             }
 
             currentSubmeshVertices.clear();
             currentSubmeshIndices.clear();
-
-            currentSubmeshName = "[unnamed]";
         }
 
         if (eofFlush)
@@ -175,7 +187,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             break;
         }
 
-        if (tokens[0] == "mtllib" && !loadSubobjectsAsEntities && mesh->useMaterialsReferencedInObjFile)
+        if (tokens[0] == "mtllib" && considerMaterials)
         {
             // material file
             currentMaterialFilename = relFileDirectory + tokens[1].c_str();
@@ -184,6 +196,11 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
         else if (tokens[0] == "o")
         {
             currentSubmeshName = tokens[1].c_str();
+
+            if (loadSubobjectsAsEntities)
+            {
+                materialsReferencedInObj.clear();
+            }
         }
         else if (tokens[0] == "v")
         {
@@ -208,7 +225,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             float32 z = stof(tokens[3]);
             vn.push_back(normalize(Vec3(x, y, z)));
         }
-        else if (tokens[0] == "usemtl" && !loadSubobjectsAsEntities && mesh->useMaterialsReferencedInObjFile)
+        else if (tokens[0] == "usemtl" && considerMaterials)
         {
             // init material in resource manager if it doesnt already exist.
             // do NOT load on init.
@@ -216,8 +233,8 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
 
             Material* m = ResourceManager::instance().initMaterial(currentMaterialFilename, currentMaterialName, false);
             assert(m != nullptr);
-
-            mesh->materialsReferencedInObjFile[m->id.cstr()] = m;
+            
+            materialsReferencedInObj[m->id.cstr()] = m;
         }
         else if (tokens[0] == "f")
         {
@@ -262,6 +279,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                     const vector<tuple<int, int, int>> &vertexTuples,
                     vector<MeshVertex> &currentSubmeshVertices,
                     vector<uint32> &currentSubmeshIndices,
+                    vector<Vec3> &currentHullVertices,
                     const vector<Vec3> &objVertices,
                     const vector<Vec2> &objUvs,
                     const vector<Vec3> &objNormals
@@ -318,6 +336,8 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                         {
                             currentSubmeshVertices.push_back(vertex);
                             index = currentSubmeshVertices.size() - 1;
+
+                            if (find(currentHullVertices.begin(), currentHullVertices.end(), vertex.position) == currentHullVertices.end()) currentHullVertices.push_back(vertex.position);
                         }
                         else
                         {
@@ -341,7 +361,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 }
             } processFace;
 
-            processFace(vertexTuples, currentSubmeshVertices, currentSubmeshIndices, v, vt, vn);
+            processFace(vertexTuples, currentSubmeshVertices, currentSubmeshIndices, currentHullVertices, v, vt, vn);
         }
 
 
@@ -350,6 +370,11 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
             char peek = filestream.peek();
             if (peek == EOF) eofFlush = true;
         }
+    }
+
+    if (!loadSubobjectsAsEntities)
+    {
+        mesh->materialsReferencedInObjFile = std::move(materialsReferencedInObj);
     }
 
     return true;

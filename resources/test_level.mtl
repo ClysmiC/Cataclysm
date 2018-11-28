@@ -1,7 +1,7 @@
 # Blender MTL File: 'test_level.blend'
-# Material Count: 3
+# Material Count: 4
 
-newmtl Material
+newmtl Dirt
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -10,6 +10,20 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Bump dirt_bump.png
+map_Kd dirt.png
+
+newmtl Grass
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.034151 0.640000 0.026058
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump grass_bump.png
+map_Kd grass.png
 
 newmtl Material.001
 Ns 96.078431
@@ -22,9 +36,11 @@ d 1.000000
 illum 2
 
 newmtl None
-Ns 0
-Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
+Ns 96.078431
+Ka 0.300000 0.300000 0.300000
+Kd 0.80000 0.80000 0.80000
+Ks 0.500000 0.500000 0.500000
+map_Bump default/normal.png
+map_Ka default/white.png
+map_Kd default/white.png
+map_Ks default/white.png

@@ -151,6 +151,11 @@ Vec3& Vec3::normalizeInPlace()
     return *this;
 }
 
+bool Vec3::operator==(Vec3 other)
+{
+    return equals(*this, other);
+}
+
 Vec3& Vec3::normalizeOrZeroInPlace()
 {
     float32 len = length(*this);
