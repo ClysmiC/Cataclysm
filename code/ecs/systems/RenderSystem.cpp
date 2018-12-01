@@ -20,8 +20,8 @@
 void initRenderer(Renderer* renderer, Window* window)
 {
     renderer->window = window;
-    renderer->shadowMap.width = 1024;
-    renderer->shadowMap.height = 1024;
+    renderer->shadowMap.width = 2048;
+    renderer->shadowMap.height = 2048;
     renderer->shadowMap.gpuFormat = GL_DEPTH_COMPONENT;
     renderer->shadowMap.wrapS = GL_CLAMP_TO_BORDER;
     renderer->shadowMap.wrapT = GL_CLAMP_TO_BORDER;

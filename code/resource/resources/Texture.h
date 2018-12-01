@@ -15,8 +15,8 @@ struct TextureData
     uint32 width;
     uint32 height;
 
-    GLuint wrapS = GL_CLAMP_TO_EDGE;
-    GLuint wrapT = GL_CLAMP_TO_EDGE;
+    GLuint wrapS = GL_REPEAT;
+    GLuint wrapT = GL_REPEAT;
     
     GLuint magFilter = GL_LINEAR;
     GLuint minFilter = GL_LINEAR_MIPMAP_LINEAR;

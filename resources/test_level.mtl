@@ -1,8 +1,18 @@
-# Blender MTL File: 'test_level.blend'
-# Material Count: 4
+# Blender MTL File: 'None'
+# Material Count: 12
+
+newmtl Blue
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.011866 0.011866 0.553657
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
 
 newmtl Dirt
-Ns 96.078431
+Ns 92.156863
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -10,11 +20,12 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Bump dirt_bump.png
 map_Kd dirt.png
+map_Bump dirt_bump.png
+map_Ka dirt.png
 
 newmtl Grass
-Ns 96.078431
+Ns 92.156863
 Ka 1.000000 1.000000 1.000000
 Kd 0.034151 0.640000 0.026058
 Ks 0.500000 0.500000 0.500000
@@ -22,11 +33,59 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Bump grass_bump.png
 map_Kd grass.png
+map_Bump grass_bump.png
+map_Ka grass.png
 
-newmtl Material.001
-Ns 96.078431
+newmtl Green
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.011866 0.553657 0.011866
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Leaf
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd leaf.jpg
+map_Bump leaf_bump.png
+map_Ka leaf.jpg
+
+newmtl None
+Ns 92.156863
+Ka 0.300000 0.300000 0.300000
+Kd 0.000000 1.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd default\white.png
+map_Bump default\\normal.png
+map_Ka default\\white.png
+map_Ks default\\white.png
+
+newmtl Purple
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.266526 0.027196 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Squares
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -34,13 +93,54 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd squares.jpg
+map_Bump squares_bump.png
+map_Ka squares.jpg
 
-newmtl None
-Ns 96.078431
-Ka 0.300000 0.300000 0.300000
-Kd 0.80000 0.80000 0.80000
+newmtl Wood
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
-map_Bump default/normal.png
-map_Ka default/white.png
-map_Kd default/white.png
-map_Ks default/white.png
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood.png
+map_Bump wood.png
+map_Ka wood.png
+
+newmtl Wood2
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood2.jpg
+map_Bump wood2_bump.png
+map_Ka wood2.jpg
+
+newmtl finish
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd finish.png
+map_Ka finish.png
+
+newmtl red
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.553657 0.011866 0.011866
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

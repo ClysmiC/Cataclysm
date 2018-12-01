@@ -164,18 +164,25 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
 
     struct
     {
-        bool operator() (Material* m, string32 texType, FilenameString texFilename)
+        bool operator() (Material* m, string32 texType, vector<string>& tokens)
         {
             using namespace std;
 
-            // Note: texFilename is relative to this material's directory, not the resource directory
-
+            FilenameString texFilename = tokens[tokens.size() - 1].c_str();
             FilenameString relFileDirectory = truncateFilenameAfterDirectory(m->filename);
             FilenameString texRelFilename = relFileDirectory + texFilename;
 
             bool gammaCorrect = texType == "material.diffuseTex";
             gammaCorrect = false;
-            Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, true);
+            Texture *tex = ResourceManager::instance().initTexture(texRelFilename, gammaCorrect, false);
+
+            if (tokens[1] == "-clamp" && tokens[2] == "on")
+            {
+                tex->textureData.wrapS = GL_CLAMP_TO_EDGE;
+                tex->textureData.wrapT = GL_CLAMP_TO_EDGE;
+            }
+
+            load(tex);
 
             assert(tex != nullptr);
             if (tex == nullptr) return false;
@@ -285,21 +292,21 @@ bool loadFromMtlFile(Material* material, FilenameString fullFilename)
         }
         else if (tokens[0] == "map_Bump")
         {
-            handleTexture(currentMaterial, "material.normalTex", tokens[1].c_str());
+            handleTexture(currentMaterial, "material.normalTex", tokens);
         }
         else if (tokens[0] == "map_Ka")
         {
-            handleTexture(currentMaterial, "material.ambientTex", tokens[1].c_str());
+            handleTexture(currentMaterial, "material.ambientTex", tokens);
             currentMaterial->vec3Uniforms["material.ambient"] = Vec3(1); // The obj spec says that map values get multiplied by constant values (i.e. Ka), but that consistently leads to wrong results, so I use EITHER the map or the constant
         }
         else if (tokens[0] == "map_Kd")
         {
-            handleTexture(currentMaterial, "material.diffuseTex", tokens[1].c_str());
+            handleTexture(currentMaterial, "material.diffuseTex", tokens);
             currentMaterial->vec3Uniforms["material.diffuse"] = Vec3(1);
         }
         else if (tokens[0] == "map_Ks")
         {
-            handleTexture(currentMaterial, "material.specularTex", tokens[1].c_str());
+            handleTexture(currentMaterial, "material.specularTex", tokens);
             currentMaterial->vec3Uniforms["material.specular"] = Vec3(1);
         }
         else if (tokens[0] == "map_Ns")

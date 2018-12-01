@@ -27,13 +27,14 @@
 [X] Test GJK against convex hull colliders
 [X] Add/inspect convex hull collider in editor
 [X] Controller input
-[ ] Create 3rd person entity (player)
-   [~] Attach camera offset from it
+[~] Create 3rd person entity (player)
+   [X] Attach camera offset from it
    [X] Render a mesh
-   [~] Move and resolve collisions
+   [X] Move and resolve collisions
+   [X] Jump
    [ ] Walljump?
-[ ] Design better level w/ some cool textures
-[ ]
+[X] Design better level w/ some cool textures
+[ ] Better shadow map resolution
 
 ======================
 ==== MID PRIOIRTY ====

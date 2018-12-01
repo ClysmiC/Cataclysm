@@ -10,8 +10,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd Buttons.png
-map_Ka Buttons.png
+map_Kd -clamp on Buttons.png
+map_Ka -clamp on Buttons.png
 
 newmtl Eyes
 Ns 9.803922
@@ -22,8 +22,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd Eyes.png
-map_Ka Eyes.png
+map_Kd -clamp on Eyes.png
+map_Ka -clamp on Eyes.png
 
 newmtl Gloves
 Ns 9.803922
@@ -66,8 +66,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd Logo.png
-map_Ka Logo.png
+map_Kd -clamp on Logo.png
+map_Ka -clamp on Logo.png
 
 newmtl Moustache
 Ns 9.803922
@@ -78,8 +78,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd Moustache.png
-map_Ka Moustache.png
+map_Kd -clamp on Moustache.png
+map_Ka -clamp on Moustache.png
 
 newmtl Overalls
 Ns 9.803922
