@@ -88,11 +88,14 @@ T* addComponent(Entity e);
 template<class T>
 T* getComponent(Entity e);
 
-template<class T, uint32 BUCKET_SIZE>
-ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents);
+template<class T>
+ComponentGroup<T, Ecs::ecsBucketSize<T>()> addComponents(Entity e, uint32 numComponents);
 
-template<class T, uint32 BUCKET_SIZE>
-bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* component);
+template<class T>
+ComponentGroup<T, Ecs::ecsBucketSize<T>()> getComponents(Entity e);
+
+template<class T>
+bool removeComponent(T* component);
 
 //
 // Entity functions

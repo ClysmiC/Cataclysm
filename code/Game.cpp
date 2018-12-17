@@ -176,8 +176,8 @@ void deleteMarkedEntities(Game* game)
 
         // Remove mandatory components
         {
-            removeComponent(&ecs->entityDetails, details);
-            removeComponent(&ecs->transforms,    xfm);
+            removeComponent(details);
+            removeComponent(xfm);
         }
 
         //

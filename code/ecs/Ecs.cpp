@@ -120,9 +120,9 @@ T* getComponent(Entity e)
 }
 
 template<class T, uint32 BUCKET_SIZE>
-ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents)
+ComponentGroup<T, BUCKET_SIZE> _addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents)
 {
-    assert(T::multipleAllowedPerEntity);
+    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
     
     //
     // Creates new component group entry if one doesn't exist. Otherwise, modifies the existing one
@@ -148,10 +148,23 @@ ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
     return *cg;
 }
 
-template<class T, uint32 BUCKET_SIZE>
-ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
+template<class T>
+ComponentGroup<T, Ecs::ecsBucketSize<T>()> addComponents(Entity e, uint32 numComponents)
 {
-    assert(T::multipleAllowedPerEntity);
+    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
+
+    auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
+
+    void* ptr = e.ecs->componentListByType[typeid(T)];
+    auto ptrCasted = (Ecs::ComponentList<T, bucketSize>*)(ptr);
+
+    return _addComponents<T, bucketSize>(ptrCasted, e, numComponents);
+}
+
+template<class T, uint32 BUCKET_SIZE>
+ComponentGroup<T, BUCKET_SIZE> _getComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
+{
+    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
     
     ComponentGroup<T, BUCKET_SIZE> result;
     
@@ -164,8 +177,21 @@ ComponentGroup<T, BUCKET_SIZE> getComponents(Ecs::ComponentList<T, BUCKET_SIZE>*
     return result;
 }
 
+template<class T>
+ComponentGroup<T, Ecs::ecsBucketSize<T>()> getComponents(Entity e)
+{
+    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
+
+    auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
+
+    void* ptr = e.ecs->componentListByType[typeid(T)];
+    auto ptrCasted = (Ecs::ComponentList<T, bucketSize>*)(ptr);
+
+    return _getComponents<T, bucketSize>(ptrCasted, e);
+}
+
 template<class T, uint32 BUCKET_SIZE>
-bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* toRemove)
+bool _removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* toRemove)
 {
     auto it = componentList->lookup.find(toRemove->entity.id);
     if (it == componentList->lookup.end())
@@ -200,6 +226,18 @@ bool removeComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, T* toRem
     }
 
     return false;
+}
+
+template<class T>
+bool removeComponent(T* component)
+{
+    auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
+
+    Entity e = component->entity;
+    void* ptr = e.ecs->componentListByType[typeid(T)];
+    auto ptrCasted = (Ecs::ComponentList<T, bucketSize>*)(ptr);
+
+    return _removeComponent<T, bucketSize>(ptrCasted, component);
 }
 
 Entity makeEntity(Ecs* ecs, string16 friendlyName, EntityFlags flags)
@@ -268,7 +306,7 @@ bool removeEntityDetails(EntityDetails** ppComponent)
         return false;
     }
     
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->entityDetails), *ppComponent);
+    bool success = removeComponent<EntityDetails>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -292,7 +330,7 @@ bool removeTransformComponent(TransformComponent** ppComponent)
         return false;
     }
     
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->transforms), *ppComponent);
+    bool success = removeComponent<TransformComponent>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -315,7 +353,7 @@ bool removeCameraComponent(CameraComponent** ppComponent)
 {
     if (!ppComponent) return false;
     assert((*ppComponent)->entity.id != (*ppComponent)->entity.ecs->scene->game->activeCamera.id);
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->cameras), *ppComponent);
+    bool success = removeComponent<CameraComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     return success;
 }
@@ -335,7 +373,7 @@ TerrainComponent* getTerrainComponent(Entity e)
 bool removeTerrainComponent(TerrainComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->terrains), *ppComponent);
+    bool success = removeComponent<TerrainComponent>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -357,7 +395,7 @@ AgentComponent* getAgentComponent(Entity e)
 bool removeAgentComponent(AgentComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->agentComponents), *ppComponent);
+    bool success = removeComponent<AgentComponent>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -379,7 +417,7 @@ WalkComponent* getWalkComponent(Entity e)
 bool removeWalkComponent(WalkComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->walkComponents), *ppComponent);
+    bool success = removeComponent<WalkComponent>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -409,7 +447,7 @@ bool removePortalComponent(PortalComponent** ppComponent)
         connectedPortal->connectedPortal.id = 0;
     }
     
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->portals), *ppComponent);
+    bool success = removeComponent<PortalComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     
     return success;
@@ -430,19 +468,19 @@ DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> addDirectionalLightComponents(Entity e, uint32 numComponents)
 {
     if (e.id == 0) return ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE>();
-    return addComponents(&e.ecs->directionalLights, e, numComponents);
+    return addComponents<DirectionalLightComponent>(e, numComponents);
 }
 
 ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> getDirectionalLightComponents(Entity e)
 {
     if (e.id == 0) return ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE>();
-    return getComponents(&e.ecs->directionalLights, e);
+    return getComponents<DirectionalLightComponent>(e);
 }
 
 bool removeDirectionalLightComponent(DirectionalLightComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->directionalLights), *ppComponent);
+    bool success = removeComponent<DirectionalLightComponent>(*ppComponent);
 
     if (success) *ppComponent = nullptr;
 
@@ -464,19 +502,19 @@ PointLightComponent* getPointLightComponent(Entity e)
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightComponents(Entity e, uint32 numComponents)
 {
     if (e.id == 0) return ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE>();
-    return addComponents(&e.ecs->pointLights, e, numComponents);
+    return addComponents<PointLightComponent>(e, numComponents);
 }
 
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getPointLightComponents(Entity e)
 {
     if (e.id == 0) return ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE>();
-    return getComponents(&e.ecs->pointLights, e);
+    return getComponents<PointLightComponent>(e);
 }
 
 bool removePointLightComponent(PointLightComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->pointLights), *ppComponent);
+    bool success = removeComponent<PointLightComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     return success;
 }
@@ -496,19 +534,19 @@ RenderComponent* getRenderComponent(Entity e)
 ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> addRenderComponents(Entity e, uint32 numComponents)
 {
     if (e.id == 0) return ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE>();
-    return addComponents(&e.ecs->renderComponents, e, numComponents);
+    return addComponents<RenderComponent>(e, numComponents);
 }
 
 ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> getRenderComponents(Entity e)
 {
     if (e.id == 0) return ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE>();
-    return getComponents(&e.ecs->renderComponents, e);
+    return getComponents<RenderComponent>(e);
 }
 
 bool removeRenderComponent(RenderComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->renderComponents), *ppComponent);
+    bool success = removeComponent<RenderComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     return success;
 }
@@ -528,19 +566,19 @@ ColliderComponent* getColliderComponent(Entity e)
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addColliderComponents(Entity e, uint32 numComponents)
 {
     if (e.id == 0) return ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE>();
-    return addComponents(&e.ecs->colliders, e, numComponents);
+    return addComponents<ColliderComponent>(e, numComponents);
 }
 
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getColliderComponents(Entity e)
 {
     if (e.id == 0) return ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE>();
-    return getComponents(&e.ecs->colliders, e);
+    return getComponents<ColliderComponent>(e);
 }
 
 bool removeColliderComponent(ColliderComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->colliders), *ppComponent);
+    bool success = removeComponent<ColliderComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     return success;
 }
@@ -561,19 +599,19 @@ ConvexHullColliderComponent* getConvexHullColliderComponent(Entity e)
 ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> addConvexHullColliderComponents(Entity e, uint32 numComponents)
 {
     if (e.id == 0) return ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE>();
-    return addComponents(&e.ecs->convexHullColliders, e, numComponents);
+    return addComponents<ConvexHullColliderComponent>(e, numComponents);
 }
 
 ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> getConvexHullColliderComponents(Entity e)
 {
     if (e.id == 0) return ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE>();
-    return getComponents(&e.ecs->convexHullColliders, e);
+    return getComponents<ConvexHullColliderComponent>(e);
 }
 
 bool removeConvexHullColliderComponent(ConvexHullColliderComponent** ppComponent)
 {
     if (!ppComponent) return false;
-    bool success = removeComponent(&((*ppComponent)->entity.ecs->convexHullColliders), *ppComponent);
+    bool success = removeComponent<ConvexHullColliderComponent>(*ppComponent);
     if (success) *ppComponent = nullptr;
     return success;
 }
