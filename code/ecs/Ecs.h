@@ -117,10 +117,11 @@ T* addComponent(Entity e)
     cg->bucketArray = &componentList->components;
 
     assert(cg->numComponents == 0 || T::multipleAllowedPerEntity);
-    assert(cg->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
 
     cg->components[cg->numComponents] = location;
     cg->numComponents++;
+
+    assert(cg->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
     
     return result;
 }
@@ -136,7 +137,6 @@ ComponentGroup<T, Ecs::ecsBucketSize<T>()> addComponents(Entity e, uint32 numCom
     if (e.id == 0)
     {
         return result;
-
     }
 
     void* componentListPtr = e.ecs->componentListByType[typeid(T)];
