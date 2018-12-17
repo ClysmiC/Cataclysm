@@ -9,9 +9,6 @@
 typedef string32 MaterialNameString;
 typedef string64 UniformNameString;
 
-//
-// Forward declarations
-//
 struct Texture;
 struct Shader;
 union Vec2;

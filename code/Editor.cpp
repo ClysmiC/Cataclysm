@@ -233,7 +233,7 @@ void showEditor(EditorState* editor)
     //
     if (mousePressed && !clickHandled)
     {
-        RaycastResult rayResult = castRay(&game->activeScene->ecs, rayThruScreen);
+        RaycastResult rayResult = castRay(game->activeScene, rayThruScreen);
         if (rayResult.hit)
         {
             selectEntity(editor, rayResult.hitEntity);

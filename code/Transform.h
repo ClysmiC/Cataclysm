@@ -81,6 +81,9 @@ struct Transform : public ITransform
     Transform(Vec3 position, Quaternion orientation);
     Transform(Vec3 position, Quaternion orientation, Vec3 scale);
 
+    ITransform* parent = nullptr;
+    std::vector<ITransform*> children;
+
     ITransform* getParent() override;
     std::vector<ITransform*> getChildren() override;
 };

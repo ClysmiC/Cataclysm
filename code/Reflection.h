@@ -127,9 +127,6 @@ struct UiReflector : public IReflector
     float32 consumeFloat32NormalizedVec3(FieldNameString name, uint32 offset, ReflectionFlags flags=0) override;
 };
 
-struct Game;
-bool testUiReflection(Game* game, Entity e);
-
 void reflectVec2(IReflector* reflector, uint32 startingOffset);
 void reflectVec3(IReflector* reflector, uint32 startingOffset);
 void reflectVec3Rgb(IReflector* reflector, uint32 startingOffset);

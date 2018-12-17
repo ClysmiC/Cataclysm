@@ -279,14 +279,13 @@ Transform::Transform(Vec3 position, Quaternion orientation, Vec3 scale)
 ITransform*
 Transform::getParent()
 {
-    return nullptr;
+    return parent;
 }
 
 std::vector<ITransform*>
 Transform::getChildren()
 {
-    std::vector<ITransform*> result;
-    return result;
+    return children;
 }
 
 void multiplyTransforms(

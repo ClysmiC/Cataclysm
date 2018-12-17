@@ -19,5 +19,6 @@ struct Scene
     Scene();
 };
 
+RaycastResult castRay(Scene* ecs, Ray ray);
 void renderScene(Renderer* renderer, Scene* scene, CameraComponent* camera, ITransform* cameraXfm, uint32 recursionLevel = 0, ITransform* destPortalXfm = nullptr);
 void addCubemap(Scene* scene, Cubemap* cubemap);

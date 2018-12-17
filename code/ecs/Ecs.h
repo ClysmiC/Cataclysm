@@ -10,11 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-struct ITransform;
-struct Scene;
-struct Game;
-
-
 #include "components/EntityDetails.h"
 #include "components/TransformComponent.h"
 #include "components/PortalComponent.h"
@@ -28,17 +23,9 @@ struct Game;
 #include "components/AgentComponent.h"
 #include "components/WalkComponent.h"
 
-//struct TransformComponent;
-//struct PortalComponent;
-//struct CameraComponent;
-//struct PointLightComponent;
-//struct DirectionalLightComponent;
-//struct RenderComponent;
-//struct ColliderComponent;
-//struct ConvexHullColliderComponent;
-//struct TerrainComponent;
-//struct AgentComponent;
-//struct WalkComponent;
+struct ITransform;
+struct Scene;
+struct Game;
 
 struct Ecs
 {
@@ -59,9 +46,6 @@ struct Ecs
     Ecs();
     
     static uint32 nextEntityId;
-    
-    Scene* scene;
-    Game* game;
 
     static constexpr uint32 ENTITY_DETAILS_BUCKET_SIZE = 512;
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
@@ -90,6 +74,9 @@ struct Ecs
     template<> static constexpr uint32 ecsBucketSize<ColliderComponent>()  { return Ecs::COLLIDER_BUCKET_SIZE; }
     template<> static constexpr uint32 ecsBucketSize<AgentComponent>()     { return Ecs::AGENT_BUCKET_SIZE; }
     template<> static constexpr uint32 ecsBucketSize<WalkComponent>()      { return Ecs::WALK_COMPONENT_BUCKET_SIZE; }
+
+    Scene* scene;
+    Game* game;
 
     std::vector<Entity> entities;
     ComponentList<EntityDetails,               ENTITY_DETAILS_BUCKET_SIZE>         entityDetails;
@@ -168,10 +155,10 @@ ComponentGroup<T, Ecs::ecsBucketSize<T>()> addComponents(Entity e, uint32 numCom
         T* component = componentList->components.addressOf(locator);
         component->entity = e;
 
-        assert(componentGroup->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
-
         componentGroup->components[componentGroup->numComponents] = locator;
         componentGroup->numComponents++;
+
+        assert(componentGroup->numComponents < MAX_NUM_OF_SAME_COMPONENTS_PER_ENTITY);
     }
 
     componentGroup->bucketArray = &componentList->components;
@@ -186,8 +173,6 @@ T* getComponent(Entity e)
     if (e.id == 0) return nullptr;
 
     auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
-
-    const type_info& foo = typeid(T);
 
     void* componentListPtr = e.ecs->componentListByType[typeid(T)];
     auto componentList = (Ecs::ComponentList<T, bucketSize>*)(componentListPtr);
@@ -207,6 +192,7 @@ T* getComponent(Entity e)
 template<class T>
 ComponentGroup<T, Ecs::ecsBucketSize<T>()> getComponents(Entity e)
 {
+    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
     auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
 
     ComponentGroup<T, bucketSize> result;
@@ -216,8 +202,6 @@ ComponentGroup<T, Ecs::ecsBucketSize<T>()> getComponents(Entity e)
     {
         return result;
     }
-
-    static_assert(T::multipleAllowedPerEntity, "Multiple components of this type not allowed");
 
     void* componentListPtr = e.ecs->componentListByType[typeid(T)];
     auto componentList = (Ecs::ComponentList<T, bucketSize>*)(componentListPtr);
@@ -282,61 +266,3 @@ bool removeComponent(T** component)
 Entity makeEntity(Ecs* ecs, string16 friendlyName="", EntityFlags flags=g_defaultEntityFlags);
 bool   markEntityForDeletion(Entity entity);
 
-//EntityDetails* getEntityDetails(Entity entity);
-//bool           removeEntityDetails(EntityDetails** ppComponent);
-//
-//TransformComponent* getComponent<TransformComponent>(Entity e);
-//bool                removeTransformComponent(TransformComponent** ppComponent);
-//
-//CameraComponent* addComponent<CameraComponent>(Entity e);
-//CameraComponent* getComponent<CameraComponent>(Entity e);
-//bool             removeComponent<CameraComponent>(CameraComponent** ppComponent);
-//
-//PortalComponent* addComponent<PortalComponent>(Entity e);
-//PortalComponent* getComponent<PortalComponent>(Entity e);
-//bool             removeComponent<PortalComponent>(PortalComponent** ppComponent);
-//
-//DirectionalLightComponent* addComponent<DirectionalLightComponent>(Entity e);
-//DirectionalLightComponent* getComponent<DirectionalLightComponent>(Entity e);
-//ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> addComponent<DirectionalLightComponent>s(Entity e, uint32 numComponents);
-//ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> getComponents<DirectionalLightComponent>(Entity e);
-//bool                       removeComponent<DirectionalLightComponent>(DirectionalLightComponent** ppComponent);
-//
-//TerrainComponent* addTerrainComponent(Entity e);
-//TerrainComponent* getComponent<TerrainComponent>(Entity e);
-//bool              removeComponent<TerrainComponent>(TerrainComponent** ppComponent);
-//
-//AgentComponent* addComponent<AgentComponent>(Entity e);
-//AgentComponent* getComponent<AgentComponent>(Entity e);
-//bool              removeAgentComponent(AgentComponent** ppComponent);
-//
-//WalkComponent* addWalkComponent(Entity e);
-//WalkComponent* getComponent<WalkComponent>(Entity e);
-//bool           removeComponent<WalkComponent>(WalkComponent** ppComponent);
-//    
-//RenderComponent* addComponent<RenderComponent>(Entity e);
-//RenderComponent* getComponent<RenderComponent>(Entity e);
-//ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> addComponents<RenderComponent>(Entity e, uint32 numComponents);
-//ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> getComponents<RenderComponent>(Entity e);
-//bool           removeComponent<RenderComponent>(RenderComponent** ppComponent);
-//
-//ColliderComponent* addComponent<ColliderComponent>(Entity e);
-//ColliderComponent* getComponent<ColliderComponent>(Entity e);
-//ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addComponents<ColliderComponent>(Entity e, uint32 numComponents);
-//ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> getComponents<ColliderComponent>(Entity e);
-//bool                                                         removeComponent<ColliderComponent>(ColliderComponent** ppComponent);
-//
-//ConvexHullColliderComponent* addComponent<ConvexHullColliderComponent>(Entity e);
-//ConvexHullColliderComponent* getComponent<ConvexHullColliderComponent>(Entity e);
-//ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> addComponent<ConvexHullColliderComponent>s(Entity e, uint32 numComponents);
-//ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> getComponents<ConvexHullColliderComponent>(Entity e);
-//bool                                                         removeComponent(ConvexHullColliderComponent** ppComponent);
-//
-//PointLightComponent* addComponent<PointLightComponent>(Entity e);
-//PointLightComponent* getComponent<PointLightComponent>(Entity e);
-//ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addComponent<PointLightComponent>s(Entity e, uint32 numComponents);
-//ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> getComponents<PointLightComponent>(Entity e);
-//bool           removeComponent<PointLightComponent>(PointLightComponent** ppComponent);
-
-// TODO: where to put this?
-RaycastResult castRay(Ecs* ecs, Ray ray);

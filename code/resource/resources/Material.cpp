@@ -20,8 +20,6 @@ Material::Material(FilenameString filename_, MaterialNameString materialName)
     this->filename = filename_;
     this->name = materialName;
 
-    // Todo: grow fixed strings when RHS types and then only truncate once they are assigned to
-    // the lhs type?
     this->id = filename;
     this->id += COMPOSITE_ID_DELIMITER;
     this->id += materialName;
@@ -59,7 +57,8 @@ bool load(Material* material)
     }
     else
     {
-        material->isLoaded = true;
+        // TODO: support additional material file formats
+        material->isLoaded = false;
     }
 
     return material->isLoaded;
