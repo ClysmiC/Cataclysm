@@ -139,7 +139,7 @@
     <ClCompile Include="code\Camera.cpp" />
     <ClCompile Include="code\ConvexHull.cpp" />
     <ClCompile Include="code\DebugDraw.cpp" />
-    <ClCompile Include="code\ecs\Component.cpp" />
+    <ClCompile Include="code\ecs\IComponent.cpp" />
     <ClCompile Include="code\ecs\components\CameraComponent.cpp" />
     <ClCompile Include="code\ecs\components\ColliderComponent.cpp" />
     <ClCompile Include="code\ecs\components\ConvexHullColliderComponent.cpp" />
@@ -190,7 +190,7 @@
     <ClInclude Include="code\Camera.h" />
     <ClInclude Include="code\ConvexHull.h" />
     <ClInclude Include="code\DebugDraw.h" />
-    <ClInclude Include="code\ecs\Component.h" />
+    <ClInclude Include="code\ecs\IComponent.h" />
     <ClInclude Include="code\ecs\ComponentGroup.h" />
     <ClInclude Include="code\ecs\components\CameraComponent.h" />
     <ClInclude Include="code\ecs\components\ColliderComponent.h" />

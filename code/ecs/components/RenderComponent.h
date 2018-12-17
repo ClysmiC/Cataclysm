@@ -1,7 +1,7 @@
 #pragma once
 
 #include "resource/Submesh.h"
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "ecs/ComponentGroup.h"
 #include "resource/resources/Mesh.h"
 
@@ -10,7 +10,7 @@ struct ITransform;
 struct ICamera;
 struct Shader;
 
-struct RenderComponent : public Component
+struct RenderComponent : public IComponent
 {
     RenderComponent() = default;
     RenderComponent(Entity entity, Submesh* submesh);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/Entity.h"
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_fixed_string.h"
 #include <vector>
 
@@ -15,7 +15,7 @@ enum EntityFlags : uint64
 
 extern EntityFlags g_defaultEntityFlags;
 
-struct EntityDetails : public Component
+struct EntityDetails : public IComponent
 {
     PotentiallyStaleEntity parent;
     uint64 flags = 0;

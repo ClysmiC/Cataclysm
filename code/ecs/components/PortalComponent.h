@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_math.h"
 #include "ecs/Entity.h"
 
@@ -8,7 +8,7 @@ struct Scene;
 struct Shader;
 struct Scene;
 
-struct PortalComponent : public Component
+struct PortalComponent : public IComponent
 {
     PortalComponent() = default;
     PotentiallyStaleEntity connectedPortal;

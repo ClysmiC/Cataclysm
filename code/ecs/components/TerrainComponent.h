@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_math.h"
 #include "resource/resources/Mesh.h"
 #include "resource/Resource.h"
@@ -45,7 +45,7 @@ struct TerrainChunk
     TerrainComponent* terrainComponent;
 };
     
-struct TerrainComponent : public Component
+struct TerrainComponent : public IComponent
 {
     TerrainComponent() = default;
     TerrainComponent(Entity entity, FilenameString heightmap, Vec3 origin, float32 xLength, float32 zLength, float32 minHeight, float32 maxHeight);

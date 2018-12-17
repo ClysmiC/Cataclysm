@@ -1,11 +1,11 @@
 #pragma once
 
 #include "als/als_math.h"
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "Transform.h"
 #include <vector>
 
-struct TransformComponent : public Component, public ITransform
+struct TransformComponent : public IComponent, public ITransform
 {
     TransformComponent() = default;
     TransformComponent(Entity e);

@@ -24,7 +24,7 @@ TransformComponent::TransformComponent(Entity e, ITransform& transform)
 }
 
 TransformComponent::TransformComponent(Entity e, Vec3 position, Quaternion orientation, Vec3 scale)
-    : Component(e)
+    : IComponent(e)
     , ITransform(position, orientation, scale)
 {
 }

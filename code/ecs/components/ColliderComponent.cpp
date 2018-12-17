@@ -16,7 +16,7 @@ ColliderComponent::ColliderComponent()
 }
 
 ColliderComponent::ColliderComponent(Entity e, Aabb aabb)
-    : Component(e)
+    : IComponent(e)
 {
     this->xfmOffset = Vec3(0, 0, 0);
     this->type = ColliderType::RECT3;

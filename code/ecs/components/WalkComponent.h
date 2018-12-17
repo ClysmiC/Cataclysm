@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 
-struct WalkComponent : public Component
+struct WalkComponent : public IComponent
 {
     bool isGrounded = false;
     

@@ -6,6 +6,7 @@
 #include "Ray.h"
 #include "ComponentGroup.h"
 
+#include <typeindex>
 #include <unordered_map>
 #include <vector>
 
@@ -40,6 +41,8 @@ struct Ecs
             return *(components.at(index));
         }
     };
+
+    Ecs();
     
     static uint32 nextEntityId;
     
@@ -47,6 +50,7 @@ struct Ecs
     Game* game;
 
     static constexpr uint32 ENTITY_DETAILS_BUCKET_SIZE = 512;
+
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
     static constexpr uint32 CAMERA_BUCKET_SIZE = 4;
     static constexpr uint32 DIRECTIONAL_LIGHT_BUCKET_SIZE = 16;
@@ -73,13 +77,27 @@ struct Ecs
     ComponentList<ConvexHullColliderComponent, CONVEX_HULL_COLLIDER_BUCKET_SIZE>   convexHullColliders;
     ComponentList<AgentComponent,              AGENT_BUCKET_SIZE>                  agentComponents;
     ComponentList<WalkComponent,               WALK_COMPONENT_BUCKET_SIZE>         walkComponents;
+
+    std::unordered_map<std::type_index, void*> componentListByType;
 };
+
+    //template<typename T>
+    //uint32 bucketSize<T>(T t) { return T::UNIMPLEMENTED_FUNCTION; } // only the specialized templates should be called
+
+    //template<>
+    //uint32 bucketSize<EntityDetails>(EntityDetails e) { return 512; }
+
 
 //
 // Component List functions
 //
 template<class T, uint32 BUCKET_SIZE>
 T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e);
+
+//template<class T>
+//T* addComponent<T>(Entity e)
+//{
+//}
 
 template<class T, uint32 BUCKET_SIZE>
 T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e);

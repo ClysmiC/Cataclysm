@@ -599,3 +599,17 @@ RaycastResult castRay(Ecs* ecs, Ray ray)
     return result;
 }
 
+Ecs::Ecs()
+{
+    componentListByType[typeid(EntityDetails)] = &entityDetails;
+    componentListByType[typeid(TransformComponent)] = &transforms;
+    componentListByType[typeid(CameraComponent)] = &cameras;
+    componentListByType[typeid(DirectionalLightComponent)] = &directionalLights;
+    componentListByType[typeid(PointLightComponent)] = &pointLights;
+    componentListByType[typeid(RenderComponent)] = &renderComponents;
+    componentListByType[typeid(PortalComponent)] = &portals;
+    componentListByType[typeid(ColliderComponent)] = &colliders;
+    componentListByType[typeid(ConvexHullColliderComponent)] = &convexHullColliders;
+    componentListByType[typeid(AgentComponent)] = &agentComponents;
+    componentListByType[typeid(WalkComponent)] = &walkComponents;
+}

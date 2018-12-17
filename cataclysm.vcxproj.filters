@@ -452,7 +452,49 @@
     <ClCompile Include="code\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="code\*.cpp">
+    <ClCompile Include="code\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ConvexHull.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\DebugDraw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Editor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Gjk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ObjLoading.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Quickhull.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Reflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\stb_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="code\*.cpp">
@@ -911,9 +953,6 @@
     <ClCompile Include="code\als\als_math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="code\ecs\Component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="code\ecs\Ecs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1023,6 +1062,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="code\ecs\components\ConvexHullColliderComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ecs\IComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1177,61 +1219,13 @@
     <ClInclude Include="code\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\als.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\als_math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\CameraComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\ColliderComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\ComponentGroup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Cubemap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\DebugDraw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\DebugGlobal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\DirectionalLightComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Ecs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\Editor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\MeshVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\PointLightComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\PortalComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\Quad.h">
@@ -1243,31 +1237,10 @@
     <ClInclude Include="code\Reflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\RenderComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\ResourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Submesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\TransformComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\Window.h">
@@ -1634,6 +1607,48 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\Gjk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Quad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Quickhull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Reflection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ConvexHull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\DebugDraw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Gjk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ObjLoading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\Quad.h">
@@ -1864,9 +1879,6 @@
     <ClInclude Include="code\*.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\*.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lib\imgui\include\imgui\imconfig.h">
       <Filter>Libraries\imgui</Filter>
     </ClInclude>
@@ -1978,9 +1990,6 @@
     <ClInclude Include="code\resource\resources\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="code\ecs\Component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\ecs\ComponentGroup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2072,6 +2081,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\ecs\components\AgentComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ecs\IComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

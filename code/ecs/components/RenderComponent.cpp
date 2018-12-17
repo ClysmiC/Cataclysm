@@ -11,7 +11,7 @@
 #include "resource/resources/Shader.h"
 
 RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
-    : Component(entity)
+    : IComponent(entity)
 {
     submesh = submesh_;
     submeshOpenGlInfo = submesh->openGlInfo;

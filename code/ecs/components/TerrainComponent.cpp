@@ -5,7 +5,7 @@
 #include <cmath>
 
 TerrainComponent::TerrainComponent(Entity entity, FilenameString heightMapFile, Vec3 origin, float32 xLength, float32 zLength, float32 minHeight, float32 maxHeight)
-    : Component(entity)
+    : IComponent(entity)
 {
     assert(minHeight <= maxHeight);
 

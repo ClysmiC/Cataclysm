@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_math.h"
 
-struct PointLightComponent : public Component
+struct PointLightComponent : public IComponent
 {
     Vec3 intensity;
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_math.h"
 
-struct DirectionalLightComponent : public Component
+struct DirectionalLightComponent : public IComponent
 {
     Vec3 intensity;
     Vec3 direction;

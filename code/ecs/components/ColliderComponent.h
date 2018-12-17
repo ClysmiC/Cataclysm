@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ICollider.h"
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "als/als_math.h"
 
 struct Aabb;
@@ -16,7 +16,7 @@ enum class ColliderType : uint32
     ENUM_VALUE_COUNT
 };
 
-struct ColliderComponent : public Component, public ICollider
+struct ColliderComponent : public IComponent, public ICollider
 {
     ColliderComponent();
     ColliderComponent(Entity e, Aabb aabb);

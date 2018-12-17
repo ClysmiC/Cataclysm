@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ecs/Component.h"
+#include "ecs/IComponent.h"
 #include "ConvexHull.h"
 #include "ICollider.h"
 #include <utility>
 
-struct ConvexHullColliderComponent : public Component, public ConvexHull, public ICollider
+struct ConvexHullColliderComponent : public IComponent, public ConvexHull, public ICollider
 {
     ConvexHullColliderComponent() = default;
 

@@ -3,10 +3,13 @@
 #include "als/als_types.h"
 #include "Entity.h"
 
-struct Component
+struct IComponent
 {
-    Component() = default;
-    Component(Entity entity);
+    IComponent() = default;
+    IComponent(Entity entity);
     
     Entity entity; // Note: this needs to be updated for all of an entity's components if the entity moves ECSs
+
+    virtual void onAddComponent();
+    virtual void onRemoveComponent();
 };
