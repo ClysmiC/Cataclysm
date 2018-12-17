@@ -140,7 +140,7 @@ float32 rayVsRect3(Ray ray, Vec3 center, Quaternion orientation, Vec3 halfDim)
 float32 rayVsCollider(Ray ray, ColliderComponent* collider)
 {
     assert(isNormal(ray.direction));
-    TransformComponent* xfm = getTransformComponent(collider->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(collider->entity);
     assert (xfm != nullptr);
     
     Vec3 localX = xfm->right();

@@ -150,7 +150,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 quickHull(currentHullVertices.data(), currentHullVertices.size(), &convHull, true); // if slow, try changing true to false
 
                 Vec3 centroid = approximateHullCentroid(&convHull);
-                TransformComponent* xfm = getTransformComponent(e);
+                TransformComponent* xfm = getComponent<TransformComponent>(e);
                 xfm->setPosition(centroid);
 
                 if (createMeshes)
@@ -162,7 +162,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
 
                     for (uint32 i = 0; i < meshToPush->submeshes.size(); i++)
                     {
-                        RenderComponent* rc = addRenderComponent(e);
+                        RenderComponent* rc = addComponent<RenderComponent>(e);
                         new (rc) RenderComponent(e, &meshToPush->submeshes[i]);
                     }
                 }
@@ -170,7 +170,7 @@ bool _loadObjInternal(FilenameString objFilename, Mesh* mesh, Ecs* ecs, bool cre
                 if (createColliders)
                 {
                     recalculatePositionsRelativeToCentroid(&convHull, centroid);
-                    ConvexHullColliderComponent* chcc = addConvexHullColliderComponent(e);
+                    ConvexHullColliderComponent* chcc = addComponent<ConvexHullColliderComponent>(e);
                     stdmoveConvexHullIntoComponent(chcc, &convHull);
                 }
 

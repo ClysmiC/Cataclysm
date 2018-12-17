@@ -27,7 +27,7 @@ ColliderComponent::ColliderComponent(Entity e, Aabb aabb)
 
 Vec3 ColliderComponent::center()
 {
-    TransformComponent *xfm = getTransformComponent(this->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(this->entity);
     Vec3 unrotatedOffset = scaledXfmOffset(this);
     Vec3 rotatedOffset = xfm->orientation() * unrotatedOffset;
     return xfm->position() + rotatedOffset;
@@ -39,7 +39,7 @@ Vec3 ColliderComponent::support(Vec3 direction)
     // Need to rotate direction accordingly
     direction.normalizeInPlace();
 
-    Quaternion orientation = getTransformComponent(this->entity)->orientation();
+    Quaternion orientation = getComponent<TransformComponent>(this->entity)->orientation();
     Quaternion toIdentity = relativeRotation(orientation, Quaternion());
 
     Vec3 relativeDirection = toIdentity * direction;
@@ -184,7 +184,7 @@ Vec3 ColliderComponent::support(Vec3 direction)
 
 Vec3 scaledXfmOffset(ColliderComponent* collider)
 {
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     return hadamard(collider->xfmOffset, xfm->scale());
 }
 
@@ -192,7 +192,7 @@ float32 scaledLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE);
     
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     
     float32 scaleValue = getValue(xfm->scale(), collider->axis);
     return collider->length * scaleValue;
@@ -202,7 +202,7 @@ float32 scaledRadius(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::CYLINDER || collider->type == ColliderType::CAPSULE || collider->type == ColliderType::SPHERE);
 
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     float32 scaleValue = std::max(std::max(xfm->scale().x, xfm->scale().y), xfm->scale().z);
 
     return scaleValue * collider->radius;
@@ -212,7 +212,7 @@ Vec3 scaledRect3Lengths(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     return hadamard(xfm->scale(), collider->rect3Lengths);
 }
 
@@ -220,7 +220,7 @@ float32 scaledXLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     return xfm->scale().x * collider->rect3Lengths.x;
 }
 
@@ -228,7 +228,7 @@ float32 scaledYLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     return xfm->scale().y * collider->rect3Lengths.y;
 }
 
@@ -236,13 +236,13 @@ float32 scaledZLength(ColliderComponent* collider)
 {
     assert(collider->type == ColliderType::RECT3);
     
-    TransformComponent *xfm = getTransformComponent(collider->entity);
+    TransformComponent *xfm = getComponent<TransformComponent>(collider->entity);
     return xfm->scale().z * collider->rect3Lengths.z;
 }
 
 bool pointInsideCollider(ColliderComponent* collider, Vec3 point)
 {
-    Quaternion orientation = getTransformComponent(collider->entity)->orientation();
+    Quaternion orientation = getComponent<TransformComponent>(collider->entity)->orientation();
     
     Vec3 center = collider->center();
 

@@ -20,7 +20,7 @@ RenderComponent::RenderComponent(Entity entity, Submesh* submesh_)
 
 Mesh* getMesh(Entity e)
 {
-    RenderComponent* r = getRenderComponent(e);
+    RenderComponent* r = getComponent<RenderComponent>(e);
 
     if (!r) return nullptr;
 

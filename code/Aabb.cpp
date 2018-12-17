@@ -85,7 +85,7 @@ Aabb aabbFromMinMax(Vec3 min, Vec3 max)
 
 Aabb aabbFromRenderComponent(RenderComponent* rc)
 {
-    TransformComponent* xfm = getTransformComponent(rc->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(rc->entity);
     assert(xfm);
     
     return transformedAabb(rc->submesh->mesh->bounds, xfm);
@@ -93,7 +93,7 @@ Aabb aabbFromRenderComponent(RenderComponent* rc)
 
 Aabb aabbFromCollider(ColliderComponent* collider)
 {
-    TransformComponent* xfm = getTransformComponent(collider->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(collider->entity);
     assert(xfm);
 
     switch (collider->type)
@@ -185,7 +185,7 @@ Aabb aabbFromCollider(ColliderComponent* collider)
 
 Aabb aabbFromConvexCollider(ConvexHullColliderComponent* collider)
 {
-    TransformComponent* xfm = getTransformComponent(collider->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(collider->entity);
     Aabb result = transformedAabb(collider->bounds, xfm); // @Think: should we call recalculate bounds here? It would be slower, but could avoid bugs if the bounds were never calculated
     return result;
 }

@@ -16,7 +16,7 @@ Vec3 ConvexHullColliderComponent::center()
 
 Vec3 ConvexHullColliderComponent::support(Vec3 direction)
 {
-    TransformComponent* xfm = getTransformComponent(this->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(this->entity);
     Vec3 result;
     float32 biggestDot = -FLT_MAX;
 

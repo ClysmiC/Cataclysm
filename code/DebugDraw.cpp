@@ -736,7 +736,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                     scaledYLength(collider),
                     scaledZLength(collider)
                 ),
-                getTransformComponent(collider->entity)->orientation()
+                getComponent<TransformComponent>(collider->entity)->orientation()
             );
         } break;
 
@@ -755,7 +755,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->orientation()
+                getComponent<TransformComponent>(collider->entity)->orientation()
             );
         } break;
 
@@ -766,7 +766,7 @@ DebugDraw::drawCollider(ColliderComponent* collider)
                 scaledRadius(collider),
                 scaledLength(collider),
                 collider->axis,
-                getTransformComponent(collider->entity)->orientation()
+                getComponent<TransformComponent>(collider->entity)->orientation()
             );
         } break;
 
@@ -856,8 +856,8 @@ void DebugDraw::drawAabb(Aabb aabb)
 
 void DebugDraw::drawAabb(Entity entity)
 {
-    TransformComponent* xfm = getTransformComponent(entity);
-    RenderComponent* rc = getRenderComponent(entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(entity);
+    RenderComponent* rc = getComponent<RenderComponent>(entity);
     
     if (rc != nullptr && xfm != nullptr)
     {

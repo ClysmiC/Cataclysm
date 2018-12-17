@@ -47,7 +47,7 @@ PointLightComponent* closestPointLight(Ecs* ecs, ITransform* xfm)
     FOR_BUCKET_ARRAY (ecs->pointLights.components)
     {
         PointLightComponent* pl = it.ptr;
-        TransformComponent* plXfm = getTransformComponent(pl->entity);
+        TransformComponent* plXfm = getComponent<TransformComponent>(pl->entity);
 
         assert(plXfm != nullptr);
         if (plXfm == nullptr) continue;
@@ -121,7 +121,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
                     RenderComponent &rc = *it.ptr;
                     if (!rc.isVisible) continue;
 
-                    TransformComponent* xfm = getTransformComponent(rc.entity);
+                    TransformComponent* xfm = getComponent<TransformComponent>(rc.entity);
                     Mat4 m2w = xfm->matrix();;
                     setMat4(simpleDepthShader, "model", m2w);
 
@@ -139,7 +139,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
         RenderComponent &rc = *it.ptr;
         if (!rc.isVisible) continue;
           
-        TransformComponent* xfm = getTransformComponent(rc.entity);
+        TransformComponent* xfm = getComponent<TransformComponent>(rc.entity);
 
         if (renderingViaPortal)
         {
@@ -156,7 +156,7 @@ void renderAllRenderComponents(Renderer* renderer, Ecs* ecs, CameraComponent* ca
 
             if (pl != nullptr)
             {
-                TransformComponent* plXfm = getTransformComponent(pl->entity);
+                TransformComponent* plXfm = getComponent<TransformComponent>(pl->entity);
               
                 setVec3(shader, "pointLights[0].posWorld", plXfm->position());
                 setVec3(shader, "pointLights[0].intensity", pl->intensity);
@@ -242,7 +242,7 @@ void renderContentsOfAllPortals(Renderer* renderer, Scene* scene, CameraComponen
         PortalComponent* pc = scene->ecs.portals.components.addressOf(it.locator);
         if (pc->connectedPortal.id == 0) continue;
 
-        TransformComponent* sourceSceneXfm = getTransformComponent(pc->entity);
+        TransformComponent* sourceSceneXfm = getComponent<TransformComponent>(pc->entity);
         TransformComponent* destSceneXfm = getConnectedSceneXfm(pc);
 
         Transform portalViewpointXfm(cameraXfm->position(), cameraXfm->orientation());

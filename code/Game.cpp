@@ -102,7 +102,7 @@ EntityDetails* getEntityDetails(Game* game, uint32 entityId)
         probe.id = entityId;
         probe.ecs = &game->scenes[i].ecs;
 
-        result = getEntityDetails(probe);
+        result = getComponent<EntityDetails>(probe);
 
         if (result) break;
     }
@@ -135,7 +135,7 @@ Entity getEntity(Game* game, PotentiallyStaleEntity* potentiallyStaleEntity)
 
     if (potentiallyStaleEntity->id == 0) return result;
 
-    if (result.ecs == nullptr || getEntityDetails(result) == nullptr)
+    if (result.ecs == nullptr || getComponent<EntityDetails>(result) == nullptr)
     {
         // Stale!
         result = getEntity(game, potentiallyStaleEntity->id);
@@ -155,29 +155,29 @@ void deleteMarkedEntities(Game* game)
     for (PotentiallyStaleEntity staleEntity : game->entitiesMarkedForDeletion)
     {
         Entity e = getEntity(game, &staleEntity);
-        EntityDetails* details = getEntityDetails(e);
+        EntityDetails* details = getComponent<EntityDetails>(e);
         if (details == nullptr)
         {
             assert(false);
             continue;
         }
 
-        TransformComponent*        xfm              = getTransformComponent(e);
-        CameraComponent*           camera           = getCameraComponent(e);
-        DirectionalLightComponent* directionalLight = getDirectionalLightComponent(e);
-        TerrainComponent*          terrain          = getTerrainComponent(e);
-        auto                       pointLights      = getPointLightComponents(e);
-        auto                       renderComponents = getRenderComponents(e);
-        PortalComponent*           portal           = getPortalComponent(e);
-        auto                       colliders        = getColliderComponents(e);
-        WalkComponent*             walk             = getWalkComponent(e);
+        TransformComponent*        xfm              = getComponent<TransformComponent>(e);
+        CameraComponent*           camera           = getComponent<CameraComponent>(e);
+        DirectionalLightComponent* directionalLight = getComponent<DirectionalLightComponent>(e);
+        TerrainComponent*          terrain          = getComponent<TerrainComponent>(e);
+        auto                       pointLights      = getComponents<PointLightComponent>(e);
+        auto                       renderComponents = getComponents<RenderComponent>(e);
+        PortalComponent*           portal           = getComponent<PortalComponent>(e);
+        auto                       colliders        = getComponents<ColliderComponent>(e);
+        WalkComponent*             walk             = getComponent<WalkComponent>(e);
 
         Ecs* ecs = e.ecs;
 
         // Remove mandatory components
         {
-            removeComponent(details);
-            removeComponent(xfm);
+            removeComponent(&details);
+            removeComponent(&xfm);
         }
 
         //
@@ -191,11 +191,11 @@ void deleteMarkedEntities(Game* game)
     
         // Remove optional single components
         {
-            if (camera)           removeCameraComponent(&camera);
-            if (directionalLight) removeDirectionalLightComponent(&directionalLight);
-            if (terrain)          removeTerrainComponent(&terrain);
-            if (portal)           removePortalComponent(&portal);
-            if (walk)             removeWalkComponent(&walk);
+            if (camera)           removeComponent(&camera);
+            if (directionalLight) removeComponent(&directionalLight);
+            if (terrain)          removeComponent(&terrain);
+            if (portal)           removeComponent(&portal);
+            if (walk)             removeComponent(&walk);
         }
 
         // Remove optional multi components
@@ -205,7 +205,7 @@ void deleteMarkedEntities(Game* game)
                 for (uint32 i = 0; i < pointLights.numComponents; i++)
                 {
                     PointLightComponent* component = &pointLights[i];
-                    removePointLightComponent(&component);
+                    removeComponent<PointLightComponent>(&component);
                 }
             }
 
@@ -214,7 +214,7 @@ void deleteMarkedEntities(Game* game)
                 for (uint32 i = 0; i < renderComponents.numComponents; i++)
                 {
                     RenderComponent* component = &renderComponents[i];
-                    removeRenderComponent(&component);
+                    removeComponent<RenderComponent>(&component);
                 }
             }
 
@@ -223,7 +223,7 @@ void deleteMarkedEntities(Game* game)
                 for (uint32 i = 0; i < colliders.numComponents; i++)
                 {
                     ColliderComponent* component = &colliders[i];
-                    removeColliderComponent(&component);
+                    removeComponent<ColliderComponent>(&component);
                 }
             }
         }
@@ -375,7 +375,7 @@ void buildTestScene1(Scene* scene)
     // Set up directional light
     {
         Entity dirLight = makeEntity(&scene->ecs, "directional light");
-        DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
+        DirectionalLightComponent* dlc = addComponent<DirectionalLightComponent>(dirLight);
 
         dlc->intensity = Vec3(.25, .25, .25);
         dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
@@ -399,19 +399,19 @@ void buildTestScene1(Scene* scene)
     //{
     //    Entity e = makeEntity(&scene->ecs, "hex");
     //    
-    //    TransformComponent *tc = getTransformComponent(e);
-    //    ColliderComponent* cc = addColliderComponent(e);
+    //    TransformComponent *tc = getComponent<TransformComponent>(e);
+    //    ColliderComponent* cc = addComponent<ColliderComponent>(e);
 
     //    if (i == 0)
     //    {
     //        // add some more collider components to test having multiple components on an entity
-    //        addColliderComponent(e);
-    //        addColliderComponent(e);
+    //        addComponent<ColliderComponent>(e);
+    //        addComponent<ColliderComponent>(e);
     //    }
     //    tc->setPosition(hexPositions[i]);
     //    tc->setScale(Vec3(1));
     //    
-    //    auto rcc = addRenderComponents(e, hexMesh->submeshes.size());
+    //    auto rcc = addComponents<RenderComponent>(e, hexMesh->submeshes.size());
 
     //    for(uint32 j = 0; j < hexMesh->submeshes.size(); j++)
     //    {
@@ -430,7 +430,7 @@ void buildTestScene1(Scene* scene)
     //    //       we could assume the origin at this case, or maybe set a flag on the entity that explicitly
     //    //       says we don't store a transform so we can have the robustness of that check without the memory
     //    //       overhead
-    //    TransformComponent *xfm = getTransformComponent(e);
+    //    TransformComponent *xfm = getComponent<TransformComponent>(e);
     //    xfm->setPosition(Vec3(0, 0, 0));
     //    
     //    TerrainComponent* tc = addTerrainComponent(e);
@@ -438,7 +438,7 @@ void buildTestScene1(Scene* scene)
 
     //    uint32 numChunks = tc->xChunkCount * tc->zChunkCount;
 
-    //    auto rcList = addRenderComponents(e, numChunks);
+    //    auto rcList = addComponents<RenderComponent>(e, numChunks);
 
     //    for (uint32 i = 0; i < tc->zChunkCount; i++)
     //    {
@@ -466,7 +466,7 @@ void buildTestScene2(Scene* scene)
     // Set up directional light
     {
         Entity dirLight = makeEntity(&scene->ecs, "directional light");
-        DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
+        DirectionalLightComponent* dlc = addComponent<DirectionalLightComponent>(dirLight);
 
         dlc->intensity = Vec3(.25, .25, .25);
         dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
@@ -491,12 +491,12 @@ void buildTestScene2(Scene* scene)
     for (uint32 i = 0; i < icosahedronCount; i++)
     {
         Entity e = makeEntity(&scene->ecs, "icosahedron");
-        TransformComponent *tc = getTransformComponent(e);
+        TransformComponent *tc = getComponent<TransformComponent>(e);
         tc->setPosition(icosahedronPositions[i]);
 
-        auto rcc = addRenderComponents(e, icosahedronMesh->submeshes.size());
+        auto rcc = addComponents<RenderComponent>(e, icosahedronMesh->submeshes.size());
 
-        ColliderComponent *cc = addColliderComponent(e);
+        ColliderComponent *cc = addComponent<ColliderComponent>(e);
         new (cc) ColliderComponent(e, icosahedronMesh->bounds);
                                    
         for(uint32 j = 0; j < icosahedronMesh->submeshes.size(); j++)
@@ -519,7 +519,7 @@ void buildTestScene3(Scene* scene)
     // Set up directional light
     {
         Entity dirLight = makeEntity(&scene->ecs, "directional light");
-        DirectionalLightComponent* dlc = addDirectionalLightComponent(dirLight);
+        DirectionalLightComponent* dlc = addComponent<DirectionalLightComponent>(dirLight);
 
         dlc->intensity = Vec3(.25, .25, .25);
         dlc->direction = Vec3(-.2, -1, -1).normalizeInPlace();
@@ -541,11 +541,11 @@ void buildTestScene3(Scene* scene)
     for (uint32 i = 0; i < shuttleCount; i++)
     {
         Entity e = makeEntity(&scene->ecs, "shuttle");
-        TransformComponent *tc = getTransformComponent(e);
+        TransformComponent *tc = getComponent<TransformComponent>(e);
         tc->setPosition(shuttlePositions[i]);
         tc->setScale(Vec3(.25));
         
-        auto rcc = addRenderComponents(e, shuttleMesh->submeshes.size());
+        auto rcc = addComponents<RenderComponent>(e, shuttleMesh->submeshes.size());
 
         auto it = (rcc).bucketArray->addressOf((rcc).components[0]);
 
@@ -570,11 +570,11 @@ void updateGame(Game* game)
     // Update camera
     //
     {
-        Vec3 playerPos = getTransformComponent(game->player)->position();
+        Vec3 playerPos = getComponent<TransformComponent>(game->player)->position();
         Vec3 camPos = playerPos + Vec3(0, 12, 20);
         Quaternion camRot = lookRotation(playerPos - camPos, Vec3(0, 1, 0));
 
-        TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+        TransformComponent* camXfm = getComponent<TransformComponent>(game->activeCamera);
         camXfm->setPosition(camPos);
         camXfm->setOrientation(camRot);
     }
@@ -600,8 +600,8 @@ void updateGame(Game* game)
     // Render
     //
     {
-        CameraComponent* camComponent = getCameraComponent(game->activeCamera);
-        TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+        CameraComponent* camComponent = getComponent<CameraComponent>(game->activeCamera);
+        TransformComponent* camXfm = getComponent<TransformComponent>(game->activeCamera);
 
         renderScene(&game->renderer, game->activeScene, camComponent, camXfm);
     }
@@ -641,8 +641,8 @@ void makeSceneActive(Game* game, Scene* scene)
 
 void makeCameraActive(Game* game, Entity camera)
 {
-    assert(getCameraComponent(camera) != nullptr);
-    assert(getTransformComponent(camera) != nullptr);
+    assert(getComponent<CameraComponent>(camera) != nullptr);
+    assert(getComponent<TransformComponent>(camera) != nullptr);
 
     game->activeCamera = camera;
 }
@@ -717,8 +717,8 @@ int main()
     // scene. Maybe the game has its own ECS outside of scenes or maybe make system to transfer ownership
     // from one scene to another scene
     Entity camera = makeEntity(&testScene1->ecs, "camera");
-    TransformComponent* cameraXfm = getTransformComponent(camera);
-    CameraComponent* cameraComponent = addCameraComponent(camera);
+    TransformComponent* cameraXfm = getComponent<TransformComponent>(camera);
+    CameraComponent* cameraComponent = addComponent<CameraComponent>(camera);
     cameraComponent->window = &window;
 
     // Set up player
@@ -726,24 +726,24 @@ int main()
     Entity player = makeEntity(&testScene1->ecs, "player", EntityFlag_None);
     game->player = player;
     {
-        TransformComponent* playerXfm = getTransformComponent(player);
+        TransformComponent* playerXfm = getComponent<TransformComponent>(player);
         playerXfm->setPosition(Vec3(0, 1, 0)); // @Hack: start "above" ground and fall onto it so I don't have to worry about precisely lining stuff up
         Mesh* marioMesh = ResourceManager::instance().initMesh("sm64/mario.obj", true, MeshLoadOptions::CPU_AND_GPU);
 
         for (uint32 i = 0; i < marioMesh->submeshes.size(); i++)
         {
-            RenderComponent* rc = addRenderComponent(game->player);
+            RenderComponent* rc = addComponent<RenderComponent>(game->player);
             new (rc) RenderComponent(game->player, &marioMesh->submeshes[i]);
         }
 
-        ColliderComponent* playerCollider = addColliderComponent(player);
+        ColliderComponent* playerCollider = addComponent<ColliderComponent>(player);
         playerCollider->type = ColliderType::RECT3;
         float32 playerHeight = 2;
         float32 playerWidth = .5;
         playerCollider->rect3Lengths = Vec3(playerWidth, playerHeight, playerWidth);
         playerCollider->xfmOffset = Vec3(0, playerHeight / 2, 0);
 
-        addAgentComponent(player);
+        addComponent<AgentComponent>(player);
         
         //WalkComponent* playerWalk = addWalkComponent(player);
         //playerWalk->isGrounded = true;

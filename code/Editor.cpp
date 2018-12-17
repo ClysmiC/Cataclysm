@@ -38,7 +38,7 @@ const char* EditorState::ComponentListUi::ADD_RENDER_COMPONENT_POPUP_ID = "Selec
 EditorState::EditorState()
 {
     this->translator.pseudoEntity = makeEntity(&this->pseudoEcs, "Translator");
-    auto colliders = addColliderComponents(this->translator.pseudoEntity, 3);
+    auto colliders = addComponents<ColliderComponent>(this->translator.pseudoEntity, 3);
 
     this->translator.xAxisHandle = &colliders[0];
     this->translator.yAxisHandle = &colliders[1];
@@ -77,8 +77,8 @@ void showEditor(EditorState* editor)
     bool mousePressed = mouseHeld && !lastMouseButtons[GLFW_MOUSE_BUTTON_1];
     bool clickHandled = false;
 
-    Ray prevRayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseXPrev, mouseYPrev));
-    Ray rayThruScreen = rayThroughScreenCoordinate(getCameraComponent(game->activeCamera), Vec2(mouseX, mouseY));
+    Ray prevRayThruScreen = rayThroughScreenCoordinate(getComponent<CameraComponent>(game->activeCamera), Vec2(mouseXPrev, mouseYPrev));
+    Ray rayThruScreen = rayThroughScreenCoordinate(getComponent<CameraComponent>(game->activeCamera), Vec2(mouseX, mouseY));
 
     //
     // Draw aabb and collider
@@ -103,11 +103,11 @@ void showEditor(EditorState* editor)
 
         if (e.id != 0)
         {
-            ConvexHullColliderComponent* chcc = getConvexHullColliderComponent(e);
+            ConvexHullColliderComponent* chcc = getComponent<ConvexHullColliderComponent>(e);
 
             if (chcc && chcc->showInEditor)
             {
-                TransformComponent* xfm = getTransformComponent(e);
+                TransformComponent* xfm = getComponent<TransformComponent>(e);
 
                 for (uint32 i = 0; i < chcc->edges.size(); i++)
                 {
@@ -125,11 +125,11 @@ void showEditor(EditorState* editor)
     // Scale and draw 3d translator handles
     //
     {
-        TransformComponent* tc = getTransformComponent(editor->selectedEntity);
+        TransformComponent* tc = getComponent<TransformComponent>(editor->selectedEntity);
 
         if (tc)
         {
-            TransformComponent* toolXfm = getTransformComponent(editor->translator.pseudoEntity);
+            TransformComponent* toolXfm = getComponent<TransformComponent>(editor->translator.pseudoEntity);
             toolXfm->setPosition(tc->position());
 
             if (editor->isLocalXfm)
@@ -137,7 +137,7 @@ void showEditor(EditorState* editor)
                 toolXfm->setOrientation(tc->orientation());
             }
             
-            TransformComponent* cameraXfm = getTransformComponent(game->activeCamera);
+            TransformComponent* cameraXfm = getComponent<TransformComponent>(game->activeCamera);
 
             const float32 SCALE_FACTOR = 0.1;
 
@@ -262,15 +262,15 @@ void showEditor(EditorState* editor)
         ImGui::Begin((getFriendlyNameAndId(e) + "###e").cstr(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
         // Get components
-        EntityDetails* details = getEntityDetails(e);
-        TransformComponent* transform = getTransformComponent(e);
-        auto colliders = getColliderComponents(e);
-        CameraComponent* camera = getCameraComponent(e);
-        PortalComponent* portal = getPortalComponent(e);
-        auto directionalLights = getDirectionalLightComponents(e);
-        auto pointLights = getPointLightComponents(e);
-        auto renderComponents = getRenderComponents(e);
-        auto convexHullColliders = getConvexHullColliderComponents(e);
+        EntityDetails* details = getComponent<EntityDetails>(e);
+        TransformComponent* transform = getComponent<TransformComponent>(e);
+        auto colliders = getComponents<ColliderComponent>(e);
+        CameraComponent* camera = getComponent<CameraComponent>(e);
+        PortalComponent* portal = getComponent<PortalComponent>(e);
+        auto directionalLights = getComponents<DirectionalLightComponent>(e);
+        auto pointLights = getComponents<PointLightComponent>(e);
+        auto renderComponents = getComponents<RenderComponent>(e);
+        auto convexHullColliders = getComponents<ConvexHullColliderComponent>(e);
 
         //
         // Docked buttons
@@ -304,11 +304,11 @@ void showEditor(EditorState* editor)
 
             // Note: Use short-circuit evaluation to not show selectable for components
             //       that we can't add (e.g., if we already have a camera component)
-            if (ImGui::Selectable("Collider"))          addColliderComponent(e);
-            if (!camera && ImGui::Selectable("Camera")) addCameraComponent(e);
-            if (!portal && ImGui::Selectable("Portal")) addPortalComponent(e);
-            if (ImGui::Selectable("Directional Light")) addDirectionalLightComponent(e);
-            if (ImGui::Selectable("Point Light"))       addPointLightComponent(e);
+            if (ImGui::Selectable("Collider"))          addComponent<ColliderComponent>(e);
+            if (!camera && ImGui::Selectable("Camera")) addComponent<CameraComponent>(e);
+            if (!portal && ImGui::Selectable("Portal")) addComponent<PortalComponent>(e);
+            if (ImGui::Selectable("Directional Light")) addComponent<DirectionalLightComponent>(e);
+            if (ImGui::Selectable("Point Light"))       addComponent<PointLightComponent>(e);
 
             // Select mesh modal window
             {
@@ -337,7 +337,7 @@ void showEditor(EditorState* editor)
 
                             if (!isUploadedToGpuOpenGl(m)) uploadToGpuOpenGl(m);
 
-                            auto rcc = addRenderComponents(e, m->submeshes.size());
+                            auto rcc = addComponents<RenderComponent>(e, m->submeshes.size());
                             initRenderComponents(&rcc, m);
 
                             closePopup = true;
@@ -482,7 +482,7 @@ void showEditor(EditorState* editor)
                             ImGui::TreePop();
                         }
 
-                        if (!xNotClicked) removeColliderComponent(&cc);
+                        if (!xNotClicked) removeComponent<ColliderComponent>(&cc);
                     }
                 }
 
@@ -521,7 +521,7 @@ void showEditor(EditorState* editor)
                             ImGui::TreePop();
                         }
 
-                        if (!xNotClicked) removeConvexHullColliderComponent(&chcc);
+                        if (!xNotClicked) removeComponent(&chcc);
                     }
                 }
 
@@ -555,7 +555,7 @@ void showEditor(EditorState* editor)
                 if (!xNotClicked)
                 {
                     // @TODO light this up
-                    // removeCameraComponent(camera);
+                    // removeComponent<CameraComponent>(camera);
                 }
             }
     
@@ -588,7 +588,7 @@ void showEditor(EditorState* editor)
                             ImGui::TreePop();
                         }
 
-                        if (!xNotClicked) removeDirectionalLightComponent(&component);
+                        if (!xNotClicked) removeComponent<DirectionalLightComponent>(&component);
                     }
                 }
 
@@ -627,7 +627,7 @@ void showEditor(EditorState* editor)
                             ImGui::TreePop();
                         }
 
-                        if (!xNotClicked) removePointLightComponent(&component);
+                        if (!xNotClicked) removeComponent<PointLightComponent>(&component);
                     }
                 }
 
@@ -648,7 +648,7 @@ void showEditor(EditorState* editor)
 
                     if (portal->connectedPortal.id != connectedPortalBeforeReflect.id)
                     {
-                        PortalComponent* newConnectedPortal = getPortalComponent(getEntity(getGame(portal->entity), &portal->connectedPortal));
+                        PortalComponent* newConnectedPortal = getComponent<PortalComponent>(getEntity(getGame(portal->entity), &portal->connectedPortal));
                         if (!newConnectedPortal)
                         {
                             portal->connectedPortal = connectedPortalBeforeReflect;
@@ -660,7 +660,7 @@ void showEditor(EditorState* editor)
 
                             if (newPortalOldConnected.id != 0)
                             {
-                                PortalComponent* unlinkedPortal = getPortalComponent(getEntity(getGame(portal->entity), &newPortalOldConnected));
+                                PortalComponent* unlinkedPortal = getComponent<PortalComponent>(getEntity(getGame(portal->entity), &newPortalOldConnected));
                                 assert(unlinkedPortal != nullptr);
 
                                 unlinkedPortal->connectedPortal.id = 0;
@@ -673,7 +673,7 @@ void showEditor(EditorState* editor)
 
                 if (!xNotClicked)
                 {
-                    removePortalComponent(&portal);
+                    removeComponent<PortalComponent>(&portal);
                     assert(portal == nullptr);
                 }
             }
@@ -707,7 +707,7 @@ void showEditor(EditorState* editor)
                     for (uint32 i = 0; i < renderComponents.numComponents; i++)
                     {
                         RenderComponent* rc = &renderComponents[i];
-                        removeRenderComponent(&rc);
+                        removeComponent<RenderComponent>(&rc);
                         assert(rc == nullptr);
                     }
                 }
@@ -825,7 +825,7 @@ void showEditor(EditorState* editor)
             for (Entity e : game->activeScene->ecs.entities)
             {
                 // Skip entity if it has a parent
-                TransformComponent* xfm = getTransformComponent(e);
+                TransformComponent* xfm = getComponent<TransformComponent>(e);
                 if (xfm && getParent(e).id != 0) continue;
 
                 drawEntityAndChildren(e, editor);

@@ -21,7 +21,7 @@ Shader* portalShader()
 
 void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToConnectedPortal)
 {
-    TransformComponent* xfm = getTransformComponent(portal->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(portal->entity);
     if (xfm)
     {
         xfm->setScale(Vec3(dimensions.x, dimensions.y, xfm->scale().z));
@@ -37,7 +37,7 @@ void setDimensions(PortalComponent* portal, Vec2 dimensions, bool propogateToCon
 
 Vec2 getDimensions(PortalComponent* portal)
 {
-    TransformComponent* xfm = getTransformComponent(portal->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(portal->entity);
 
     assert(xfm != nullptr);
     if (xfm == nullptr) return Vec2(0);
@@ -50,7 +50,7 @@ Vec2 getDimensions(PortalComponent* portal)
 PortalComponent* getConnectedPortal(PortalComponent* portal)
 {
     Entity connectedPortal = getEntity(getGame(portal->entity), &portal->connectedPortal);
-    PortalComponent* connectedPortalComponent = getPortalComponent(connectedPortal);
+    PortalComponent* connectedPortalComponent = getComponent<PortalComponent>(connectedPortal);
 
     assert(connectedPortalComponent != nullptr);
 
@@ -66,20 +66,20 @@ Scene* getConnectedScene(PortalComponent* portal)
 TransformComponent* getConnectedSceneXfm(PortalComponent* portal)
 {
     Entity connectedPortal = getEntity(getGame(portal->entity), &portal->connectedPortal);
-    TransformComponent* result = getTransformComponent(connectedPortal);
+    TransformComponent* result = getComponent<TransformComponent>(connectedPortal);
     return result;
 }
 
 Vec3 intoPortalNormal(PortalComponent* portal)
 {
-    TransformComponent* xfm = getTransformComponent(portal->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(portal->entity);
     Vec3 result = xfm->back();
     return result;
 }
 
 Vec3 outOfPortalNormal(PortalComponent* portal)
 {
-    TransformComponent* xfm = getTransformComponent(portal->entity);
+    TransformComponent* xfm = getComponent<TransformComponent>(portal->entity);
     Vec3 result = xfm->forward();
     return result;
 }
@@ -100,7 +100,7 @@ Vec3 outOfConnectedPortalNormal(PortalComponent* portal)
 
 void rebaseTransformInPlace(PortalComponent* portal, ITransform* transform)
 {
-    TransformComponent* sourceSceneXfm = getTransformComponent(portal->entity);;
+    TransformComponent* sourceSceneXfm = getComponent<TransformComponent>(portal->entity);;
     TransformComponent* connectedSceneXfm = getConnectedSceneXfm(portal);
 
     Quaternion intoSourcePortal = axisAngle(sourceSceneXfm->up(), 180) * sourceSceneXfm->orientation();
@@ -119,17 +119,17 @@ void rebaseTransformInPlace(PortalComponent* portal, ITransform* transform)
 
 void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, ITransform* portal1Xfm, ITransform* portal2Xfm, Vec2 dimensions)
 {
-    PortalComponent* portal1Component = addPortalComponent(portal1);
-    PortalComponent* portal2Component = addPortalComponent(portal2);
+    PortalComponent* portal1Component = addComponent<PortalComponent>(portal1);
+    PortalComponent* portal2Component = addComponent<PortalComponent>(portal2);
     portal1Component->connectedPortal = portal2;
     portal2Component->connectedPortal = portal1;
     
-    TransformComponent* portal1XfmComponent = getTransformComponent(portal1);
+    TransformComponent* portal1XfmComponent = getComponent<TransformComponent>(portal1);
     portal1XfmComponent->setPosition(portal1Xfm->position());
     portal1XfmComponent->setOrientation(portal1Xfm->orientation());
     portal1XfmComponent->setScale(portal1Xfm->scale());
 
-    TransformComponent* portal2XfmComponent = getTransformComponent(portal2);
+    TransformComponent* portal2XfmComponent = getComponent<TransformComponent>(portal2);
     portal2XfmComponent->setPosition(portal2Xfm->position());
     portal2XfmComponent->setOrientation(portal2Xfm->orientation());
     portal2XfmComponent->setScale(portal2Xfm->scale());
@@ -137,14 +137,14 @@ void createPortalFromTwoBlankEntities(Entity portal1, Entity portal2, ITransform
     // The collider is a box "behind" the portal (think of the loading zone behind a painting in sm64, where the painting is the portal)
     float32 colliderDepth = 1.0f;
     
-    ColliderComponent* portal1Collider = addColliderComponent(portal1);
+    ColliderComponent* portal1Collider = addComponent<ColliderComponent>(portal1);
     portal1Collider->xfmOffset = Vec3(Axis3D::Z) * colliderDepth / 2;
     portal1Collider->rect3Lengths.x = 1;
     portal1Collider->rect3Lengths.y = 1;
     portal1Collider->rect3Lengths.z = colliderDepth;
     portal1Collider->type = ColliderType::RECT3;
 
-    ColliderComponent* portal2Collider = addColliderComponent(portal2);
+    ColliderComponent* portal2Collider = addComponent<ColliderComponent>(portal2);
     portal2Collider->xfmOffset = Vec3(Axis3D::Z) * colliderDepth / 2;
     portal2Collider->rect3Lengths.x = 1;
     portal2Collider->rect3Lengths.y = 1;

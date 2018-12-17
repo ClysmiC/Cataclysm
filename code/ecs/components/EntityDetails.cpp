@@ -17,7 +17,7 @@ void removeParent(Entity e)
 
     if (parent.id == 0) return;
 
-    TransformComponent* xfm = getTransformComponent(e);
+    TransformComponent* xfm = getComponent<TransformComponent>(e);
     Vec3 oldWorldPosition;
     Vec3 oldWorldScale;
     Quaternion oldWorldOrientation;
@@ -49,7 +49,7 @@ void removeParent(Entity e)
     //
     // Set parent to 0
     //
-    EntityDetails* details = getEntityDetails(e);
+    EntityDetails* details = getComponent<EntityDetails>(e);
     details->parent.id = 0;
 
     //
@@ -77,7 +77,7 @@ void setParent(Entity child, Entity parent)
     //
     // Store old world xfm
     //
-    TransformComponent* childXfm = getTransformComponent(child);
+    TransformComponent* childXfm = getComponent<TransformComponent>(child);
     Vec3 oldWorldPosition;
     Vec3 oldWorldScale;
     Quaternion oldWorldOrientation;
@@ -91,10 +91,10 @@ void setParent(Entity child, Entity parent)
     //
     // Set parent
     //
-    EntityDetails* childDetails = getEntityDetails(child);
+    EntityDetails* childDetails = getComponent<EntityDetails>(child);
     childDetails->parent = PotentiallyStaleEntity(parent);
 
-    EntityDetails* parentDetails = getEntityDetails(parent);
+    EntityDetails* parentDetails = getComponent<EntityDetails>(parent);
     parentDetails->children.push_back(PotentiallyStaleEntity(child));
 
     if (childXfm)
@@ -108,27 +108,27 @@ void setParent(Entity child, Entity parent)
 PotentiallyStaleEntity getParent(Entity e)
 {
     PotentiallyStaleEntity result;
-    result = getEntityDetails(e)->parent;
+    result = getComponent<EntityDetails>(e)->parent;
     return result;
 }
 
 std::vector<PotentiallyStaleEntity>* getChildren(Entity e)
 {
     std::vector<PotentiallyStaleEntity>* result;
-    result = &getEntityDetails(e)->children;
+    result = &getComponent<EntityDetails>(e)->children;
     return result;
 }
 
 string16* getFriendlyName(Entity e)
 {
     string16* result;
-    result = &getEntityDetails(e)->friendlyName;
+    result = &getComponent<EntityDetails>(e)->friendlyName;
     return result;
 }
 
 string32 getFriendlyNameAndId(Entity e)
 {
-    EntityDetails* details = getEntityDetails(e);
+    EntityDetails* details = getComponent<EntityDetails>(e);
     string32 result;
 
     if (e.id == 0)

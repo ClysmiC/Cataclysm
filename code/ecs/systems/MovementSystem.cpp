@@ -22,12 +22,12 @@
 
 void walkAndCamera(Game* game)
 {
-    TransformComponent* xfm = getTransformComponent(game->player);
-    ColliderComponent* collider = getColliderComponent(game->player);
-    EntityDetails* details = getEntityDetails(game->player);
-    AgentComponent* agent = getAgentComponent(game->player);
+    TransformComponent* xfm = getComponent<TransformComponent>(game->player);
+    ColliderComponent* collider = getComponent<ColliderComponent>(game->player);
+    EntityDetails* details = getComponent<EntityDetails>(game->player);
+    AgentComponent* agent = getComponent<AgentComponent>(game->player);
 
-    TransformComponent* camXfm = getTransformComponent(game->activeCamera);
+    TransformComponent* camXfm = getComponent<TransformComponent>(game->activeCamera);
     
     float32 deltaTS = deltaTMs / 1000.0f;
 
@@ -44,7 +44,7 @@ void walkAndCamera(Game* game)
             {
                 // @Slow. Improve with spatial partitioning
                 ColliderComponent* cc = it.ptr;
-                EntityDetails* debug_details = getEntityDetails(cc->entity);
+                EntityDetails* debug_details = getComponent<EntityDetails>(cc->entity);
 
                 if (cc->isTrigger || cc->entity.id == game->player.id) continue;
 
@@ -62,7 +62,7 @@ void walkAndCamera(Game* game)
             {
                 // @Slow. Improve with spatial partitioning
                 ConvexHullColliderComponent* cc = it.ptr;
-                EntityDetails* debug_details = getEntityDetails(cc->entity);
+                EntityDetails* debug_details = getComponent<EntityDetails>(cc->entity);
 
                 if (cc->isTrigger || cc->entity.id == game->player.id) continue;
 

@@ -5,5 +5,5 @@
 
 ITransform* CameraComponent::getTransform()
 {
-    return getTransformComponent(this->entity);
+    return getComponent<TransformComponent>(this->entity);
 }

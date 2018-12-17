@@ -32,7 +32,7 @@ TransformComponent::TransformComponent(Entity e, Vec3 position, Quaternion orien
 ITransform* TransformComponent::getParent()
 {
     PotentiallyStaleEntity parent = ::getParent(this->entity);
-    TransformComponent* result = getTransformComponent(getEntity(getGame(this->entity), &parent));
+    TransformComponent* result = getComponent<TransformComponent>(getEntity(getGame(this->entity), &parent));
     return result;
 }
      
@@ -43,7 +43,7 @@ std::vector<ITransform*> TransformComponent::getChildren()
     
     for (auto e : *::getChildren(this->entity))
     {
-        TransformComponent* xfm = getTransformComponent(getEntity(getGame(this->entity), &e));
+        TransformComponent* xfm = getComponent<TransformComponent>(getEntity(getGame(this->entity), &e));
 
         if (xfm)
         {
