@@ -32,8 +32,35 @@
 // ID 0 is a null entity
 uint32 Ecs::nextEntityId = 1;
 
+// Compile time lookups
+template<> constexpr uint32 Ecs::ecsBucketSize<EntityDetails>()      { return Ecs::ENTITY_DETAILS_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<TransformComponent>() { return Ecs::TRANSFORM_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<CameraComponent>()    { return Ecs::CAMERA_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<DirectionalLightComponent>() { return Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<TerrainComponent>()   { return Ecs::TERRAIN_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<PointLightComponent>() { return Ecs::POINT_LIGHT_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<RenderComponent>()    { return Ecs::RENDER_COMPONENT_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<PortalComponent>()    { return Ecs::PORTAL_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<ConvexHullColliderComponent>() { return Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<ColliderComponent>()  { return Ecs::COLLIDER_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<AgentComponent>()     { return Ecs::AGENT_BUCKET_SIZE; }
+template<> constexpr uint32 Ecs::ecsBucketSize<WalkComponent>()      { return Ecs::WALK_COMPONENT_BUCKET_SIZE; }
+
+//template<> auto Ecs::ecsComponentListAddress<EntityDetails>() { return &this->entityDetails; }
+//template<> Ecs::ComponentList<TransformComponent, Ecs::ecsBucketSize<TransformComponent>()>* Ecs::ecsComponentListAddress<TransformComponent>() { return &this->transforms; }
+//template<> Ecs::ComponentList<CameraComponent, Ecs::ecsBucketSize<CameraComponent>()>* Ecs::ecsComponentListAddress<CameraComponent>() { return &this->cameras; }
+//template<> Ecs::ComponentList<DirectionalLightComponent, Ecs::ecsBucketSize<DirectionalLightComponent>()>* Ecs::ecsComponentListAddress<DirectionalLightComponent>() { return &this->directionalLights; }
+//template<> Ecs::ComponentList<TerrainComponent, Ecs::ecsBucketSize<TerrainComponent>()>* Ecs::ecsComponentListAddress<TerrainComponent>() { return &this->terrains; }
+//template<> Ecs::ComponentList<PointLightComponent, Ecs::ecsBucketSize<PointLightComponent>()>* Ecs::ecsComponentListAddress<PointLightComponent>() { return &this->pointLights; }
+//template<> Ecs::ComponentList<RenderComponent, Ecs::ecsBucketSize<RenderComponent>()>* Ecs::ecsComponentListAddress<RenderComponent>() { return &this->renderComponents; }
+//template<> Ecs::ComponentList<PortalComponent, Ecs::ecsBucketSize<PortalComponent>()>* Ecs::ecsComponentListAddress<PortalComponent>() { return &this->portals; }
+//template<> Ecs::ComponentList<ConvexHullColliderComponent, Ecs::ecsBucketSize<ConvexHullColliderComponent>()>* Ecs::ecsComponentListAddress<ConvexHullColliderComponent>() { return &this->convexHullColliders; }
+//template<> Ecs::ComponentList<ColliderComponent, Ecs::ecsBucketSize<ColliderComponent>()>* Ecs::ecsComponentListAddress<ColliderComponent>() { return &this->colliders; }
+//template<> Ecs::ComponentList<AgentComponent, Ecs::ecsBucketSize<AgentComponent>()>* Ecs::ecsComponentListAddress<AgentComponent>() { return &this->agentComponents; }
+//template<> Ecs::ComponentList<WalkComponent, Ecs::ecsBucketSize<WalkComponent>()>* Ecs::ecsComponentListAddress<WalkComponent>() { return &this->walkComponents; }
+
 template<class T, uint32 BUCKET_SIZE>
-T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
+T* _addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
     BucketLocator location = componentList->components.occupyEmptySlot();
     T* result = componentList->components.addressOf(location);
@@ -55,8 +82,19 @@ T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
     return result;    
 }
 
+template<class T>
+T* addComponent(Entity e)
+{
+    auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
+
+    void* ptr = e.ecs->componentListByType[typeid(T)];
+    auto ptrCasted = (Ecs::ComponentList<T, bucketSize>*)(ptr);
+
+    return _addComponent<T, bucketSize>(ptrCasted, e);
+}
+
 template<class T, uint32 BUCKET_SIZE>
-T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
+T* _getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
 {
     auto it = componentList->lookup.find(e.id);
     if (it == componentList->lookup.end())
@@ -68,6 +106,17 @@ T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e)
     assert(cg.numComponents > 0);
 
     return &(cg)[0];
+}
+
+template<class T>
+T* getComponent(Entity e)
+{
+    auto constexpr bucketSize = Ecs::ecsBucketSize<T>();
+
+    void* ptr = e.ecs->componentListByType[typeid(T)];
+    auto ptrCasted = (Ecs::ComponentList<T, bucketSize>*)(ptr);
+
+    return _getComponent<T, bucketSize>(ptrCasted, e);
 }
 
 template<class T, uint32 BUCKET_SIZE>
@@ -161,7 +210,7 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName, EntityFlags flags)
 
     ecs->entities.push_back(result);
 
-    EntityDetails* details = addComponent(&ecs->entityDetails, result);
+    EntityDetails* details = addComponent<EntityDetails>(result);
     assert(details != nullptr);
     
     details->entity.id = result.id;
@@ -170,7 +219,7 @@ Entity makeEntity(Ecs* ecs, string16 friendlyName, EntityFlags flags)
     details->parent.id = 0;
     details->friendlyName = friendlyName;
 
-    TransformComponent* xfm = addComponent(&ecs->transforms, result);
+    TransformComponent* xfm = addComponent<TransformComponent>(result);
     assert(xfm != nullptr);
     
     xfm->entity.id = result.id;
@@ -207,7 +256,7 @@ bool markEntityForDeletion(Entity e)
 EntityDetails* getEntityDetails(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->entityDetails, e);
+    return getComponent<EntityDetails>(e);
 }
 
 bool removeEntityDetails(EntityDetails** ppComponent)
@@ -229,7 +278,7 @@ bool removeEntityDetails(EntityDetails** ppComponent)
 TransformComponent* getTransformComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->transforms, e);
+    return getComponent<TransformComponent>(e);
 }
 
 bool removeTransformComponent(TransformComponent** ppComponent)
@@ -253,13 +302,13 @@ bool removeTransformComponent(TransformComponent** ppComponent)
 CameraComponent* addCameraComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->cameras, e);
+    return addComponent<CameraComponent>(e);
 }
 
 CameraComponent* getCameraComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->cameras, e);
+    return getComponent<CameraComponent>(e);
 }
 
 bool removeCameraComponent(CameraComponent** ppComponent)
@@ -274,13 +323,13 @@ bool removeCameraComponent(CameraComponent** ppComponent)
 TerrainComponent* addTerrainComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->terrains, e);
+    return addComponent<TerrainComponent>(e);
 }
 
 TerrainComponent* getTerrainComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->terrains, e);
+    return getComponent<TerrainComponent>(e);
 }
 
 bool removeTerrainComponent(TerrainComponent** ppComponent)
@@ -296,13 +345,13 @@ bool removeTerrainComponent(TerrainComponent** ppComponent)
 AgentComponent* addAgentComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->agentComponents, e);
+    return addComponent<AgentComponent>(e);
 }
 
 AgentComponent* getAgentComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->agentComponents, e);
+    return getComponent<AgentComponent>(e);
 }
 
 bool removeAgentComponent(AgentComponent** ppComponent)
@@ -318,13 +367,13 @@ bool removeAgentComponent(AgentComponent** ppComponent)
 WalkComponent* addWalkComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->walkComponents, e);
+    return addComponent<WalkComponent>(e);
 }
 
 WalkComponent* getWalkComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->walkComponents, e);
+    return getComponent<WalkComponent>(e);
 }
 
 bool removeWalkComponent(WalkComponent** ppComponent)
@@ -340,13 +389,13 @@ bool removeWalkComponent(WalkComponent** ppComponent)
 PortalComponent* addPortalComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->portals, e);
+    return addComponent<PortalComponent>(e);
 }
 
 PortalComponent* getPortalComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->portals, e);
+    return getComponent<PortalComponent>(e);
 }
 
 bool removePortalComponent(PortalComponent** ppComponent)
@@ -369,13 +418,13 @@ bool removePortalComponent(PortalComponent** ppComponent)
 DirectionalLightComponent* addDirectionalLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->directionalLights, e);
+    return addComponent<DirectionalLightComponent>(e);
 }
 
 DirectionalLightComponent* getDirectionalLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->directionalLights, e);
+    return getComponent<DirectionalLightComponent>(e);
 }
 
 ComponentGroup<DirectionalLightComponent, Ecs::DIRECTIONAL_LIGHT_BUCKET_SIZE> addDirectionalLightComponents(Entity e, uint32 numComponents)
@@ -403,13 +452,13 @@ bool removeDirectionalLightComponent(DirectionalLightComponent** ppComponent)
 PointLightComponent* addPointLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->pointLights, e);
+    return addComponent<PointLightComponent>(e);
 }
 
 PointLightComponent* getPointLightComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->pointLights, e);
+    return getComponent<PointLightComponent>(e);
 }
 
 ComponentGroup<PointLightComponent, Ecs::POINT_LIGHT_BUCKET_SIZE> addPointLightComponents(Entity e, uint32 numComponents)
@@ -435,13 +484,13 @@ bool removePointLightComponent(PointLightComponent** ppComponent)
 RenderComponent* addRenderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->renderComponents, e);
+    return addComponent<RenderComponent>(e);
 }
 
 RenderComponent* getRenderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->renderComponents, e);
+    return getComponent<RenderComponent>(e);
 }
 
 ComponentGroup<RenderComponent, Ecs::RENDER_COMPONENT_BUCKET_SIZE> addRenderComponents(Entity e, uint32 numComponents)
@@ -467,13 +516,13 @@ bool removeRenderComponent(RenderComponent** ppComponent)
 ColliderComponent* addColliderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->colliders, e);
+    return addComponent<ColliderComponent>(e);
 }
 
 ColliderComponent* getColliderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->colliders, e);
+    return getComponent<ColliderComponent>(e);
 }
 
 ComponentGroup<ColliderComponent, Ecs::COLLIDER_BUCKET_SIZE> addColliderComponents(Entity e, uint32 numComponents)
@@ -500,13 +549,13 @@ bool removeColliderComponent(ColliderComponent** ppComponent)
 ConvexHullColliderComponent* addConvexHullColliderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return addComponent(&e.ecs->convexHullColliders, e);
+    return addComponent<ConvexHullColliderComponent>(e);
 }
 
 ConvexHullColliderComponent* getConvexHullColliderComponent(Entity e)
 {
     if (e.id == 0) return nullptr;
-    return getComponent(&e.ecs->convexHullColliders, e);
+    return getComponent<ConvexHullColliderComponent>(e);
 }
 
 ComponentGroup<ConvexHullColliderComponent, Ecs::CONVEX_HULL_COLLIDER_BUCKET_SIZE> addConvexHullColliderComponents(Entity e, uint32 numComponents)

@@ -50,7 +50,6 @@ struct Ecs
     Game* game;
 
     static constexpr uint32 ENTITY_DETAILS_BUCKET_SIZE = 512;
-
     static constexpr uint32 TRANSFORM_BUCKET_SIZE = 512;
     static constexpr uint32 CAMERA_BUCKET_SIZE = 4;
     static constexpr uint32 DIRECTIONAL_LIGHT_BUCKET_SIZE = 16;
@@ -63,9 +62,11 @@ struct Ecs
     static constexpr uint32 AGENT_BUCKET_SIZE = 512;
     static constexpr uint32 WALK_COMPONENT_BUCKET_SIZE = 8;
 
+    // Compile-time lookup for a specific component's bucket size
+    template<typename T> static constexpr uint32 ecsBucketSize() { return T::UNIMPLEMENTED_FUNCTION; } // only the specialized templates should be called
+
     std::vector<Entity> entities;
     ComponentList<EntityDetails,               ENTITY_DETAILS_BUCKET_SIZE>         entityDetails;
-
     ComponentList<TransformComponent,          TRANSFORM_BUCKET_SIZE>              transforms;
     ComponentList<CameraComponent,             CAMERA_BUCKET_SIZE>                 cameras;
     ComponentList<DirectionalLightComponent,   DIRECTIONAL_LIGHT_BUCKET_SIZE>      directionalLights;
@@ -81,26 +82,11 @@ struct Ecs
     std::unordered_map<std::type_index, void*> componentListByType;
 };
 
-    //template<typename T>
-    //uint32 bucketSize<T>(T t) { return T::UNIMPLEMENTED_FUNCTION; } // only the specialized templates should be called
+template<class T>
+T* addComponent(Entity e);
 
-    //template<>
-    //uint32 bucketSize<EntityDetails>(EntityDetails e) { return 512; }
-
-
-//
-// Component List functions
-//
-template<class T, uint32 BUCKET_SIZE>
-T* addComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e);
-
-//template<class T>
-//T* addComponent<T>(Entity e)
-//{
-//}
-
-template<class T, uint32 BUCKET_SIZE>
-T* getComponent(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e);
+template<class T>
+T* getComponent(Entity e);
 
 template<class T, uint32 BUCKET_SIZE>
 ComponentGroup<T, BUCKET_SIZE> addComponents(Ecs::ComponentList<T, BUCKET_SIZE>* componentList, Entity e, uint32 numComponents);
